@@ -1,0 +1,22 @@
+#![enable(unwrap_newtypes)]
+
+[
+    (
+        id: "main_dish_return",
+        size: (width: 1.5, height: 0.8),
+        capacity: 80,
+        processing_capacity: 15.0,
+    ),
+    (
+        id: "tray_return_station",
+        size: (width: 1.2, height: 0.6),
+        capacity: 60,
+        processing_capacity: 20.0,
+    ),
+    (
+        id: "exit_collection_point",
+        size: (width: 2.0, height: 1.0),
+        capacity: 100,
+        processing_capacity: 25.0,
+    ),
+]

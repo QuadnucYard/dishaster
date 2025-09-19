@@ -1,0 +1,16 @@
+[package]
+name = "dishaster-data"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishaster-core.workspace = true
+
+serde.workspace = true
+ron.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

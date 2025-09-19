@@ -1,0 +1,88 @@
+#![enable(unwrap_newtypes)]
+
+[
+    (
+        id: "steamed_rice",
+        name: "Steamed White Rice",
+        characteristics: (
+            quality_range: (0.7, 1.0),
+            safety_level: 0.95,
+            serving_time: 10.0,
+        ),
+        properties: (
+            pricing_method: PerUnit(3.0),
+            tags: ["staple", "vegetarian", "gluten-free"],
+            category: Some("main"),
+        ),
+    ),
+    (
+        id: "braised_pork",
+        name: "Red Braised Pork Belly",
+        characteristics: (
+            quality_range: (0.6, 0.9),
+            safety_level: 0.85,
+            serving_time: 30.0,
+        ),
+        properties: (
+            pricing_method: ByWeight(15.0),
+            tags: ["meat", "premium", "spicy"],
+            category: Some("main"),
+        ),
+    ),
+    (
+        id: "mapo_tofu",
+        name: "Mapo Tofu",
+        characteristics: (
+            quality_range: (0.65, 0.95),
+            safety_level: 0.9,
+            serving_time: 20.0,
+        ),
+        properties: (
+            pricing_method: PerUnit(8.0),
+            tags: ["vegetarian", "spicy", "sichuan"],
+            category: Some("main"),
+        ),
+    ),
+    (
+        id: "tomato_egg_soup",
+        name: "Tomato and Egg Drop Soup",
+        characteristics: (
+            quality_range: (0.5, 0.8),
+            safety_level: 0.9,
+            serving_time: 15.0,
+        ),
+        properties: (
+            pricing_method: PerUnit(4.0),
+            tags: ["soup", "vegetarian", "light"],
+            category: Some("soup"),
+        ),
+    ),
+    (
+        id: "kung_pao_chicken",
+        name: "Kung Pao Chicken",
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            safety_level: 0.8,
+            serving_time: 25.0,
+        ),
+        properties: (
+            pricing_method: ByWeight(18.0),
+            tags: ["meat", "spicy", "nuts", "sichuan"],
+            category: Some("main"),
+        ),
+    ),
+    (
+        id: "green_vegetables",
+        name: "Stir-fried Seasonal Vegetables",
+        characteristics: (
+            quality_range: (0.6, 0.9),
+            safety_level: 0.92,
+            serving_time: 12.0,
+        ),
+        properties: (
+            pricing_method: PerUnit(5.0),
+            tags: ["vegetarian", "healthy", "fresh"],
+            category: Some("vegetable"),
+        ),
+    ),
+]

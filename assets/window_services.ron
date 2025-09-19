@@ -1,0 +1,54 @@
+#![enable(unwrap_newtypes)]
+
+[
+    (
+        id: "main_food_window",
+        window_type: General,
+        name: "Main Dishes Counter",
+        compatible_dishes: ["steamed_rice", "braised_pork", "mapo_tofu", "kung_pao_chicken"],
+        layout: (
+            dish_slots: [
+                (position: (0.5, 0.3), capacity: 80.0),
+                (position: (1.5, 0.3), capacity: 60.0),
+                (position: (2.5, 0.3), capacity: 60.0),
+                (position: (3.5, 0.3), capacity: 50.0),
+            ],
+            constraints: (
+                max_concurrent_services: 4,
+                supports_weighing: true,
+            ),
+        ),
+    ),
+    (
+        id: "soup_window",
+        window_type: Soup,
+        name: "Soup and Beverages",
+        compatible_dishes: ["tomato_egg_soup"],
+        layout: (
+            dish_slots: [
+                (position: (0.5, 0.3), capacity: 120.0),
+                (position: (1.5, 0.3), capacity: 100.0),
+            ],
+            constraints: (
+                max_concurrent_services: 3,
+                supports_weighing: false,
+            ),
+        ),
+    ),
+    (
+        id: "vegetable_window",
+        window_type: Specialty,
+        name: "Vegetarian Specialties",
+        compatible_dishes: ["green_vegetables", "mapo_tofu"],
+        layout: (
+            dish_slots: [
+                (position: (0.5, 0.3), capacity: 70.0),
+                (position: (1.5, 0.3), capacity: 50.0),
+            ],
+            constraints: (
+                max_concurrent_services: 2,
+                supports_weighing: false,
+            ),
+        ),
+    ),
+]
