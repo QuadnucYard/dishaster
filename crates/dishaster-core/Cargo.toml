@@ -1,0 +1,20 @@
+[package]
+name = "dishaster-core"
+version.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy_ecs.workspace = true
+bevy_math.workspace = true
+derive_more.workspace = true
+ecow.workspace = true
+glam.workspace = true
+rand.workspace = true
+rand_chacha.workspace = true
+rustc-hash.workspace = true
+serde.workspace = true
+
+[lints]
+workspace = true

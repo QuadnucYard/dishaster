@@ -1,0 +1,205 @@
+use super::prelude::*;
+
+// ===================== Core Dish Models =====================
+
+/// Static dish definition - the master "recipe" for a food item
+#[derive(Debug, Clone, Deserialize)]
+pub struct DishModel {
+    /// Unique identifier for this dish type
+    pub id: ModelId,
+    /// Display name of the dish
+    pub name: EcoString,
+    /// Base characteristics - can be extended without breaking changes
+    pub characteristics: DishCharacteristics,
+    /// Extensible properties for future features
+    pub properties: DishProperties,
+}
+
+impl HasId for DishModel {
+    fn id(&self) -> &ModelId {
+        &self.id
+    }
+}
+
+/// Core characteristics that define how a dish behaves in the simulation
+#[derive(Debug, Clone, Deserialize)]
+pub struct DishCharacteristics {
+    /// Quality range this dish can achieve
+    pub quality_range: MinMax<f32>,
+    /// Base safety level (affects contamination)
+    pub safety_level: f32,
+    /// Base serving time
+    pub serving_time: Seconds,
+}
+
+/// Extensible properties container - easy to add new fields
+#[derive(Debug, Clone, Deserialize)]
+pub struct DishProperties {
+    /// How this dish can be priced
+    pub pricing_method: PricingMethod,
+    /// Optional tags for future preference matching
+    pub tags: Vec<EcoString>,
+    /// Optional category for future categorization
+    pub category: Option<EcoString>,
+}
+
+/// Different pricing strategies for dishes
+#[derive(Debug, Clone, Deserialize)]
+pub enum PricingMethod {
+    /// Fixed price per serving
+    PerUnit(f32),
+    /// Price calculated by weight (per kg)
+    ByWeight(f32),
+}
+
+// ===================== Window Service Models =====================
+
+/// Categories of food service windows with different capabilities
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub enum WindowType {
+    /// Standard food service window
+    General,
+    /// Specialized dishes requiring special equipment
+    Specialty,
+    /// Liquid-based dishes like soups
+    Soup,
+}
+
+/// Static window service template - defines what this window type can do
+#[derive(Debug, Clone, Deserialize)]
+pub struct WindowServiceModel {
+    /// Unique identifier for this service template
+    pub id: ModelId,
+    /// Type category of this window
+    pub window_type: WindowType,
+    /// Display name for this service window
+    pub name: EcoString,
+    /// Dishes this window type can serve
+    pub compatible_dishes: Vec<ModelId>,
+    /// Physical layout
+    pub layout: WindowLayout,
+}
+
+impl HasId for WindowServiceModel {
+    fn id(&self) -> &ModelId {
+        &self.id
+    }
+}
+
+/// Physical layout configuration for a service window
+#[derive(Debug, Clone, Deserialize)]
+pub struct WindowLayout {
+    /// Positions where dishes can be placed
+    pub dish_slots: Vec<DishSlot>,
+    /// Service constraints
+    pub constraints: ServiceConstraints,
+}
+
+/// Individual dish placement slot within a service window
+#[derive(Debug, Clone, Deserialize)]
+pub struct DishSlot {
+    /// Physical position of this slot
+    pub position: Vec2,
+    /// Maximum capacity this slot can hold
+    pub capacity: f32,
+}
+
+/// Service limitations and capabilities for a window type
+#[derive(Debug, Clone, Deserialize)]
+pub struct ServiceConstraints {
+    /// Maximum number of customers that can be served simultaneously
+    pub max_concurrent_services: u32,
+    /// Whether this window can weigh portions
+    pub supports_weighing: bool,
+}
+
+// ===================== Operational Configuration =====================
+
+/// Player's configuration for a specific window instance
+#[derive(Debug, Clone)]
+pub struct WindowConfiguration {
+    /// Which service template this uses
+    pub service_template: ModelId,
+    /// Position in the canteen
+    pub position: XRange,
+    /// Whether enabled
+    pub is_enabled: bool,
+    /// Player-selected dishes
+    pub dish_assignments: Vec<DishAssignment>,
+}
+
+/// Player's assignment of a dish to a specific slot in a window
+#[derive(Debug, Clone)]
+pub struct DishAssignment {
+    /// Which dish to serve
+    pub dish_id: ModelId,
+    /// Which slot to use
+    pub slot_index: usize,
+    /// Player-set pricing
+    pub pricing_config: PricingConfig,
+    /// Initial quantity
+    pub initial_quantity: f32,
+}
+
+/// Player-configured pricing for a dish assignment
+#[derive(Debug, Clone)]
+pub struct PricingConfig {
+    /// Base price set by player
+    pub base_price: f32,
+    /// Any modifiers (can be extended)
+    pub modifiers: Vec<PriceModifier>,
+}
+
+/// Pricing adjustments applied to base dish prices
+#[derive(Debug, Clone)]
+pub struct PriceModifier {
+    /// Type of modifier ("discount", "markup", "time_based", etc.)
+    pub modifier_type: EcoString, // "discount", "markup", "time_based", etc.
+    /// Modifier value or percentage
+    pub value: f32,
+}
+
+// ===================== Runtime State =====================
+
+/// Runtime state of an active dish in a window
+#[derive(Debug, Clone)]
+pub struct ActiveDish {
+    /// Configuration this came from
+    pub assignment: DishAssignment,
+    /// Current runtime state
+    pub state: DishRuntimeState,
+}
+
+/// Dynamic state tracking for dishes during simulation
+#[derive(Debug, Clone)]
+pub struct DishRuntimeState {
+    /// Current quantity available
+    pub current_quantity: f32,
+    /// Current quality (may degrade)
+    pub current_quality: f32,
+    /// Current contamination level
+    pub contamination_level: f32,
+    /// When last restocked
+    pub last_restocked: f32,
+    /// Times served today
+    pub service_count: u32,
+}
+
+/// What gets served to a diner - minimal and focused
+#[derive(Debug, Clone)]
+pub struct ServedDish {
+    /// Original dish reference
+    pub dish_id: ModelId,
+    /// Name for display
+    pub name: EcoString,
+    /// Actual values at time of service
+    pub served_quantity: f32,
+    /// Quality level when served
+    pub served_quality: f32,
+    /// Final price charged to customer
+    pub price_paid: f32,
+    /// Time taken to serve this dish
+    pub service_time: Seconds,
+    /// Any contamination
+    pub contamination_level: f32,
+}
