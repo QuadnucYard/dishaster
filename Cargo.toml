@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*"]
+members = ["crates/*", "crates/dishrupt-godot-ui/macros"]
 default-members = ["crates/dishaster-core"]
 
 [workspace.package]
@@ -10,8 +10,15 @@ rust-version = "1.89"
 edition = "2024"
 
 [workspace.dependencies]
-dishaster-core = { path = "crates/dishaster-core" }
+dishrupt-core = { path = "crates/dishrupt-core" }
+dishrupt-godot = { path = "crates/dishrupt-godot" }
+dishrupt-godot-ui = { path = "crates/dishrupt-godot-ui" }
+dishrupt-godot-scene = { path = "crates/dishrupt-godot-scene" }
 
+dishaster-core = { path = "crates/dishaster-core" }
+dishaster-data = { path = "crates/dishaster-data" }
+
+bevy_color = { version = "0.16", default-features = false, features = ["std"] }
 bevy_ecs = { version = "0.16", default-features = false, features = [
   "std",
   "backtrace",
@@ -19,14 +26,20 @@ bevy_ecs = { version = "0.16", default-features = false, features = [
 bevy_math = { version = "0.16", default-features = false, features = ["std"] }
 glam = { version = "0.29", features = ["serde"] } # sync with bevy
 
+godot = "0.3.5"
+
+as-any = "0.3"
 derive_more = "1"
 ecow = { version = "0.2", features = ["serde"] }
+fibre = "0.5"
+log = "0.4"
 rand = "0.9"
 rand_core = "0.9"
 rand_chacha = "0.9"
 ron = "0.11"
 rustc-hash = "2"
 serde = { version = "1.0", features = ["derive"] }
+signals2 = "0.3"
 thiserror = "2.0"
 
 [workspace.lints.rust]
@@ -35,3 +48,12 @@ missing_docs = "warn"
 [workspace.lints.clippy]
 too_many_arguments = "allow"
 type_complexity = "allow"
+
+[patch.crates-io]
+godot = { git = "https://github.com/godot-rust/gdext", rev = "9da0f54" }
+
+[profile.dev.package]
+glam.opt-level = 1
+bevy_ecs.opt-level = 1
+bevy_math.opt-level = 1
+godot.opt-level = 1

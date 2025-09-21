@@ -1,0 +1,18 @@
+[package]
+name = "dishrupt-godot"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-core.workspace = true
+
+bevy_ecs.workspace = true
+derive_more.workspace = true
+godot.workspace = true
+glam.workspace = true
+rustc-hash.workspace = true
+
+[lints]
+# workspace = true

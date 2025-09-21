@@ -1,0 +1,17 @@
+[package]
+name = "dishrupt-godot-scene"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-godot.workspace = true
+dishrupt-godot-ui.workspace = true
+
+as-any.workspace = true
+godot.workspace = true
+log.workspace = true
+
+[lints]
+# workspace = true

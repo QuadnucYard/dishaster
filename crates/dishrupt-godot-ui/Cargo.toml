@@ -1,0 +1,17 @@
+[package]
+name = "dishrupt-godot-ui"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-godot-ui-macros = { path = "macros" }
+
+as-any.workspace = true
+bevy_ecs.workspace = true
+godot.workspace = true
+signals2.workspace = true
+
+[lints]
+# workspace = true
