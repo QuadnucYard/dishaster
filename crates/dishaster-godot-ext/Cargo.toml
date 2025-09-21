@@ -1,0 +1,17 @@
+[package]
+name = "dishaster-godot-ext"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib"] # Compile this crate to a dynamic C library.
+
+[dependencies]
+dishaster-godot.workspace = true
+
+godot.workspace = true
+
+[lints]
+# workspace = true

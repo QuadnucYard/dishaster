@@ -1,0 +1,14 @@
+[configuration]
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.5
+reloadable = true
+
+[libraries]
+linux.debug.x86_64 =     "res://../target/debug/libdishaster_godot_ext.so"
+linux.release.x86_64 =   "res://../target/release/libdishaster_godot_ext.so"
+windows.debug.x86_64 =   "res://../target/debug/dishaster_godot_ext.dll"
+windows.release.x86_64 = "res://../target/release/dishaster_godot_ext.dll"
+macos.debug =            "res://../target/debug/libdishaster_godot_ext.dylib"
+macos.release =          "res://../target/release/libdishaster_godot_ext.dylib"
+macos.debug.arm64 =      "res://../target/debug/libdishaster_godot_ext.dylib"
+macos.release.arm64 =    "res://../target/release/libdishaster_godot_ext.dylib"

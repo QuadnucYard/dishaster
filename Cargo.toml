@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
 members = ["crates/*", "crates/dishrupt-godot-ui/macros"]
-default-members = ["crates/dishaster-core"]
+default-members = ["crates/dishaster-core", "crates/dishaster-godot-ext"]
 
 [workspace.package]
 version = "0.1.0"
@@ -17,6 +17,8 @@ dishrupt-godot-scene = { path = "crates/dishrupt-godot-scene" }
 
 dishaster-core = { path = "crates/dishaster-core" }
 dishaster-data = { path = "crates/dishaster-data" }
+dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }
+dishaster-godot = { path = "crates/dishaster-godot" }
 
 bevy_color = { version = "0.16", default-features = false, features = ["std"] }
 bevy_ecs = { version = "0.16", default-features = false, features = [

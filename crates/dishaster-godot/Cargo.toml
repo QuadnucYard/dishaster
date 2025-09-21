@@ -1,0 +1,22 @@
+[package]
+name = "dishaster-godot"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-core.workspace = true
+dishrupt-godot.workspace = true
+dishrupt-godot-ui.workspace = true
+dishrupt-godot-scene.workspace = true
+dishaster-core.workspace = true
+dishaster-data.workspace = true
+dishaster-godot-ui.workspace = true
+
+as-any.workspace = true
+fibre.workspace = true
+godot.workspace = true
+
+[lints]
+# workspace = true
