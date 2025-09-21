@@ -2,9 +2,12 @@ use super::prelude::*;
 use crate::models::*;
 
 /// Complete level configuration defining the game scenario
-#[derive(Debug, Clone, Resource)]
+#[derive(Resource, Debug, Clone, Deserialize)]
 pub struct LevelConfig {
+    /// Unique identifier for this level
+    pub id: ModelId,
     /// Which day/level this represents
+    #[serde(default)]
     pub day: u32,
 
     /// Player-configured window setups
@@ -26,8 +29,14 @@ pub struct LevelConfig {
     pub seed: u64,
 }
 
+impl HasId for LevelConfig {
+    fn id(&self) -> &ModelId {
+        &self.id
+    }
+}
+
 /// Legacy support - can be removed once systems are updated
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ActiveWindowModel {
     /// Reference to service template
     pub service: ModelId,
@@ -40,7 +49,7 @@ pub struct ActiveWindowModel {
 }
 
 /// Physical placement configuration for dining tables
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct TablePlacement {
     /// Reference to table model
     pub model: ModelId,
@@ -49,7 +58,7 @@ pub struct TablePlacement {
 }
 
 /// Physical placement configuration for item dispensers
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct DispenserPlacement {
     /// Reference to dispenser model
     pub model: ModelId,
@@ -58,7 +67,7 @@ pub struct DispenserPlacement {
 }
 
 /// Physical placement configuration for dish collectors
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct CollectorPlacement {
     /// Reference to collector model
     pub model: ModelId,

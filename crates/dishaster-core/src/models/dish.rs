@@ -116,7 +116,7 @@ pub struct ServiceConstraints {
 // ===================== Operational Configuration =====================
 
 /// Player's configuration for a specific window instance
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct WindowConfiguration {
     /// Which service template this uses
     pub service_template: ModelId,
@@ -129,7 +129,7 @@ pub struct WindowConfiguration {
 }
 
 /// Player's assignment of a dish to a specific slot in a window
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct DishAssignment {
     /// Which dish to serve
     pub dish_id: ModelId,
@@ -142,7 +142,7 @@ pub struct DishAssignment {
 }
 
 /// Player-configured pricing for a dish assignment
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct PricingConfig {
     /// Base price set by player
     pub base_price: f32,
@@ -151,7 +151,7 @@ pub struct PricingConfig {
 }
 
 /// Pricing adjustments applied to base dish prices
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct PriceModifier {
     /// Type of modifier ("discount", "markup", "time_based", etc.)
     pub modifier_type: EcoString, // "discount", "markup", "time_based", etc.
@@ -186,7 +186,7 @@ pub struct DishRuntimeState {
 }
 
 /// What gets served to a diner - minimal and focused
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ServedDish {
     /// Original dish reference
     pub dish_id: ModelId,

@@ -1,10 +1,13 @@
 //! Test running a basic simulation loop to verify no panics and basic lifecycle
 
+use std::sync::Arc;
+
 use dishaster_core::{model_registry::*, models::*, resources::*, sim::*};
 
 /// Create a minimal test level configuration
 fn create_test_level() -> LevelConfig {
     LevelConfig {
+        id: ModelId::new("test_level"),
         day: 1,
         window_configurations: vec![],
         table_placements: vec![],
@@ -42,7 +45,7 @@ fn create_test_level() -> LevelConfig {
 
 /// Create a minimal game model registry for testing
 fn create_test_registry() -> GameModelRegistry {
-    let mut registry = GameModelRegistry::new();
+    let mut registry = GameModelRegistry::default();
 
     // Add a basic canteen model
     let canteen_model = CanteenModel {
@@ -74,7 +77,7 @@ fn test_simulation_basic_lifecycle() {
     );
 
     // Create and initialize simulation
-    let mut sim = Simulation::new(registry);
+    let mut sim = Simulation::new(Arc::new(registry));
     sim.start(level);
 
     // The simulation should not be complete at start
@@ -118,14 +121,14 @@ fn test_simulation_basic_lifecycle() {
         println!(
             "WARNING: Test timed out after {} ticks ({}s)",
             timeout_ticks,
-            timeout_ticks as f32 * dt
+            timeout_ticks as f64 * dt
         );
         // Don't fail the test for timeout - this is expected for the minimal loop
     } else {
         println!(
             "Day completed successfully after {} ticks ({}s)",
             timeout_ticks + 50,
-            (timeout_ticks + 50) as f32 * dt
+            (timeout_ticks + 50) as f64 * dt
         );
         assert!(sim.is_day_complete(), "Day should be complete");
     }
@@ -136,7 +139,7 @@ fn test_spawning_stops_after_run_length() {
     let registry = create_test_registry();
     let level = create_test_level();
 
-    let mut sim = Simulation::new(registry);
+    let mut sim = Simulation::new(Arc::new(registry));
     sim.start(level);
 
     // Run past the spawner run length (10 seconds)

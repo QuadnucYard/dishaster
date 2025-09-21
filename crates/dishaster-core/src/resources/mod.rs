@@ -2,6 +2,8 @@
 
 mod time;
 
+use std::sync::Arc;
+
 use derive_more::derive::{Deref, DerefMut};
 use rand_chacha::ChaCha8Rng;
 pub use time::Time;
@@ -95,8 +97,10 @@ pub struct DayStatus {
 /// Manages the static configuration templates that define the properties
 /// and behaviors of all entities in the simulation. Uses type-safe handles
 /// to reference models efficiently without duplicating data.
-#[derive(Resource, Default)]
+#[derive(Default)]
 pub struct GameModelRegistry {
+    /// Level configurations defining initial setups
+    pub levels: ModelRegistry<LevelConfig>,
     /// Canteen layout and structural configurations
     pub canteens: ModelRegistry<CanteenModel>,
     /// Food service window configurations and constraints
@@ -111,9 +115,6 @@ pub struct GameModelRegistry {
     pub collectors: ModelRegistry<CollectorModel>,
 }
 
-impl GameModelRegistry {
-    /// Create a new empty model registry with empty registries
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
+/// Wrapper resource to allow sharing GameModelRegistry via Arc
+#[derive(Resource, Deref, DerefMut)]
+pub struct GameModelRegistryRes(pub Arc<GameModelRegistry>);

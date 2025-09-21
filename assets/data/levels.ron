@@ -1,0 +1,37 @@
+[
+    (
+        id: "sample_level",
+        day: 1,
+        window_configurations: [],
+        table_placements: [],
+        tray_dispenser_placements: [],
+        chopstick_dispenser_placements: [],
+        collector_placements: [],
+        diner_provider: (
+            attributes:  (
+                hunger: (0.3, 0.8),
+                patience: (0.2, 0.7),
+                economic_capacity: (10.0, 50.0),
+                price_sensitivity: (0.1, 0.5),
+            ),
+            behavior: (
+                decisiveness: (0.2, 0.8),
+                adaptiveness: (0.1, 0.6),
+                leave_probability: (0.05, 0.3),
+                observation_time: (5.0, 15.0),
+                decision_time: (2.0, 8.0),
+                eating_time: (300.0, 900.0),
+            ),
+            movement: (
+                movement_speed: (1.0, 3.0),
+                avoidance_speed: (0.5, 2.0),
+                arrival_threshold: (0.1, 0.5),
+            ),
+        ),
+        diner_spawner: (
+            run_length: 600.0,
+            spawn_interval: (1.0, 3.0),
+        ),
+        seed: 12345,
+    )
+]

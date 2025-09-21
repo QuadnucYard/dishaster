@@ -42,9 +42,10 @@ impl DataLoader {
 
     /// Load all game data and populate the model registry
     pub fn load_all_data(&self) -> Result<GameModelRegistry, DataError> {
-        let mut registry = GameModelRegistry::new();
+        let mut registry = GameModelRegistry::default();
 
         // Load each registry type from separate files
+        self.load_to_registry(&mut registry.levels, "levels.ron")?;
         self.load_to_registry(&mut registry.canteens, "canteens.ron")?;
         self.load_to_registry(&mut registry.dishes, "dishes.ron")?;
         self.load_to_registry(&mut registry.window_services, "window_services.ron")?;
@@ -76,7 +77,9 @@ impl DataLoader {
         T: serde::de::DeserializeOwned,
     {
         let content = std::fs::read_to_string(path)?;
-        let data = ron::from_str(&content)?;
+        let options = ron::Options::default()
+            .with_default_extension(ron::extensions::Extensions::UNWRAP_NEWTYPES);
+        let data = options.from_str(&content)?;
         Ok(data)
     }
 }

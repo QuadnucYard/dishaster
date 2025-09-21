@@ -5,7 +5,7 @@ pub fn spawn_static_objects(
     mut commands: Commands,
     _canteen: Res<Canteen>,
     level: Res<LevelConfig>,
-    registry: Res<GameModelRegistry>,
+    registry: Res<GameModelRegistryRes>,
 ) {
     // Spawn windows using new configuration
     for window_config in &level.window_configurations {
@@ -120,7 +120,7 @@ pub fn update_diner_spawner(
     mut spawner: ResMut<DinerSpawner>,
     provider: Res<DinerProvider>,
     canteen: Res<Canteen>,
-    registry: Res<GameModelRegistry>,
+    registry: Res<GameModelRegistryRes>,
     diner_query: Query<&Diner>,
     mut rng: ResMut<GameRng>,
 ) {

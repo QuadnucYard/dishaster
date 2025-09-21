@@ -1,5 +1,7 @@
 //! Main simulation engine and event handling
 
+use std::sync::Arc;
+
 use bevy_ecs::prelude::*;
 
 use crate::{models::*, resources::*, systems::*};
@@ -33,14 +35,14 @@ impl Simulation {
     ///
     /// # Arguments
     /// * `db` - Game model registry containing all static configuration data
-    pub fn new(db: GameModelRegistry) -> Self {
+    pub fn new(db: Arc<GameModelRegistry>) -> Self {
         let mut world = World::new();
         let mut schedule = Schedule::default();
 
         world.insert_resource(Canteen {
             model: db.canteens.first().unwrap().clone(),
         });
-        world.insert_resource(db);
+        world.insert_resource(GameModelRegistryRes(db));
         world.insert_resource(CollisionGridRes::default());
 
         schedule.add_systems(
@@ -88,7 +90,7 @@ impl Simulation {
     ///
     /// # Arguments
     /// * `dt` - Delta time since last tick (used for time initialization)
-    pub fn tick(&mut self, dt: f32) {
+    pub fn tick(&mut self, dt: f64) {
         // Check if time resource exists and advance it, or create a new one
         match self.world.get_resource_mut::<Time>() {
             Some(mut time) => {
@@ -96,7 +98,7 @@ impl Simulation {
             }
             None => {
                 // Initialize with dt as tick duration if not exists
-                let time = Time::new(dt as f64);
+                let time = Time::new(dt);
                 self.world.insert_resource(time);
             }
         }
