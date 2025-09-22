@@ -5,12 +5,11 @@ mod time;
 use std::sync::Arc;
 
 use derive_more::derive::{Deref, DerefMut};
+use dishrupt_core::model_registry::ModelRegistry;
 use rand_chacha::ChaCha8Rng;
 pub use time::Time;
 
-use crate::{
-    model_registry::ModelRegistry, models::*, prelude::*, utils::collision::CollisionGrid,
-};
+use crate::{models::*, prelude::*, utils::collision::CollisionGrid};
 
 /// Cryptographically secure random number generator for deterministic simulation
 ///

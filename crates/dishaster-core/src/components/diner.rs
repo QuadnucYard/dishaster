@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{model_registry::ModelHandle, models::*, prelude::*};
+use crate::{models::*, prelude::*};
 
 /// Core diner identity - links to static configuration
 #[derive(Component)]

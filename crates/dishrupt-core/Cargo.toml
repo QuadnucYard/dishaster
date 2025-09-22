@@ -10,6 +10,7 @@ bevy_color.workspace = true
 bevy_ecs.workspace = true
 ecow.workspace = true
 glam.workspace = true
+rustc-hash.workspace = true
 serde.workspace = true
 
 [lints]

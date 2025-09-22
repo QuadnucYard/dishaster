@@ -1,4 +1,4 @@
-use crate::{model_registry::ModelHandle, models::*, prelude::*};
+use crate::{models::*, prelude::*};
 
 /// Food service window component containing static configuration and player settings
 #[derive(Component)]

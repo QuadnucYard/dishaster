@@ -2,6 +2,7 @@ use std::num::NonZeroU32;
 
 pub mod asset;
 pub mod display;
+pub mod model_registry;
 pub mod prelude;
 pub mod utils;
 

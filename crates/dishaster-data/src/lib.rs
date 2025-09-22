@@ -2,10 +2,8 @@
 
 use std::path::{Path, PathBuf};
 
-use dishaster_core::{
-    model_registry::{HasId, ModelRegistry},
-    resources::GameModelRegistry,
-};
+use dishaster_core::resources::GameModelRegistry;
+use dishrupt_core::model_registry::*;
 use thiserror::Error;
 
 /// Error types for data loading operations

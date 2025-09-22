@@ -6,6 +6,7 @@ rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
+dishrupt-core.workspace = true
 dishaster-core.workspace = true
 
 serde.workspace = true

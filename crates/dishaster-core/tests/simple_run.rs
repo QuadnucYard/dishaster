@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use dishaster_core::{model_registry::*, models::*, resources::*, sim::*};
+use dishaster_core::{models::*, resources::*, sim::*};
 
 /// Create a minimal test level configuration
 fn create_test_level() -> LevelConfig {
