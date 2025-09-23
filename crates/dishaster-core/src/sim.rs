@@ -1,8 +1,9 @@
 //! Main simulation engine and event handling
 
-use std::sync::Arc;
+use std::{num::NonZero, sync::Arc};
 
 use bevy_ecs::prelude::*;
+use dishrupt_core::{EntityId, display::*};
 
 use crate::{models::*, resources::*, systems::*};
 
@@ -12,11 +13,11 @@ use crate::{models::*, resources::*, systems::*};
 /// game state changes to external observers or UI systems.
 pub struct Event;
 
-/// Simulation state snapshot for debugging and analysis
-///
-/// Placeholder for future snapshot system that will capture
-/// complete simulation state for debugging, replay, or analysis.
-pub struct Snapshot;
+/// Simulation state snapshot for rendering
+pub struct Snapshot {
+    /// TBD
+    pub display: Vec<DisplaySnapshot>,
+}
 
 /// Core simulation engine managing ECS world and system execution
 ///
@@ -38,6 +39,9 @@ impl Simulation {
     pub fn new(db: Arc<GameModelRegistry>) -> Self {
         let mut world = World::new();
         let mut schedule = Schedule::default();
+
+        let root_entity = world.spawn(Transform::default()).id();
+        world.insert_resource(DisplayRoot(root_entity));
 
         world.insert_resource(Canteen {
             model: db.canteens.first().unwrap().clone(),
@@ -112,8 +116,25 @@ impl Simulation {
     }
 
     /// Create a snapshot of the current simulation state for serialization or debugging
-    pub fn snapshot(&self) -> Snapshot {
-        Snapshot // Placeholder
+    pub fn snapshot(&mut self) -> Snapshot {
+        let mut query = self
+            .world
+            .query::<(Entity, &DisplayState, &mut Transform)>();
+        let display = query
+            .iter_mut(&mut self.world)
+            .map(|(e, d, mut t)| DisplaySnapshot {
+                core_id: EntityId(NonZero::new(e.to_bits()).unwrap()),
+                proto: d.proto.clone(),
+                transform: t.snapshot(),
+            })
+            .collect();
+
+        Snapshot { display }
+    }
+
+    /// Get the root entity of the display hierarchy
+    pub fn root_entity(&self) -> EntityId {
+        EntityId(NonZero::new(self.world.resource::<DisplayRoot>().0.to_bits()).unwrap())
     }
 
     /// Check if the current day is complete (spawning finished and all diners left)

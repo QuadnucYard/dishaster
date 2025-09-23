@@ -1,11 +1,13 @@
+use std::num::NonZero;
+
 use bevy_color::Color;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{EntityId, asset::PrefabReference, prelude::*, utils::Modified};
 
 // ===
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
 pub struct DisplayModel {
     pub res: PrefabReference,
@@ -42,7 +44,10 @@ pub struct CoreId(pub EntityId);
 
 // ===
 
+#[derive(Component)]
 pub struct DisplayState {
+    pub proto: PrefabReference,
+
     pub color: Modified<Color>,
 
     pub visible: Modified<bool>,
@@ -51,6 +56,7 @@ pub struct DisplayState {
 impl Default for DisplayState {
     fn default() -> Self {
         Self {
+            proto: PrefabReference::default(),
             color: Color::WHITE.into(),
             visible: true.into(),
         }
@@ -60,7 +66,7 @@ impl Default for DisplayState {
 // ===
 
 #[derive(Component)]
-pub struct TransformState {
+pub struct Transform {
     pub position: Vec3,
     pub scale: Vec3,
     /// In radians
@@ -69,7 +75,7 @@ pub struct TransformState {
     pub parent: Modified<Option<Entity>>,
 }
 
-impl Default for TransformState {
+impl Default for Transform {
     fn default() -> Self {
         Self {
             position: Vec3::ZERO,
@@ -80,7 +86,21 @@ impl Default for TransformState {
     }
 }
 
-impl TransformState {
+impl Transform {
+    pub fn snapshot(&mut self) -> TransformSnapshot {
+        let parent = self
+            .parent
+            .clone()
+            .map(|v| v.map(|e| EntityId(NonZero::new(e.to_bits()).unwrap())));
+        self.parent.reset_modified();
+        TransformSnapshot {
+            position: self.position,
+            scale: self.scale,
+            rotation: self.rotation,
+            parent,
+        }
+    }
+
     pub fn detach(&mut self) {
         *self.parent = None;
     }
@@ -96,11 +116,6 @@ pub struct TransformSnapshot {
 }
 
 // ===
-
-pub struct DisplayBundle {
-    pub display: DisplayState,
-    pub transform: TransformState,
-}
 
 pub struct DisplaySnapshot {
     pub core_id: EntityId,

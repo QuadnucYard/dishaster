@@ -1,3 +1,8 @@
+use dishrupt_core::{
+    display::{DisplayModel, DisplayState, Transform},
+    utils::Modified,
+};
+
 use crate::{components::*, models::*, prelude::*, resources::*};
 
 /// System that spawns all static objects (windows, tables, dispensers, collectors) at level start
@@ -120,8 +125,7 @@ pub fn update_diner_spawner(
     mut spawner: ResMut<DinerSpawner>,
     provider: Res<DinerProvider>,
     canteen: Res<Canteen>,
-    registry: Res<GameModelRegistryRes>,
-    diner_query: Query<&Diner>,
+    display_root: Res<DisplayRoot>,
     mut rng: ResMut<GameRng>,
 ) {
     // Check if spawning time is finished using the new time system
@@ -139,9 +143,6 @@ pub fn update_diner_spawner(
     // Update spawn timer using tick duration
     spawner.next_spawn_timer -= time.tick_duration;
 
-    // Count current active diners (not used in simplified version)
-    let _active_diners = diner_query.iter().count();
-
     // Check if we should spawn a new diner (simplified - no max limit)
     if spawner.next_spawn_timer <= 0.0 {
         // Generate new spawn interval using f64 for consistency
@@ -153,7 +154,7 @@ pub fn update_diner_spawner(
             &mut commands,
             &provider.model,
             &canteen.model,
-            &registry,
+            &display_root,
             &mut rng,
         );
 
@@ -208,6 +209,14 @@ pub fn generate_diner_model(provider_model: &DinerProviderModel, rng: &mut GameR
             base_satisfaction: 0.5, // Default base satisfaction
             preferences: vec![],    // Start with empty preferences
         },
+        display: DisplayModel {
+            res: provider_model
+                .display_res
+                .choose(rng)
+                .cloned()
+                .unwrap_or_default(),
+            ..Default::default()
+        },
     }
 }
 
@@ -216,7 +225,7 @@ pub fn spawn_diner_from_provider(
     commands: &mut Commands,
     provider_model: &DinerProviderModel,
     canteen_model: &CanteenModel,
-    _registry: &GameModelRegistry, // For future use when we have diner archetypes
+    display_root: &DisplayRoot,
     rng: &mut GameRng,
 ) {
     // For now, create a temporary diner model (later we'll use registry)
@@ -235,22 +244,20 @@ pub fn spawn_diner_from_provider(
     );
 
     // Get random entrance position
-    let entrance = if canteen_model.entrances.is_empty() {
-        XRange {
-            x_min: -5.0,
-            x_max: 5.0,
-        }
-    } else {
+    let entrance = {
         let entrance_idx = rng.random_range(0..canteen_model.entrances.len());
         canteen_model.entrances[entrance_idx].clone()
     };
 
-    let entrance_x = rng.random_range(entrance.x_min..entrance.x_max);
-    let entrance_pos = Vec2::new(entrance_x, canteen_model.height + 2.0);
+    let entrance_pos = Vec2::new(
+        rng.random_range(entrance.x_min..entrance.x_max),
+        canteen_model.height + 2.0,
+    );
 
-    let observation_x = rng.random_range(entrance.x_min..entrance.x_max);
-    let observation_y = rng.random_range(2.0..canteen_model.height * 0.3);
-    let observation_pos = Vec2::new(observation_x, observation_y);
+    let observation_pos = Vec2::new(
+        rng.random_range(entrance.x_min..entrance.x_max),
+        rng.random_range(2.0..canteen_model.height * 0.3),
+    );
 
     // Create diner entity with separated components - simplified for now
     commands.spawn((
@@ -278,6 +285,15 @@ pub fn spawn_diner_from_provider(
             last_visit_day: 0,
             average_satisfaction: diner_model.properties.base_satisfaction,
             learned_preferences: vec![],
+        },
+        DisplayState {
+            proto: diner_model.display.res.clone(),
+            ..Default::default()
+        },
+        Transform {
+            position: Vec3::new(entrance_pos.x, entrance_pos.y, 0.0),
+            parent: Modified::new(Some(display_root.0)),
+            ..Default::default()
         },
         // Add the diner model directly as a component for now
         diner_model,

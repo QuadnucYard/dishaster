@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://7oexp5olmcpm"]
+
+[ext_resource type="Texture2D" uid="uid://b8wuejckomh7t" path="res://godot.svg" id="1_7p2rk"]
+
+[node name="SampleDiner" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_7p2rk")
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+position = Vector2(-46, -56)
+rotation = -0.48189238
+scale = Vector2(0.5390625, 0.5390625)
+texture = ExtResource("1_7p2rk")
+
+[node name="Sprite2D3" type="Sprite2D" parent="."]
+position = Vector2(60, -55.999996)
+rotation = 0.7110483
+scale = Vector2(0.4453125, 0.4453125)
+texture = ExtResource("1_7p2rk")

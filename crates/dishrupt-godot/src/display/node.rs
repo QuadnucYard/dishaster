@@ -29,8 +29,6 @@ pub struct GodotDisplayNode2D {
     pub bind: Option<EntityId>,
 
     pub node: GdNode2D,
-
-    pub is_destroyed: bool,
 }
 
 impl GodotDisplayNode2D {
@@ -38,7 +36,6 @@ impl GodotDisplayNode2D {
         Self {
             bind: Default::default(),
             node,
-            is_destroyed: false,
         }
     }
 
@@ -46,13 +43,13 @@ impl GodotDisplayNode2D {
         Self {
             bind: Some(entity),
             node,
-            is_destroyed: false,
         }
     }
 
     pub fn bind_to(&mut self, entity: EntityId) {
         self.bind = Some(entity);
     }
+
     /*
        pub fn take_reparent(&self) -> Option<Rc<DisplayNode>> {
            self.0.borrow().bind.upgrade().and_then(|display_rc| {
@@ -63,17 +60,16 @@ impl GodotDisplayNode2D {
                    .and_then(|t| t.upgrade())
            })
        }
-
-       pub fn set_parent(&self, parent: &Rc<GodotDisplayNode2D>) {
-           let parent_node = &mut parent.0.borrow_mut().node;
-           let node = &mut self.0.borrow_mut().node;
-           if node.get_parent().is_some() {
-               node.reparent(&*parent_node);
-           } else {
-               parent_node.add_child(&*node);
-           }
-       }
     */
+
+    pub fn set_parent(&mut self, parent: &mut Self) {
+        if self.node.get_parent().is_some() {
+            self.node.reparent(&*parent.node);
+        } else {
+            parent.node.add_child(&*self.node);
+        }
+    }
+
     pub fn detach(&mut self) {
         let node = &self.node;
         if node.is_instance_valid()
@@ -84,7 +80,6 @@ impl GodotDisplayNode2D {
     }
 
     pub fn reset(&mut self) {
-        self.is_destroyed = false;
         self.node.request_ready();
     }
 
@@ -93,7 +88,6 @@ impl GodotDisplayNode2D {
     }
 
     pub fn destroy(&mut self) {
-        self.is_destroyed = true;
         self.detach();
     }
 }

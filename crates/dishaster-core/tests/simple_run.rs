@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use dishaster_core::{models::*, resources::*, sim::*};
+use dishrupt_core::asset::PrefabReference;
 
 /// Create a minimal test level configuration
 fn create_test_level() -> LevelConfig {
@@ -34,6 +35,7 @@ fn create_test_level() -> LevelConfig {
                 avoidance_speed: MinMax::new(0.5, 2.0),
                 arrival_threshold: MinMax::new(0.1, 0.5),
             },
+            display_res: vec![PrefabReference::default()],
         },
         diner_spawner: DinerSpawnerModel {
             run_length: 600.0,

@@ -13,7 +13,7 @@ config_version=5
 config/name="dishaster"
 run/main_scene="uid://clow4hmvvd6pr"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://bhdj1bfq6t8gx"
 
 [display]
 

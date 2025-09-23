@@ -95,7 +95,8 @@ impl DisplayFactory {
     pub fn init(&mut self) {
         let dummy_prefab = PrefabReference::new("");
         self.res_registry.insert(dummy_prefab.clone(), 0);
-        self.items[0] = FactoryItem::from_prefab(make_empty_prefab());
+        self.items
+            .push(FactoryItem::from_prefab(make_empty_prefab()));
     }
 
     pub fn create(&mut self, prefab: &PrefabReference) -> GdNode2D {

@@ -1,3 +1,5 @@
+use dishrupt_core::{asset::PrefabReference, display::DisplayModel};
+
 use super::prelude::*;
 
 /// Complete diner configuration model used both as component and model definition
@@ -9,6 +11,8 @@ pub struct DinerModel {
     pub behavior: DinerBehavior,
     /// Extensible properties for future features
     pub properties: DinerProperties,
+    /// Display model
+    pub display: DisplayModel,
 }
 
 /// Core psychological and economic attributes of a diner
@@ -59,6 +63,8 @@ pub struct DinerProviderModel {
     pub behavior: DinerBehaviorRanges,
     /// Movement parameters
     pub movement: MovementRanges,
+    /// List of display resources
+    pub display_res: Vec<PrefabReference>,
 }
 
 /// Range definitions for randomizing diner attributes

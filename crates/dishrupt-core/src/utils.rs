@@ -10,7 +10,7 @@ impl<T> Modified<T> {
     pub fn new(value: T) -> Self {
         Self {
             value,
-            modified: false,
+            modified: true,
         }
     }
 
@@ -23,6 +23,10 @@ impl<T> Modified<T> {
         self.modified = true;
     }
 
+    pub fn is_modified(&self) -> bool {
+        self.modified
+    }
+
     pub fn reset_modified(&mut self) {
         self.modified = false;
     }
@@ -33,6 +37,13 @@ impl<T> Modified<T> {
             Some(&self.value)
         } else {
             None
+        }
+    }
+
+    pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Modified<U> {
+        Modified {
+            value: f(self.value),
+            modified: self.modified,
         }
     }
 }

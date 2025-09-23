@@ -49,10 +49,10 @@ impl Scene for GameScene {
         gaming.show();
     }
 
-    fn process(&mut self, _ctx: &mut SceneContext, _delta: f64) {
+    fn process(&mut self, _ctx: &mut SceneContext, delta: f64) {
         let game = self.game.get_mut().unwrap();
 
-        game.process();
+        game.process(delta);
     }
 
     fn input(&mut self, _ctx: &mut SceneContext, event: GodotInputEvent) {

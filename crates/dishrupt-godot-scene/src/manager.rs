@@ -25,6 +25,14 @@ impl SceneManager {
         }
     }
 
+    pub fn active_scene(&self) -> &Option<Box<dyn Scene>> {
+        &self.stack.active_scene
+    }
+
+    pub fn active_scene_mut(&mut self) -> &mut Option<Box<dyn Scene>> {
+        &mut self.stack.active_scene
+    }
+
     pub fn inspect_active_scene(&self, f: impl FnOnce(&Box<dyn Scene>)) {
         self.stack.inspect_active_scene(f);
     }

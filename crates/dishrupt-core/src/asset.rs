@@ -1,10 +1,14 @@
 use core::fmt;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Deserialize)]
+/// Reference to a prefab resource.
+///
+/// The path is relative to `res://assets/{prefabs}/` in Godot.
+/// It does not include file extension.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct PrefabReference(EcoString);
 
 impl PrefabReference {

@@ -67,12 +67,15 @@ impl Inner {
         let gui_root = root.get_or_add_node_as::<CanvasLayer>("UIRoot");
         let audio_root = root.get_or_add_node_as("AudioRoot");
 
+        let input_listener = root.get_or_add_node_of_type::<InputListener>();
+        // input_listener.bind_mut().base_mut().set_process_mode(ProcessMode::ALWAYS);
+
         Self {
             scene_manager: SceneManager::new(scene_root.upcast(), DefaultSceneLoader),
             gui: GuiManager::new(gui_root.upcast()),
             audio: AudioManager::new(audio_root),
             // l10n_server: Default::default(),
-            input_listener: root.get_or_add_node_of_type(),
+            input_listener,
 
             late_initialized: false,
         }

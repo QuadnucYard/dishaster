@@ -11,6 +11,10 @@ pub use time::Time;
 
 use crate::{models::*, prelude::*, utils::collision::CollisionGrid};
 
+/// Root entity for all display-related objects in the scene
+#[derive(Resource)]
+pub struct DisplayRoot(pub Entity);
+
 /// Cryptographically secure random number generator for deterministic simulation
 ///
 /// Uses ChaCha8 algorithm to ensure reproducible randomness across simulation runs
