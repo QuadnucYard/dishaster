@@ -1,3 +1,5 @@
+use bevy_math::Rect;
+
 use super::prelude::*;
 
 // ===================== Core Dish Models =====================
@@ -35,8 +37,6 @@ pub struct DishCharacteristics {
 /// Extensible properties container - easy to add new fields
 #[derive(Debug, Clone, Deserialize)]
 pub struct DishProperties {
-    /// How this dish can be priced
-    pub pricing_method: PricingMethod,
     /// Optional tags for future preference matching
     pub tags: Vec<EcoString>,
     /// Optional category for future categorization
@@ -47,7 +47,7 @@ pub struct DishProperties {
 #[derive(Debug, Clone, Deserialize)]
 pub enum PricingMethod {
     /// Fixed price per serving
-    PerUnit(f32),
+    PerPortion(f32),
     /// Price calculated by weight (per kg)
     ByWeight(f32),
 }
@@ -89,28 +89,21 @@ impl HasId for WindowServiceModel {
 /// Physical layout configuration for a service window
 #[derive(Debug, Clone, Deserialize)]
 pub struct WindowLayout {
+    /// Physical width of the service window
+    pub size: Size,
+    /// X-axis positions for customer queueing
+    pub queue_x: Vec<Meters>,
     /// Positions where dishes can be placed
-    pub dish_slots: Vec<DishSlot>,
-    /// Service constraints
-    pub constraints: ServiceConstraints,
-}
-
-/// Individual dish placement slot within a service window
-#[derive(Debug, Clone, Deserialize)]
-pub struct DishSlot {
-    /// Physical position of this slot
-    pub position: Vec2,
-    /// Maximum capacity this slot can hold
-    pub capacity: f32,
+    pub dish_slots: Vec<Rect>,
+    // /// Service constraints
+    // pub constraints: ServiceConstraints,
 }
 
 /// Service limitations and capabilities for a window type
 #[derive(Debug, Clone, Deserialize)]
 pub struct ServiceConstraints {
-    /// Maximum number of customers that can be served simultaneously
-    pub max_concurrent_services: u32,
-    /// Whether this window can weigh portions
-    pub supports_weighing: bool,
+    // /// Maximum number of customers that can be served simultaneously
+    // pub max_concurrent_services: u32,
 }
 
 // ===================== Operational Configuration =====================
@@ -118,10 +111,10 @@ pub struct ServiceConstraints {
 /// Player's configuration for a specific window instance
 #[derive(Debug, Clone, Deserialize)]
 pub struct WindowConfiguration {
+    /// Which slot to use
+    pub slot_index: usize,
     /// Which service template this uses
     pub service_template: ModelId,
-    /// Position in the canteen
-    pub position: XRange,
     /// Whether enabled
     pub is_enabled: bool,
     /// Player-selected dishes
@@ -131,22 +124,21 @@ pub struct WindowConfiguration {
 /// Player's assignment of a dish to a specific slot in a window
 #[derive(Debug, Clone, Deserialize)]
 pub struct DishAssignment {
-    /// Which dish to serve
-    pub dish_id: ModelId,
     /// Which slot to use
     pub slot_index: usize,
+    /// Which dish to serve
+    pub dish_id: ModelId,
     /// Player-set pricing
-    pub pricing_config: PricingConfig,
-    /// Initial quantity
-    pub initial_quantity: f32,
+    pub pricing: PricingConfig,
 }
 
 /// Player-configured pricing for a dish assignment
 #[derive(Debug, Clone, Deserialize)]
 pub struct PricingConfig {
     /// Base price set by player
-    pub base_price: f32,
+    pub method: PricingMethod,
     /// Any modifiers (can be extended)
+    #[serde(default)]
     pub modifiers: Vec<PriceModifier>,
 }
 

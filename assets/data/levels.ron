@@ -1,8 +1,26 @@
 [
     (
         id: "sample_level",
-        day: 1,
-        window_configurations: [],
+        canteen: "main_canteen",
+        window_configurations: [
+            (
+                slot_index: 0,
+                service_template: "main_food_window",
+                is_enabled: true,
+                dish_assignments: [
+                    (
+                        slot_index: 0,
+                        dish_id: "steamed_rice",
+                        pricing: (method: PerPortion(1.0)),
+                    ),
+                    (
+                        slot_index: 1,
+                        dish_id: "steamed_rice",
+                        pricing: (method: PerPortion(2.0)),
+                    ),
+                ],
+            )
+        ],
         table_placements: [],
         tray_dispenser_placements: [],
         chopstick_dispenser_placements: [],
@@ -32,9 +50,9 @@
             ],
         ),
         diner_spawner: (
-            run_length: 600.0,
+            run_length: 3600.0,
             spawn_interval: (1.0, 2.0),
         ),
-        seed: 12345,
+        seed: 42,
     )
 ]

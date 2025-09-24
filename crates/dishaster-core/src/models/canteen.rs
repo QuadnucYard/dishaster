@@ -1,3 +1,5 @@
+use dishrupt_core::display::DisplayModel;
+
 use super::prelude::*;
 
 /// Physical layout model for the dining hall structure
@@ -9,13 +11,19 @@ pub struct CanteenModel {
     pub width: Meters,
     /// Total height of the dining hall in meters
     pub height: Meters,
-    /// Y coordinate where food service windows are located
-    pub windows_y: Meters,
 
+    /// Y coordinate where customers enter/exit the hall
+    pub entrances_y: Meters,
     /// X-axis ranges where customers can enter/exit the hall
     pub entrances: Vec<XRange>,
+
+    /// Y coordinate where food service windows are located
+    pub windows_y: Meters,
     /// X-axis ranges where food service windows are positioned
     pub windows: Vec<XRange>,
+
+    /// Display model
+    pub display: DisplayModel,
 }
 
 impl HasId for CanteenModel {

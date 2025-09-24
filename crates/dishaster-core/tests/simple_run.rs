@@ -3,12 +3,13 @@
 use std::sync::Arc;
 
 use dishaster_core::{models::*, resources::*, sim::*};
-use dishrupt_core::asset::PrefabReference;
+use dishrupt_core::{asset::PrefabReference, display::DisplayModel};
 
 /// Create a minimal test level configuration
 fn create_test_level() -> LevelConfig {
     LevelConfig {
         id: ModelId::new("test_level"),
+        canteen: ModelId::new("test_canteen"),
         day: 1,
         window_configurations: vec![],
         table_placements: vec![],
@@ -54,9 +55,11 @@ fn create_test_registry() -> GameModelRegistry {
         id: ModelId::new("test_canteen"),
         width: 20.0,
         height: 15.0,
-        windows_y: 12.0,
+        entrances_y: 0.0,
         entrances: vec![XRange::new(8.0, 12.0)],
+        windows_y: 12.0,
         windows: vec![XRange::new(5.0, 15.0)],
+        display: DisplayModel::default(),
     };
     registry
         .canteens

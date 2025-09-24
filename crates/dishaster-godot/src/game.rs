@@ -16,7 +16,16 @@ pub struct Game {
 
 impl Game {
     pub fn new(gd: Gd<Node>, level: LevelConfig) -> Self {
-        let mut sim = Simulation::new(GAME_DATA.get().unwrap().clone());
+        let db = GAME_DATA.get().unwrap();
+
+        let map_prefab = &db
+            .canteens
+            .get_by_id(&db.levels.get_by_id(&level.id).unwrap().canteen)
+            .unwrap()
+            .display
+            .res;
+
+        let mut sim = Simulation::new(db.clone());
         sim.start(level);
         let root_entity = sim.root_entity();
 
@@ -26,8 +35,12 @@ impl Game {
         let display_root_node = gd.get_node_as::<Node2D>("%DisplayRoot");
         stage.set_root(root_entity, GdNode2D::new(display_root_node));
         stage.set_display_context(DisplayContext2D {
-            view_scale: Vec3::new(32.0, 32.0, 16.0),
+            view_scale: Vec3::new(60.0, 50.0, 50.0),
         });
+
+        let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
+        let map_scene = load_prefab_sync(map_prefab).instantiate().unwrap();
+        stage_root.add_child(&map_scene);
 
         Self { sim_runner, stage }
     }

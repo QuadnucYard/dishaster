@@ -1,15 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://dd2u8a4ff87cr"]
-
-[ext_resource type="Texture2D" uid="uid://b8wuejckomh7t" path="res://godot.svg" id="1_cb66b"]
+[gd_scene format=3 uid="uid://dd2u8a4ff87cr"]
 
 [node name="Game" type="Node2D"]
 
 [node name="Stage" type="Node2D" parent="."]
+unique_name_in_owner = true
+y_sort_enabled = true
 
 [node name="DisplayRoot" type="Node2D" parent="Stage"]
 unique_name_in_owner = true
-
-[node name="Sprite2D" type="Sprite2D" parent="Stage/DisplayRoot"]
-texture = ExtResource("1_cb66b")
+y_sort_enabled = true
 
 [node name="Camera2D" type="Camera2D" parent="Stage"]
+position = Vector2(960, 540)

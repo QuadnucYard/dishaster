@@ -8,10 +8,10 @@ use crate::{EntityId, asset::PrefabReference, prelude::*, utils::Modified};
 // ===
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(default)]
 pub struct DisplayModel {
     pub res: PrefabReference,
 
+    #[serde(default)]
     pub scale: f32,
 }
 

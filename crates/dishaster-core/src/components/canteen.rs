@@ -7,6 +7,8 @@ pub struct Window {
     pub service_template: ModelHandle<WindowServiceModel>,
     /// Player configuration
     pub config: WindowConfiguration,
+    /// Position in the canteen (should correspond to canteen layout)
+    pub position: XRange,
 }
 
 /// Active dishes in a window - separate component for better data locality

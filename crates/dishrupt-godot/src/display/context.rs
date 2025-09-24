@@ -5,6 +5,7 @@ use dishrupt_core::prelude::*;
 /// The context for translation vectors between simulation space and display space.
 #[derive(Resource, Clone)]
 pub struct DisplayContext2D {
+    /// Scale factors for each axis from simulation space to display space.
     pub view_scale: Vec3,
 }
 

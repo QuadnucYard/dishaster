@@ -2,6 +2,7 @@
 
 use std::path::{Path, PathBuf};
 
+use anyhow::{Context, bail};
 use dishaster_core::resources::GameModelRegistry;
 use dishrupt_core::model_registry::*;
 use thiserror::Error;
@@ -27,10 +28,10 @@ pub struct DataLoader {
 
 impl DataLoader {
     /// Create a new data loader with the specified assets directory
-    pub fn new(assets_path: impl AsRef<Path>) -> Result<Self, DataError> {
+    pub fn new(assets_path: impl AsRef<Path>) -> anyhow::Result<Self> {
         let assets_path = assets_path.as_ref().to_path_buf();
         if !std::fs::exists(&assets_path).is_ok_and(|exists| exists) {
-            return Err(DataError::IoError(std::io::Error::new(
+            bail!(DataError::IoError(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
                 format!("Assets path does not exist: {}", assets_path.display()),
             )));
@@ -39,7 +40,7 @@ impl DataLoader {
     }
 
     /// Load all game data and populate the model registry
-    pub fn load_all_data(&self) -> Result<GameModelRegistry, DataError> {
+    pub fn load_all_data(&self) -> anyhow::Result<GameModelRegistry> {
         let mut registry = GameModelRegistry::default();
 
         // Load each registry type from separate files
@@ -58,12 +59,14 @@ impl DataLoader {
         &self,
         registry: &mut ModelRegistry<T>,
         filename: &str,
-    ) -> Result<(), DataError>
+    ) -> anyhow::Result<()>
     where
         T: serde::de::DeserializeOwned + HasId,
     {
         let path = self.assets_path.join(filename);
-        let models: Vec<T> = self.load_ron_file(&path)?;
+        let models: Vec<T> = self
+            .load_ron_file(&path)
+            .with_context(|| format!("Loading {filename}"))?;
         for model in models {
             registry.intern(model.id().clone(), model);
         }
@@ -74,9 +77,11 @@ impl DataLoader {
     where
         T: serde::de::DeserializeOwned,
     {
+        use ron::extensions::Extensions;
+
         let content = std::fs::read_to_string(path)?;
         let options = ron::Options::default()
-            .with_default_extension(ron::extensions::Extensions::UNWRAP_NEWTYPES);
+            .with_default_extension(Extensions::UNWRAP_NEWTYPES | Extensions::IMPLICIT_SOME);
         let data = options.from_str(&content)?;
         Ok(data)
     }

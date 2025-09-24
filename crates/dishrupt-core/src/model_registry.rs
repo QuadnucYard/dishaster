@@ -33,7 +33,7 @@ pub trait HasId {
 /// Provides efficient access to models without storing the data directly.
 /// The generic type parameter ensures compile-time type safety when
 /// accessing model data from registries.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ModelHandle<T>(usize, PhantomData<T>);
 
 impl<T> ModelHandle<T> {
@@ -45,6 +45,8 @@ impl<T> ModelHandle<T> {
         Self(index, PhantomData)
     }
 }
+
+impl<T: Clone> Copy for ModelHandle<T> {}
 
 /// Efficient storage and retrieval system for game object models
 ///
@@ -90,8 +92,13 @@ impl<T> ModelRegistry<T> {
         &self.models[handle.0]
     }
 
+    /// Find a model handle by its string identifier
+    pub fn get_by_id(&self, id: &ModelId) -> Option<&T> {
+        self.name_to_handle.get(id).map(|idx| &self.models[*idx])
+    }
+
     /// Find a model by its string identifier
-    pub fn get_by_id(&self, id: &ModelId) -> Option<ModelHandle<T>> {
+    pub fn get_handle_by_id(&self, id: &ModelId) -> Option<ModelHandle<T>> {
         self.name_to_handle.get(id).copied().map(ModelHandle::new)
     }
 

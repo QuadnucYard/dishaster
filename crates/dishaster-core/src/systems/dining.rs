@@ -6,6 +6,8 @@ pub fn update_diner_states(
     mut movement_query: Query<&mut Movement>,
     mut table_query: Query<(Entity, &mut DiningTable)>,
     window_query: Query<(Entity, &Window)>,
+    db: Res<GameModelRegistryRes>,
+    canteen: Res<Canteen>,
     time: Res<Time>,
     mut rng: ResMut<GameRng>,
 ) {
@@ -41,11 +43,12 @@ pub fn update_diner_states(
                         // Find available window
                         for (window_entity, window) in window_query.iter() {
                             if window.config.is_enabled {
+                                let service = db.window_services.get(window.service_template);
                                 targets.chosen_window = Some(window_entity);
-                                let window_x = (window.config.position.x_min
-                                    + window.config.position.x_max)
-                                    / 2.0;
-                                movement.target_position = Vec2::new(window_x, 20.0);
+                                let queue_x = window.position.x_min
+                                    + *service.layout.queue_x.choose(&mut rng).unwrap();
+                                movement.target_position =
+                                    Vec2::new(queue_x, canteen.model.windows_y);
                                 state.current = DinerStateType::MovingToWindow;
                                 break;
                             }

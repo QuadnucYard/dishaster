@@ -43,10 +43,7 @@ impl Simulation {
         let root_entity = world.spawn(Transform::default()).id();
         world.insert_resource(DisplayRoot(root_entity));
 
-        world.insert_resource(Canteen {
-            model: db.canteens.first().unwrap().clone(),
-        });
-        world.insert_resource(GameModelRegistryRes(db));
+        world.insert_resource(GameModelRegistryRes::new(db));
         world.insert_resource(CollisionGridRes::default());
 
         schedule.add_systems(
@@ -69,6 +66,11 @@ impl Simulation {
     /// the first tick() to properly initialize the simulation state.
     pub fn start(&mut self, level: LevelConfig) {
         self.world.insert_resource(GameRng::new(level.seed));
+
+        let db = self.world.resource::<GameModelRegistryRes>();
+        self.world.insert_resource(Canteen {
+            model: db.canteens.get_by_id(&level.canteen).unwrap().clone(),
+        });
         self.world.insert_resource(DinerProvider {
             model: level.diner_provider.clone(),
         });

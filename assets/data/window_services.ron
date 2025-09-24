@@ -2,19 +2,17 @@
     (
         id: "main_food_window",
         window_type: General,
-        name: "Main Dishes Counter",
+        name: "大伙",
         compatible_dishes: ["steamed_rice", "braised_pork", "mapo_tofu", "kung_pao_chicken"],
         layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
             dish_slots: [
-                (position: (0.5, 0.3), capacity: 80.0),
-                (position: (1.5, 0.3), capacity: 60.0),
-                (position: (2.5, 0.3), capacity: 60.0),
-                (position: (3.5, 0.3), capacity: 50.0),
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
             ],
-            constraints: (
-                max_concurrent_services: 4,
-                supports_weighing: true,
-            ),
         ),
     ),
     (
@@ -23,30 +21,9 @@
         name: "Soup and Beverages",
         compatible_dishes: ["tomato_egg_soup"],
         layout: (
-            dish_slots: [
-                (position: (0.5, 0.3), capacity: 120.0),
-                (position: (1.5, 0.3), capacity: 100.0),
-            ],
-            constraints: (
-                max_concurrent_services: 3,
-                supports_weighing: false,
-            ),
-        ),
-    ),
-    (
-        id: "vegetable_window",
-        window_type: Specialty,
-        name: "Vegetarian Specialties",
-        compatible_dishes: ["green_vegetables", "mapo_tofu"],
-        layout: (
-            dish_slots: [
-                (position: (0.5, 0.3), capacity: 70.0),
-                (position: (1.5, 0.3), capacity: 50.0),
-            ],
-            constraints: (
-                max_concurrent_services: 2,
-                supports_weighing: false,
-            ),
+            size: (width: 2.0, height: 1.0),
+            queue_x: [1.0],
+            dish_slots: [],
         ),
     ),
 ]

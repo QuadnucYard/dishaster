@@ -58,7 +58,7 @@ impl Size {
 /// Used for defining entrance areas, window positions, and other
 /// linear features along the X axis. Provides containment testing
 /// and geometric calculations.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Copy, Deserialize)]
 pub struct XRange {
     /// Minimum X coordinate of the range
     pub x_min: Meters,

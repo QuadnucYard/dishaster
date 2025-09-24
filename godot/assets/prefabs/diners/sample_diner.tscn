@@ -1,20 +1,47 @@
-[gd_scene load_steps=2 format=3 uid="uid://7oexp5olmcpm"]
+[gd_scene load_steps=6 format=3 uid="uid://7oexp5olmcpm"]
 
-[ext_resource type="Texture2D" uid="uid://b8wuejckomh7t" path="res://godot.svg" id="1_7p2rk"]
+[ext_resource type="Texture2D" uid="uid://daph5cjlkk88r" path="res://assets/sprites/emojis/jeans.svg" id="1_kjwk8"]
+[ext_resource type="Texture2D" uid="uid://bcvpmpbp5np22" path="res://assets/sprites/emojis/mans_shoe.svg" id="2_n0mje"]
+[ext_resource type="Texture2D" uid="uid://b4neupvch3ad1" path="res://assets/sprites/emojis/1F91A.svg" id="3_y3akv"]
+[ext_resource type="Texture2D" uid="uid://bml5j77263av8" path="res://assets/sprites/emojis/shirt.svg" id="4_jly6e"]
+[ext_resource type="Texture2D" uid="uid://cyl7vn8jf8ug2" path="res://assets/sprites/emojis/sweat_smile.svg" id="5_ywdyx"]
 
 [node name="SampleDiner" type="Node2D"]
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_7p2rk")
+[node name="Jeans" type="Sprite2D" parent="."]
+position = Vector2(-4.038968e-28, -16.000004)
+scale = Vector2(0.88888896, 0.88888896)
+texture = ExtResource("1_kjwk8")
 
-[node name="Sprite2D2" type="Sprite2D" parent="."]
-position = Vector2(-46, -56)
-rotation = -0.48189238
-scale = Vector2(0.5390625, 0.5390625)
-texture = ExtResource("1_7p2rk")
+[node name="LeftShoe" type="Sprite2D" parent="."]
+position = Vector2(-11.999999, 0)
+rotation = 0.7853982
+scale = Vector2(0.51967824, 0.51967824)
+texture = ExtResource("2_n0mje")
+flip_h = true
 
-[node name="Sprite2D3" type="Sprite2D" parent="."]
-position = Vector2(60, -55.999996)
-rotation = 0.7110483
-scale = Vector2(0.4453125, 0.4453125)
-texture = ExtResource("1_7p2rk")
+[node name="RightShoe" type="Sprite2D" parent="."]
+position = Vector2(12, -1)
+rotation = -0.7853982
+scale = Vector2(0.57296884, 0.57296884)
+texture = ExtResource("2_n0mje")
+
+[node name="LeftHand" type="Sprite2D" parent="."]
+position = Vector2(-26, -50)
+scale = Vector2(0.30555546, 0.30555546)
+texture = ExtResource("3_y3akv")
+
+[node name="RightHand" type="Sprite2D" parent="."]
+position = Vector2(26, -52)
+scale = Vector2(0.36111143, 0.36111143)
+texture = ExtResource("3_y3akv")
+
+[node name="Shirt" type="Sprite2D" parent="."]
+position = Vector2(1, -44)
+scale = Vector2(0.88888896, 0.88888896)
+texture = ExtResource("4_jly6e")
+
+[node name="Face" type="Sprite2D" parent="."]
+position = Vector2(1, -70)
+scale = Vector2(0.45833337, 0.45833337)
+texture = ExtResource("5_ywdyx")

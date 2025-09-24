@@ -8,7 +8,7 @@ use crate::{components::*, models::*, prelude::*, resources::*};
 /// System that spawns all static objects (windows, tables, dispensers, collectors) at level start
 pub fn spawn_static_objects(
     mut commands: Commands,
-    _canteen: Res<Canteen>,
+    canteen: Res<Canteen>,
     level: Res<LevelConfig>,
     registry: Res<GameModelRegistryRes>,
 ) {
@@ -16,7 +16,7 @@ pub fn spawn_static_objects(
     for window_config in &level.window_configurations {
         let service_handle = registry
             .window_services
-            .get_by_id(&window_config.service_template)
+            .get_handle_by_id(&window_config.service_template)
             .expect("Window service not found in registry");
 
         // Create active dishes from configuration
@@ -26,8 +26,8 @@ pub fn spawn_static_objects(
             .map(|assignment| ActiveDish {
                 assignment: assignment.clone(),
                 state: DishRuntimeState {
-                    current_quantity: assignment.initial_quantity,
-                    current_quality: 0.8, // Default quality
+                    current_quantity: 100.0, // TODO
+                    current_quality: 0.8,    // Default quality
                     contamination_level: 0.0,
                     last_restocked: 0.0,
                     service_count: 0,
@@ -40,6 +40,7 @@ pub fn spawn_static_objects(
             .spawn(Window {
                 service_template: service_handle,
                 config: window_config.clone(),
+                position: canteen.model.windows[window_config.slot_index],
             })
             .id();
 
@@ -53,7 +54,7 @@ pub fn spawn_static_objects(
     for table_placement in &level.table_placements {
         let table_handle = registry
             .tables
-            .get_by_id(&table_placement.model)
+            .get_handle_by_id(&table_placement.model)
             .expect("Table model not found in registry");
         commands.spawn(DiningTable {
             model: table_handle,
@@ -72,9 +73,9 @@ pub fn spawn_static_objects(
     ) {
         let dispenser_handle = registry
             .dispensers
-            .get_by_id(&placement.model)
+            .get_handle_by_id(&placement.model)
             .expect("Dispenser model not found in registry");
-        let dispenser_model = registry.dispensers.get(dispenser_handle.clone());
+        let dispenser_model = registry.dispensers.get(dispenser_handle);
 
         commands.spawn(Dispenser {
             model: dispenser_handle,
@@ -108,7 +109,7 @@ pub fn spawn_static_objects(
     for collector_placement in &level.collector_placements {
         let collector_handle = registry
             .collectors
-            .get_by_id(&collector_placement.model)
+            .get_handle_by_id(&collector_placement.model)
             .expect("Dish collector model not found in registry");
         commands.spawn(DishCollector {
             model: collector_handle,
@@ -246,7 +247,7 @@ pub fn spawn_diner_from_provider(
     // Get random entrance position
     let entrance = {
         let entrance_idx = rng.random_range(0..canteen_model.entrances.len());
-        canteen_model.entrances[entrance_idx].clone()
+        canteen_model.entrances[entrance_idx]
     };
 
     let entrance_pos = Vec2::new(

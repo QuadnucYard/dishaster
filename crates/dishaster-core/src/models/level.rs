@@ -10,6 +10,8 @@ pub struct LevelConfig {
     #[serde(default)]
     pub day: u32,
 
+    /// Reference to the canteen model
+    pub canteen: ModelId,
     /// Player-configured window setups
     pub window_configurations: Vec<WindowConfiguration>,
     /// Placement of dining tables

@@ -120,4 +120,11 @@ pub struct GameModelRegistry {
 
 /// Wrapper resource to allow sharing GameModelRegistry via Arc
 #[derive(Resource, Deref, DerefMut)]
-pub struct GameModelRegistryRes(pub Arc<GameModelRegistry>);
+pub struct GameModelRegistryRes(Arc<GameModelRegistry>);
+
+impl GameModelRegistryRes {
+    /// Constructor
+    pub fn new(db: Arc<GameModelRegistry>) -> Self {
+        Self(db)
+    }
+}

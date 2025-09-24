@@ -9,6 +9,7 @@ edition.workspace = true
 dishrupt-core.workspace = true
 dishaster-core.workspace = true
 
+anyhow.workspace = true
 serde.workspace = true
 ron.workspace = true
 thiserror.workspace = true

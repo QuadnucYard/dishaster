@@ -13,7 +13,7 @@ pub struct Stage {
     display_world: World,
     /// Map from display entity to Godot node
     core_to_view: FxHashMap<EntityId, Entity>,
-
+    // persistent_nodes: FxHashMap<EntityId, GdNode2D>,
     display_root: OnceCell<EntityId>,
 
     active: bool,
