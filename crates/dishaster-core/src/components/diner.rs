@@ -40,6 +40,28 @@ pub struct DinerTargets {
     pub chosen_table: Option<Entity>,
 }
 
+/// Marker component while a diner participates in a queue at a window
+#[derive(Component)]
+pub struct QueueParticipant {
+    /// Service window this diner intends to order from
+    pub window: Entity,
+    /// Simulation time when the diner joined the queue (seconds)
+    pub joined_at: f64,
+    /// Current zero-based index within the queue ordering
+    pub slot_index: usize,
+}
+
+impl QueueParticipant {
+    /// Create a new queue participant entry at the moment a diner joins the queue
+    pub fn new(window: Entity, joined_at: f64) -> Self {
+        Self {
+            window,
+            joined_at,
+            slot_index: 0,
+        }
+    }
+}
+
 /// Persistent memory component for diner data across days
 #[derive(Component, Debug, Clone, Serialize, Deserialize)]
 pub struct DinerMemory {
@@ -66,6 +88,10 @@ pub enum DinerStateType {
     MovingToWindow,
     /// Arrived at the window. Currently transitions directly to leaving.
     AtWindow,
+    /// Standing in the queue and waiting to reach the counter.
+    Queueing,
+    /// Currently being served at the counter.
+    BeingServed,
     /// Leaving the canteen.
     Leaving,
 }

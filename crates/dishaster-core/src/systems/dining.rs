@@ -1,14 +1,18 @@
+use bevy_math::IVec2;
 use dishaster_navigation::{PathRequest, find_path};
 
 use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 
 /// Main diner behavior system - dispatches to state-specific handlers.
 pub fn update_diner_states(
+    mut commands: Commands,
     mut diner_query: Query<(
+        Entity,
         &mut DinerState,
         &mut DinerTargets,
         &DinerModel,
         &mut Movement,
+        Option<&QueueParticipant>,
     )>,
     window_query: Query<(Entity, &Window)>,
     canteen: Res<Canteen>,
@@ -16,7 +20,9 @@ pub fn update_diner_states(
     mut rng: ResMut<GameRng>,
     collision_grid: Res<CollisionGridRes>,
 ) {
-    for (mut state, mut targets, diner_model, mut movement) in diner_query.iter_mut() {
+    for (entity, mut state, mut targets, diner_model, mut movement, queue_participant) in
+        diner_query.iter_mut()
+    {
         // Update state timer using tick duration
         state.state_timer += time.tick_duration as f32;
 
@@ -43,18 +49,37 @@ pub fn update_diner_states(
                 &window_query,
                 &canteen,
                 &collision_grid,
+                queue_participant,
             ),
-            DinerStateType::AtWindow => {
-                // Per instructions, transition directly to leaving for now.
-                DinerStateType::Leaving
-            }
+            DinerStateType::AtWindow => DinerStateType::Queueing,
+            DinerStateType::Queueing => handle_queueing(&mut state, &movement, queue_participant),
+            DinerStateType::BeingServed => handle_being_served(&mut state),
             DinerStateType::Leaving => {
                 handle_leaving(&mut movement, &canteen, &collision_grid);
-                DinerStateType::Leaving // Remain in leaving state
+                DinerStateType::Leaving
             }
         };
 
         if next_state != state.current {
+            if next_state == DinerStateType::MovingToWindow
+                && state.current != DinerStateType::MovingToWindow
+                && let Some(window) = targets.chosen_window
+            {
+                commands
+                    .entity(entity)
+                    .insert(QueueParticipant::new(window, time.current_time));
+            }
+
+            if !matches!(
+                next_state,
+                DinerStateType::MovingToWindow
+                    | DinerStateType::Queueing
+                    | DinerStateType::BeingServed
+            ) && queue_participant.is_some()
+            {
+                commands.entity(entity).remove::<QueueParticipant>();
+            }
+
             state.current = next_state;
             state.state_timer = 0.0;
         }
@@ -65,16 +90,13 @@ pub fn update_diner_states(
 /// Sets their initial position and transitions them to observing.
 fn handle_entering(
     movement: &mut Movement,
-    _canteen: &Canteen,
+    canteen: &Canteen,
     collision_grid: &CollisionGridRes,
     rng: &mut GameRng,
 ) -> DinerStateType {
     // Spawn already sets pos; here we ensure the first wander target is reasonable.
     let spot = find_valid_spot_near(movement.pos, WANDER_RADIUS, collision_grid, rng);
-    movement.target_pos = Vec2::new(
-        spot.x.clamp(0.0, _canteen.model.width),
-        spot.y.clamp(0.0, _canteen.model.height),
-    );
+    movement.target_pos = clamp_to_canteen_with_margin(spot, canteen);
     log::trace!(
         target: "nav",
         "entering: pos=({:.2},{:.2}) first_target=({:.2},{:.2})",
@@ -88,11 +110,12 @@ fn handle_entering(
         start: movement.pos,
         end: movement.target_pos,
         grid: collision_grid,
-        world_width: _canteen.model.width,
-        world_height: _canteen.model.height,
+        world_width: canteen.model.width,
+        world_height: canteen.model.height,
         crowd: None,
     }) {
         movement.path = path;
+        movement.ignoring_collisions = false;
         log::trace!(target: "nav", "entering: path_len={}", movement.path.len());
     } else {
         log::debug!(target: "nav", "entering: no path");
@@ -133,10 +156,7 @@ fn handle_observing(
         let observation_spot =
             find_valid_spot_near(observation_center, WANDER_RADIUS, collision_grid, rng);
         // Clamp to bounds just in case
-        movement.target_pos = Vec2::new(
-            observation_spot.x.clamp(0.0, canteen.model.width),
-            observation_spot.y.clamp(0.0, canteen.model.height),
-        );
+        movement.target_pos = clamp_to_canteen_with_margin(observation_spot, canteen);
         log::trace!(
             target: "nav",
             "observing: window={:?} target=({:.2},{:.2})",
@@ -154,6 +174,7 @@ fn handle_observing(
             crowd: None,
         }) {
             movement.path = path;
+            movement.ignoring_collisions = false;
             log::trace!(target: "nav", "observing: path_len={}", movement.path.len());
         } else {
             log::debug!(target: "nav", "observing: no path");
@@ -212,6 +233,7 @@ fn handle_moving_to_window(
     window_query: &Query<(Entity, &Window)>,
     canteen: &Canteen,
     collision_grid: &CollisionGridRes,
+    queue_participant: Option<&QueueParticipant>,
 ) -> DinerStateType {
     let Some(window_entity) = targets.chosen_window else {
         // Should not happen, but as a fallback, go observe.
@@ -224,46 +246,69 @@ fn handle_moving_to_window(
         return DinerStateType::Observing;
     };
 
-    // Approach the counter directly (ignore queue in this phase).
-    let approach_spot = Vec2::new(
-        window.position.center(),
-        canteen.model.windows_y + WINDOW_APPROACH_OFFSET,
-    );
-    if movement.target_pos != approach_spot {
-        movement.target_pos = Vec2::new(
-            approach_spot.x.clamp(0.0, canteen.model.width),
-            approach_spot.y.clamp(0.0, canteen.model.height),
+    // Queue management system assigns the actual queue slot target.
+    if queue_participant.is_none() {
+        // Fallback: attempt to move near window center to avoid getting stuck.
+        let fallback = Vec2::new(
+            window.position.center(),
+            (canteen.model.windows_y - WINDOW_APPROACH_OFFSET).clamp(0.0, canteen.model.height),
         );
-        log::trace!(
-            target: "nav",
-            "move_to_window: target=({:.2},{:.2})",
-            movement.target_pos.x,
-            movement.target_pos.y
-        );
-
-        // Use pathfinding for movement
-        if let Some(path) = find_path(PathRequest {
-            start: movement.pos,
-            end: movement.target_pos,
-            grid: collision_grid,
-            world_width: canteen.model.width,
-            world_height: canteen.model.height,
-            crowd: None,
-        }) {
-            movement.path = path;
-            log::trace!(target: "nav", "move_to_window: path_len={}", movement.path.len());
-        } else {
-            log::debug!(target: "nav", "move_to_window: no path");
+        if movement.target_pos.distance_squared(fallback) > 0.05 || movement.path.is_empty() {
+            if let Some(plan) =
+                compute_path_with_fallback(movement.pos, fallback, canteen, collision_grid)
+            {
+                movement.target_pos = plan.goal;
+                movement.path = plan.path;
+                movement.ignoring_collisions = false;
+            } else {
+                movement.target_pos = fallback;
+                movement.path = direct_path_fallback(movement.pos, fallback);
+                movement.ignoring_collisions = true;
+            }
         }
+        return DinerStateType::MovingToWindow;
     }
 
-    // If close enough, transition to the next state (simplified for now).
     if movement.pos.distance(movement.target_pos) < QUEUE_ARRIVAL_EPS {
-        log::info!(target: "diner", "arrived_at_window: pos=({:.2},{:.2})", movement.pos.x, movement.pos.y);
-        return DinerStateType::AtWindow;
+        log::trace!(
+            target: "diner",
+            "joined_queue: window={:?} pos=({:.2},{:.2})",
+            window_entity,
+            movement.pos.x,
+            movement.pos.y
+        );
+        return DinerStateType::Queueing;
     }
 
     DinerStateType::MovingToWindow
+}
+
+/// Handles diners waiting in the queue until they reach the counter.
+fn handle_queueing(
+    _state: &mut DinerState,
+    movement: &Movement,
+    queue_participant: Option<&QueueParticipant>,
+) -> DinerStateType {
+    if let Some(queue) = queue_participant
+        && queue.slot_index == 0
+        && movement.pos.distance(movement.target_pos) < QUEUE_ARRIVAL_EPS
+    {
+        log::trace!(target: "diner", "queue_front_reached");
+        return DinerStateType::BeingServed;
+    }
+
+    // Remain in queue and keep accumulating wait time.
+    DinerStateType::Queueing
+}
+
+/// Handles placeholder service timing once the diner reaches the counter.
+fn handle_being_served(state: &mut DinerState) -> DinerStateType {
+    if state.state_timer >= PLACEHOLDER_SERVICE_TIME_S {
+        log::info!(target: "diner", "service_complete");
+        DinerStateType::Leaving
+    } else {
+        DinerStateType::BeingServed
+    }
 }
 
 /// Handles the diner leaving the canteen.
@@ -284,19 +329,20 @@ fn handle_leaving(movement: &mut Movement, canteen: &Canteen, collision_grid: &C
     if let Some(exit_point) = best_point
         && movement.target_pos.distance(exit_point) > EXIT_ARRIVAL_EPS
     {
-        movement.target_pos = Vec2::new(
+        let exit_target = Vec2::new(
             exit_point.x.clamp(0.0, canteen.model.width),
             exit_point.y.clamp(0.0, canteen.model.height),
         );
-        if let Some(path) = find_path(PathRequest {
-            start: movement.pos,
-            end: movement.target_pos,
-            grid: collision_grid,
-            world_width: canteen.model.width,
-            world_height: canteen.model.height,
-            crowd: None,
-        }) {
-            movement.path = path;
+        if let Some(plan) =
+            compute_path_with_fallback(movement.pos, exit_target, canteen, collision_grid)
+        {
+            movement.target_pos = plan.goal;
+            movement.path = plan.path;
+            movement.ignoring_collisions = false;
+        } else {
+            movement.target_pos = exit_target;
+            movement.path = direct_path_fallback(movement.pos, exit_target);
+            movement.ignoring_collisions = true;
         }
     }
 }
@@ -321,6 +367,114 @@ fn find_valid_spot_near(
         return point;
     }
     center // Fallback
+}
+
+/// Clamp a point to stay within the canteen bounds while keeping a soft margin from the walls.
+///
+/// This helper is intended for free-roaming targets (entering/observing). It must not be used
+/// when queueing or interacting with service windows, where agents should hug the counters.
+fn clamp_to_canteen_with_margin(point: Vec2, canteen: &Canteen) -> Vec2 {
+    let margin = DINING_AREA_MARGIN;
+    let width = canteen.model.width;
+    let height = canteen.model.height;
+
+    let (min_x, max_x) = if width <= margin * 2.0 {
+        (0.0, width)
+    } else {
+        (margin, width - margin)
+    };
+    let (min_y, max_y) = if height <= margin * 2.0 {
+        (0.0, height)
+    } else {
+        (margin, height - margin)
+    };
+
+    Vec2::new(point.x.clamp(min_x, max_x), point.y.clamp(min_y, max_y))
+}
+
+struct PathPlan {
+    path: Vec<Vec2>,
+    goal: Vec2,
+}
+
+fn compute_path_with_fallback(
+    start: Vec2,
+    target: Vec2,
+    canteen: &Canteen,
+    collision_grid: &CollisionGridRes,
+) -> Option<PathPlan> {
+    if let Some(path) = find_path(PathRequest {
+        start,
+        end: target,
+        grid: collision_grid,
+        world_width: canteen.model.width,
+        world_height: canteen.model.height,
+        crowd: None,
+    }) {
+        return Some(PathPlan { path, goal: target });
+    }
+
+    if let Some(open_point) = nearest_open_point(target, canteen, collision_grid, 6)
+        && let Some(path) = find_path(PathRequest {
+            start,
+            end: open_point,
+            grid: collision_grid,
+            world_width: canteen.model.width,
+            world_height: canteen.model.height,
+            crowd: None,
+        })
+    {
+        return Some(PathPlan {
+            path,
+            goal: open_point,
+        });
+    }
+
+    None
+}
+
+fn nearest_open_point(
+    target: Vec2,
+    canteen: &Canteen,
+    collision_grid: &CollisionGridRes,
+    max_radius: i32,
+) -> Option<Vec2> {
+    let target_tile = collision_grid.world_to_grid(target);
+    if !collision_grid.is_occupied(target_tile) {
+        return Some(target);
+    }
+
+    for radius in 1..=max_radius {
+        for dx in -radius..=radius {
+            for dy in -radius..=radius {
+                if dx.abs_diff(radius) != 0 && dy.abs_diff(radius) != 0 {
+                    continue;
+                }
+                let tile = target_tile + IVec2::new(dx, dy);
+                let world = collision_grid.tile_to_world(tile);
+                if world.x < 0.0
+                    || world.x > canteen.model.width
+                    || world.y < 0.0
+                    || world.y > canteen.model.height
+                {
+                    continue;
+                }
+                if !collision_grid.is_occupied(tile) {
+                    return Some(world);
+                }
+            }
+        }
+    }
+
+    None
+}
+
+fn direct_path_fallback(start: Vec2, target: Vec2) -> Vec<Vec2> {
+    if start.distance_squared(target) < f32::EPSILON {
+        Vec::new()
+    } else {
+        vec![target]
+    }
 }
 
 /// System to clean up diners who have left.

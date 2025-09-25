@@ -6,12 +6,13 @@ use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 /// System to update the global collision grid
 pub fn update_collision_grid(
     mut collision_grid: ResMut<CollisionGridRes>,
-    query: Query<(Entity, &BoxCollider)>,
+    query: Query<(Entity, &BoxCollider, Option<&Movement>)>,
 ) {
     collision_grid.update(
         query
             .iter()
-            .map(|(e, c)| (CollisionEntity(e.to_bits()), &**c)),
+            .filter(|(_, _, movement)| movement.map(|m| !m.ignoring_collisions).unwrap_or(true))
+            .map(|(e, c, _)| (CollisionEntity(e.to_bits()), &**c)),
     );
 }
 

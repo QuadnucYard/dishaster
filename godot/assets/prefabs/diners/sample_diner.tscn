@@ -1,12 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://7oexp5olmcpm"]
+[gd_scene load_steps=7 format=3 uid="uid://7oexp5olmcpm"]
 
 [ext_resource type="Texture2D" uid="uid://daph5cjlkk88r" path="res://assets/sprites/emojis/jeans.svg" id="1_kjwk8"]
+[ext_resource type="Script" uid="uid://c2fdqeq26wma6" path="res://assets/prefabs/diners/sample_diner.gd" id="1_n0mje"]
 [ext_resource type="Texture2D" uid="uid://bcvpmpbp5np22" path="res://assets/sprites/emojis/mans_shoe.svg" id="2_n0mje"]
 [ext_resource type="Texture2D" uid="uid://b4neupvch3ad1" path="res://assets/sprites/emojis/1F91A.svg" id="3_y3akv"]
 [ext_resource type="Texture2D" uid="uid://bml5j77263av8" path="res://assets/sprites/emojis/shirt.svg" id="4_jly6e"]
 [ext_resource type="Texture2D" uid="uid://cyl7vn8jf8ug2" path="res://assets/sprites/emojis/sweat_smile.svg" id="5_ywdyx"]
 
 [node name="SampleDiner" type="Node2D"]
+script = ExtResource("1_n0mje")
 
 [node name="Jeans" type="Sprite2D" parent="."]
 position = Vector2(-4.038968e-28, -16.000004)

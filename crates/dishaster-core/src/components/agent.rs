@@ -15,4 +15,6 @@ pub struct Movement {
     pub path: Vec<Vec2>,
     /// Position in the previous tick, used for interpolation.
     pub last_pos: Vec2,
+    /// When true, this agent should be ignored by collision avoidance while it finds a fallback path.
+    pub ignoring_collisions: bool,
 }

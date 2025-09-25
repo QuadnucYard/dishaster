@@ -49,19 +49,21 @@ impl Simulation {
 
         schedule.add_systems(
             (
-                // 1) Keep grid current for pathfinding and validation (uses last tick's positions)
+                // Keep grid current for pathfinding and validation (uses last tick's positions)
                 update_collision_grid,
-                // 1.5) Recompute soft crowd costs for pathfinding
+                // Recompute soft crowd costs for pathfinding
                 update_crowd_field,
-                // 2) Spawn logic may add diners
+                // Spawn logic may add diners
                 update_diner_spawner,
-                // 3) Agents decide targets and compute paths
+                // Agents decide targets and compute paths
                 update_diner_states,
-                // 4) Move agents along paths
+                // Update queue ordering and slot targets before movement
+                update_window_queues,
+                // Move agents along paths
                 update_agent_movement,
-                // 4.5) Sync visuals to movement positions
+                // Sync visuals to movement positions
                 sync_transform_with_movement,
-                // 5) Despawn agents who reached exits and update counts
+                // Despawn agents who reached exits and update counts
                 despawn_leaving_diners,
                 check_day_completion,
             )

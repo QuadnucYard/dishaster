@@ -21,6 +21,23 @@
                 ],
             ),
             (
+                slot_index: 3,
+                service_template: "main_food_window",
+                is_enabled: true,
+                dish_assignments: [
+                    (
+                        slot_index: 0,
+                        dish_id: "steamed_rice",
+                        pricing: (method: PerPortion(1.0)),
+                    ),
+                    (
+                        slot_index: 1,
+                        dish_id: "steamed_rice",
+                        pricing: (method: PerPortion(2.0)),
+                    ),
+                ],
+            ),
+            (
                 slot_index: 6,
                 service_template: "main_food_window",
                 is_enabled: true,
@@ -36,7 +53,7 @@
                         pricing: (method: PerPortion(2.0)),
                     ),
                 ],
-            )
+            ),
         ],
         table_placements: [],
         tray_dispenser_placements: [],

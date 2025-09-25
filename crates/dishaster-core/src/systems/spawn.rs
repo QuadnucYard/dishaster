@@ -268,6 +268,7 @@ fn spawn_diner(
                 velocity: Vec2::ZERO,
                 path: Vec::new(),
                 last_pos: pos,
+                ignoring_collisions: false,
             },
         },
         BoxCollider(dishaster_navigation::BoxCollider {

@@ -12,6 +12,9 @@ pub const OBSERVATION_ARRIVAL_EPS: Meters = 1.5;
 /// How close counts as "arrived" when queuing at a window (meters)
 pub const QUEUE_ARRIVAL_EPS: Meters = 0.6;
 
+/// Spacing between customers standing in the same queue (meters)
+pub const QUEUE_SPACING: Meters = 0.5;
+
 /// Radius used when picking a wander/observation target (meters)
 pub const WANDER_RADIUS: Meters = 6.0;
 
@@ -33,6 +36,12 @@ pub const PATH_WAYPOINT_EPS: Meters = 0.3;
 
 /// Default per-diner initial satisfaction [0,1]
 pub const DEFAULT_DINER_SATISFACTION: f32 = 0.5;
+
+/// Placeholder service duration at the window (seconds)
+pub const PLACEHOLDER_SERVICE_TIME_S: f32 = 10.0;
+
+/// Soft margin from canteen walls for free roaming movement (meters)
+pub const DINING_AREA_MARGIN: Meters = 1.0;
 
 /// Default runtime dish values
 pub const DEFAULT_DISH_QUANTITY: f32 = 100.0;
