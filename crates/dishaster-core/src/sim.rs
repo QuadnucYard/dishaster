@@ -48,9 +48,18 @@ impl Simulation {
 
         schedule.add_systems(
             (
+                // 1) Keep grid current for pathfinding and validation (uses last tick's positions)
                 update_collision_grid,
+                // 2) Spawn logic may add diners
                 update_diner_spawner,
+                // 3) Agents decide targets and compute paths
                 update_diner_states,
+                // 4) Move agents along paths
+                update_agent_movement,
+                // 4.5) Sync visuals to movement positions
+                sync_transform_with_movement,
+                // 5) Despawn agents who reached exits and update counts
+                despawn_leaving_diners,
                 check_day_completion,
             )
                 .chain(),
@@ -79,6 +88,7 @@ impl Simulation {
         self.world.insert_resource(DinerSpawner {
             model: level.diner_spawner.clone(),
             next_spawn_timer: 0.0,
+            next_diner_id: 0,
             spawning_finished: false,
         });
         self.world.insert_resource(DayStatus::default());
@@ -132,13 +142,10 @@ impl Simulation {
 
     /// Check if the current day is complete (spawning finished and all diners left)
     pub fn is_day_complete(&self) -> bool {
-        if let (Some(day_status), Some(spawner)) = (
-            self.world.get_resource::<DayStatus>(),
-            self.world.get_resource::<DinerSpawner>(),
-        ) {
-            day_status.current_diner_count == 0 && spawner.spawning_finished
-        } else {
-            false
-        }
+        let (day_status, spawner) = (
+            self.world.resource::<DayStatus>(),
+            self.world.resource::<DinerSpawner>(),
+        );
+        day_status.current_diner_count == 0 && spawner.spawning_finished
     }
 }

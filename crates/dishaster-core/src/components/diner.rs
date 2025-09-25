@@ -1,17 +1,24 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{models::*, prelude::*};
+use crate::{components::Movement, prelude::*};
 
-/// Core diner identity - links to static configuration
+#[allow(missing_docs)]
+#[derive(Bundle)]
+pub struct DinerBundle {
+    pub diner: Diner,
+    pub state: DinerState,
+    pub targets: DinerTargets,
+    pub movement: Movement,
+}
+
+/// Core diner identity
 #[derive(Component)]
 pub struct Diner {
-    /// Reference to diner's static configuration
-    pub archetype: ModelHandle<DinerModel>,
-    /// Unique identifier for this diner instance
+    /// Unique identifier for this diner instance. Useless yet.
     pub id: u32,
 }
 
-/// Runtime diner state - only mutable data
+/// Runtime diner state
 #[derive(Component)]
 pub struct DinerState {
     /// Current state in the state machine
@@ -23,8 +30,10 @@ pub struct DinerState {
 }
 
 /// Diner's current targets and decisions
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct DinerTargets {
+    /// Window the diner is currently observing
+    pub observing_window: Option<Entity>,
     /// Currently chosen window entity
     pub chosen_window: Option<Entity>,
     /// Currently chosen table entity
@@ -45,26 +54,18 @@ pub struct DinerMemory {
 }
 
 /// State machine for diner behavior
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DinerStateType {
-    /// Entering the canteen, moving to observation point
+    /// Entering the canteen and moving to an observation area.
     Entering,
-    /// Observing windows to make decisions
+    /// Wandering to observe different windows before making a choice.
     Observing,
-    /// Making decision about which window to choose
+    /// Pausing to decide on a window after observation.
     Deciding,
-    /// Moving towards chosen window
+    /// Moving towards the chosen window.
     MovingToWindow,
-    /// Being served at the window
-    BeingServed,
-    /// Looking for an available table
-    LookingForTable,
-    /// Moving towards chosen table
-    MovingToTable,
-    /// Eating at the table
-    EatingAtTable,
-    /// Returning plate to return area
-    ReturningPlate,
-    /// Leaving the canteen
+    /// Arrived at the window. Currently transitions directly to leaving.
+    AtWindow,
+    /// Leaving the canteen.
     Leaving,
 }

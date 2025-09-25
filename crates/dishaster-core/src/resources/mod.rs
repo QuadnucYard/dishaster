@@ -73,6 +73,8 @@ pub struct DinerSpawner {
     pub model: DinerSpawnerModel,
     /// Countdown timer until next diner spawn (in seconds)
     pub next_spawn_timer: f64,
+    /// Unique ID for the next diner to be spawned
+    pub next_diner_id: u32,
     /// Whether the spawning period has ended for the current day
     pub spawning_finished: bool,
 }

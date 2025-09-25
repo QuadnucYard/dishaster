@@ -35,6 +35,7 @@ pub struct DishCharacteristics {
 }
 
 /// Extensible properties container - easy to add new fields
+/// TODO: this needs rework for new models. do not use it if not suitable.
 #[derive(Debug, Clone, Deserialize)]
 pub struct DishProperties {
     /// Optional tags for future preference matching

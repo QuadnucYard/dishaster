@@ -15,8 +15,10 @@ dishaster-data.workspace = true
 dishaster-godot-ui.workspace = true
 
 as-any.workspace = true
+env_logger.workspace = true
 fibre.workspace = true
 godot.workspace = true
+log.workspace = true
 
 [lints]
 # workspace = true

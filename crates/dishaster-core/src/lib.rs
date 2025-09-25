@@ -1,6 +1,7 @@
 //! Dishaster core logic and data structures
 
 pub mod components;
+pub mod constants;
 pub mod models;
 pub mod resources;
 pub mod sim;

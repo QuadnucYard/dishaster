@@ -19,6 +19,23 @@
                         pricing: (method: PerPortion(2.0)),
                     ),
                 ],
+            ),
+            (
+                slot_index: 6,
+                service_template: "main_food_window",
+                is_enabled: true,
+                dish_assignments: [
+                    (
+                        slot_index: 0,
+                        dish_id: "steamed_rice",
+                        pricing: (method: PerPortion(1.0)),
+                    ),
+                    (
+                        slot_index: 1,
+                        dish_id: "steamed_rice",
+                        pricing: (method: PerPortion(2.0)),
+                    ),
+                ],
             )
         ],
         table_placements: [],
@@ -51,7 +68,7 @@
         ),
         diner_spawner: (
             run_length: 3600.0,
-            spawn_interval: (1.0, 2.0),
+            spawn_interval: (2.0, 5.0),
         ),
         seed: 42,
     )

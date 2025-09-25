@@ -7,7 +7,7 @@ use rustc_hash::FxHashMap;
 
 use crate::{components::BoxCollider, prelude::*};
 
-/// Default spatial hash grid cell size in world units (meters)
+/// Default spatial hash grid cell size in world units
 ///
 /// Chosen to balance memory usage vs collision detection performance.
 /// Larger cells reduce memory but may increase collision checks per cell.
@@ -64,23 +64,27 @@ impl CollisionGrid {
         cells
     }
 
+    /// Check if a specific grid cell is occupied by any entity
+    pub fn is_occupied(&self, coord: IVec2) -> bool {
+        self.cells.contains_key(&coord)
+    }
+
     /// Test if an entity can be placed at a position without colliding
     pub fn is_position_valid(&self, entity: Entity, center: Vec2, size: Vec2) -> bool {
         let test_collider = BoxCollider { center, size };
 
         // Check all cells this object would occupy
         for cell_coord in self.get_occupied_cells(center, size) {
-            if let Some(entities) = self.cells.get(&cell_coord) {
-                for &other_entity in entities {
-                    if other_entity == entity {
-                        continue; // Skip self
-                    }
-                    if let Some(other_collider) = self.colliders.get(&other_entity)
-                        && test_collider
-                            .extent()
-                            .intersect(other_collider.extent())
-                            .is_empty()
-                    {
+            let Some(entities) = self.cells.get(&cell_coord) else {
+                continue;
+            };
+            for &other_entity in entities {
+                if other_entity == entity {
+                    continue; // Skip self
+                }
+                if let Some(other_collider) = self.colliders.get(&other_entity) {
+                    let overlap = test_collider.extent().intersect(other_collider.extent());
+                    if !overlap.is_empty() {
                         return false;
                     }
                 }
@@ -101,19 +105,45 @@ impl CollisionGrid {
         for dx in -cell_radius..=cell_radius {
             for dy in -cell_radius..=cell_radius {
                 let cell_coord = center_cell + IVec2::new(dx, dy);
-                if let Some(entities) = self.cells.get(&cell_coord) {
-                    for &entity in entities {
-                        if let Some(collider) = self.colliders.get(&entity) {
-                            let distance_squared = center.distance_squared(collider.center);
-                            if distance_squared <= radius_squared {
-                                nearby.push(entity);
-                            }
+                let Some(entities) = self.cells.get(&cell_coord) else {
+                    continue;
+                };
+                for &entity in entities {
+                    if let Some(collider) = self.colliders.get(&entity) {
+                        let distance_squared = center.distance_squared(collider.center);
+                        if distance_squared <= radius_squared {
+                            nearby.push(entity);
                         }
                     }
                 }
             }
         }
         nearby
+    }
+
+    /// Get walkable neighboring grid cells for pathfinding
+    pub fn get_neighbors(&self, pos: IVec2) -> Vec<(IVec2, i32)> {
+        let mut neighbors = Vec::new();
+        for dx in -1..=1 {
+            for dy in -1..=1 {
+                if dx == 0 && dy == 0 {
+                    continue;
+                }
+                let neighbor_pos = pos + IVec2::new(dx, dy);
+                if !self.is_occupied(neighbor_pos) {
+                    neighbors.push((neighbor_pos, 1));
+                }
+            }
+        }
+        neighbors
+    }
+
+    /// Convert grid cell coordinates back to world position (cell center)
+    pub fn tile_to_world(&self, tile_pos: IVec2) -> Vec2 {
+        Vec2::new(
+            tile_pos.x as f32 * self.cell_size + self.cell_size / 2.0,
+            tile_pos.y as f32 * self.cell_size + self.cell_size / 2.0,
+        )
     }
 
     /// Rebuild the spatial grid from current collider positions

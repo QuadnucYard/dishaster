@@ -37,6 +37,10 @@ struct Inner {
 impl INode for GameMain {
     /// The game entry.
     fn ready(&mut self) {
+        env_logger::Builder::new()
+            .filter_level(log::LevelFilter::Debug)
+            .init();
+
         godot_print!("Main loop initialize");
 
         init_game();
