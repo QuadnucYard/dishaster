@@ -117,27 +117,29 @@ impl Stage {
 
         // process parent-setting
         for (child, parent) in reparents {
-            if let Some(child_entity) = self.core_to_view.get(&child) {
-                // reparent
-                if let Some(parent_entity) = self.core_to_view.get(&parent) {
-                    let mut child_node = self
-                        .display_world
-                        .get_mut::<GodotDisplayNode2D>(*child_entity)
-                        .unwrap()
-                        .node
-                        .clone();
-                    let mut parent_node = self
-                        .display_world
-                        .get_mut::<GodotDisplayNode2D>(*parent_entity)
-                        .unwrap()
-                        .node
-                        .clone();
-                    if child_node.get_parent().is_some() {
-                        child_node.reparent(&parent_node);
-                    } else {
-                        parent_node.add_child(&child_node);
-                    }
-                }
+            let (Some(child_entity), Some(parent_entity)) = (
+                self.core_to_view.get(&child),
+                self.core_to_view.get(&parent),
+            ) else {
+                continue;
+            };
+
+            let mut child_node = self
+                .display_world
+                .get_mut::<GodotDisplayNode2D>(*child_entity)
+                .unwrap()
+                .node
+                .clone();
+            let mut parent_node = self
+                .display_world
+                .get_mut::<GodotDisplayNode2D>(*parent_entity)
+                .unwrap()
+                .node
+                .clone();
+            if child_node.get_parent().is_some() {
+                child_node.reparent(&parent_node);
+            } else {
+                parent_node.add_child(&child_node);
             }
         }
     }

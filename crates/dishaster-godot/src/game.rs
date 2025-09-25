@@ -31,16 +31,21 @@ impl Game {
 
         let sim_runner = SyncSimulationRunner::new(sim);
 
+        let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
+        let map_scene = load_prefab_sync(map_prefab).instantiate().unwrap();
+        stage_root.add_child(&map_scene);
+
         let mut stage = Stage::new();
-        let display_root_node = gd.get_node_as::<Node2D>("%DisplayRoot");
+        let mut display_root_node = gd.get_node_as::<Node2D>("%DisplayRoot");
+        display_root_node.set_position(
+            map_scene
+                .get_node_as::<Node2D>("%Origin")
+                .get_global_position(),
+        );
         stage.set_root(root_entity, GdNode2D::new(display_root_node));
         stage.set_display_context(DisplayContext2D {
             view_scale: Vec3::new(60.0, 50.0, 50.0),
         });
-
-        let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
-        let map_scene = load_prefab_sync(map_prefab).instantiate().unwrap();
-        stage_root.add_child(&map_scene);
 
         Self { sim_runner, stage }
     }

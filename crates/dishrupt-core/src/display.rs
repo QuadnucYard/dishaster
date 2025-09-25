@@ -106,6 +106,7 @@ impl Transform {
     }
 }
 
+#[derive(Debug)]
 pub struct TransformSnapshot {
     pub position: Vec3,
     pub scale: Vec3,
@@ -117,6 +118,7 @@ pub struct TransformSnapshot {
 
 // ===
 
+#[derive(Debug)]
 pub struct DisplaySnapshot {
     pub core_id: EntityId,
     pub proto: PrefabReference,
