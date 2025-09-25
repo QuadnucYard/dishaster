@@ -1,9 +1,8 @@
 //! Pathfinding utilities using the `pathfinding` crate.
 
-use pathfinding::prelude::astar;
+use ::pathfinding::prelude::astar;
 
-pub use crate::{components::Movement, prelude::Vec2};
-use crate::{prelude::IVec2, utils::collision::CollisionGrid};
+use crate::{prelude::*, *};
 
 /// A request to find a path between two points.
 pub struct PathRequest<'a> {
@@ -17,6 +16,8 @@ pub struct PathRequest<'a> {
     pub world_width: f32,
     /// Inclusive world bounds height
     pub world_height: f32,
+    /// Optional crowd cost field to bias path away from agents
+    pub crowd: Option<&'a CrowdCostField>,
 }
 
 /// Finds a path from a start to an end point using A*.
@@ -24,16 +25,6 @@ pub struct PathRequest<'a> {
 pub fn find_path(request: PathRequest) -> Option<Vec<Vec2>> {
     let start_tile = request.grid.world_to_grid(request.start);
     let end_tile = request.grid.world_to_grid(request.end);
-    log::trace!(
-        target: "nav",
-        "pathfind: start=({:.2},{:.2}) tile={:?} end=({:.2},{:.2}) tile={:?}",
-        request.start.x,
-        request.start.y,
-        start_tile,
-        request.end.x,
-        request.end.y,
-        end_tile
-    );
 
     // Custom neighbor generator: allow entering the goal tile even if currently occupied.
     // This avoids unbounded search when the end cell is temporarily blocked by another diner.
@@ -65,16 +56,23 @@ pub fn find_path(request: PathRequest) -> Option<Vec<Vec2>> {
 
     let result = astar(
         &start_tile,
-        neighbor_fn,
+        |p| {
+            let neighbors = neighbor_fn(p);
+            neighbors
+                .into_iter()
+                .map(|(n, base)| {
+                    let mut cost = base;
+                    if let Some(field) = request.crowd {
+                        let extra = field.sample(n);
+                        cost += (extra.ceil() as i32).max(0);
+                    }
+                    (n, cost)
+                })
+                .collect::<Vec<_>>()
+        },
         |&p| (p.x - end_tile.x).abs() + (p.y - end_tile.y).abs(),
         |&p| p == end_tile,
     );
-
-    if let Some((ref path, _)) = result {
-        log::trace!(target: "nav", "pathfind: found len={}", path.len());
-    } else {
-        log::trace!(target: "nav", "pathfind: no path");
-    }
 
     result.map(|(path, _cost)| {
         path.into_iter()

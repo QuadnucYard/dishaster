@@ -44,12 +44,15 @@ impl Simulation {
         world.insert_resource(DisplayRoot(root_entity));
 
         world.insert_resource(GameModelRegistryRes::new(db));
-        world.insert_resource(CollisionGridRes::default());
+        world.insert_resource(CollisionGridRes::new(0.1));
+        world.insert_resource(CrowdFieldRes::default());
 
         schedule.add_systems(
             (
                 // 1) Keep grid current for pathfinding and validation (uses last tick's positions)
                 update_collision_grid,
+                // 1.5) Recompute soft crowd costs for pathfinding
+                update_crowd_field,
                 // 2) Spawn logic may add diners
                 update_diner_spawner,
                 // 3) Agents decide targets and compute paths

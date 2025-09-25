@@ -15,6 +15,7 @@ dishrupt-godot = { path = "crates/dishrupt-godot" }
 dishrupt-godot-ui = { path = "crates/dishrupt-godot-ui" }
 dishrupt-godot-scene = { path = "crates/dishrupt-godot-scene" }
 
+dishaster-navigation = { path = "crates/dishaster-navigation" }
 dishaster-core = { path = "crates/dishaster-core" }
 dishaster-data = { path = "crates/dishaster-data" }
 dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }

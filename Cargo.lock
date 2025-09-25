@@ -427,11 +427,11 @@ dependencies = [
  "bevy_ecs",
  "bevy_math",
  "derive_more",
+ "dishaster-navigation",
  "dishrupt-core",
  "ecow",
  "glam 0.29.3",
  "log",
- "pathfinding",
  "rand 0.9.2",
  "rand_chacha 0.9.0",
  "rustc-hash",
@@ -484,6 +484,15 @@ dependencies = [
  "dishrupt-godot-ui",
  "godot",
  "signals2",
+]
+
+[[package]]
+name = "dishaster-navigation"
+version = "0.1.0"
+dependencies = [
+ "bevy_math",
+ "pathfinding",
+ "rustc-hash",
 ]
 
 [[package]]

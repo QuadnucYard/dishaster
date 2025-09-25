@@ -270,10 +270,10 @@ fn spawn_diner(
                 last_pos: pos,
             },
         },
-        BoxCollider {
+        BoxCollider(dishaster_navigation::BoxCollider {
             center: pos,
             size: Vec2::new(DINER_COLLIDER_SIZE, DINER_COLLIDER_SIZE),
-        },
+        }),
         DisplayState {
             proto: model.display.res.clone(),
             ..Default::default()

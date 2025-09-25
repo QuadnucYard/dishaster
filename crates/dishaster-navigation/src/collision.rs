@@ -5,13 +5,27 @@
 
 use rustc_hash::FxHashMap;
 
-use crate::{components::BoxCollider, prelude::*};
+use crate::prelude::*;
 
-/// Default spatial hash grid cell size in world units
-///
-/// Chosen to balance memory usage vs collision detection performance.
-/// Larger cells reduce memory but may increase collision checks per cell.
-const GRID_CELL_SIZE: f32 = 10.0;
+/// Simple entity identifier wrapper
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct CollisionEntity(pub u64);
+
+/// Axis-aligned bounding box collider for spatial collision detection
+#[derive(Debug, Clone, Copy)]
+pub struct BoxCollider {
+    /// Center position of the collider
+    pub center: Vec2,
+    /// Width and height dimensions of the collider
+    pub size: Vec2,
+}
+
+impl BoxCollider {
+    /// Converts the collider to a Bevy Rect for intersection testing
+    pub fn extent(&self) -> Rect {
+        Rect::from_center_size(self.center, self.size)
+    }
+}
 
 /// Spatial hash grid for efficient collision detection and proximity queries
 ///
@@ -21,21 +35,26 @@ const GRID_CELL_SIZE: f32 = 10.0;
 #[derive(Debug)]
 pub struct CollisionGrid {
     /// Spatial hash map storing entity lists per grid cell coordinate
-    cells: FxHashMap<IVec2, Vec<Entity>>,
+    cells: FxHashMap<IVec2, Vec<CollisionEntity>>,
     /// Size of each grid cell in world units
     cell_size: f32,
     /// Cache of all active colliders for direct entity-to-collider lookup
-    colliders: FxHashMap<Entity, BoxCollider>,
+    colliders: FxHashMap<CollisionEntity, BoxCollider>,
 }
 
 impl CollisionGrid {
     /// Create a new collision grid with default cell size
-    pub fn new() -> Self {
+    pub fn new(cell_size: f32) -> Self {
         Self {
             cells: FxHashMap::default(),
-            cell_size: GRID_CELL_SIZE,
+            cell_size,
             colliders: FxHashMap::default(),
         }
+    }
+
+    /// Get the grid cell size in world units
+    pub fn cell_size(&self) -> f32 {
+        self.cell_size
     }
 
     /// Convert world coordinates to grid cell coordinates
@@ -70,7 +89,7 @@ impl CollisionGrid {
     }
 
     /// Test if an entity can be placed at a position without colliding
-    pub fn is_position_valid(&self, entity: Entity, center: Vec2, size: Vec2) -> bool {
+    pub fn is_position_valid(&self, entity: CollisionEntity, center: Vec2, size: Vec2) -> bool {
         let test_collider = BoxCollider { center, size };
 
         // Check all cells this object would occupy
@@ -94,7 +113,7 @@ impl CollisionGrid {
     }
 
     /// Find all entities within a circular radius of a center point
-    pub fn find_nearby_entities(&self, center: Vec2, radius: f32) -> Vec<Entity> {
+    pub fn find_nearby_entities(&self, center: Vec2, radius: f32) -> Vec<CollisionEntity> {
         let mut nearby = Vec::new();
         let radius_squared = radius * radius;
 
@@ -146,18 +165,22 @@ impl CollisionGrid {
         )
     }
 
+    /// Get the collider for a specific entity, if present
+    pub fn collider(&self, entity: CollisionEntity) -> Option<&BoxCollider> {
+        self.colliders.get(&entity)
+    }
+
     /// Rebuild the spatial grid from current collider positions
     ///
     /// This should be called every frame or when entities move to keep
     /// the spatial hash accurate for collision detection.
-    ///
-    pub fn update(&mut self, query: &Query<(Entity, &BoxCollider)>) {
+    pub fn update<'a>(&mut self, query: impl Iterator<Item = (CollisionEntity, &'a BoxCollider)>) {
         // Clear the grid
         self.cells.clear();
         self.colliders.clear();
 
         // Rebuild from current query
-        for (entity, collider) in query.iter() {
+        for (entity, collider) in query {
             // Store collider for quick lookup
             self.colliders.insert(entity, *collider);
 
@@ -166,11 +189,5 @@ impl CollisionGrid {
                 self.cells.entry(cell_coord).or_default().push(entity);
             }
         }
-    }
-}
-
-impl Default for CollisionGrid {
-    fn default() -> Self {
-        Self::new()
     }
 }

@@ -1,0 +1,14 @@
+[package]
+name = "dishaster-navigation"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy_math.workspace = true
+pathfinding.workspace = true
+rustc-hash.workspace = true
+
+[lints]
+workspace = true

@@ -4,12 +4,12 @@ mod time;
 
 use std::sync::Arc;
 
-use derive_more::derive::{Deref, DerefMut};
+use dishaster_navigation::{CollisionGrid, CrowdCostField};
 use dishrupt_core::model_registry::ModelRegistry;
 use rand_chacha::ChaCha8Rng;
 pub use time::Time;
 
-use crate::{models::*, prelude::*, utils::collision::CollisionGrid};
+use crate::{models::*, prelude::*};
 
 /// Root entity for all display-related objects in the scene
 #[derive(Resource)]
@@ -37,8 +37,26 @@ impl GameRng {
 /// Wraps the collision detection system in a Bevy resource for world-wide
 /// access. Used for diner pathfinding, object placement validation,
 /// and spatial queries during simulation.
-#[derive(Resource, Default, Deref, DerefMut)]
+#[derive(Resource, Deref, DerefMut)]
 pub struct CollisionGridRes(CollisionGrid);
+
+impl CollisionGridRes {
+    /// Create a new collision grid resource
+    pub fn new(cell_size: f32) -> Self {
+        Self(CollisionGrid::new(cell_size))
+    }
+}
+
+/// Crowd cost field resource used by pathfinding to soft-avoid nearby diners
+#[derive(Resource, Default, Deref, DerefMut)]
+pub struct CrowdFieldRes(CrowdCostField);
+
+impl CrowdFieldRes {
+    /// Construct a crowd field resource with the given collision grid cell size
+    pub fn new(cell: f32) -> Self {
+        Self(CrowdCostField::new(cell))
+    }
+}
 
 /// Global canteen configuration and layout information
 ///

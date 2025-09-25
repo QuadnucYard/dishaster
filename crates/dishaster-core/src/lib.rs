@@ -6,9 +6,9 @@ pub mod models;
 pub mod resources;
 pub mod sim;
 pub mod systems;
-pub mod utils;
 
 mod prelude {
+    pub use derive_more::derive::{Deref, DerefMut};
     pub use dishrupt_core::{model_registry::*, prelude::*};
     pub use rand::prelude::*;
 }

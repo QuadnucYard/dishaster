@@ -1,11 +1,6 @@
-use crate::{
-    components::*,
-    constants::*,
-    models::*,
-    prelude::*,
-    resources::*,
-    utils::pathfinding::{PathRequest, find_path},
-};
+use dishaster_navigation::{PathRequest, find_path};
+
+use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 
 /// Main diner behavior system - dispatches to state-specific handlers.
 pub fn update_diner_states(
@@ -95,6 +90,7 @@ fn handle_entering(
         grid: collision_grid,
         world_width: _canteen.model.width,
         world_height: _canteen.model.height,
+        crowd: None,
     }) {
         movement.path = path;
         log::trace!(target: "nav", "entering: path_len={}", movement.path.len());
@@ -155,6 +151,7 @@ fn handle_observing(
             grid: collision_grid,
             world_width: canteen.model.width,
             world_height: canteen.model.height,
+            crowd: None,
         }) {
             movement.path = path;
             log::trace!(target: "nav", "observing: path_len={}", movement.path.len());
@@ -251,6 +248,7 @@ fn handle_moving_to_window(
             grid: collision_grid,
             world_width: canteen.model.width,
             world_height: canteen.model.height,
+            crowd: None,
         }) {
             movement.path = path;
             log::trace!(target: "nav", "move_to_window: path_len={}", movement.path.len());
@@ -296,6 +294,7 @@ fn handle_leaving(movement: &mut Movement, canteen: &Canteen, collision_grid: &C
             grid: collision_grid,
             world_width: canteen.model.width,
             world_height: canteen.model.height,
+            crowd: None,
         }) {
             movement.path = path;
         }

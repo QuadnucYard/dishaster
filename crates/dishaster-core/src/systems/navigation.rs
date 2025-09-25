@@ -1,13 +1,55 @@
+use dishaster_navigation::{CollisionEntity, world_to_tile_dist};
 use dishrupt_core::display::Transform;
 
-use crate::{components::*, constants::*, prelude::*, resources::*};
+use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 
 /// System to update the global collision grid
 pub fn update_collision_grid(
     mut collision_grid: ResMut<CollisionGridRes>,
     query: Query<(Entity, &BoxCollider)>,
 ) {
-    collision_grid.update(&query);
+    collision_grid.update(
+        query
+            .iter()
+            .map(|(e, c)| (CollisionEntity(e.to_bits()), &**c)),
+    );
+}
+
+/// Rebuild crowd cost field from current diner positions
+pub fn update_crowd_field(
+    mut field: ResMut<CrowdFieldRes>,
+    diners: Query<(&Movement, &DinerModel)>,
+    grid: Res<CollisionGridRes>,
+) {
+    // Initialize field with current grid cell size
+    field.set_cell_size(grid.cell_size());
+    field.clear();
+
+    // Parameters: influence radius and decay scale based on diner attributes (e.g., patience)
+    for (movement, model) in diners.iter() {
+        let center = movement.pos;
+        let patience = model.attributes.patience.max(0.1);
+        // Larger patience -> prefers more space; increase radius and weight
+        let influence_radius = 2.0 + 4.0 * patience; // meters
+        let max_extra = 5.0 * patience; // peak extra cost at center
+
+        // Compute bounding tiles
+        let tile_radius = world_to_tile_dist(influence_radius, grid.cell_size()).ceil() as i32;
+        let center_tile = grid.world_to_grid(center);
+        for dx in -tile_radius..=tile_radius {
+            for dy in -tile_radius..=tile_radius {
+                let t = center_tile + IVec2::new(dx, dy);
+                let world = grid.tile_to_world(t);
+                let d = center.distance(world);
+                if d <= influence_radius {
+                    // Smooth decay: extra = max_extra * (1 - (d/r)^2)
+                    let r = influence_radius.max(0.001);
+                    let extra = max_extra * (1.0f32 - (d / r).powi(2)).max(0.0f32);
+                    field.add_cost(t, extra);
+                }
+            }
+        }
+    }
 }
 
 /// Move agents along their planned paths with smooth steering.
@@ -17,7 +59,8 @@ pub fn update_collision_grid(
 pub fn update_agent_movement(
     time: Res<Time>,
     canteen: Res<Canteen>,
-    mut query: Query<(&mut Movement, &mut BoxCollider)>,
+    collision_grid: Res<CollisionGridRes>,
+    mut query: Query<(Entity, &mut Movement, &mut BoxCollider)>,
 ) {
     let dt = time.tick_duration as f32;
     let max_speed = DINER_SPEED_MPS;
@@ -25,9 +68,13 @@ pub fn update_agent_movement(
     let accel = 5.0; // Steering acceleration factor
     let stop_eps = 0.5; // Distance to target to stop moving
 
-    for (mut movement, mut collider) in query.iter_mut() {
+    // Separation tuning
+    let sep_gain = 2.0; // strength multiplier for repulsion
+
+    for (entity, mut movement, mut collider) in query.iter_mut() {
         movement.last_pos = movement.pos;
         let current_pos = movement.pos;
+        let self_entity = CollisionEntity(entity.to_bits());
 
         // Determine desired velocity
         let next_pos = movement.path.first().copied();
@@ -53,8 +100,33 @@ pub fn update_agent_movement(
             movement.velocity = Vec2::ZERO;
         }
 
-        // Update position
+        // Update position by velocity
         let mut new_pos = movement.pos + movement.velocity * dt;
+
+        // Apply local separation to avoid overlaps with nearby agents
+        let search_radius = (collider.size.x.max(collider.size.y)) * 2.0;
+        let mut separation = Vec2::ZERO;
+        for other in collision_grid.find_nearby_entities(new_pos, search_radius) {
+            if other == self_entity {
+                continue;
+            }
+            if let Some(other_col) = collision_grid.collider(other) {
+                let delta = new_pos - other_col.center;
+                let dist = delta.length();
+                if dist <= 0.0001 {
+                    continue;
+                }
+                let desired = (collider.size.x + other_col.size.x) * 0.5;
+                if dist < desired {
+                    let push_dir = delta / dist;
+                    let strength = (desired - dist) / desired; // 0..1
+                    separation += push_dir * strength;
+                }
+            }
+        }
+        if separation != Vec2::ZERO {
+            new_pos += separation * sep_gain * dt * DINER_SPEED_MPS;
+        }
 
         // Clamp within canteen bounds
         let ww = canteen.model.width;
