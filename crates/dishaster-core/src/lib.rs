@@ -2,10 +2,14 @@
 
 pub mod components;
 pub mod constants;
-pub mod models;
 pub mod resources;
 pub mod sim;
 pub mod systems;
+
+/// Re-export of dishaster_models
+pub mod models {
+    pub use dishaster_models::*;
+}
 
 mod prelude {
     pub use derive_more::derive::{Deref, DerefMut};

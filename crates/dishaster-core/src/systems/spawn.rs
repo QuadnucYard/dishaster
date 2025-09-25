@@ -15,7 +15,7 @@ pub fn check_day_completion(mut day_status: ResMut<DayStatus>, diner_query: Quer
 pub fn spawn_static_objects(
     mut commands: Commands,
     canteen: Res<Canteen>,
-    level: Res<LevelConfig>,
+    level: Res<LevelConfigRes>,
     registry: Res<GameModelRegistryRes>,
 ) {
     // Spawn windows using new configuration
@@ -284,6 +284,6 @@ fn spawn_diner(
             parent: Modified::new(Some(display_root.0)),
             ..Default::default()
         },
-        model,
+        DinerModelComp::from(model),
     ));
 }

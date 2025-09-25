@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, bail};
-use dishaster_core::resources::GameModelRegistry;
+use dishaster_models::GameModelRegistry;
 use dishrupt_core::model_registry::*;
 use thiserror::Error;
 

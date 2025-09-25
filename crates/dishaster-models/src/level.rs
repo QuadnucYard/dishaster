@@ -1,8 +1,8 @@
 use super::prelude::*;
-use crate::models::*;
+use crate::{DinerProviderModel, ServedDish, WindowConfiguration};
 
 /// Complete level configuration defining the game scenario
-#[derive(Resource, Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct LevelConfig {
     /// Unique identifier for this level
     pub id: ModelId,

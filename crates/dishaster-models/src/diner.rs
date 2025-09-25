@@ -3,7 +3,7 @@ use dishrupt_core::{asset::PrefabReference, display::DisplayModel};
 use super::prelude::*;
 
 /// Complete diner configuration model used both as component and model definition
-#[derive(Component, Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DinerModel {
     /// Core attributes
     pub attributes: DinerAttributes,

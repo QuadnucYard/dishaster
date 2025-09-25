@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, OnceLock},
 };
 
-use dishaster_core::resources::GameModelRegistry;
+use dishaster_core::models::GameModelRegistry;
 use dishaster_data::DataLoader;
 use dishaster_godot_ui::register_guis;
 use dishrupt_godot::{audio::AudioManager, ext::NodeExt, input::listener::InputListener};

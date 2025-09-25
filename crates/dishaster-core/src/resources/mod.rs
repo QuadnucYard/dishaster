@@ -5,11 +5,20 @@ mod time;
 use std::sync::Arc;
 
 use dishaster_navigation::{CollisionGrid, CrowdCostField};
-use dishrupt_core::model_registry::ModelRegistry;
 use rand_chacha::ChaCha8Rng;
 pub use time::Time;
 
 use crate::{models::*, prelude::*};
+
+/// Turn a type into a Bevy resource
+#[derive(Resource, Default, Deref, DerefMut)]
+pub struct ResourceWrapper<T>(T);
+
+impl<T> From<T> for ResourceWrapper<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
 
 /// Root entity for all display-related objects in the scene
 #[derive(Resource)]
@@ -32,31 +41,11 @@ impl GameRng {
     }
 }
 
-/// Spatial collision detection grid for efficient proximity queries
-///
-/// Wraps the collision detection system in a Bevy resource for world-wide
-/// access. Used for diner pathfinding, object placement validation,
-/// and spatial queries during simulation.
-#[derive(Resource, Deref, DerefMut)]
-pub struct CollisionGridRes(CollisionGrid);
+/// Resource wrapper for CollisionGrid
+pub type CollisionGridRes = ResourceWrapper<CollisionGrid>;
 
-impl CollisionGridRes {
-    /// Create a new collision grid resource
-    pub fn new(cell_size: f32) -> Self {
-        Self(CollisionGrid::new(cell_size))
-    }
-}
-
-/// Crowd cost field resource used by pathfinding to soft-avoid nearby diners
-#[derive(Resource, Default, Deref, DerefMut)]
-pub struct CrowdFieldRes(CrowdCostField);
-
-impl CrowdFieldRes {
-    /// Construct a crowd field resource with the given collision grid cell size
-    pub fn new(cell: f32) -> Self {
-        Self(CrowdCostField::new(cell))
-    }
-}
+/// Resource wrapper for CrowdCostField
+pub type CrowdFieldRes = ResourceWrapper<CrowdCostField>;
 
 /// Global canteen configuration and layout information
 ///
@@ -115,36 +104,8 @@ pub struct DayStatus {
     pub current_diner_count: usize,
 }
 
-/// Centralized registry for all game object model definitions
-///
-/// Manages the static configuration templates that define the properties
-/// and behaviors of all entities in the simulation. Uses type-safe handles
-/// to reference models efficiently without duplicating data.
-#[derive(Default)]
-pub struct GameModelRegistry {
-    /// Level configurations defining initial setups
-    pub levels: ModelRegistry<LevelConfig>,
-    /// Canteen layout and structural configurations
-    pub canteens: ModelRegistry<CanteenModel>,
-    /// Food service window configurations and constraints
-    pub window_services: ModelRegistry<WindowServiceModel>,
-    /// Dish definitions with pricing and characteristics
-    pub dishes: ModelRegistry<DishModel>,
-    /// Table models with seating and comfort properties
-    pub tables: ModelRegistry<TableModel>,
-    /// Tray and utensil dispenser configurations
-    pub dispensers: ModelRegistry<DispenserModel>,
-    /// Dish collection point configurations
-    pub collectors: ModelRegistry<CollectorModel>,
-}
+/// Resource wrapper for Arc<GameModelRegistry>
+pub type GameModelRegistryRes = ResourceWrapper<Arc<GameModelRegistry>>;
 
-/// Wrapper resource to allow sharing GameModelRegistry via Arc
-#[derive(Resource, Deref, DerefMut)]
-pub struct GameModelRegistryRes(Arc<GameModelRegistry>);
-
-impl GameModelRegistryRes {
-    /// Constructor
-    pub fn new(db: Arc<GameModelRegistry>) -> Self {
-        Self(db)
-    }
-}
+/// Resource wrapper for LevelConfig
+pub type LevelConfigRes = ResourceWrapper<LevelConfig>;

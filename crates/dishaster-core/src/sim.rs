@@ -3,6 +3,7 @@
 use std::{num::NonZero, sync::Arc};
 
 use bevy_ecs::prelude::*;
+use dishaster_navigation::CollisionGrid;
 use dishrupt_core::{EntityId, display::*};
 
 use crate::{models::*, resources::*, systems::*};
@@ -43,8 +44,8 @@ impl Simulation {
         let root_entity = world.spawn(Transform::default()).id();
         world.insert_resource(DisplayRoot(root_entity));
 
-        world.insert_resource(GameModelRegistryRes::new(db));
-        world.insert_resource(CollisionGridRes::new(0.1));
+        world.insert_resource(GameModelRegistryRes::from(db));
+        world.insert_resource(CollisionGridRes::from(CollisionGrid::new(0.1)));
         world.insert_resource(CrowdFieldRes::default());
 
         schedule.add_systems(
@@ -97,7 +98,7 @@ impl Simulation {
             spawning_finished: false,
         });
         self.world.insert_resource(DayStatus::default());
-        self.world.insert_resource(level);
+        self.world.insert_resource(LevelConfigRes::from(level));
 
         // Spawn static objects once at startup
         let mut schedule = Schedule::default();

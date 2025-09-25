@@ -1,6 +1,5 @@
 use derive_more::*;
 use dishrupt_core::{EntityId, display::DisplaySnapshot, prelude::*};
-use glam::Vec3Swizzles;
 use godot::prelude::*;
 
 use super::context::DisplayContext2D;

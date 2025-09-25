@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use dishaster_core::{models::*, resources::*, sim::*};
+use dishaster_core::{models::*, sim::*};
 use dishrupt_core::{asset::PrefabReference, display::DisplayModel};
 
 /// Create a minimal test level configuration

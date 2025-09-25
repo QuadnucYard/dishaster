@@ -1,7 +1,7 @@
 use dishaster_navigation::{CollisionEntity, world_to_tile_dist};
 use dishrupt_core::display::Transform;
 
-use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
+use crate::{components::*, constants::*, prelude::*, resources::*};
 
 /// System to update the global collision grid
 pub fn update_collision_grid(
@@ -19,7 +19,7 @@ pub fn update_collision_grid(
 /// Rebuild crowd cost field from current diner positions
 pub fn update_crowd_field(
     mut field: ResMut<CrowdFieldRes>,
-    diners: Query<(&Movement, &DinerModel)>,
+    diners: Query<(&Movement, &DinerModelComp)>,
     grid: Res<CollisionGridRes>,
 ) {
     // Initialize field with current grid cell size

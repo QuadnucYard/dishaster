@@ -1,6 +1,10 @@
+use dishaster_models::DinerModel;
 use serde::{Deserialize, Serialize};
 
-use crate::{components::Movement, prelude::*};
+use crate::{
+    components::{ComponentWrapper, Movement},
+    prelude::*,
+};
 
 #[allow(missing_docs)]
 #[derive(Bundle)]
@@ -17,6 +21,9 @@ pub struct Diner {
     /// Unique identifier for this diner instance. Useless yet.
     pub id: u32,
 }
+
+/// Component wrapper for DinerModel
+pub type DinerModelComp = ComponentWrapper<DinerModel>;
 
 /// Runtime diner state
 #[derive(Component)]

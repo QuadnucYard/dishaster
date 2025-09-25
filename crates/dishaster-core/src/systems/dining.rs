@@ -10,7 +10,7 @@ pub fn update_diner_states(
         Entity,
         &mut DinerState,
         &mut DinerTargets,
-        &DinerModel,
+        &DinerModelComp,
         &mut Movement,
         Option<&QueueParticipant>,
     )>,
