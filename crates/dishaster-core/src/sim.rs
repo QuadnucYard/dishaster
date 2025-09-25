@@ -65,6 +65,8 @@ impl Simulation {
     /// spawning parameters, and static world objects. Must be called before
     /// the first tick() to properly initialize the simulation state.
     pub fn start(&mut self, level: LevelConfig) {
+        const DEFAULT_TIMESTEP_S: f64 = 0.1;
+        self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
         self.world.insert_resource(GameRng::new(level.seed));
 
         let db = self.world.resource::<GameModelRegistryRes>();
@@ -93,21 +95,10 @@ impl Simulation {
     /// Executes all registered systems in the proper order to update
     /// entity states, handle interactions, and progress the simulation.
     /// This should be called at regular intervals to maintain simulation flow.
-    ///
-    /// # Arguments
-    /// * `dt` - Delta time since last tick (used for time initialization)
-    pub fn tick(&mut self, dt: f64) {
+    pub fn tick(&mut self) {
         // Check if time resource exists and advance it, or create a new one
-        match self.world.get_resource_mut::<Time>() {
-            Some(mut time) => {
-                time.tick();
-            }
-            None => {
-                // Initialize with dt as tick duration if not exists
-                let time = Time::new(dt);
-                self.world.insert_resource(time);
-            }
-        }
+        let mut time = self.world.resource_mut::<Time>();
+        time.tick();
 
         self.schedule.run(&mut self.world);
     }

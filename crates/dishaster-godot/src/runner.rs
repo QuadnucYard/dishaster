@@ -99,7 +99,7 @@ impl SimulationRunner {
                 let now = Instant::now();
                 if now.duration_since(last).as_secs_f64() >= dt {
                     last = now;
-                    sim.tick(dt);
+                    sim.tick();
                     let snap = sim.snapshot();
                     let _ = tx.send(snap);
                 }
@@ -180,7 +180,7 @@ impl SyncSimulationRunner {
 
         if self.accumulator >= fixed_dt {
             // Advance simulation by one fixed timestep
-            self.sim.tick(fixed_dt);
+            self.sim.tick();
 
             // Subtract fixed dt, keeping any remainder for next frame
             self.accumulator -= fixed_dt;
@@ -197,9 +197,7 @@ impl SyncSimulationRunner {
     /// # Returns
     /// The new snapshot after the forced tick
     pub fn force_tick(&mut self) -> Snapshot {
-        const FIXED_DT: f64 = 1.0 / 60.0;
-
-        self.sim.tick(FIXED_DT);
+        self.sim.tick();
 
         // Reset accumulator since we forced a tick
         self.accumulator = 0.0;

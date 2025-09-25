@@ -5,6 +5,8 @@ use crate::prelude::*;
 /// Uses tick-based timing to avoid floating-point accumulation errors.
 /// Time is calculated from discrete ticks rather than accumulated deltas,
 /// ensuring consistent precision throughout long simulations.
+///
+/// NOTE: the time is simulation time in the simulation world, not real clock time.
 #[derive(Resource)]
 pub struct Time {
     /// Current tick number in the current simulation frame

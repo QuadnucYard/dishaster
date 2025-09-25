@@ -95,7 +95,7 @@ fn test_simulation_basic_lifecycle() {
     let dt = 0.1; // 100ms per tick
     for i in 0..50 {
         // Run for 5 seconds (50 * 0.1s)
-        sim.tick(dt);
+        sim.tick();
 
         // Log progress every second
         if i % 10 == 0 {
@@ -108,7 +108,7 @@ fn test_simulation_basic_lifecycle() {
     const MAX_TIMEOUT_TICKS: i32 = 7200; // 7200 second timeout
 
     while !sim.is_day_complete() && timeout_ticks < MAX_TIMEOUT_TICKS {
-        sim.tick(dt);
+        sim.tick();
         timeout_ticks += 1;
 
         // Log progress occasionally
@@ -148,10 +148,9 @@ fn test_spawning_stops_after_run_length() {
     sim.start(level);
 
     // Run past the spawner run length (10 seconds)
-    let dt = 0.1;
     for _ in 0..120 {
         // 12 seconds total
-        sim.tick(dt);
+        sim.tick();
     }
 
     // At this point, spawning should be complete
