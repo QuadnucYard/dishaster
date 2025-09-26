@@ -7,6 +7,7 @@ edition.workspace = true
 
 [dependencies]
 bevy_math.workspace = true
+grid.workspace = true
 pathfinding.workspace = true
 rustc-hash.workspace = true
 

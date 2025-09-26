@@ -22,8 +22,6 @@ pub fn update_crowd_field(
     diners: Query<(&Movement, &DinerModelComp)>,
     grid: Res<CollisionGridRes>,
 ) {
-    // Initialize field with current grid cell size
-    field.set_cell_size(grid.cell_size());
     field.clear();
 
     // Parameters: influence radius and decay scale based on diner attributes (e.g., patience)

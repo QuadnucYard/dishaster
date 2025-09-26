@@ -5,7 +5,7 @@ mod crowd;
 mod pathfinding;
 
 mod prelude {
-    pub use bevy_math::{IVec2, Rect, Vec2};
+    pub use bevy_math::{IVec2, Rect, USizeVec2, Vec2};
 }
 
 pub use collision::*;

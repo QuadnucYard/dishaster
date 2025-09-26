@@ -59,10 +59,12 @@ impl CollisionGrid {
 
     /// Convert world coordinates to grid cell coordinates
     pub fn world_to_grid(&self, position: Vec2) -> IVec2 {
-        IVec2::new(
-            (position.x / self.cell_size).floor() as i32,
-            (position.y / self.cell_size).floor() as i32,
-        )
+        (position / self.cell_size).floor().as_ivec2()
+    }
+
+    /// Convert grid cell coordinates back to world position (cell center)
+    pub fn tile_to_world(&self, tile_pos: IVec2) -> Vec2 {
+        tile_pos.as_vec2() * self.cell_size + self.cell_size / 2.0
     }
 
     /// Calculate all grid cells that a rectangular object occupies
@@ -155,14 +157,6 @@ impl CollisionGrid {
             }
         }
         neighbors
-    }
-
-    /// Convert grid cell coordinates back to world position (cell center)
-    pub fn tile_to_world(&self, tile_pos: IVec2) -> Vec2 {
-        Vec2::new(
-            tile_pos.x as f32 * self.cell_size + self.cell_size / 2.0,
-            tile_pos.y as f32 * self.cell_size + self.cell_size / 2.0,
-        )
     }
 
     /// Get the collider for a specific entity, if present

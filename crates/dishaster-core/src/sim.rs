@@ -3,7 +3,7 @@
 use std::{num::NonZero, sync::Arc};
 
 use bevy_ecs::prelude::*;
-use dishaster_navigation::CollisionGrid;
+use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
 
 use crate::{models::*, resources::*, systems::*};
@@ -46,7 +46,6 @@ impl Simulation {
 
         world.insert_resource(GameModelRegistryRes::from(db));
         world.insert_resource(CollisionGridRes::from(CollisionGrid::new(0.1)));
-        world.insert_resource(CrowdFieldRes::default());
 
         schedule.add_systems(
             (
@@ -84,9 +83,17 @@ impl Simulation {
         self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
         self.world.insert_resource(GameRng::new(level.seed));
 
-        let db = self.world.resource::<GameModelRegistryRes>();
+        let db = (*self.world.resource::<GameModelRegistryRes>()).clone();
+        let canteen = db.canteens.get_by_id(&level.canteen).unwrap();
+        self.world
+            .insert_resource(CrowdFieldRes::from(CrowdCostField::new(
+                canteen.width,
+                canteen.height,
+                0.1,
+            )));
+
         self.world.insert_resource(Canteen {
-            model: db.canteens.get_by_id(&level.canteen).unwrap().clone(),
+            model: canteen.clone(),
         });
         self.world.insert_resource(DinerProvider {
             model: level.diner_provider.clone(),
