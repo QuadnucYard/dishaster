@@ -1,0 +1,18 @@
+//! Simulation state snapshots for rendering and debugging.
+
+mod dbg;
+
+pub use dbg::*;
+use dishrupt_core::display::DisplaySnapshot;
+
+/// Simulation state snapshot for rendering
+pub struct Snapshot {
+    /// Display graph data for rendering the current frame.
+    pub display: Vec<DisplaySnapshot>,
+    /// Per-agent movement debug data collected for visualization.
+    pub movement_debug: Option<Vec<MovementDebugSnapshot>>,
+    /// Collision grid occupancy data when debug is enabled.
+    pub collision_debug: Option<CollisionGridDebugSnapshot>,
+    /// Crowd cost field data when debug is enabled.
+    pub crowd_debug: Option<CrowdFieldDebugSnapshot>,
+}

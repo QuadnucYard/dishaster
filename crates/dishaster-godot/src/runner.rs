@@ -7,7 +7,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use dishaster_core::sim::{Simulation, Snapshot};
+use dishaster_core::{sim::Simulation, snapshots::Snapshot};
 use fibre::spsc;
 
 pub struct SimulationRunner {

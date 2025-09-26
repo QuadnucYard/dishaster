@@ -4,6 +4,7 @@ pub mod components;
 pub mod constants;
 pub mod resources;
 pub mod sim;
+pub mod snapshots;
 pub mod systems;
 
 /// Re-export of dishaster_models

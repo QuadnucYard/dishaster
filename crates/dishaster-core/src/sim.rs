@@ -2,23 +2,16 @@
 
 use std::{num::NonZero, sync::Arc};
 
-use bevy_ecs::prelude::*;
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
 
-use crate::{models::*, resources::*, systems::*};
+use crate::{models::*, prelude::*, resources::*, snapshots::*, systems::*};
 
 /// Simulation event data structure for external observation
 ///
 /// Placeholder for future event system that will communicate
 /// game state changes to external observers or UI systems.
 pub struct Event;
-
-/// Simulation state snapshot for rendering
-pub struct Snapshot {
-    /// TBD
-    pub display: Vec<DisplaySnapshot>,
-}
 
 /// Core simulation engine managing ECS world and system execution
 ///
@@ -27,9 +20,11 @@ pub struct Snapshot {
 /// canteen dining simulation.
 pub struct Simulation {
     /// ECS world containing all entities, components, and resources
-    world: World,
+    pub(crate) world: World,
     /// System execution schedule defining update order and dependencies
     schedule: Schedule,
+    /// Debug feature configuration for snapshot export.
+    pub(crate) debug_flags: DebugFeatureFlags,
 }
 
 impl Simulation {
@@ -70,7 +65,21 @@ impl Simulation {
                 .chain(),
         );
 
-        Self { world, schedule }
+        Self {
+            world,
+            schedule,
+            debug_flags: DebugFeatureFlags::all(),
+        }
+    }
+
+    /// Update the debug feature configuration for snapshot export.
+    pub fn set_debug_flags(&mut self, flags: DebugFeatureFlags) {
+        self.debug_flags = flags;
+    }
+
+    /// Retrieve the current debug feature configuration.
+    pub fn debug_flags(&self) -> DebugFeatureFlags {
+        self.debug_flags
     }
 
     /// Initialize and start a simulation level with the given configuration
@@ -145,7 +154,16 @@ impl Simulation {
             })
             .collect();
 
-        Snapshot { display }
+        let movement_debug = self.snapshot_movement();
+        let collision_debug = self.snapshot_collision();
+        let crowd_debug = self.snapshot_crowd();
+
+        Snapshot {
+            display,
+            movement_debug,
+            collision_debug,
+            crowd_debug,
+        }
     }
 
     /// Get the root entity of the display hierarchy

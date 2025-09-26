@@ -164,6 +164,14 @@ impl CollisionGrid {
         self.colliders.get(&entity)
     }
 
+    /// Collect occupied grid cells and the number of entities in each cell for debugging.
+    pub fn debug_cells(&self) -> Vec<(IVec2, usize)> {
+        self.cells
+            .iter()
+            .map(|(coord, entities)| (*coord, entities.len()))
+            .collect()
+    }
+
     /// Rebuild the spatial grid from current collider positions
     ///
     /// This should be called every frame or when entities move to keep
