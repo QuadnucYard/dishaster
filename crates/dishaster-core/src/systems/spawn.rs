@@ -149,13 +149,7 @@ pub fn update_diner_spawner(
     // Update spawn timer using tick duration
     spawner.next_spawn_timer -= time.tick_duration;
 
-    // Check if we should spawn a new diner
-    if spawner.next_spawn_timer <= 0.0 {
-        // Generate new spawn interval
-        let new_spawn_timer = rng
-            .random_range(spawner.model.spawn_interval.min..spawner.model.spawn_interval.max)
-            as f64;
-
+    while spawner.next_spawn_timer <= 0.0 {
         let diner_model = generate_diner_model(&provider.model, &mut rng);
 
         spawn_diner(
@@ -167,8 +161,13 @@ pub fn update_diner_spawner(
             &mut rng,
         );
 
-        // Reset spawn timer
-        spawner.next_spawn_timer = new_spawn_timer;
+        // Schedule next spawn using exponential sampling around current time
+        let interval = spawner.sample_next_interval(&mut rng, time.current_time);
+        spawner.next_spawn_timer += interval;
+
+        if spawner.is_spawning_complete(time.current_time) {
+            break;
+        }
     }
 }
 

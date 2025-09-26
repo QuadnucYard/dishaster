@@ -82,6 +82,25 @@ pub struct CollectorPlacement {
 pub struct DinerSpawnerModel {
     /// Total duration of the simulation run
     pub run_length: Seconds,
-    /// Time range between diner spawns
-    pub spawn_interval: MinMax<Seconds>,
+    /// Baseline arrival rate in diners per minute
+    pub base_rate_per_min: f32,
+    /// Piecewise multipliers applied to the baseline rate over the day
+    #[serde(default = "default_spawn_curve")]
+    pub spawn_curve: Vec<SpawnRateKey>,
+}
+
+/// Keyframe describing spawn rate multiplier changes over time
+#[derive(Debug, Clone, Deserialize)]
+pub struct SpawnRateKey {
+    /// Timestamp (seconds since day start)
+    pub time: Seconds,
+    /// Multiplier applied to the base spawn rate at and after this time
+    pub multiplier: f32,
+}
+
+fn default_spawn_curve() -> Vec<SpawnRateKey> {
+    vec![SpawnRateKey {
+        time: 0.0,
+        multiplier: 1.0,
+    }]
 }

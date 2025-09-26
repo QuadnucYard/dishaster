@@ -1,6 +1,6 @@
 //! Main simulation engine and event handling
 
-use std::{num::NonZero, sync::Arc};
+use std::{cmp::Ordering, num::NonZero, sync::Arc};
 
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
@@ -107,8 +107,29 @@ impl Simulation {
         self.world.insert_resource(DinerProvider {
             model: level.diner_provider.clone(),
         });
+        let spawner_model = level.diner_spawner.clone();
+        let mut curve = spawner_model.spawn_curve.clone();
+        curve.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap_or(Ordering::Equal));
+        curve.dedup_by(|a, b| (a.time - b.time).abs() <= f32::EPSILON);
+        if curve.is_empty() {
+            curve.push(SpawnRateKey {
+                time: 0.0,
+                multiplier: 1.0,
+            });
+        } else if curve[0].time > 0.0 {
+            let initial_multiplier = curve[0].multiplier;
+            curve.insert(
+                0,
+                SpawnRateKey {
+                    time: 0.0,
+                    multiplier: initial_multiplier,
+                },
+            );
+        }
+
         self.world.insert_resource(DinerSpawner {
-            model: level.diner_spawner.clone(),
+            model: spawner_model,
+            curve,
             next_spawn_timer: 0.0,
             next_diner_id: 0,
             spawning_finished: false,

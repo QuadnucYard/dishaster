@@ -85,7 +85,14 @@
         ),
         diner_spawner: (
             run_length: 3600.0,
-            spawn_interval: (2.0, 5.0),
+            base_rate_per_min: 45.0,
+            spawn_curve: [
+                (time: 0.0, multiplier: 0.6),
+                (time: 600.0, multiplier: 1.0),
+                (time: 1200.0, multiplier: 1.4),
+                (time: 2100.0, multiplier: 1.6),
+                (time: 3000.0, multiplier: 0.8),
+            ],
         ),
         seed: 42,
     )

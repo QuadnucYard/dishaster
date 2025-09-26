@@ -40,7 +40,11 @@ fn create_test_level() -> LevelConfig {
         },
         diner_spawner: DinerSpawnerModel {
             run_length: 600.0,
-            spawn_interval: MinMax::new(1.0, 3.0),
+            base_rate_per_min: 15.0,
+            spawn_curve: vec![SpawnRateKey {
+                time: 0.0,
+                multiplier: 1.0,
+            }],
         },
         seed: 12345,
     }

@@ -78,6 +78,8 @@ pub struct DinerProvider {
 pub struct DinerSpawner {
     /// Configuration model defining spawn timing and flow parameters
     pub model: DinerSpawnerModel,
+    /// Sorted spawn rate curve for quick lookup
+    pub curve: Vec<SpawnRateKey>,
     /// Countdown timer until next diner spawn (in seconds)
     pub next_spawn_timer: f64,
     /// Unique ID for the next diner to be spawned
@@ -90,6 +92,45 @@ impl DinerSpawner {
     /// Check if the spawning period has completed based on simulation time
     pub fn is_spawning_complete(&self, current_time: f64) -> bool {
         current_time >= self.model.run_length as f64
+    }
+
+    /// Sample the next inter-arrival interval (seconds) using a time-varying Poisson rate.
+    pub fn sample_next_interval(&self, rng: &mut GameRng, current_time: f64) -> f64 {
+        let lambda = self.arrival_rate_per_sec(current_time).max(1.0e-6);
+        let u = rng.random::<f64>().clamp(f64::EPSILON, 1.0 - f64::EPSILON);
+        -u.ln() / lambda
+    }
+
+    fn arrival_rate_per_sec(&self, time: f64) -> f64 {
+        let base = (self.model.base_rate_per_min.max(0.0) as f64) / 60.0;
+        base * self.rate_multiplier(time)
+    }
+
+    fn rate_multiplier(&self, time: f64) -> f64 {
+        if self.curve.is_empty() {
+            return 1.0;
+        }
+
+        let mut prev = &self.curve[0];
+        if time <= prev.time as f64 {
+            return prev.multiplier.max(0.0) as f64;
+        }
+
+        for point in self.curve.iter().skip(1) {
+            if time <= point.time as f64 {
+                let duration = (point.time - prev.time).max(f32::EPSILON);
+                let t = ((time as f32 - prev.time).max(0.0) / duration).clamp(0.0, 1.0);
+                let start = prev.multiplier.max(0.0) as f64;
+                let end = point.multiplier.max(0.0) as f64;
+                return start + (end - start) * f64::from(t);
+            }
+            prev = point;
+        }
+
+        self.curve
+            .last()
+            .map(|point| point.multiplier.max(0.0) as f64)
+            .unwrap_or(1.0)
     }
 }
 
