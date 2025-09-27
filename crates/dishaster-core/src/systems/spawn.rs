@@ -1,7 +1,10 @@
+mod layout;
+
 use dishrupt_core::{
     display::{DisplayModel, DisplayState, Transform},
     utils::Modified,
 };
+pub use layout::spawn_static_objects;
 
 use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 
@@ -9,120 +12,6 @@ use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 pub fn check_day_completion(mut day_status: ResMut<DayStatus>, diner_query: Query<&Diner>) {
     // Update current diner count
     day_status.current_diner_count = diner_query.iter().count();
-}
-
-/// System that spawns all static objects (windows, tables, dispensers, collectors) at level start
-pub fn spawn_static_objects(
-    mut commands: Commands,
-    canteen: Res<Canteen>,
-    level: Res<LevelConfigRes>,
-    registry: Res<GameModelRegistryRes>,
-) {
-    // Spawn windows using new configuration
-    for window_config in &level.window_configurations {
-        let service_handle = registry
-            .window_services
-            .get_handle_by_id(&window_config.service_template)
-            .expect("Window service not found in registry");
-
-        // Create active dishes from configuration
-        let active_dishes: Vec<ActiveDish> = window_config
-            .dish_assignments
-            .iter()
-            .map(|assignment| ActiveDish {
-                assignment: assignment.clone(),
-                state: DishRuntimeState {
-                    current_quantity: DEFAULT_DISH_QUANTITY,
-                    current_quality: DEFAULT_DISH_QUALITY,
-                    contamination_level: DEFAULT_DISH_CONTAMINATION,
-                    last_restocked: DEFAULT_DISH_LAST_RESTOCKED_S,
-                    service_count: 0,
-                },
-            })
-            .collect();
-
-        // Spawn window entity with separated data
-        let window_entity = commands
-            .spawn(Window {
-                service_template: service_handle,
-                config: window_config.clone(),
-                position: canteen.model.windows[window_config.slot_index],
-            })
-            .id();
-
-        // Add dishes as separate component for better data locality
-        commands.entity(window_entity).insert(WindowDishes {
-            dishes: active_dishes,
-        });
-    }
-
-    // Spawn tables
-    for table_placement in &level.table_placements {
-        let table_handle = registry
-            .tables
-            .get_handle_by_id(&table_placement.model)
-            .expect("Table model not found in registry");
-        commands.spawn(DiningTable {
-            model: table_handle,
-            center_pos: table_placement.center_pos,
-            occupied: [false; 2],
-            dirtiness: 0.0,
-        });
-    }
-
-    // Helper function to spawn dispensers
-    fn spawn_dispenser(
-        commands: &mut Commands,
-        registry: &GameModelRegistry,
-        placement: &DispenserPlacement,
-        dispenser_type: DispenserType,
-    ) {
-        let dispenser_handle = registry
-            .dispensers
-            .get_handle_by_id(&placement.model)
-            .expect("Dispenser model not found in registry");
-        let dispenser_model = registry.dispensers.get(dispenser_handle);
-
-        commands.spawn(Dispenser {
-            model: dispenser_handle,
-            center_pos: placement.center_pos,
-            current_stock: dispenser_model.initial_stock,
-            dispenser_type,
-        });
-    }
-
-    // Spawn tray dispensers
-    for dispenser_placement in &level.tray_dispenser_placements {
-        spawn_dispenser(
-            &mut commands,
-            &registry,
-            dispenser_placement,
-            DispenserType::Tray,
-        );
-    }
-
-    // Spawn chopstick dispensers
-    for dispenser_placement in &level.chopstick_dispenser_placements {
-        spawn_dispenser(
-            &mut commands,
-            &registry,
-            dispenser_placement,
-            DispenserType::Chopstick,
-        );
-    }
-
-    // Spawn dish collectors
-    for collector_placement in &level.collector_placements {
-        let collector_handle = registry
-            .collectors
-            .get_handle_by_id(&collector_placement.model)
-            .expect("Dish collector model not found in registry");
-        commands.spawn(DishCollector {
-            model: collector_handle,
-            center_pos: collector_placement.center_pos,
-            current_load: 0,
-        });
-    }
 }
 
 /// System that manages diner spawning based on timing and capacity constraints
@@ -264,10 +153,8 @@ fn spawn_diner(
                 pos,
                 target_pos: pos,
                 next_waypoint: pos,
-                velocity: Vec2::ZERO,
-                path: Vec::new(),
                 last_pos: pos,
-                ignoring_collisions: false,
+                ..Default::default()
             },
         },
         BoxCollider(dishaster_navigation::BoxCollider {
@@ -279,7 +166,7 @@ fn spawn_diner(
             ..Default::default()
         },
         Transform {
-            position: Vec3::new(pos.x, pos.y, 0.0),
+            position: pos.extend(0.0),
             parent: Modified::new(Some(display_root.0)),
             ..Default::default()
         },

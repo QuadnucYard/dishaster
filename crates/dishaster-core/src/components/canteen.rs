@@ -25,8 +25,10 @@ pub struct DiningTable {
     pub model: ModelHandle<TableModel>,
     /// Physical center position of the table
     pub center_pos: Vec2,
-    /// Which seats are currently occupied
-    pub occupied: [bool; 2],
+    /// World-space positions diners should move to when seating
+    pub seat_positions: Vec<Vec2>,
+    /// Which seats are currently occupied (stores occupant entity)
+    pub occupants: Vec<Option<Entity>>,
     /// Current dirtiness level of the table
     pub dirtiness: f32,
 }

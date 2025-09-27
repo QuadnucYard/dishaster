@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://c1ad2itpe80n2"]
+
+[sub_resource type="Gradient" id="Gradient_4wl8r"]
+offsets = PackedFloat32Array(0.0044444446)
+colors = PackedColorArray(0.63842386, 0.5191339, 0.19881883, 0.49803922)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lhhjm"]
+gradient = SubResource("Gradient_4wl8r")
+width = 60
+height = 25
+
+[sub_resource type="Gradient" id="Gradient_qsgs5"]
+offsets = PackedFloat32Array(0.0044444446)
+colors = PackedColorArray(0.94657224, 0.79299814, 0.41967276, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dae6u"]
+gradient = SubResource("Gradient_qsgs5")
+width = 60
+height = 25
+
+[node name="NormalTable" type="Node2D"]
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+texture = SubResource("GradientTexture2D_lhhjm")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -12)
+texture = SubResource("GradientTexture2D_dae6u")

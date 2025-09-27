@@ -18,6 +18,11 @@ impl Size {
     pub fn new(width: Meters, height: Meters) -> Self {
         Self { width, height }
     }
+
+    /// Convert the size to a 2D vector representation
+    pub fn as_vec2(&self) -> Vec2 {
+        Vec2::new(self.width, self.height)
+    }
 }
 
 /// Horizontal range defined by minimum and maximum X coordinates

@@ -59,10 +59,9 @@ pub fn update_agent_movement(
     time: Res<Time>,
     canteen: Res<Canteen>,
     collision_grid: Res<CollisionGridRes>,
-    mut query: Query<(Entity, &mut Movement, &mut BoxCollider)>,
+    mut query: Query<(Entity, &mut Movement, &mut BoxCollider, Option<&DinerState>)>,
 ) {
     let dt = time.tick_duration as f32;
-    let max_speed = DINER_SPEED_MPS;
     let waypoint_eps = PATH_WAYPOINT_EPS;
     let accel = 5.0; // Steering acceleration factor
     let stop_eps = 0.5; // Distance to target to stop moving
@@ -70,7 +69,17 @@ pub fn update_agent_movement(
     // Separation tuning
     let sep_gain = 2.0; // strength multiplier for repulsion
 
-    for (entity, mut movement, mut collider) in query.iter_mut() {
+    for (entity, mut movement, mut collider, diner_state) in query.iter_mut() {
+        if matches!(diner_state, Some(state) if state.current == DinerStateType::Eating) {
+            movement.velocity = Vec2::ZERO;
+            movement.last_pos = movement.pos;
+            movement.path.clear();
+            movement.next_waypoint = movement.pos;
+            continue;
+        }
+
+        let max_speed = DINER_SPEED_MPS * movement.speed_factor;
+
         movement.last_pos = movement.pos;
         let current_pos = movement.pos;
         let self_entity = CollisionEntity(entity.to_bits());

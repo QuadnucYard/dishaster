@@ -1,32 +1,9 @@
 [
     (
-        id: "small_round_table",
-        size: (width: 1.0, height: 1.0),
+        id: "normal_table",
+        size: (width: 1.0, height: 0.5),
         seats: 2,
         comfort_level: 0.6,
-    ),
-    (
-        id: "medium_table",
-        size: (width: 1.4, height: 0.8),
-        seats: 4,
-        comfort_level: 0.75,
-    ),
-    (
-        id: "large_family_table",
-        size: (width: 2.0, height: 1.2),
-        seats: 6,
-        comfort_level: 0.85,
-    ),
-    (
-        id: "long_communal_table",
-        size: (width: 3.0, height: 1.0),
-        seats: 8,
-        comfort_level: 0.7,
-    ),
-    (
-        id: "corner_table",
-        size: (width: 1.2, height: 1.2),
-        seats: 3,
-        comfort_level: 0.8,
+        display: (res: "tables/normal_table")
     ),
 ]

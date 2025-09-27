@@ -43,6 +43,30 @@ pub const PLACEHOLDER_SERVICE_TIME_S: f32 = 10.0;
 /// Soft margin from canteen walls for free roaming movement (meters)
 pub const DINING_AREA_MARGIN: Meters = 1.0;
 
+/// How close counts as sitting down at a table (meters)
+pub const TABLE_SEAT_ARRIVAL_EPS: Meters = 0.45;
+
+/// Radius used to place seats around a table (meters added beyond half table size)
+pub const TABLE_SEAT_CLEARANCE: Meters = 0.4;
+
+/// Time a diner spends eating before leaving the table (seconds)
+pub const BASE_EATING_DURATION_S: f32 = 90.0;
+
+/// Dirtiness increase applied to a table after a diner finishes eating
+pub const TABLE_DIRTINESS_INCREMENT: f32 = 0.2;
+
+/// Maximum allowed dirtiness value
+pub const TABLE_MAX_DIRTINESS: f32 = 1.0;
+
+/// Tolerance when reaching a dish collector (meters)
+pub const COLLECTOR_ARRIVAL_EPS: Meters = 0.6;
+
+/// Speed factor applied while the diner carries a tray
+pub const CARRYING_TRAY_SPEED_FACTOR: f32 = 0.75;
+
+/// Maximum time diners will keep searching for seats before giving up (seconds)
+pub const MAX_SEAT_SEARCH_TIME_S: f32 = 45.0;
+
 /// Default runtime dish values
 pub const DEFAULT_DISH_QUANTITY: f32 = 100.0;
 /// Quality in [0,1], where 1 is perfect and 0 is inedible

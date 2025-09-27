@@ -1,7 +1,20 @@
+use std::cmp::Ordering;
+
+use bevy_ecs::system::ParamSet;
 use bevy_math::IVec2;
 use dishaster_navigation::{PathRequest, find_path};
+use rand::seq::SliceRandom;
 
 use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
+
+fn speed_factor_for_state(state: DinerStateType) -> f32 {
+    match state {
+        DinerStateType::MovingToSeat | DinerStateType::ReturningDishes => {
+            CARRYING_TRAY_SPEED_FACTOR
+        }
+        _ => 1.0,
+    }
+}
 
 /// Main diner behavior system - dispatches to state-specific handlers.
 pub fn update_diner_states(
@@ -15,6 +28,11 @@ pub fn update_diner_states(
         Option<&QueueParticipant>,
     )>,
     window_query: Query<(Entity, &Window)>,
+    mut table_set: ParamSet<(
+        Query<(Entity, &DiningTable)>,
+        Query<(Entity, &mut DiningTable)>,
+    )>,
+    collector_query: Query<(Entity, &DishCollector)>,
     canteen: Res<Canteen>,
     time: Res<Time>,
     mut rng: ResMut<GameRng>,
@@ -54,6 +72,34 @@ pub fn update_diner_states(
             DinerStateType::AtWindow => DinerStateType::Queueing,
             DinerStateType::Queueing => handle_queueing(&mut state, &movement, queue_participant),
             DinerStateType::BeingServed => handle_being_served(&mut state),
+            DinerStateType::FindingSeat => handle_finding_seat(
+                entity,
+                &mut state,
+                &mut targets,
+                &mut movement,
+                &canteen,
+                &collision_grid,
+                &mut rng,
+                &mut table_set,
+            ),
+            DinerStateType::MovingToSeat => handle_moving_to_seat(
+                entity,
+                &mut movement,
+                &mut targets,
+                &canteen,
+                &collision_grid,
+                &mut table_set,
+            ),
+            DinerStateType::Eating => {
+                handle_eating(entity, &mut state, &mut targets, &mut table_set)
+            }
+            DinerStateType::ReturningDishes => handle_returning_dishes(
+                &mut targets,
+                &mut movement,
+                &canteen,
+                &collision_grid,
+                &collector_query,
+            ),
             DinerStateType::Leaving => {
                 handle_leaving(&mut movement, &canteen, &collision_grid);
                 DinerStateType::Leaving
@@ -83,6 +129,8 @@ pub fn update_diner_states(
             state.current = next_state;
             state.state_timer = 0.0;
         }
+
+        movement.speed_factor = speed_factor_for_state(state.current);
     }
 }
 
@@ -305,10 +353,320 @@ fn handle_queueing(
 fn handle_being_served(state: &mut DinerState) -> DinerStateType {
     if state.state_timer >= PLACEHOLDER_SERVICE_TIME_S {
         log::info!(target: "diner", "service_complete");
-        DinerStateType::Leaving
+        DinerStateType::FindingSeat
     } else {
         DinerStateType::BeingServed
     }
+}
+
+fn handle_finding_seat(
+    entity: Entity,
+    state: &mut DinerState,
+    targets: &mut DinerTargets,
+    movement: &mut Movement,
+    canteen: &Canteen,
+    collision_grid: &CollisionGridRes,
+    rng: &mut GameRng,
+    table_set: &mut ParamSet<(
+        Query<(Entity, &DiningTable)>,
+        Query<(Entity, &mut DiningTable)>,
+    )>,
+) -> DinerStateType {
+    if let (Some(table_entity), Some(seat_index)) = (targets.chosen_table, targets.chosen_seat) {
+        match table_set.p0().get(table_entity) {
+            Ok((_, table))
+                if table.occupants.get(seat_index).and_then(|slot| *slot) == Some(entity) =>
+            {
+                return DinerStateType::MovingToSeat;
+            }
+            _ => {
+                targets.chosen_table = None;
+                targets.chosen_seat = None;
+            }
+        }
+    }
+
+    let mut best: Option<(Entity, usize, bool, f32, f32, Vec2)> = None;
+    for (table_entity, table) in table_set.p0().iter() {
+        if table.seat_positions.is_empty() {
+            continue;
+        }
+        let mut free_indices: Vec<usize> = table
+            .occupants
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, occ)| if occ.is_none() { Some(idx) } else { None })
+            .collect();
+        if free_indices.is_empty() {
+            continue;
+        }
+        free_indices.shuffle(rng);
+        let seat_index = free_indices[0];
+        let seat_pos = table.seat_positions[seat_index];
+        let all_free = table.occupants.iter().all(|occ| occ.is_none());
+        let dirtiness = table.dirtiness;
+        let distance = movement.pos.distance(seat_pos);
+
+        let better = match &best {
+            None => true,
+            Some((_, _, best_all_free, best_dirtiness, best_distance, _)) => {
+                match all_free.cmp(best_all_free) {
+                    Ordering::Greater => true,
+                    Ordering::Less => false,
+                    Ordering::Equal => {
+                        if dirtiness < *best_dirtiness - f32::EPSILON {
+                            true
+                        } else if dirtiness > *best_dirtiness + f32::EPSILON {
+                            false
+                        } else {
+                            distance < *best_distance
+                        }
+                    }
+                }
+            }
+        };
+
+        if better {
+            best = Some((
+                table_entity,
+                seat_index,
+                all_free,
+                dirtiness,
+                distance,
+                seat_pos,
+            ));
+        }
+    }
+
+    let Some((table_entity, seat_index, _, _, _, seat_pos)) = best else {
+        if state.state_timer > MAX_SEAT_SEARCH_TIME_S {
+            log::warn!(
+                target: "diner",
+                "finding_seat: timed out entity={:?}",
+                entity
+            );
+            return DinerStateType::Leaving;
+        }
+        return DinerStateType::FindingSeat;
+    };
+
+    {
+        let mut tables = table_set.p1();
+        match tables.get_mut(table_entity) {
+            Ok((_, mut table)) => {
+                if matches!(table.occupants.get(seat_index), Some(slot) if slot.is_none()) {
+                    table.occupants[seat_index] = Some(entity);
+                } else {
+                    return DinerStateType::FindingSeat;
+                }
+            }
+            Err(_) => return DinerStateType::FindingSeat,
+        }
+    }
+
+    targets.chosen_window = None;
+    targets.observing_window = None;
+    targets.chosen_table = Some(table_entity);
+    targets.chosen_seat = Some(seat_index);
+    targets.collector_target = None;
+
+    if let Some(plan) = compute_path_with_fallback(movement.pos, seat_pos, canteen, collision_grid)
+    {
+        movement.target_pos = plan.goal;
+        movement.path = plan.path;
+        movement.ignoring_collisions = false;
+    } else {
+        movement.target_pos = seat_pos;
+        movement.path = direct_path_fallback(movement.pos, seat_pos);
+        movement.ignoring_collisions = true;
+    }
+
+    log::trace!(
+        target: "diner",
+        "finding_seat: reserved table={:?} seat={} target=({:.2},{:.2})",
+        table_entity,
+        seat_index,
+        movement.target_pos.x,
+        movement.target_pos.y
+    );
+
+    DinerStateType::MovingToSeat
+}
+
+fn handle_moving_to_seat(
+    entity: Entity,
+    movement: &mut Movement,
+    targets: &mut DinerTargets,
+    canteen: &Canteen,
+    collision_grid: &CollisionGridRes,
+    table_set: &mut ParamSet<(
+        Query<(Entity, &DiningTable)>,
+        Query<(Entity, &mut DiningTable)>,
+    )>,
+) -> DinerStateType {
+    let (Some(table_entity), Some(seat_index)) = (targets.chosen_table, targets.chosen_seat) else {
+        return DinerStateType::FindingSeat;
+    };
+
+    let seat_pos = {
+        let tables = table_set.p0();
+        match tables.get(table_entity) {
+            Ok((_, table)) => {
+                if table.occupants.get(seat_index).and_then(|slot| *slot) != Some(entity) {
+                    targets.chosen_table = None;
+                    targets.chosen_seat = None;
+                    return DinerStateType::FindingSeat;
+                }
+                table.seat_positions[seat_index]
+            }
+            Err(_) => {
+                targets.chosen_table = None;
+                targets.chosen_seat = None;
+                return DinerStateType::FindingSeat;
+            }
+        }
+    };
+    if movement.path.is_empty() && movement.target_pos.distance(seat_pos) > TABLE_SEAT_ARRIVAL_EPS {
+        if let Some(plan) =
+            compute_path_with_fallback(movement.pos, seat_pos, canteen, collision_grid)
+        {
+            movement.target_pos = plan.goal;
+            movement.path = plan.path;
+            movement.ignoring_collisions = false;
+        } else {
+            movement.target_pos = seat_pos;
+            movement.path = direct_path_fallback(movement.pos, seat_pos);
+            movement.ignoring_collisions = true;
+        }
+    }
+
+    if movement.pos.distance(seat_pos) <= TABLE_SEAT_ARRIVAL_EPS {
+        movement.target_pos = seat_pos;
+        movement.path.clear();
+        movement.velocity = Vec2::ZERO;
+        return DinerStateType::Eating;
+    }
+
+    DinerStateType::MovingToSeat
+}
+
+fn handle_eating(
+    entity: Entity,
+    state: &mut DinerState,
+    targets: &mut DinerTargets,
+    table_set: &mut ParamSet<(
+        Query<(Entity, &DiningTable)>,
+        Query<(Entity, &mut DiningTable)>,
+    )>,
+) -> DinerStateType {
+    let (Some(table_entity), Some(seat_index)) = (targets.chosen_table, targets.chosen_seat) else {
+        return DinerStateType::FindingSeat;
+    };
+
+    {
+        let tables = table_set.p0();
+        match tables.get(table_entity) {
+            Ok((_, table))
+                if table.occupants.get(seat_index).and_then(|slot| *slot) == Some(entity) => {}
+            _ => {
+                targets.chosen_table = None;
+                targets.chosen_seat = None;
+                return DinerStateType::FindingSeat;
+            }
+        }
+    }
+
+    if state.state_timer >= BASE_EATING_DURATION_S {
+        let mut tables = table_set.p1();
+        if let Ok((_, mut table)) = tables.get_mut(table_entity) {
+            if matches!(
+                table.occupants.get(seat_index),
+                Some(slot) if slot.as_ref() == Some(&entity)
+            ) {
+                table.occupants[seat_index] = None;
+            }
+            table.dirtiness =
+                (table.dirtiness + TABLE_DIRTINESS_INCREMENT).min(TABLE_MAX_DIRTINESS);
+        }
+        targets.chosen_table = None;
+        targets.chosen_seat = None;
+        return DinerStateType::ReturningDishes;
+    }
+
+    DinerStateType::Eating
+}
+
+fn handle_returning_dishes(
+    targets: &mut DinerTargets,
+    movement: &mut Movement,
+    canteen: &Canteen,
+    collision_grid: &CollisionGridRes,
+    collector_query: &Query<(Entity, &DishCollector)>,
+) -> DinerStateType {
+    if collector_query.is_empty() {
+        return DinerStateType::Leaving;
+    }
+
+    if targets.collector_target.is_none() {
+        let mut best: Option<(Entity, Vec2, f32)> = None;
+        for (entity, collector) in collector_query.iter() {
+            let distance = movement.pos.distance(collector.center_pos);
+            if best
+                .as_ref()
+                .map(|(_, _, best_distance)| distance < *best_distance)
+                .unwrap_or(true)
+            {
+                best = Some((entity, collector.center_pos, distance));
+            }
+        }
+
+        let Some((collector_entity, target_pos, _)) = best else {
+            return DinerStateType::Leaving;
+        };
+
+        targets.collector_target = Some(collector_entity);
+        if let Some(plan) =
+            compute_path_with_fallback(movement.pos, target_pos, canteen, collision_grid)
+        {
+            movement.target_pos = plan.goal;
+            movement.path = plan.path;
+            movement.ignoring_collisions = false;
+        } else {
+            movement.target_pos = target_pos;
+            movement.path = direct_path_fallback(movement.pos, target_pos);
+            movement.ignoring_collisions = true;
+        }
+        return DinerStateType::ReturningDishes;
+    }
+
+    let collector_entity = targets.collector_target.unwrap();
+    let Ok((_, collector)) = collector_query.get(collector_entity) else {
+        targets.collector_target = None;
+        return DinerStateType::ReturningDishes;
+    };
+
+    let target_pos = collector.center_pos;
+    if movement.pos.distance(target_pos) <= COLLECTOR_ARRIVAL_EPS {
+        targets.collector_target = None;
+        return DinerStateType::Leaving;
+    }
+
+    if movement.path.is_empty() || movement.target_pos.distance(target_pos) > COLLECTOR_ARRIVAL_EPS
+    {
+        if let Some(plan) =
+            compute_path_with_fallback(movement.pos, target_pos, canteen, collision_grid)
+        {
+            movement.target_pos = plan.goal;
+            movement.path = plan.path;
+            movement.ignoring_collisions = false;
+        } else {
+            movement.target_pos = target_pos;
+            movement.path = direct_path_fallback(movement.pos, target_pos);
+            movement.ignoring_collisions = true;
+        }
+    }
+
+    DinerStateType::ReturningDishes
 }
 
 /// Handles the diner leaving the canteen.

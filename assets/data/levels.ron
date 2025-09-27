@@ -55,7 +55,36 @@
                 ],
             ),
         ],
-        table_placements: [],
+        table_placements: [
+            (
+                model: "normal_table",
+                center_pos: (5.0, 5.0),
+            ),
+            (
+                model: "normal_table",
+                center_pos: (10.0, 5.0),
+            ),
+            (
+                model: "normal_table",
+                center_pos: (15.0, 5.0),
+            ),
+            (
+                model: "normal_table",
+                center_pos: (20.0, 5.0),
+            ),
+            (
+                model: "normal_table",
+                center_pos: (7.5, 8.0),
+            ),
+            (
+                model: "normal_table",
+                center_pos: (12.5, 8.0),
+            ),
+            (
+                model: "normal_table",
+                center_pos: (17.5, 8.0),
+            ),
+        ],
         tray_dispenser_placements: [],
         chopstick_dispenser_placements: [],
         collector_placements: [],

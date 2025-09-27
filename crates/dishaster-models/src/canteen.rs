@@ -43,6 +43,8 @@ pub struct TableModel {
     pub seats: usize,
     /// Comfort rating affecting customer satisfaction
     pub comfort_level: f32,
+    /// Display model
+    pub display: DisplayModel,
 }
 
 impl HasId for TableModel {

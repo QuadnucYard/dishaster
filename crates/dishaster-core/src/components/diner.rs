@@ -45,6 +45,10 @@ pub struct DinerTargets {
     pub chosen_window: Option<Entity>,
     /// Currently chosen table entity
     pub chosen_table: Option<Entity>,
+    /// Seat index reserved at the chosen table
+    pub chosen_seat: Option<usize>,
+    /// Dish collector the diner will visit after eating
+    pub collector_target: Option<Entity>,
 }
 
 /// Marker component while a diner participates in a queue at a window
@@ -83,7 +87,7 @@ pub struct DinerMemory {
 }
 
 /// State machine for diner behavior
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DinerStateType {
     /// Entering the canteen and moving to an observation area.
     Entering,
@@ -93,12 +97,20 @@ pub enum DinerStateType {
     Deciding,
     /// Moving towards the chosen window.
     MovingToWindow,
-    /// Arrived at the window. Currently transitions directly to leaving.
+    /// Arrived at the window and preparing to enter the queue.
     AtWindow,
     /// Standing in the queue and waiting to reach the counter.
     Queueing,
     /// Currently being served at the counter.
     BeingServed,
+    /// Looking for an available seat after receiving food.
+    FindingSeat,
+    /// Walking towards the reserved seat.
+    MovingToSeat,
+    /// Sitting at the table and consuming the meal.
+    Eating,
+    /// Returning trays and leftovers before leaving.
+    ReturningDishes,
     /// Leaving the canteen.
     Leaving,
 }
