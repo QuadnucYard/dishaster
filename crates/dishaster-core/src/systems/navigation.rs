@@ -36,12 +36,11 @@ pub fn update_crowd_field(
                 let Some(t) = grid.bound_tile(center_tile + IVec2::new(dx, dy)) else {
                     continue;
                 };
-                let world = grid.tile_to_world(t);
-                let d = center.distance(world);
-                if d <= influence_radius {
+                let d2 = center.distance_squared(grid.tile_to_world(t));
+                if d2 <= influence_radius.squared() {
                     // Smooth decay: extra = max_extra * (1 - (d/r)^2)
                     let r = influence_radius.max(0.001);
-                    let extra = max_extra * (1.0f32 - (d / r).powi(2)).max(0.0f32);
+                    let extra = max_extra * (1.0f32 - d2 / r.squared()).max(0.0f32);
                     grid.crowd.add_cost(t, extra);
                 }
             }
@@ -111,8 +110,7 @@ pub fn update_agent_movement(
         // Update next_waypoint
         if let Some(next) = movement.path.next() {
             movement.next_waypoint = next;
-            let dist = movement.pos.distance(next);
-            if dist < waypoint_eps {
+            if movement.pos.close_to(next, waypoint_eps) {
                 movement.path.pop();
             }
         } else {

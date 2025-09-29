@@ -188,7 +188,10 @@ fn handle_observing(
     }
 
     // If the diner has reached their observation spot, transition to deciding.
-    if movement.pos.distance(movement.target_pos) < OBSERVATION_ARRIVAL_EPS {
+    if movement
+        .pos
+        .close_to(movement.target_pos, OBSERVATION_ARRIVAL_EPS)
+    {
         log::trace!(
             target: "nav",
             "observing: arrived target=({:.2},{:.2})",
@@ -258,13 +261,16 @@ fn handle_moving_to_window(
             window.position.center(),
             (canteen.model.windows_y - WINDOW_APPROACH_OFFSET).clamp(0.0, canteen.model.height),
         );
-        if movement.target_pos.distance_squared(fallback) > 0.05 || movement.path.is_empty() {
+        if movement.path.is_empty() || !movement.target_pos.close_to(fallback, 0.2) {
             movement.compute_new_path(fallback, nav_grid);
         }
         return DinerStateType::MovingToWindow;
     }
 
-    if movement.pos.distance(movement.target_pos) < QUEUE_ARRIVAL_EPS {
+    if movement
+        .pos
+        .close_to(movement.target_pos, QUEUE_ARRIVAL_EPS)
+    {
         log::trace!(
             target: "diner",
             "joined_queue: window={:?} pos=({:.2},{:.2})",
@@ -286,7 +292,9 @@ fn handle_queueing(
 ) -> DinerStateType {
     if let Some(queue) = queue_participant
         && queue.slot_index == 0
-        && movement.pos.distance(movement.target_pos) < QUEUE_ARRIVAL_EPS
+        && movement
+            .pos
+            .close_to(movement.target_pos, QUEUE_ARRIVAL_EPS)
     {
         log::trace!(target: "diner", "queue_front_reached");
         return DinerStateType::BeingServed;
@@ -351,7 +359,7 @@ fn handle_finding_seat(
         let seat_pos = table.seat_positions[seat_index];
         let all_free = table.occupants.iter().all(|occ| occ.is_none());
         let dirtiness = table.dirtiness;
-        let distance = movement.pos.distance(seat_pos);
+        let distance = movement.pos.distance_squared(seat_pos);
 
         let better = match &best {
             None => true,
@@ -462,11 +470,15 @@ fn handle_moving_to_seat(
             }
         }
     };
-    if movement.path.is_empty() && movement.target_pos.distance(seat_pos) > TABLE_SEAT_ARRIVAL_EPS {
+    if movement.path.is_empty()
+        && !movement
+            .target_pos
+            .close_to(seat_pos, TABLE_SEAT_ARRIVAL_EPS)
+    {
         movement.compute_new_path(seat_pos, nav_grid);
     }
 
-    if movement.pos.distance(seat_pos) <= TABLE_SEAT_ARRIVAL_EPS {
+    if movement.pos.close_to(seat_pos, TABLE_SEAT_ARRIVAL_EPS) {
         movement.target_pos = seat_pos;
         movement.path.clear();
         movement.velocity = Vec2::ZERO;
@@ -535,7 +547,7 @@ fn handle_returning_dishes(
     if targets.collector_target.is_none() {
         let mut best: Option<(Entity, Vec2, f32)> = None;
         for (entity, collector) in collector_query.iter() {
-            let distance = movement.pos.distance(collector.center_pos);
+            let distance = movement.pos.distance_squared(collector.center_pos);
             if best
                 .as_ref()
                 .map(|(_, _, best_distance)| distance < *best_distance)
@@ -561,12 +573,15 @@ fn handle_returning_dishes(
     };
 
     let target_pos = collector.center_pos;
-    if movement.pos.distance(target_pos) <= COLLECTOR_ARRIVAL_EPS {
+    if movement.pos.close_to(target_pos, COLLECTOR_ARRIVAL_EPS) {
         targets.collector_target = None;
         return DinerStateType::Leaving;
     }
 
-    if movement.path.is_empty() || movement.target_pos.distance(target_pos) > COLLECTOR_ARRIVAL_EPS
+    if movement.path.is_empty()
+        || !movement
+            .target_pos
+            .close_to(target_pos, COLLECTOR_ARRIVAL_EPS)
     {
         movement.compute_new_path(target_pos, nav_grid);
     }

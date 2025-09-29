@@ -184,7 +184,7 @@ pub fn despawn_leaving_diners(
         let reached_exit = canteen.model.entrances.iter().any(|xr| {
             let clamped_x = movement.pos.x.clamp(xr.x_min, xr.x_max);
             let exit_point = Vec2::new(clamped_x, canteen.model.entrances_y);
-            movement.pos.distance(exit_point) < EXIT_ARRIVAL_EPS
+            movement.pos.close_to(exit_point, EXIT_ARRIVAL_EPS)
         });
         if reached_exit {
             log::info!(

@@ -1,6 +1,6 @@
 use std::num::NonZero;
 
-use bevy_color::Color;
+// use bevy_color::Color;
 use serde::{Deserialize, Serialize};
 
 use crate::{EntityId, asset::PrefabReference, prelude::*, utils::Modified};
@@ -48,8 +48,7 @@ pub struct CoreId(pub EntityId);
 pub struct DisplayState {
     pub proto: PrefabReference,
 
-    pub color: Modified<Color>,
-
+    // pub color: Modified<Color>,
     pub visible: Modified<bool>,
 }
 
@@ -57,7 +56,7 @@ impl Default for DisplayState {
     fn default() -> Self {
         Self {
             proto: PrefabReference::default(),
-            color: Color::WHITE.into(),
+            // color: Color::WHITE.into(),
             visible: true.into(),
         }
     }

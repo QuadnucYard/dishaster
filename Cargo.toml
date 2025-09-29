@@ -65,3 +65,7 @@ godot = { git = "https://github.com/godot-rust/gdext", rev = "9da0f54" }
 bevy_ecs.opt-level = 1
 bevy_math.opt-level = 1
 godot.opt-level = 1
+
+[profile.profiling]
+inherits = "release"
+debug = true

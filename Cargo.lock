@@ -142,21 +142,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
-name = "bevy_color"
-version = "0.17.0-rc.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "953016aa35c8a45e3195a67d889bdb10c3b8d97212bcbb249c790d1627649bd0"
-dependencies = [
- "bevy_math",
- "bevy_reflect",
- "bytemuck",
- "derive_more",
- "serde",
- "thiserror",
- "wgpu-types",
-]
-
-[[package]]
 name = "bevy_ecs"
 version = "0.17.0-rc.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -528,7 +513,6 @@ dependencies = [
 name = "dishrupt-core"
 version = "0.1.0"
 dependencies = [
- "bevy_color",
  "bevy_ecs",
  "bevy_math",
  "ecow",

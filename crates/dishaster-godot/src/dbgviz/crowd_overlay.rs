@@ -9,7 +9,6 @@ use godot::{
     obj::{Gd, NewAlloc, NewGd},
 };
 
-const BASE_ALPHA: f32 = 0.18;
 const Z_INDEX: i32 = 8;
 
 /// Renders the crowd navigation cost field as a heatmap sprite for debugging.
@@ -119,19 +118,22 @@ fn update_buffer(pixel_buffer: &mut Vec<u8>, snapshot: &CrowdFieldDebugSnapshot)
         .fold(0.0_f32, |acc, cost| acc.max(*cost));
     let clamp = |value: f32| -> u8 { (value.clamp(0.0, 1.0) * 255.0).round() as u8 };
 
+    // Define a simple RGBA color bar: blue for low intensity, red for high intensity
+    const BASE_ALPHA: f32 = 0.05;
+    const LOW_COLOR: Color = Color::from_rgba(0.0, 0.0, 1.0, BASE_ALPHA);
+    const HIGH_COLOR: Color = Color::from_rgba(1.0, 0.0, 0.0, BASE_ALPHA + 0.3);
+
     for (i, &cost) in snapshot.costs.iter().enumerate() {
+        if cost <= 0.0 {
+            continue;
+        }
         let intensity = if max_cost > 0.0 {
             (cost / max_cost).clamp(0.0, 1.0)
         } else {
             0.0
         };
 
-        let color = Color::from_ok_hsl(
-            f64::from((0.6 - 0.5 * intensity).clamp(0.0, 1.0)),
-            0.65,
-            f64::from(0.55 + 0.2 * intensity),
-        )
-        .with_alpha(BASE_ALPHA + 0.4 * intensity);
+        let color = LOW_COLOR.lerp(HIGH_COLOR, intensity as f64);
 
         let idx = i * 4;
         pixel_buffer[idx] = clamp(color.r);
