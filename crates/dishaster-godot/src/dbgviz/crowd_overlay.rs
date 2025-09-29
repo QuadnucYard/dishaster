@@ -112,10 +112,7 @@ fn update_buffer(pixel_buffer: &mut Vec<u8>, snapshot: &CrowdFieldDebugSnapshot)
     }
     pixel_buffer.fill(0);
 
-    let max_cost = snapshot
-        .costs
-        .iter()
-        .fold(0.0_f32, |acc, cost| acc.max(*cost));
+    let max_cost = 10.0;
     let clamp = |value: f32| -> u8 { (value.clamp(0.0, 1.0) * 255.0).round() as u8 };
 
     // Define a simple RGBA color bar: blue for low intensity, red for high intensity

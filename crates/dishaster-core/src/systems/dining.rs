@@ -129,13 +129,14 @@ pub fn update_diner_states(
 /// Sets their initial position and transitions them to observing.
 fn handle_entering(
     movement: &mut Movement,
-    canteen: &Canteen,
+    _canteen: &Canteen,
     nav_grid: &NavigationGrid,
     rng: &mut GameRng,
 ) -> DinerStateType {
     // Spawn already sets pos; here we ensure the first wander target is reasonable.
     let spot = find_valid_spot_near(movement.pos, WANDER_RADIUS, nav_grid, rng);
-    let target_pos = clamp_to_canteen_with_margin(spot, canteen);
+    // let target_pos = clamp_to_canteen_with_margin(spot, canteen);
+    let target_pos = spot;
     movement.compute_new_path(target_pos, nav_grid);
 
     DinerStateType::Observing
@@ -623,6 +624,7 @@ impl Movement {
             start: self.pos,
             end: target,
             radius: self.radius,
+            impatience: self.impatience,
             grid: nav_grid,
         }) {
             self.path = path;

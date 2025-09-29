@@ -21,6 +21,8 @@ pub struct Movement {
     pub next_waypoint: Vec2,
     /// The radius of the agent for collision avoidance.
     pub radius: f32,
+    /// How impatient the agent is (0.0 = patient, 1.0 = very impatient).
+    pub impatience: f32,
 }
 
 impl Default for Movement {
@@ -34,6 +36,7 @@ impl Default for Movement {
             path: Default::default(),
             next_waypoint: Vec2::ZERO,
             radius: 0.0,
+            impatience: 1.0,
         }
     }
 }

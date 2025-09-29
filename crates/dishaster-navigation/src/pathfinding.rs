@@ -12,6 +12,9 @@ pub struct PathRequest<'a> {
     pub end: Vec2,
     /// The radius of the agent requesting the path.
     pub radius: f32,
+    /// How impatient the agent is (0.0 = patient, 1.0 = very impatient).
+    /// This affects how much the agent avoids crowded areas.
+    pub impatience: f32,
     /// The collision grid to use for pathfinding.
     pub grid: &'a NavigationGrid,
 }
@@ -55,7 +58,7 @@ pub fn find_path(request: PathRequest) -> Option<NavPath> {
             neighbors
                 .into_iter()
                 .map(|(n, base)| {
-                    let extra = request.grid.crowd.sample(n) * 100.0;
+                    let extra = request.grid.crowd.sample(n) * request.impatience * 100.0;
                     let cost = base + (extra.ceil() as i32).max(0);
 
                     (n, cost)

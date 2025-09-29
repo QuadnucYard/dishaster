@@ -13,22 +13,16 @@ pub fn build_collision_grid(
 }
 
 /// Rebuild crowd cost field from current diner positions
-pub fn update_crowd_field(
-    diners: Query<(&Movement, &DinerModelComp)>,
-    mut grid: ResMut<ResWrapper<NavigationGrid>>,
-) {
+pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<NavigationGrid>>) {
     grid.crowd.clear();
 
-    // Parameters: influence radius and decay scale based on diner attributes (e.g., patience)
-    for (movement, model) in diners.iter() {
+    for movement in query.iter() {
         let center = movement.pos;
-        let patience = model.attributes.patience.max(0.1);
-        // Larger patience -> prefers more space; increase radius and weight
-        let influence_radius = 2.0 + 4.0 * patience; // meters
-        let max_extra = 5.0 * patience; // peak extra cost at center
+        let influence_radius = movement.radius * 5.0;
+        let r2 = influence_radius.squared();
+        let max_extra = movement.radius * 5.0; // todo: improve model
 
         // Compute bounding tiles
-        // TODO: here we borrows grid from collision grid, which may be buggy when they have different grid sizes.
         let tile_radius = world_to_tile_dist(influence_radius, grid.cell_size()).ceil() as i32;
         let center_tile = grid.world_to_igrid(center);
         for dx in -tile_radius..=tile_radius {
@@ -38,9 +32,8 @@ pub fn update_crowd_field(
                 };
                 let d2 = center.distance_squared(grid.tile_to_world(t));
                 if d2 <= influence_radius.squared() {
-                    // Smooth decay: extra = max_extra * (1 - (d/r)^2)
-                    let r = influence_radius.max(0.001);
-                    let extra = max_extra * (1.0f32 - d2 / r.squared()).max(0.0f32);
+                    // Smooth decay: extra = m * (r / d)^2
+                    let extra = max_extra * (r2 / (d2 + 1.0));
                     grid.crowd.add_cost(t, extra);
                 }
             }

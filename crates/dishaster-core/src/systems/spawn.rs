@@ -153,6 +153,8 @@ fn spawn_diner(
                 pos,
                 target_pos: pos,
                 next_waypoint: pos,
+                radius: rng.random_range(0.2..0.4),
+                impatience: rng.random_range(0.0..1.0),
                 ..Default::default()
             },
         },
