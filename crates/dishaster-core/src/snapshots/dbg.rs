@@ -1,5 +1,6 @@
 use std::num::NonZero;
 
+use dishaster_navigation::NavigationGrid;
 use dishrupt_core::EntityId;
 
 use crate::{components::*, prelude::*, resources::*, sim::Simulation};
@@ -10,7 +11,7 @@ pub struct DebugFeatureFlags {
     /// Include per-agent movement debug data.
     pub movement: bool,
     /// Include collision grid occupancy visualization data.
-    pub collision_grid: bool,
+    pub nav_grid: bool,
     /// Include crowd cost field visualization data.
     pub crowd_field: bool,
 }
@@ -20,7 +21,7 @@ impl DebugFeatureFlags {
     pub const fn all() -> Self {
         Self {
             movement: true,
-            collision_grid: true,
+            nav_grid: true,
             crowd_field: true,
         }
     }
@@ -29,7 +30,7 @@ impl DebugFeatureFlags {
     pub const fn none() -> Self {
         Self {
             movement: false,
-            collision_grid: false,
+            nav_grid: false,
             crowd_field: false,
         }
     }
@@ -81,7 +82,7 @@ pub struct CrowdFieldDebugSnapshot {
 
 impl Simulation {
     pub(crate) fn snapshot_movement(&mut self) -> Option<Vec<MovementDebugSnapshot>> {
-        if !self.debug_flags.collision_grid {
+        if !self.debug_flags.nav_grid {
             return None;
         }
 
@@ -93,40 +94,41 @@ impl Simulation {
                     core_id: EntityId(NonZero::new(entity.to_bits()).unwrap()),
                     position: movement.pos,
                     velocity: movement.velocity,
-                    path: movement.path.clone(),
+                    path: movement.path.waypoints.clone(),
                 })
                 .collect(),
         )
     }
 
     pub(crate) fn snapshot_collision(&mut self) -> Option<CollisionGridDebugSnapshot> {
-        if !self.debug_flags.collision_grid {
-            return None;
-        }
+        None
+        // if !self.debug_flags.nav_grid {
+        //     return None;
+        // }
 
-        let grid = self.world.resource::<CollisionGridRes>();
-        let cells = grid.debug_cells();
-        if cells.is_empty() {
-            return None;
-        }
+        // let grid = self.world.resource::<CollisionGridRes>();
+        // let cells = grid.debug_cells();
+        // if cells.is_empty() {
+        //     return None;
+        // }
 
-        let cell_size = grid.cell_size();
-        let size = Vec2::splat(cell_size);
-        Some(CollisionGridDebugSnapshot {
-            cell_size,
-            cells: cells
-                .into_iter()
-                .map(|(coord, count)| {
-                    let center = grid.tile_to_world(coord);
-                    CollisionCellDebugSnapshot {
-                        coord,
-                        center,
-                        size,
-                        occupancy: count as u32,
-                    }
-                })
-                .collect(),
-        })
+        // let cell_size = grid.cell_size();
+        // let size = Vec2::splat(cell_size);
+        // Some(CollisionGridDebugSnapshot {
+        //     cell_size,
+        //     cells: cells
+        //         .into_iter()
+        //         .map(|(coord, count)| {
+        //             let center = grid.tile_to_world(coord);
+        //             CollisionCellDebugSnapshot {
+        //                 coord,
+        //                 center,
+        //                 size,
+        //                 occupancy: count as u32,
+        //             }
+        //         })
+        //         .collect(),
+        // })
     }
 
     pub(crate) fn snapshot_crowd(&mut self) -> Option<CrowdFieldDebugSnapshot> {
@@ -134,15 +136,14 @@ impl Simulation {
             return None;
         }
 
-        let field = self.world.resource::<CrowdFieldRes>();
+        let field = &self.world.resource::<ResWrapper<NavigationGrid>>().crowd;
 
         let cell_size = field.cell_size();
         let dimensions = field.tile_dimensions();
-        let origin = field.tile_bounds().map(|(min, _)| min).unwrap_or_default();
         let tiles = field.costs().flatten().clone();
         Some(CrowdFieldDebugSnapshot {
             cell_size,
-            origin,
+            origin: Default::default(),
             dimensions,
             costs: tiles,
         })

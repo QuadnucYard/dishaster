@@ -26,6 +26,13 @@ pub struct CanteenModel {
     pub display: DisplayModel,
 }
 
+impl CanteenModel {
+    /// Get the size of the canteen as a 2D vector (width, height)
+    pub fn size(&self) -> Vec2 {
+        Vec2::new(self.width, self.height)
+    }
+}
+
 impl HasId for CanteenModel {
     fn id(&self) -> &ModelId {
         &self.id

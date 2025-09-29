@@ -9,7 +9,7 @@ use grid::Grid;
 use crate::prelude::*;
 
 /// Tile coordinate in the collision grid
-pub type Tile = IVec2;
+pub type Tile = UVec2;
 
 type Cost = f32;
 
@@ -19,20 +19,18 @@ pub struct CrowdCostField {
     grid: Grid<Cost>,
     cell_size: f32,
     tile_dims: USizeVec2,
-    origin: IVec2,
 }
 
 impl CrowdCostField {
     /// Create a new crowd field for the provided world size.
-    pub fn new(world_width: f32, world_height: f32, cell_size: f32) -> Self {
+    pub fn new(world_size: Vec2, cell_size: f32) -> Self {
         let cell_size = cell_size.max(0.001);
-        let dims = Self::tile_counts(world_width, world_height, cell_size);
+        let dims = Self::tile_counts(world_size.x, world_size.y, cell_size);
 
         Self {
             grid: Grid::new(dims.y, dims.x),
             cell_size,
             tile_dims: dims,
-            origin: IVec2::ZERO,
         }
     }
 
@@ -68,15 +66,6 @@ impl CrowdCostField {
         &self.grid
     }
 
-    /// Bounds of the covered tile grid.
-    pub fn tile_bounds(&self) -> Option<(IVec2, IVec2)> {
-        if self.tile_dims.x == 0 || self.tile_dims.y == 0 {
-            return None;
-        }
-        let max = self.origin + self.tile_dims.as_ivec2();
-        Some((self.origin, max))
-    }
-
     /// Tile dimensions (width, height) of the grid.
     pub fn tile_dimensions(&self) -> USizeVec2 {
         self.tile_dims
@@ -90,19 +79,10 @@ impl CrowdCostField {
     }
 
     fn index(&self, tile: Tile) -> Option<(usize, usize)> {
-        if tile.x < self.origin.x || tile.y < self.origin.y {
+        if tile.x >= self.tile_dims.x as u32 || tile.y >= self.tile_dims.y as u32 {
             return None;
         }
-        let rel_x = tile.x - self.origin.x;
-        let rel_y = tile.y - self.origin.y;
-        if rel_x < 0
-            || rel_x >= self.tile_dims.x as i32
-            || rel_y < 0
-            || rel_y >= self.tile_dims.y as i32
-        {
-            return None;
-        }
-        Some((rel_y as usize, rel_x as usize))
+        Some((tile.y as usize, tile.x as usize))
     }
 }
 

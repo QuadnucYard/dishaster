@@ -3,9 +3,6 @@
 
 use crate::models::Meters;
 
-/// Physical width/height of a diner collider (square) in meters
-pub const DINER_COLLIDER_SIZE: Meters = 0.4;
-
 /// How close counts as "arrived" when observing a spot (meters)
 pub const OBSERVATION_ARRIVAL_EPS: Meters = 1.5;
 
@@ -28,9 +25,6 @@ pub const WINDOW_APPROACH_OFFSET: Meters = 0.6;
 /// How close to an exit counts as leaving (meters)
 pub const EXIT_ARRIVAL_EPS: Meters = 1.0;
 
-/// Typical human walking speed in meters per second (Chinese canteen context)
-pub const DINER_SPEED_MPS: Meters = 1.35;
-
 /// Waypoint arrival tolerance when following a path (meters)
 pub const PATH_WAYPOINT_EPS: Meters = 0.3;
 
@@ -45,9 +39,6 @@ pub const DINING_AREA_MARGIN: Meters = 1.0;
 
 /// How close counts as sitting down at a table (meters)
 pub const TABLE_SEAT_ARRIVAL_EPS: Meters = 0.45;
-
-/// Radius used to place seats around a table (meters added beyond half table size)
-pub const TABLE_SEAT_CLEARANCE: Meters = 0.4;
 
 /// Time a diner spends eating before leaving the table (seconds)
 pub const BASE_EATING_DURATION_S: f32 = 90.0;

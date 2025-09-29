@@ -39,13 +39,10 @@ impl Simulation {
         let root_entity = world.spawn(Transform::default()).id();
         world.insert_resource(DisplayRoot(root_entity));
 
-        world.insert_resource(GameModelRegistryRes::from(db));
-        world.insert_resource(CollisionGridRes::from(CollisionGrid::new(0.1)));
+        world.insert_resource(db.into_res());
 
         schedule.add_systems(
             (
-                // Keep grid current for pathfinding and validation (uses last tick's positions)
-                update_collision_grid,
                 // Recompute soft crowd costs for pathfinding
                 update_crowd_field,
                 // Spawn logic may add diners
@@ -94,12 +91,12 @@ impl Simulation {
 
         let db = (*self.world.resource::<GameModelRegistryRes>()).clone();
         let canteen = db.canteens.get_by_id(&level.canteen).unwrap();
+
+        let world_size = canteen.size();
         self.world
-            .insert_resource(CrowdFieldRes::from(CrowdCostField::new(
-                canteen.width,
-                canteen.height,
-                0.1,
-            )));
+            .insert_resource(NavigationGrid::new(world_size, 0.1).into_res());
+        self.world
+            .insert_resource(CrowdCostField::new(world_size, 0.1).into_res());
 
         self.world.insert_resource(Canteen {
             model: canteen.clone(),
@@ -135,11 +132,11 @@ impl Simulation {
             spawning_finished: false,
         });
         self.world.insert_resource(DayStatus::default());
-        self.world.insert_resource(LevelConfigRes::from(level));
+        self.world.insert_resource(level.into_res());
 
         // Spawn static objects once at startup
         let mut schedule = Schedule::default();
-        schedule.add_systems(spawn_static_objects);
+        schedule.add_systems((spawn_static_objects, build_collision_grid));
         schedule.run(&mut self.world);
     }
 

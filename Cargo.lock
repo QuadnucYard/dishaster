@@ -218,7 +218,7 @@ dependencies = [
  "approx",
  "bevy_reflect",
  "derive_more",
- "glam",
+ "glam 0.30.8",
  "itertools",
  "rand",
  "rand_distr",
@@ -269,7 +269,7 @@ dependencies = [
  "downcast-rs",
  "erased-serde",
  "foldhash",
- "glam",
+ "glam 0.30.8",
  "serde",
  "smallvec",
  "smol_str",
@@ -517,6 +517,8 @@ name = "dishaster-navigation"
 version = "0.1.0"
 dependencies = [
  "bevy_math",
+ "dodgy",
+ "edt",
  "grid",
  "pathfinding",
  "rustc-hash",
@@ -583,6 +585,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c9c272297e804878a2a4b707cfcfc6d2328b5bb936944613b4fdf2b9269afdfd"
 
 [[package]]
+name = "dodgy"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed9c6b55f0291c3142ac9e4c29bf70ef7145b706e9a3a0b22e64f3ddb7c2eea4"
+dependencies = [
+ "glam 0.25.0",
+]
+
+[[package]]
 name = "downcast-rs"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -596,6 +607,12 @@ checksum = "78e4f79b296fbaab6ce2e22d52cb4c7f010fe0ebe7a32e34fa25885fd797bd02"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "edt"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0f0a192161cae710201120b9a2649b40e9af9fd9a2cb4915c06167b46e4a909"
 
 [[package]]
 name = "either"
@@ -763,6 +780,12 @@ dependencies = [
 
 [[package]]
 name = "glam"
+version = "0.25.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3"
+
+[[package]]
+name = "glam"
 version = "0.30.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e12d847aeb25f41be4c0ec9587d624e9cd631bc007a8fd7ce3f5851e064c6460"
@@ -811,7 +834,7 @@ name = "godot-core"
 version = "0.3.5"
 source = "git+https://github.com/godot-rust/gdext?rev=9da0f54#9da0f54b422d4d0e4a6fa2e76671842f51304b11"
 dependencies = [
- "glam",
+ "glam 0.30.8",
  "godot-bindings",
  "godot-cell",
  "godot-codegen",

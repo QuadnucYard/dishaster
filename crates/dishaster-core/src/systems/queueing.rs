@@ -116,7 +116,6 @@ pub fn update_window_queues(
             movement.path.clear();
             movement.path.push(target);
             movement.next_waypoint = target;
-            movement.ignoring_collisions = false;
         }
     }
 

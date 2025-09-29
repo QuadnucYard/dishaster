@@ -153,14 +153,9 @@ fn spawn_diner(
                 pos,
                 target_pos: pos,
                 next_waypoint: pos,
-                last_pos: pos,
                 ..Default::default()
             },
         },
-        BoxCollider(dishaster_navigation::BoxCollider {
-            center: pos,
-            size: Vec2::new(DINER_COLLIDER_SIZE, DINER_COLLIDER_SIZE),
-        }),
         DisplayState {
             proto: model.display.res.clone(),
             ..Default::default()
@@ -172,4 +167,34 @@ fn spawn_diner(
         },
         DinerModelComp::from(model),
     ));
+}
+
+/// System to clean up diners who have left.
+pub fn despawn_leaving_diners(
+    mut commands: Commands,
+    query: Query<(Entity, &Diner, &DinerState, &Movement)>,
+    canteen: Res<Canteen>,
+) {
+    for (entity, diner, state, movement) in query.iter() {
+        if state.current != DinerStateType::Leaving {
+            continue;
+        }
+        // Check if diner has reached any of the exits.
+        // If close enough to any exit point on an entrance range, despawn.
+        let reached_exit = canteen.model.entrances.iter().any(|xr| {
+            let clamped_x = movement.pos.x.clamp(xr.x_min, xr.x_max);
+            let exit_point = Vec2::new(clamped_x, canteen.model.entrances_y);
+            movement.pos.distance(exit_point) < EXIT_ARRIVAL_EPS
+        });
+        if reached_exit {
+            log::info!(
+                target: "diner",
+                "despawn: id={} pos=({:.2},{:.2})",
+                diner.id,
+                movement.pos.x,
+                movement.pos.y
+            );
+            commands.entity(entity).despawn();
+        }
+    }
 }

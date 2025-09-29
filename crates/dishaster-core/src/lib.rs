@@ -1,7 +1,7 @@
 //! Dishaster core logic and data structures
 
 pub mod components;
-pub mod constants;
+pub(crate) mod constants;
 pub mod resources;
 pub mod sim;
 pub mod snapshots;

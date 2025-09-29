@@ -1,9 +1,6 @@
 use std::cmp::Ordering;
 
-use bevy_ecs::system::ParamSet;
-use bevy_math::IVec2;
-use dishaster_navigation::{PathRequest, find_path};
-use rand::seq::SliceRandom;
+use dishaster_navigation::{NavigationGrid, PathRequest, find_path};
 
 use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 
@@ -36,7 +33,7 @@ pub fn update_diner_states(
     canteen: Res<Canteen>,
     time: Res<Time>,
     mut rng: ResMut<GameRng>,
-    collision_grid: Res<CollisionGridRes>,
+    nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
     for (entity, mut state, mut targets, diner_model, mut movement, queue_participant) in
         diner_query.iter_mut()
@@ -46,7 +43,7 @@ pub fn update_diner_states(
 
         let next_state = match state.current {
             DinerStateType::Entering => {
-                handle_entering(&mut movement, &canteen, &collision_grid, &mut rng)
+                handle_entering(&mut movement, &canteen, &nav_grid, &mut rng)
             }
             DinerStateType::Observing => handle_observing(
                 &mut state,
@@ -56,7 +53,7 @@ pub fn update_diner_states(
                 &window_query,
                 &canteen,
                 &mut rng,
-                &collision_grid,
+                &nav_grid,
             ),
             DinerStateType::Deciding => {
                 handle_deciding(&mut state, &mut targets, diner_model, &mut rng)
@@ -66,7 +63,7 @@ pub fn update_diner_states(
                 &mut targets,
                 &window_query,
                 &canteen,
-                &collision_grid,
+                &nav_grid,
                 queue_participant,
             ),
             DinerStateType::AtWindow => DinerStateType::Queueing,
@@ -77,8 +74,7 @@ pub fn update_diner_states(
                 &mut state,
                 &mut targets,
                 &mut movement,
-                &canteen,
-                &collision_grid,
+                &nav_grid,
                 &mut rng,
                 &mut table_set,
             ),
@@ -86,22 +82,17 @@ pub fn update_diner_states(
                 entity,
                 &mut movement,
                 &mut targets,
-                &canteen,
-                &collision_grid,
+                &nav_grid,
                 &mut table_set,
             ),
             DinerStateType::Eating => {
                 handle_eating(entity, &mut state, &mut targets, &mut table_set)
             }
-            DinerStateType::ReturningDishes => handle_returning_dishes(
-                &mut targets,
-                &mut movement,
-                &canteen,
-                &collision_grid,
-                &collector_query,
-            ),
+            DinerStateType::ReturningDishes => {
+                handle_returning_dishes(&mut targets, &mut movement, &nav_grid, &collector_query)
+            }
             DinerStateType::Leaving => {
-                handle_leaving(&mut movement, &canteen, &collision_grid);
+                handle_leaving(&mut movement, &canteen, &nav_grid);
                 DinerStateType::Leaving
             }
         };
@@ -139,35 +130,14 @@ pub fn update_diner_states(
 fn handle_entering(
     movement: &mut Movement,
     canteen: &Canteen,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
     rng: &mut GameRng,
 ) -> DinerStateType {
     // Spawn already sets pos; here we ensure the first wander target is reasonable.
-    let spot = find_valid_spot_near(movement.pos, WANDER_RADIUS, collision_grid, rng);
-    movement.target_pos = clamp_to_canteen_with_margin(spot, canteen);
-    log::trace!(
-        target: "nav",
-        "entering: pos=({:.2},{:.2}) first_target=({:.2},{:.2})",
-        movement.pos.x,
-        movement.pos.y,
-        movement.target_pos.x,
-        movement.target_pos.y
-    );
+    let spot = find_valid_spot_near(movement.pos, WANDER_RADIUS, nav_grid, rng);
+    let target_pos = clamp_to_canteen_with_margin(spot, canteen);
+    movement.compute_new_path(target_pos, nav_grid);
 
-    if let Some(path) = find_path(PathRequest {
-        start: movement.pos,
-        end: movement.target_pos,
-        grid: collision_grid,
-        world_width: canteen.model.width,
-        world_height: canteen.model.height,
-        crowd: None,
-    }) {
-        movement.path = path;
-        movement.ignoring_collisions = false;
-        log::trace!(target: "nav", "entering: path_len={}", movement.path.len());
-    } else {
-        log::debug!(target: "nav", "entering: no path");
-    }
     DinerStateType::Observing
 }
 
@@ -180,7 +150,7 @@ fn handle_observing(
     window_query: &Query<(Entity, &Window)>,
     canteen: &Canteen,
     rng: &mut GameRng,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
 ) -> DinerStateType {
     // If no window is being observed, or if we've been observing for too long, pick a new one.
     if targets.observing_window.is_none()
@@ -202,31 +172,18 @@ fn handle_observing(
         // Find a valid observation spot near the window.
         let observation_center = Vec2::new(window.position.center(), canteen.model.windows_y);
         let observation_spot =
-            find_valid_spot_near(observation_center, WANDER_RADIUS, collision_grid, rng);
+            find_valid_spot_near(observation_center, WANDER_RADIUS, nav_grid, rng);
         // Clamp to bounds just in case
-        movement.target_pos = clamp_to_canteen_with_margin(observation_spot, canteen);
+        let target_pos = clamp_to_canteen_with_margin(observation_spot, canteen);
         log::trace!(
             target: "nav",
             "observing: window={:?} target=({:.2},{:.2})",
             window_entity,
-            movement.target_pos.x,
-            movement.target_pos.y
+            target_pos.x,
+            target_pos.y
         );
 
-        if let Some(path) = find_path(PathRequest {
-            start: movement.pos,
-            end: movement.target_pos,
-            grid: collision_grid,
-            world_width: canteen.model.width,
-            world_height: canteen.model.height,
-            crowd: None,
-        }) {
-            movement.path = path;
-            movement.ignoring_collisions = false;
-            log::trace!(target: "nav", "observing: path_len={}", movement.path.len());
-        } else {
-            log::debug!(target: "nav", "observing: no path");
-        }
+        movement.compute_new_path(target_pos, nav_grid);
         state.state_timer = 0.0; // Reset timer for new observation
     }
 
@@ -280,7 +237,7 @@ fn handle_moving_to_window(
     targets: &mut DinerTargets,
     window_query: &Query<(Entity, &Window)>,
     canteen: &Canteen,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
     queue_participant: Option<&QueueParticipant>,
 ) -> DinerStateType {
     let Some(window_entity) = targets.chosen_window else {
@@ -302,17 +259,7 @@ fn handle_moving_to_window(
             (canteen.model.windows_y - WINDOW_APPROACH_OFFSET).clamp(0.0, canteen.model.height),
         );
         if movement.target_pos.distance_squared(fallback) > 0.05 || movement.path.is_empty() {
-            if let Some(plan) =
-                compute_path_with_fallback(movement.pos, fallback, canteen, collision_grid)
-            {
-                movement.target_pos = plan.goal;
-                movement.path = plan.path;
-                movement.ignoring_collisions = false;
-            } else {
-                movement.target_pos = fallback;
-                movement.path = direct_path_fallback(movement.pos, fallback);
-                movement.ignoring_collisions = true;
-            }
+            movement.compute_new_path(fallback, nav_grid);
         }
         return DinerStateType::MovingToWindow;
     }
@@ -364,8 +311,7 @@ fn handle_finding_seat(
     state: &mut DinerState,
     targets: &mut DinerTargets,
     movement: &mut Movement,
-    canteen: &Canteen,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
     rng: &mut GameRng,
     table_set: &mut ParamSet<(
         Query<(Entity, &DiningTable)>,
@@ -470,16 +416,7 @@ fn handle_finding_seat(
     targets.chosen_seat = Some(seat_index);
     targets.collector_target = None;
 
-    if let Some(plan) = compute_path_with_fallback(movement.pos, seat_pos, canteen, collision_grid)
-    {
-        movement.target_pos = plan.goal;
-        movement.path = plan.path;
-        movement.ignoring_collisions = false;
-    } else {
-        movement.target_pos = seat_pos;
-        movement.path = direct_path_fallback(movement.pos, seat_pos);
-        movement.ignoring_collisions = true;
-    }
+    movement.compute_new_path(seat_pos, nav_grid);
 
     log::trace!(
         target: "diner",
@@ -497,8 +434,7 @@ fn handle_moving_to_seat(
     entity: Entity,
     movement: &mut Movement,
     targets: &mut DinerTargets,
-    canteen: &Canteen,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
     table_set: &mut ParamSet<(
         Query<(Entity, &DiningTable)>,
         Query<(Entity, &mut DiningTable)>,
@@ -527,17 +463,7 @@ fn handle_moving_to_seat(
         }
     };
     if movement.path.is_empty() && movement.target_pos.distance(seat_pos) > TABLE_SEAT_ARRIVAL_EPS {
-        if let Some(plan) =
-            compute_path_with_fallback(movement.pos, seat_pos, canteen, collision_grid)
-        {
-            movement.target_pos = plan.goal;
-            movement.path = plan.path;
-            movement.ignoring_collisions = false;
-        } else {
-            movement.target_pos = seat_pos;
-            movement.path = direct_path_fallback(movement.pos, seat_pos);
-            movement.ignoring_collisions = true;
-        }
+        movement.compute_new_path(seat_pos, nav_grid);
     }
 
     if movement.pos.distance(seat_pos) <= TABLE_SEAT_ARRIVAL_EPS {
@@ -599,8 +525,7 @@ fn handle_eating(
 fn handle_returning_dishes(
     targets: &mut DinerTargets,
     movement: &mut Movement,
-    canteen: &Canteen,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
     collector_query: &Query<(Entity, &DishCollector)>,
 ) -> DinerStateType {
     if collector_query.is_empty() {
@@ -625,17 +550,7 @@ fn handle_returning_dishes(
         };
 
         targets.collector_target = Some(collector_entity);
-        if let Some(plan) =
-            compute_path_with_fallback(movement.pos, target_pos, canteen, collision_grid)
-        {
-            movement.target_pos = plan.goal;
-            movement.path = plan.path;
-            movement.ignoring_collisions = false;
-        } else {
-            movement.target_pos = target_pos;
-            movement.path = direct_path_fallback(movement.pos, target_pos);
-            movement.ignoring_collisions = true;
-        }
+        movement.compute_new_path(target_pos, nav_grid);
         return DinerStateType::ReturningDishes;
     }
 
@@ -653,24 +568,14 @@ fn handle_returning_dishes(
 
     if movement.path.is_empty() || movement.target_pos.distance(target_pos) > COLLECTOR_ARRIVAL_EPS
     {
-        if let Some(plan) =
-            compute_path_with_fallback(movement.pos, target_pos, canteen, collision_grid)
-        {
-            movement.target_pos = plan.goal;
-            movement.path = plan.path;
-            movement.ignoring_collisions = false;
-        } else {
-            movement.target_pos = target_pos;
-            movement.path = direct_path_fallback(movement.pos, target_pos);
-            movement.ignoring_collisions = true;
-        }
+        movement.compute_new_path(target_pos, nav_grid);
     }
 
     DinerStateType::ReturningDishes
 }
 
 /// Handles the diner leaving the canteen.
-fn handle_leaving(movement: &mut Movement, canteen: &Canteen, collision_grid: &CollisionGridRes) {
+fn handle_leaving(movement: &mut Movement, canteen: &Canteen, nav_grid: &NavigationGrid) {
     // Entrances also serve as exits. Compute nearest point on any entrance XRange at Y = entrances_y.
     let mut best_point: Option<Vec2> = None;
     let mut best_dist_sq: f32 = f32::INFINITY;
@@ -691,17 +596,25 @@ fn handle_leaving(movement: &mut Movement, canteen: &Canteen, collision_grid: &C
             exit_point.x.clamp(0.0, canteen.model.width),
             exit_point.y.clamp(0.0, canteen.model.height),
         );
-        if let Some(plan) =
-            compute_path_with_fallback(movement.pos, exit_target, canteen, collision_grid)
-        {
-            movement.target_pos = plan.goal;
-            movement.path = plan.path;
-            movement.ignoring_collisions = false;
+        movement.compute_new_path(exit_target, nav_grid);
+    }
+}
+
+impl Movement {
+    /// Computes a new path to the specified target, updating the target position and path.
+    /// If no valid path is found, the path is cleared.
+    pub fn compute_new_path(&mut self, target: Vec2, nav_grid: &NavigationGrid) {
+        if let Some(path) = find_path(PathRequest {
+            start: self.pos,
+            end: target,
+            radius: self.radius,
+            grid: nav_grid,
+        }) {
+            self.path = path;
         } else {
-            movement.target_pos = exit_target;
-            movement.path = direct_path_fallback(movement.pos, exit_target);
-            movement.ignoring_collisions = true;
+            self.path.clear();
         }
+        self.target_pos = target;
     }
 }
 
@@ -710,7 +623,7 @@ fn handle_leaving(movement: &mut Movement, canteen: &Canteen, collision_grid: &C
 fn find_valid_spot_near(
     center: Vec2,
     radius: Meters,
-    _collision_grid: &CollisionGridRes,
+    _collision_grid: &NavigationGrid,
     rng: &mut GameRng,
 ) -> Vec2 {
     for _ in 0..FIND_SPOT_ATTEMPTS {
@@ -750,6 +663,7 @@ fn clamp_to_canteen_with_margin(point: Vec2, canteen: &Canteen) -> Vec2 {
     Vec2::new(point.x.clamp(min_x, max_x), point.y.clamp(min_y, max_y))
 }
 
+/*
 struct PathPlan {
     path: Vec<Vec2>,
     goal: Vec2,
@@ -759,12 +673,12 @@ fn compute_path_with_fallback(
     start: Vec2,
     target: Vec2,
     canteen: &Canteen,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
 ) -> Option<PathPlan> {
     if let Some(path) = find_path(PathRequest {
         start,
         end: target,
-        grid: collision_grid,
+        grid: nav_grid,
         world_width: canteen.model.width,
         world_height: canteen.model.height,
         crowd: None,
@@ -772,11 +686,11 @@ fn compute_path_with_fallback(
         return Some(PathPlan { path, goal: target });
     }
 
-    if let Some(open_point) = nearest_open_point(target, canteen, collision_grid, 6)
+    if let Some(open_point) = nearest_open_point(target, canteen, nav_grid, 6)
         && let Some(path) = find_path(PathRequest {
             start,
             end: open_point,
-            grid: collision_grid,
+            grid: nav_grid,
             world_width: canteen.model.width,
             world_height: canteen.model.height,
             crowd: None,
@@ -794,11 +708,11 @@ fn compute_path_with_fallback(
 fn nearest_open_point(
     target: Vec2,
     canteen: &Canteen,
-    collision_grid: &CollisionGridRes,
+    nav_grid: &NavigationGrid,
     max_radius: i32,
 ) -> Option<Vec2> {
-    let target_tile = collision_grid.world_to_grid(target);
-    if !collision_grid.is_occupied(target_tile) {
+    let target_tile = nav_grid.world_to_grid(target);
+    if !nav_grid.is_occupied(target_tile) {
         return Some(target);
     }
 
@@ -809,7 +723,7 @@ fn nearest_open_point(
                     continue;
                 }
                 let tile = target_tile + IVec2::new(dx, dy);
-                let world = collision_grid.tile_to_world(tile);
+                let world = nav_grid.tile_to_world(tile);
                 if world.x < 0.0
                     || world.x > canteen.model.width
                     || world.y < 0.0
@@ -817,7 +731,7 @@ fn nearest_open_point(
                 {
                     continue;
                 }
-                if !collision_grid.is_occupied(tile) {
+                if !nav_grid.is_occupied(tile) {
                     return Some(world);
                 }
             }
@@ -834,33 +748,4 @@ fn direct_path_fallback(start: Vec2, target: Vec2) -> Vec<Vec2> {
         vec![target]
     }
 }
-
-/// System to clean up diners who have left.
-pub fn despawn_leaving_diners(
-    mut commands: Commands,
-    query: Query<(Entity, &Diner, &DinerState, &Movement)>,
-    canteen: Res<Canteen>,
-) {
-    for (entity, diner, state, movement) in query.iter() {
-        if state.current != DinerStateType::Leaving {
-            continue;
-        }
-        // Check if diner has reached any of the exits.
-        // If close enough to any exit point on an entrance range, despawn.
-        let reached_exit = canteen.model.entrances.iter().any(|xr| {
-            let clamped_x = movement.pos.x.clamp(xr.x_min, xr.x_max);
-            let exit_point = Vec2::new(clamped_x, canteen.model.entrances_y);
-            movement.pos.distance(exit_point) < EXIT_ARRIVAL_EPS
-        });
-        if reached_exit {
-            log::info!(
-                target: "diner",
-                "despawn: id={} pos=({:.2},{:.2})",
-                diner.id,
-                movement.pos.x,
-                movement.pos.y
-            );
-            commands.entity(entity).despawn();
-        }
-    }
-}
+ */
