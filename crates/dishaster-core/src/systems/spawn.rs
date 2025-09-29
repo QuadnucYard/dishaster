@@ -152,7 +152,6 @@ fn spawn_diner(
             movement: Movement {
                 pos,
                 target_pos: pos,
-                next_waypoint: pos,
                 radius: rng.random_range(0.2..0.4),
                 impatience: rng.random_range(0.0..1.0),
                 ..Default::default()
@@ -167,7 +166,7 @@ fn spawn_diner(
             parent: Modified::new(Some(display_root.0)),
             ..Default::default()
         },
-        DinerModelComp::from(model),
+        model.into_comp(),
     ));
 }
 

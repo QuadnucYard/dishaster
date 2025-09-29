@@ -57,6 +57,10 @@ pub fn update_agent_movement(
     let stop_eps = 0.5; // Distance to target to stop moving
 
     let get_next_velocity = |movement: &Movement| -> Vec2 {
+        if !movement.is_moving {
+            return Vec2::ZERO;
+        }
+
         let displacement = movement.target_pos - movement.pos;
 
         // Immediate stop if very close to target
@@ -85,7 +89,7 @@ pub fn update_agent_movement(
         .map(|m| dishaster_navigation::Agent {
             position: m.pos,
             velocity: get_next_velocity(m),
-            goal: m.next_waypoint,
+            goal: m.path.next().unwrap_or(m.target_pos),
             radius: m.radius,
             max_velocity: m.walking_speed * m.speed_factor,
             avoidance_responsibility: 1.0, // TODO
@@ -96,18 +100,20 @@ pub fn update_agent_movement(
 
     // Apply new velocities and update positions
     for (mut movement, velocity) in query.iter_mut().zip(new_velocities) {
+        if !movement.is_moving {
+            movement.velocity = Vec2::ZERO;
+            continue;
+        }
+
         // Update position by velocity
         movement.velocity = velocity;
         movement.pos += velocity * dt;
 
         // Update next_waypoint
-        if let Some(next) = movement.path.next() {
-            movement.next_waypoint = next;
-            if movement.pos.close_to(next, waypoint_eps) {
-                movement.path.pop();
-            }
-        } else {
-            movement.next_waypoint = movement.target_pos;
+        if let Some(next) = movement.path.next()
+            && movement.pos.close_to(next, waypoint_eps)
+        {
+            movement.path.pop();
         }
     }
 }

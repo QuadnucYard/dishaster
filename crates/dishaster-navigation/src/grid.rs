@@ -109,6 +109,12 @@ impl NavigationGrid {
             > radius + Self::CLEARANCE_EPS
     }
 
+    /// Check if a world position is traversable given an entity radius
+    pub fn is_pos_traversable(&self, pos: Vec2, radius: f32) -> bool {
+        self.try_world_to_grid(pos)
+            .is_some_and(|cell| self.is_traversable(cell, radius))
+    }
+
     /// Rebuild the spatial grid from current collider positions
     ///
     /// This should be called every frame or when entities move to keep

@@ -15,9 +15,6 @@ pub const QUEUE_SPACING: Meters = 0.5;
 /// Radius used when picking a wander/observation target (meters)
 pub const WANDER_RADIUS: Meters = 6.0;
 
-/// Attempts when searching for a valid (non-colliding) random spot
-pub const FIND_SPOT_ATTEMPTS: usize = 12;
-
 /// Forward offset (in +Y) from the window line to approach and order (meters)
 /// Represents the distance a diner stands from the counter to order.
 pub const WINDOW_APPROACH_OFFSET: Meters = 0.6;

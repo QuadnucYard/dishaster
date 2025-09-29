@@ -20,7 +20,7 @@ pub fn update_diner_states(
         Entity,
         &mut DinerState,
         &mut DinerTargets,
-        &DinerModelComp,
+        &CompWrapper<DinerModel>,
         &mut Movement,
         Option<&QueueParticipant>,
     )>,
@@ -42,9 +42,7 @@ pub fn update_diner_states(
         state.state_timer += time.tick_duration as f32;
 
         let next_state = match state.current {
-            DinerStateType::Entering => {
-                handle_entering(&mut movement, &canteen, &nav_grid, &mut rng)
-            }
+            DinerStateType::Entering => handle_entering(&mut movement, &nav_grid, &mut rng),
             DinerStateType::Observing => handle_observing(
                 &mut state,
                 &mut targets,
@@ -129,13 +127,11 @@ pub fn update_diner_states(
 /// Sets their initial position and transitions them to observing.
 fn handle_entering(
     movement: &mut Movement,
-    _canteen: &Canteen,
     nav_grid: &NavigationGrid,
     rng: &mut GameRng,
 ) -> DinerStateType {
     // Spawn already sets pos; here we ensure the first wander target is reasonable.
     let spot = find_valid_spot_near(movement.pos, WANDER_RADIUS, nav_grid, rng);
-    // let target_pos = clamp_to_canteen_with_margin(spot, canteen);
     let target_pos = spot;
     movement.compute_new_path(target_pos, nav_grid);
 
@@ -640,19 +636,21 @@ impl Movement {
 fn find_valid_spot_near(
     center: Vec2,
     radius: Meters,
-    _collision_grid: &NavigationGrid,
+    nav_grid: &NavigationGrid,
     rng: &mut GameRng,
 ) -> Vec2 {
+    /// Attempts when searching for a valid (non-colliding) random spot
+    pub const FIND_SPOT_ATTEMPTS: usize = 12;
+
     for _ in 0..FIND_SPOT_ATTEMPTS {
         let angle = rng.random_range(0.0..std::f32::consts::PI * 2.0);
         let distance = rng.random_range(radius * 0.5..radius);
-        let point = center + Vec2::new(angle.cos() * distance, angle.sin() * distance);
-        // Clamp to a reasonable positive range; caller may further clamp to canteen bounds.
-        if point.x.is_nan() || point.y.is_nan() {
-            continue;
+        let point = center + Vec2::from_angle(angle) * distance;
+
+        if nav_grid.is_pos_traversable(point, 0.3) {
+            // TODO: use actual diner radius
+            return point;
         }
-        // Skip occupancy check to speed up; dynamic occupancy ignored in pathfinding anyway.
-        return point;
     }
     center // Fallback
 }
