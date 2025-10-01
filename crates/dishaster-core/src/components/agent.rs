@@ -14,16 +14,14 @@ pub struct Movement {
     /// How impatient the agent is (0.0 = patient, 1.0 = very impatient).
     pub impatience: f32,
 
-    /// Whether the agent is currently moving
-    pub is_moving: bool,
     /// Current position in the canteen
     pub pos: Vec2,
-    /// The final destination the agent is moving towards.
-    pub target_pos: Vec2,
     /// Current velocity vector
     pub velocity: Vec2,
     /// The calculated path to the target_pos.
     pub path: NavPath,
+    /// The target position to move towards.
+    pub pending_target: Option<Vec2>,
     /// The last tick when the path was calculated.
     pub last_path_tick: u32,
 }
@@ -36,12 +34,18 @@ impl Default for Movement {
             radius: 0.0,
             impatience: 1.0,
 
-            is_moving: false,
             pos: Vec2::ZERO,
-            target_pos: Vec2::ZERO,
             velocity: Vec2::ZERO,
             path: Default::default(),
+            pending_target: None,
             last_path_tick: 0,
         }
+    }
+}
+
+impl Movement {
+    /// Returns true if the agent has a path to follow, or is en route to a target.
+    pub fn has_path(&self) -> bool {
+        !self.path.is_empty() || self.pending_target.is_some()
     }
 }

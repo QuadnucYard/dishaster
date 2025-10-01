@@ -3,12 +3,6 @@
 
 use crate::models::Meters;
 
-/// How close counts as "arrived" when observing a spot (meters)
-pub const OBSERVATION_ARRIVAL_EPS: Meters = 1.5;
-
-/// How close counts as "arrived" when queuing at a window (meters)
-pub const QUEUE_ARRIVAL_EPS: Meters = 0.6;
-
 /// Spacing between customers standing in the same queue (meters)
 pub const QUEUE_SPACING: Meters = 0.5;
 

@@ -1,6 +1,11 @@
+//! Diner behavior and state machine system.
+//!
+//! In each state handler, we only process the logic relevant to that state.
+//! Transitional actions are put in transition functions.
+
 use std::cmp::Ordering;
 
-use dishaster_navigation::{NavigationGrid, PathRequest, find_path};
+use dishaster_navigation::NavigationGrid;
 
 use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 
@@ -61,36 +66,30 @@ pub fn update_diner_states(
                 &mut targets,
                 &window_query,
                 &canteen,
-                &nav_grid,
                 queue_participant,
             ),
             DinerStateType::AtWindow => DinerStateType::Queueing,
-            DinerStateType::Queueing => handle_queueing(&mut state, &movement, queue_participant),
+            DinerStateType::Queueing => handle_queueing(&movement, queue_participant),
             DinerStateType::BeingServed => handle_being_served(&mut state),
             DinerStateType::FindingSeat => handle_finding_seat(
                 entity,
                 &mut state,
                 &mut targets,
                 &mut movement,
-                &nav_grid,
                 &mut rng,
                 &mut table_set,
             ),
-            DinerStateType::MovingToSeat => handle_moving_to_seat(
-                entity,
-                &mut movement,
-                &mut targets,
-                &nav_grid,
-                &mut table_set,
-            ),
+            DinerStateType::MovingToSeat => {
+                handle_moving_to_seat(entity, &mut movement, &mut targets, &mut table_set)
+            }
             DinerStateType::Eating => {
                 handle_eating(entity, &mut state, &mut targets, &mut table_set)
             }
             DinerStateType::ReturningDishes => {
-                handle_returning_dishes(&mut targets, &mut movement, &nav_grid, &collector_query)
+                handle_returning_dishes(&mut targets, &mut movement, &collector_query)
             }
             DinerStateType::Leaving => {
-                handle_leaving(&mut movement, &canteen, &nav_grid);
+                handle_leaving(&mut movement, &canteen);
                 DinerStateType::Leaving
             }
         };
@@ -132,8 +131,7 @@ fn handle_entering(
 ) -> DinerStateType {
     // Spawn already sets pos; here we ensure the first wander target is reasonable.
     let spot = find_valid_spot_near(movement.pos, WANDER_RADIUS, nav_grid, rng);
-    let target_pos = spot;
-    movement.compute_new_path(target_pos, nav_grid);
+    movement.request_path(spot);
 
     DinerStateType::Observing
 }
@@ -180,21 +178,12 @@ fn handle_observing(
             target_pos.y
         );
 
-        movement.compute_new_path(target_pos, nav_grid);
+        movement.request_path(target_pos);
         state.state_timer = 0.0; // Reset timer for new observation
     }
 
     // If the diner has reached their observation spot, transition to deciding.
-    if movement
-        .pos
-        .close_to(movement.target_pos, OBSERVATION_ARRIVAL_EPS)
-    {
-        log::trace!(
-            target: "nav",
-            "observing: arrived target=({:.2},{:.2})",
-            movement.target_pos.x,
-            movement.target_pos.y
-        );
+    if !movement.has_path() {
         return DinerStateType::Deciding;
     }
 
@@ -237,7 +226,6 @@ fn handle_moving_to_window(
     targets: &mut DinerTargets,
     window_query: &Query<(Entity, &Window)>,
     canteen: &Canteen,
-    nav_grid: &NavigationGrid,
     queue_participant: Option<&QueueParticipant>,
 ) -> DinerStateType {
     let Some(window_entity) = targets.chosen_window else {
@@ -258,23 +246,13 @@ fn handle_moving_to_window(
             window.position.center(),
             (canteen.model.windows_y - WINDOW_APPROACH_OFFSET).clamp(0.0, canteen.model.height),
         );
-        if movement.path.is_empty() || !movement.target_pos.close_to(fallback, 0.2) {
-            movement.compute_new_path(fallback, nav_grid);
+        if !movement.has_path() {
+            movement.request_path(fallback);
         }
         return DinerStateType::MovingToWindow;
     }
 
-    if movement
-        .pos
-        .close_to(movement.target_pos, QUEUE_ARRIVAL_EPS)
-    {
-        log::trace!(
-            target: "diner",
-            "joined_queue: window={:?} pos=({:.2},{:.2})",
-            window_entity,
-            movement.pos.x,
-            movement.pos.y
-        );
+    if !movement.has_path() {
         return DinerStateType::Queueing;
     }
 
@@ -283,17 +261,13 @@ fn handle_moving_to_window(
 
 /// Handles diners waiting in the queue until they reach the counter.
 fn handle_queueing(
-    _state: &mut DinerState,
     movement: &Movement,
     queue_participant: Option<&QueueParticipant>,
 ) -> DinerStateType {
     if let Some(queue) = queue_participant
         && queue.slot_index == 0
-        && movement
-            .pos
-            .close_to(movement.target_pos, QUEUE_ARRIVAL_EPS)
+        && !movement.has_path()
     {
-        log::trace!(target: "diner", "queue_front_reached");
         return DinerStateType::BeingServed;
     }
 
@@ -304,7 +278,6 @@ fn handle_queueing(
 /// Handles placeholder service timing once the diner reaches the counter.
 fn handle_being_served(state: &mut DinerState) -> DinerStateType {
     if state.state_timer >= PLACEHOLDER_SERVICE_TIME_S {
-        log::info!(target: "diner", "service_complete");
         DinerStateType::FindingSeat
     } else {
         DinerStateType::BeingServed
@@ -316,7 +289,6 @@ fn handle_finding_seat(
     state: &mut DinerState,
     targets: &mut DinerTargets,
     movement: &mut Movement,
-    nav_grid: &NavigationGrid,
     rng: &mut GameRng,
     table_set: &mut ParamSet<(
         Query<(Entity, &DiningTable)>,
@@ -421,16 +393,7 @@ fn handle_finding_seat(
     targets.chosen_seat = Some(seat_index);
     targets.collector_target = None;
 
-    movement.compute_new_path(seat_pos, nav_grid);
-
-    log::trace!(
-        target: "diner",
-        "finding_seat: reserved table={:?} seat={} target=({:.2},{:.2})",
-        table_entity,
-        seat_index,
-        movement.target_pos.x,
-        movement.target_pos.y
-    );
+    movement.request_path(seat_pos);
 
     DinerStateType::MovingToSeat
 }
@@ -439,7 +402,6 @@ fn handle_moving_to_seat(
     entity: Entity,
     movement: &mut Movement,
     targets: &mut DinerTargets,
-    nav_grid: &NavigationGrid,
     table_set: &mut ParamSet<(
         Query<(Entity, &DiningTable)>,
         Query<(Entity, &mut DiningTable)>,
@@ -467,16 +429,13 @@ fn handle_moving_to_seat(
             }
         }
     };
-    if movement.path.is_empty()
-        && !movement
-            .target_pos
-            .close_to(seat_pos, TABLE_SEAT_ARRIVAL_EPS)
-    {
-        movement.compute_new_path(seat_pos, nav_grid);
+    if !movement.has_path() {
+        movement.request_path(seat_pos);
+
+        return DinerStateType::MovingToSeat;
     }
 
     if movement.pos.close_to(seat_pos, TABLE_SEAT_ARRIVAL_EPS) {
-        movement.target_pos = seat_pos;
         movement.path.clear();
         movement.velocity = Vec2::ZERO;
         return DinerStateType::Eating;
@@ -534,7 +493,6 @@ fn handle_eating(
 fn handle_returning_dishes(
     targets: &mut DinerTargets,
     movement: &mut Movement,
-    nav_grid: &NavigationGrid,
     collector_query: &Query<(Entity, &DishCollector)>,
 ) -> DinerStateType {
     if collector_query.is_empty() {
@@ -559,7 +517,7 @@ fn handle_returning_dishes(
         };
 
         targets.collector_target = Some(collector_entity);
-        movement.compute_new_path(target_pos, nav_grid);
+        movement.request_path(target_pos);
         return DinerStateType::ReturningDishes;
     }
 
@@ -575,19 +533,15 @@ fn handle_returning_dishes(
         return DinerStateType::Leaving;
     }
 
-    if movement.path.is_empty()
-        || !movement
-            .target_pos
-            .close_to(target_pos, COLLECTOR_ARRIVAL_EPS)
-    {
-        movement.compute_new_path(target_pos, nav_grid);
+    if !movement.has_path() {
+        movement.request_path(target_pos);
     }
 
     DinerStateType::ReturningDishes
 }
 
 /// Handles the diner leaving the canteen.
-fn handle_leaving(movement: &mut Movement, canteen: &Canteen, nav_grid: &NavigationGrid) {
+fn handle_leaving(movement: &mut Movement, canteen: &Canteen) {
     // Entrances also serve as exits. Compute nearest point on any entrance XRange at Y = entrances_y.
     let mut best_point: Option<Vec2> = None;
     let mut best_dist_sq: f32 = f32::INFINITY;
@@ -601,33 +555,12 @@ fn handle_leaving(movement: &mut Movement, canteen: &Canteen, nav_grid: &Navigat
         }
     }
 
-    if let Some(exit_point) = best_point
-        && movement.target_pos.distance(exit_point) > EXIT_ARRIVAL_EPS
-    {
+    if let Some(exit_point) = best_point {
         let exit_target = Vec2::new(
             exit_point.x.clamp(0.0, canteen.model.width),
             exit_point.y.clamp(0.0, canteen.model.height),
         );
-        movement.compute_new_path(exit_target, nav_grid);
-    }
-}
-
-impl Movement {
-    /// Computes a new path to the specified target, updating the target position and path.
-    /// If no valid path is found, the path is cleared.
-    pub fn compute_new_path(&mut self, target: Vec2, nav_grid: &NavigationGrid) {
-        if let Some(path) = find_path(PathRequest {
-            start: self.pos,
-            end: target,
-            radius: self.radius,
-            impatience: self.impatience,
-            grid: nav_grid,
-        }) {
-            self.path = path;
-        } else {
-            self.path.clear();
-        }
-        self.target_pos = target;
+        movement.request_path(exit_target);
     }
 }
 

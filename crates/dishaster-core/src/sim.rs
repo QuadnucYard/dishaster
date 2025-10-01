@@ -52,6 +52,7 @@ impl Simulation {
                 // Update queue ordering and slot targets before movement
                 update_window_queues,
                 // Move agents along paths
+                run_path_requests,
                 update_agent_movement,
                 // Sync visuals to movement positions
                 sync_transform_with_movement,

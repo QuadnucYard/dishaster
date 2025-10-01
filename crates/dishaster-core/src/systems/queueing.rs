@@ -111,8 +111,7 @@ pub fn update_window_queues(
         target.x = target.x.clamp(0.0, canteen.model.width);
         target.y = target.y.clamp(0.0, canteen.model.height);
 
-        if !movement.target_pos.close_to(target, 0.1) {
-            movement.target_pos = target;
+        if !movement.pos.close_to(target, 0.1) {
             movement.path.clear();
             movement.path.push(target);
         }

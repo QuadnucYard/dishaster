@@ -1,4 +1,4 @@
-use dishaster_navigation::{NavigationGrid, world_to_tile_dist};
+use dishaster_navigation::{NavigationGrid, PathRequest, find_path, world_to_tile_dist};
 use dishrupt_core::display::Transform;
 
 use crate::{components::*, constants::*, prelude::*, resources::*};
@@ -41,6 +41,49 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
     }
 }
 
+impl Movement {
+    /// Request a path to the specified target position.
+    pub fn request_path(&mut self, target: Vec2) {
+        self.pending_target = Some(target);
+    }
+
+    /// Computes a new path to the specified target, updating the target position and path.
+    /// If no valid path is found, the path is cleared.
+    fn compute_new_path(&mut self, target: Vec2, nav_grid: &NavigationGrid) {
+        if let Some(path) = find_path(PathRequest {
+            start: self.pos,
+            end: target,
+            radius: self.radius,
+            impatience: self.impatience,
+            grid: nav_grid,
+        }) {
+            self.path = path;
+        } else {
+            self.path.clear();
+        }
+    }
+}
+
+/// Process pending path requests for agents.
+pub fn run_path_requests(
+    mut query: Query<&mut Movement>,
+    nav_grid: Res<ResWrapper<NavigationGrid>>,
+    time: Res<Time>,
+) {
+    const PATH_COOLDOWN_TICKS: u32 = 60;
+
+    for mut movement in query.iter_mut() {
+        if let Some(target) = movement.pending_target {
+            if time.current_tick - movement.last_path_tick < PATH_COOLDOWN_TICKS {
+                continue;
+            }
+            movement.compute_new_path(target, &nav_grid);
+            movement.pending_target = None;
+            movement.last_path_tick = time.current_tick;
+        }
+    }
+}
+
 /// Move agents along their planned paths with smooth steering.
 ///
 /// This system advances Movement.pos using velocity-based steering for smoother
@@ -57,11 +100,11 @@ pub fn update_agent_movement(
     let stop_eps = 0.5; // Distance to target to stop moving
 
     let get_next_velocity = |movement: &Movement| -> Vec2 {
-        if !movement.is_moving {
-            return Vec2::ZERO;
-        }
+        let Some(next_pos) = movement.path.next() else {
+            return Vec2::ZERO; // No path, no movement
+        };
 
-        let displacement = movement.target_pos - movement.pos;
+        let displacement = next_pos - movement.pos;
 
         // Immediate stop if very close to target
         if displacement.length_squared() < stop_eps.squared() {
@@ -89,7 +132,7 @@ pub fn update_agent_movement(
         .map(|m| dishaster_navigation::Agent {
             position: m.pos,
             velocity: get_next_velocity(m),
-            goal: m.path.next().unwrap_or(m.target_pos),
+            goal: m.path.next().unwrap_or(m.pos),
             radius: m.radius,
             max_velocity: m.walking_speed * m.speed_factor,
             avoidance_responsibility: 1.0, // TODO
@@ -100,7 +143,7 @@ pub fn update_agent_movement(
 
     // Apply new velocities and update positions
     for (mut movement, velocity) in query.iter_mut().zip(new_velocities) {
-        if !movement.is_moving {
+        if movement.path.is_empty() {
             movement.velocity = Vec2::ZERO;
             continue;
         }

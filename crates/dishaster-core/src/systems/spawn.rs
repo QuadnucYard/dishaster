@@ -151,9 +151,8 @@ fn spawn_diner(
             targets: DinerTargets::default(),
             movement: Movement {
                 pos,
-                target_pos: pos,
                 radius: rng.random_range(0.2..0.4),
-                impatience: rng.random_range(0.0..1.0),
+                impatience: rng.random_range(0.0..1.0), // TODO: base on model
                 ..Default::default()
             },
         },
