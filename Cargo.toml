@@ -22,14 +22,14 @@ dishaster-data = { path = "crates/dishaster-data" }
 dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }
 dishaster-godot = { path = "crates/dishaster-godot" }
 
-bevy_color = { version = "0.17.0-rc.2", default-features = false, features = ["std"] }
-bevy_ecs = { version = "0.17.0-rc.2", default-features = false, features = [
+bevy_color = { version = "0.17.0", default-features = false, features = ["std"] }
+bevy_ecs = { version = "0.17.0", default-features = false, features = [
   "std",
   "backtrace",
 ] }
-bevy_math = { version = "0.17.0-rc.2", default-features = false, features = ["std", "serialize"] }
+bevy_math = { version = "0.17.0", default-features = false, features = ["std", "serialize"] }
 
-godot = "0.3.5"
+godot = "0.4.0"
 
 anyhow = "1.0"
 as-any = "0.3"
@@ -59,12 +59,10 @@ too_many_arguments = "allow"
 type_complexity = "allow"
 
 [patch.crates-io]
-godot = { git = "https://github.com/godot-rust/gdext", rev = "9da0f54" }
+# godot = { git = "https://github.com/godot-rust/gdext", rev = "9da0f54" }
 
-[profile.dev.package]
-bevy_ecs.opt-level = 1
-bevy_math.opt-level = 1
-godot.opt-level = 1
+[profile.dev]
+opt-level = 2
 
 [profile.profiling]
 inherits = "release"

@@ -7,13 +7,12 @@ pub fn make_callable<F>(name: &str, mut func: F) -> Callable
 where
     F: 'static + FnMut(&[&Variant]),
 {
-    Callable::from_local_fn(name, move |vargs| {
+    Callable::from_fn(name, move |vargs| {
         func(vargs);
-        Ok(Variant::nil())
     })
 }
 
-macro_rules! impl_connect_local_fn {
+macro_rules! impl_connect_fn {
     ($name:ident; $fn_name: ident; $($args:ident)*; $($indiced:literal)*) => {
 
         pub trait $name {
@@ -34,9 +33,8 @@ macro_rules! impl_connect_local_fn {
                 self.connect(
                     signal,
                     #[allow(unused_variables)]
-                    &Callable::from_local_fn(signal, move |vargs| {
+                    &Callable::from_fn(signal, move |vargs| {
                         func($(vargs[$indiced].to(),)*);
-                        Ok(Variant::nil())
                     }),
                 );
             }
@@ -44,6 +42,6 @@ macro_rules! impl_connect_local_fn {
     };
 }
 
-impl_connect_local_fn!(ConnectLocalFn0; connect_local_fn_0; ; );
-impl_connect_local_fn!(ConnectLocalFn1; connect_local_fn_1; T0; 0);
-impl_connect_local_fn!(ConnectLocalFn2; connect_local_fn_2; T0 T1; 0 1);
+impl_connect_fn!(ConnectLocalFn0; connect_fn_0; ; );
+impl_connect_fn!(ConnectLocalFn1; connect_fn_1; T0; 0);
+impl_connect_fn!(ConnectLocalFn2; connect_fn_2; T0 T1; 0 1);

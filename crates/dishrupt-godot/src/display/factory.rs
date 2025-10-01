@@ -3,8 +3,7 @@ use std::collections::VecDeque;
 use dishrupt_core::asset::{PrefabReference, SpriteReference};
 use godot::{
     classes::{Node2D, PackedScene, ResourceLoader, Sprite2D, Texture2D},
-    obj::{Gd, NewAlloc, NewGd},
-    tools::{load, try_load},
+    prelude::*,
 };
 use rustc_hash::FxHashMap;
 

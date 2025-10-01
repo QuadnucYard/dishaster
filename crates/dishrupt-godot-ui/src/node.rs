@@ -103,13 +103,13 @@ impl UINode {
             if let Some(node) = self.0.get_node_or_null(path) {
                 panic!(
                     "There is no node of type {ty} at path `{path}`, but node of type {ty2}",
-                    ty = T::class_name(),
+                    ty = T::class_id(),
                     ty2 = node.get_class()
                 )
             } else {
                 panic!(
                     "There is no node of type {ty} at path `{path}`",
-                    ty = T::class_name()
+                    ty = T::class_id()
                 )
             }
         })
