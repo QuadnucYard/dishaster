@@ -1,6 +1,6 @@
 use std::cell::OnceCell;
 
-use dishaster_godot_ui::GamingLayout;
+use dishaster_godot_ui::*;
 use dishrupt_godot::{bind::BindGodot, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::*;
 use dishrupt_godot_ui::*;
@@ -47,12 +47,14 @@ impl Scene for GameScene {
 
         let gaming = gui.get_mut::<GamingLayout>();
         gaming.show();
+        let time_stats = gui.get_mut::<TimeStatsGui>();
+        time_stats.show();
     }
 
-    fn process(&mut self, _ctx: &mut SceneContext, delta: f64) {
+    fn process(&mut self, ctx: &mut SceneContext, delta: f64) {
         let game = self.game.get_mut().unwrap();
 
-        game.process(delta);
+        game.process(delta, ctx);
     }
 
     fn input(&mut self, _ctx: &mut SceneContext, event: GodotInputEvent) {

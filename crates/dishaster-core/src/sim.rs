@@ -177,11 +177,15 @@ impl Simulation {
         let collision_debug = self.snapshot_collision();
         let crowd_debug = self.snapshot_crowd();
 
+        let time = self.world.resource::<Time>();
+
         Snapshot {
             display,
             movement_debug,
             collision_debug,
             crowd_debug,
+            sim_time_seconds: time.current_time,
+            sim_tick: time.total_ticks as u64,
         }
     }
 
