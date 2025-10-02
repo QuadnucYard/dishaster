@@ -4,9 +4,8 @@ use dishaster_core::snapshots::{CollisionCellDebugSnapshot, CollisionGridDebugSn
 use dishrupt_core::prelude::*;
 use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
 use godot::{
-    builtin::{Color, PackedVector2Array},
     classes::{Line2D, Node2D},
-    obj::{Gd, NewAlloc},
+    prelude::*,
 };
 
 const BASE_WIDTH: f32 = 2.0;
@@ -66,7 +65,6 @@ impl CollisionDebugOverlay {
         cell: &CollisionCellDebugSnapshot,
         ctx: &DisplayContext2D,
     ) {
-        let mut instance = node.clone();
         let mut points = PackedVector2Array::new();
         let half = cell.size * 0.5;
         let corners = [
@@ -88,28 +86,25 @@ impl CollisionDebugOverlay {
         let intensity = (occupancy / 5.0).clamp(0.0, 1.0);
         let color = Color::from_rgba(1.0, 0.6 - 0.4 * intensity, 0.2 + 0.3 * intensity, 0.75);
 
-        instance.set_points(&points);
-        instance.set_default_color(color);
-        instance.set_width(BASE_WIDTH * (0.75 + intensity * 1.25));
-        instance.set_visible(true);
+        node.set_points(&points);
+        node.set_default_color(color);
+        node.set_width(BASE_WIDTH * (0.75 + intensity * 1.25));
+        node.set_visible(true);
     }
 
     fn cleanup_unseen(&mut self, seen: &HashSet<IVec2>) {
         self.cells.retain(|coord, node| {
             if seen.contains(coord) {
-                true
-            } else {
-                let mut instance = node.clone();
-                instance.queue_free();
-                false
+                return true;
             }
+            node.queue_free();
+            false
         });
     }
 
     fn clear(&mut self) {
-        for node in self.cells.values() {
-            let mut instance = node.clone();
-            instance.queue_free();
+        for node in self.cells.values_mut() {
+            node.queue_free();
         }
         self.cells.clear();
     }

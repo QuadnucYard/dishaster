@@ -4,9 +4,8 @@ use dishaster_core::snapshots::CrowdFieldDebugSnapshot;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
 use godot::{
-    builtin::{Color, PackedByteArray, Vector2},
     classes::{Image, ImageTexture, Node2D, Sprite2D, canvas_item::TextureFilter, image::Format},
-    obj::{Gd, NewAlloc, NewGd},
+    prelude::*,
 };
 
 const Z_INDEX: i32 = 8;
@@ -87,19 +86,12 @@ impl CrowdDebugOverlay {
         );
         self.texture.set_image(&*image); // IMPORTANT: Update the texture with the new image data
 
-        let scale = Vector2::new(
-            snapshot.cell_size * ctx.view_scale.x,
-            snapshot.cell_size * ctx.view_scale.y,
-        );
-        self.sprite.set_scale(scale);
+        let scale = ctx.view_scale.xy() * snapshot.cell_size;
+        self.sprite.set_scale(scale.into_godot());
 
         let min_coord = snapshot.origin;
-        let top_left_world = Vec2::new(
-            min_coord.x as f32 * snapshot.cell_size,
-            min_coord.y as f32 * snapshot.cell_size,
-        );
-        let top_left_display =
-            ctx.to_display_space(Vec3::new(top_left_world.x, top_left_world.y, 0.0));
+        let top_left_world = min_coord.as_vec2() * snapshot.cell_size;
+        let top_left_display = ctx.to_display_space(top_left_world.extend(0.0));
         self.sprite.set_position(top_left_display.into_godot());
         self.sprite.set_visible(true);
     }
