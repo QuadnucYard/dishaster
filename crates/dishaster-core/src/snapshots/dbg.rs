@@ -1,5 +1,3 @@
-use std::num::NonZero;
-
 use dishaster_navigation::NavigationGrid;
 use dishrupt_core::EntityId;
 
@@ -91,7 +89,7 @@ impl Simulation {
             movement_query
                 .iter(&self.world)
                 .map(|(entity, movement)| MovementDebugSnapshot {
-                    core_id: EntityId(NonZero::new(entity.to_bits()).unwrap()),
+                    core_id: entity.into(),
                     position: movement.pos,
                     velocity: movement.velocity,
                     path: movement.path.waypoints.clone(),

@@ -1,6 +1,6 @@
 //! Main simulation engine and event handling
 
-use std::{cmp::Ordering, num::NonZero, sync::Arc};
+use std::{cmp::Ordering, sync::Arc};
 
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
@@ -160,6 +160,10 @@ impl Simulation {
     }
 
     /// Create a snapshot of the current simulation state for serialization or debugging
+    ///
+    /// This function is expected to be idempotent: multiple calls between ticks
+    /// should yield identical results.
+    /// (current exceptions: modification flags are reset on read)
     pub fn snapshot(&mut self) -> Snapshot {
         let mut query = self
             .world
@@ -167,7 +171,7 @@ impl Simulation {
         let display = query
             .iter_mut(&mut self.world)
             .map(|(e, d, mut t)| DisplaySnapshot {
-                core_id: EntityId(NonZero::new(e.to_bits()).unwrap()),
+                core_id: e.into(),
                 proto: d.proto.clone(),
                 transform: t.snapshot(),
             })
@@ -191,7 +195,7 @@ impl Simulation {
 
     /// Get the root entity of the display hierarchy
     pub fn root_entity(&self) -> EntityId {
-        EntityId(NonZero::new(self.world.resource::<DisplayRoot>().0.to_bits()).unwrap())
+        self.world.resource::<DisplayRoot>().0.into()
     }
 
     /// Check if the current day is complete (spawning finished and all diners left)
