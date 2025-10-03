@@ -82,7 +82,10 @@ impl Stage {
                 update_godot_display_node2d(&mut node, display, &ctx);
             } else {
                 // create new node
-                let gd_node = self.factory.create(&display.proto);
+                let mut gd_node = self.factory.create(&display.proto);
+                if let Some(name) = &display.name {
+                    gd_node.set_name(name.as_str());
+                }
                 let mut node = GodotDisplayNode2D::new_bind(gd_node, display.core_id);
                 update_godot_display_node2d(&mut node, display, &ctx);
                 let e = self.display_world.spawn(node).id();

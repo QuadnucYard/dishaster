@@ -46,7 +46,10 @@ pub struct CoreId(pub EntityId);
 
 #[derive(Component)]
 pub struct DisplayState {
+    /// Reference to the prefab resource
     pub proto: PrefabReference,
+    /// Optional name override for the node.
+    pub name: Option<EcoString>,
 
     // pub color: Modified<Color>,
     pub visible: Modified<bool>,
@@ -56,6 +59,7 @@ impl Default for DisplayState {
     fn default() -> Self {
         Self {
             proto: PrefabReference::default(),
+            name: None,
             // color: Color::WHITE.into(),
             visible: true.into(),
         }
@@ -121,6 +125,7 @@ pub struct TransformSnapshot {
 pub struct DisplaySnapshot {
     pub core_id: EntityId,
     pub proto: PrefabReference,
+    pub name: Option<EcoString>,
     // pub display: DisplayState,
     pub transform: TransformSnapshot,
 }

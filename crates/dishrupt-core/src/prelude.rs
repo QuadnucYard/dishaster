@@ -1,8 +1,6 @@
 // pub use bevy_color::prelude::*;
 pub use bevy_ecs::prelude::*;
-pub use bevy_math::{
-    FloatPow, IVec2, IVec3, Rect, USizeVec2, UVec2, Vec2, Vec2Swizzles, Vec3, Vec3Swizzles,
-};
-pub use ecow::EcoString;
+pub use bevy_math::{FloatPow, USizeVec2, USizeVec3, prelude::*};
+pub use ecow::*;
 
 pub use crate::ext::*;

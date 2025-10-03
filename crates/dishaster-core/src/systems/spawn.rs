@@ -138,11 +138,11 @@ fn spawn_diner(
         pos.y
     );
 
+    let diner_id = spawner.next_diner_id;
+    let display_res = model.display.res.clone();
     commands.spawn((
         DinerBundle {
-            diner: Diner {
-                id: spawner.next_diner_id,
-            },
+            diner: Diner { id: diner_id },
             state: DinerState {
                 current: DinerStateType::Entering,
                 state_timer: 0.0,
@@ -156,8 +156,10 @@ fn spawn_diner(
                 ..Default::default()
             },
         },
+        model.into_comp(),
         DisplayState {
-            proto: model.display.res.clone(),
+            proto: display_res,
+            name: Some(eco_format!("Diner_{}", diner_id)),
             ..Default::default()
         },
         Transform {
@@ -165,7 +167,6 @@ fn spawn_diner(
             parent: Modified::new(Some(display_root.0)),
             ..Default::default()
         },
-        model.into_comp(),
     ));
 }
 

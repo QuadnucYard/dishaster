@@ -173,6 +173,7 @@ impl Simulation {
             .map(|(e, d, mut t)| DisplaySnapshot {
                 core_id: e.into(),
                 proto: d.proto.clone(),
+                name: d.name.clone(),
                 transform: t.snapshot(),
             })
             .collect();
