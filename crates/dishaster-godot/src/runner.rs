@@ -7,8 +7,15 @@ use std::{
     time::{Duration, Instant},
 };
 
-use dishaster_core::{sim::Simulation, snapshots::Snapshot};
+use dishaster_core::{Tick, sim::Simulation, snapshots::Snapshot};
 use fibre::spsc;
+
+/// A snapshot frame paired with the number of simulation ticks it represents.
+/// This is the unit sent over the channel from the sim thread to the main thread.
+pub struct SnapshotFrame {
+    pub ticks: Tick,
+    pub snapshot: Snapshot,
+}
 
 pub struct SimulationRunner {
     snapshot_receiver: SnapshotReceiver,
@@ -62,14 +69,12 @@ impl Drop for SimController {
     }
 }
 
-pub struct SnapshotReceiver(spsc::BoundedSyncReceiver<Snapshot>);
+pub struct SnapshotReceiver(spsc::BoundedSyncReceiver<SnapshotFrame>);
 
 impl SimulationRunner {
-    const TPS: f64 = 60.0;
-
-    pub fn new(mut sim: Simulation) -> Self {
+    pub fn new(mut sim: Simulation, tps: f64) -> Self {
         // create channel
-        let (tx, rx) = spsc::bounded_sync::<Snapshot>(3);
+        let (tx, rx) = spsc::bounded_sync::<SnapshotFrame>(3);
 
         // stop flag
         let stop = Arc::new(AtomicBool::new(false));
@@ -83,7 +88,7 @@ impl SimulationRunner {
 
         // spawn sim thread
         let handle = thread::spawn(move || {
-            let dt = 1.0 / Self::TPS;
+            let dt = 1.0 / tps;
             let mut last = Instant::now();
 
             while !stop_clone.load(Ordering::Relaxed) {
@@ -101,7 +106,10 @@ impl SimulationRunner {
                     last = now;
                     sim.tick();
                     let snap = sim.snapshot();
-                    let _ = tx.send(snap);
+                    let _ = tx.send(SnapshotFrame {
+                        ticks: 1, // to be updated by receiver
+                        snapshot: snap,
+                    });
                 }
                 thread::sleep(Duration::from_millis(1));
             }
@@ -119,7 +127,7 @@ impl SimulationRunner {
         }
     }
 
-    pub fn poll_snapshot(&mut self) -> Option<Snapshot> {
+    pub fn poll_snapshot(&mut self) -> Option<SnapshotFrame> {
         let mut last_snap = None;
         while let Ok(snap) = self.snapshot_receiver.0.try_recv() {
             last_snap = Some(snap);
@@ -151,16 +159,16 @@ impl SimulationRunner {
 pub struct SyncSimulationRunner {
     sim: Simulation,
     accumulator: f64,
+    tps: f64,
 }
 
 impl SyncSimulationRunner {
-    const TPS: f64 = 60.0;
-
     /// Create a new synchronous simulation runner.
-    pub fn new(sim: Simulation) -> Self {
+    pub fn new(sim: Simulation, tps: f64) -> Self {
         Self {
             sim,
             accumulator: 0.0,
+            tps,
         }
     }
 
@@ -173,22 +181,29 @@ impl SyncSimulationRunner {
     /// # Returns
     /// * `Some(Snapshot)` if the simulation ticked and produced a new snapshot
     /// * `None` if the accumulator hasn't reached the tick threshold yet
-    pub fn tick(&mut self, dt: f64) -> Option<Snapshot> {
-        let fixed_dt: f64 = 1.0 / Self::TPS;
+    pub fn tick(&mut self, dt: f64) -> Option<SnapshotFrame> {
+        let fixed_dt: f64 = 1.0 / self.tps;
 
         self.accumulator += dt;
 
-        if self.accumulator >= fixed_dt {
+        let mut result = None;
+        let mut ticks = 0;
+
+        while self.accumulator >= fixed_dt {
             // Advance simulation by one fixed timestep
             self.sim.tick();
+            ticks += 1;
 
             // Subtract fixed dt, keeping any remainder for next frame
             self.accumulator -= fixed_dt;
 
-            Some(self.sim.snapshot())
-        } else {
-            None
+            result = Some(SnapshotFrame {
+                ticks,
+                snapshot: self.sim.snapshot(),
+            });
         }
+
+        result
     }
 
     /// Force advance the simulation by one tick, regardless of accumulator.

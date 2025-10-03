@@ -189,7 +189,7 @@ impl Simulation {
             collision_debug,
             crowd_debug,
             sim_time_seconds: time.current_time,
-            sim_tick: time.total_ticks as u64,
+            sim_tick: time.total_ticks,
         }
     }
 

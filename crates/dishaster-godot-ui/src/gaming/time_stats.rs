@@ -1,44 +1,30 @@
 use crate::prelude::*;
 
-#[derive(Debug, Default)]
-pub struct TimeStatsD {
-    pub fps_estimate: f64,
-    pub ups_estimate: f64,
-    pub last_sim_time: f64,
-    pub last_sim_tick: u64,
-}
-
 #[derive(UITree)]
 #[ui_tree]
 pub struct TimeStatsGui {
-    #[child("%StatsHudLabel")]
-    pub hud_label: LabelA,
+    #[child("%PerfLabel")]
+    pub perf_label: LabelA,
+    #[child("%TimeLabel")]
+    pub time_label: LabelA,
 }
 
 impl TimeStatsGui {
-    pub fn update(&mut self, stats: &TimeStatsD) {
-        let total_seconds = stats.last_sim_time.max(0.0).floor() as u32;
+    pub fn update_time(&mut self, sim_tick: u32, sim_time: f64) {
+        let total_seconds = sim_time as u32;
         let hours = total_seconds / 3600;
         let minutes = (total_seconds % 3600) / 60;
         let seconds = total_seconds % 60;
 
-        let fps_display = if stats.fps_estimate.is_nan() {
-            "--".to_string()
-        } else {
-            format!("{:.1}", stats.fps_estimate)
-        };
-        let ups_display = if stats.ups_estimate.is_nan() {
-            "--".to_string()
-        } else {
-            format!("{:.1}", stats.ups_estimate)
-        };
+        let text = format!("Sim: {hours:02}:{minutes:02}:{seconds:02} (tick {sim_tick})");
 
-        let text = format!(
-            "FPS: {:>5}  UPS: {:>5}\nSim: {:02}:{:02}:{:02} (tick {})",
-            fps_display, ups_display, hours, minutes, seconds, stats.last_sim_tick,
-        );
+        self.time_label.set_text(&text);
+    }
 
-        self.hud_label.set_text(&text);
+    pub fn update_perf(&mut self, fps: f32, ups: f32) {
+        let text = format!("FPS: {fps:>5.1}  UPS: {ups:>5.1}");
+
+        self.perf_label.set_text(&text);
     }
 }
 

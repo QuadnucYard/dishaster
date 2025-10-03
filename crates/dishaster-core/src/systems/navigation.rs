@@ -70,7 +70,7 @@ pub fn run_path_requests(
     nav_grid: Res<ResWrapper<NavigationGrid>>,
     time: Res<Time>,
 ) {
-    const PATH_COOLDOWN_TICKS: u32 = 60;
+    const PATH_COOLDOWN_TICKS: Tick = 60;
 
     for mut movement in query.iter_mut() {
         if let Some(target) = movement.pending_target {

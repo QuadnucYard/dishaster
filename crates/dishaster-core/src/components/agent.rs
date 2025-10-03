@@ -23,7 +23,7 @@ pub struct Movement {
     /// The target position to move towards.
     pub pending_target: Option<Vec2>,
     /// The last tick when the path was calculated.
-    pub last_path_tick: u32,
+    pub last_path_tick: Tick,
 }
 
 impl Default for Movement {

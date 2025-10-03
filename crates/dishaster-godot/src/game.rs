@@ -1,3 +1,5 @@
+pub mod perf;
+
 use dishaster_core::{models::LevelConfig, sim::Simulation};
 use dishaster_godot_ui::*;
 use dishrupt_core::prelude::*;
@@ -8,9 +10,12 @@ use godot::{
     obj::Gd,
 };
 
-use crate::{dbgviz::*, game_main::GAME_DATA, runner::SyncSimulationRunner};
-
-const METRIC_SAMPLE_INTERVAL: f64 = 0.5;
+use crate::{
+    dbgviz::*,
+    game::perf::PerfTracker,
+    game_main::GAME_DATA,
+    runner::{SnapshotFrame, SyncSimulationRunner},
+};
 
 pub struct Game {
     // sim_runner: SimulationRunner,
@@ -19,19 +24,7 @@ pub struct Game {
     display_ctx: DisplayContext2D,
     dbgviz: DbgViz,
 
-    time_stats: TimeStats,
-}
-
-#[derive(Debug, Default)]
-pub struct TimeStats {
-    pub frame_accum: f64,
-    pub frame_count: u32,
-    pub fps_estimate: f64,
-    pub update_accum: f64,
-    pub update_count: u32,
-    pub ups_estimate: f64,
-    pub last_sim_time: f64,
-    pub last_sim_tick: u64,
+    perf_tracker: PerfTracker,
 }
 
 impl Game {
@@ -49,7 +42,7 @@ impl Game {
         sim.start(level);
         let root_entity = sim.root_entity();
 
-        let sim_runner = SyncSimulationRunner::new(sim);
+        let sim_runner = SyncSimulationRunner::new(sim, 30.0);
 
         let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
         let map_scene = load_prefab_sync(map_prefab).instantiate().unwrap();
@@ -76,49 +69,29 @@ impl Game {
             display_ctx,
             dbgviz,
 
-            time_stats: Default::default(),
+            perf_tracker: Default::default(),
         }
     }
 
     pub fn process(&mut self, delta: f64, ctx: &mut SceneContext) {
-        let time_stats = &mut self.time_stats;
-        time_stats.frame_accum += delta;
-        time_stats.frame_count += 1;
+        self.perf_tracker.tick_frame();
 
-        if time_stats.frame_accum >= METRIC_SAMPLE_INTERVAL {
-            time_stats.fps_estimate = time_stats.frame_count as f64 / time_stats.frame_accum;
-            time_stats.frame_accum = 0.0;
-            time_stats.frame_count = 0;
-        }
+        if let Some(SnapshotFrame { ticks, snapshot }) = self.sim_runner.tick(delta) {
+            self.perf_tracker.tick_updates(ticks);
 
-        time_stats.update_accum += delta;
-
-        if let Some(snapshot) = self.sim_runner.tick(delta) {
             self.stage.present(snapshot.display.iter());
             self.dbgviz.update(&snapshot, &self.display_ctx);
 
-            time_stats.update_count += 1; // TODO: count actual sim steps
-            time_stats.last_sim_time = snapshot.sim_time_seconds;
-            time_stats.last_sim_tick = snapshot.sim_tick;
+            let hud = ctx.gui.get_mut::<TimeStatsGui>();
+            hud.update_time(snapshot.sim_tick, snapshot.sim_time_seconds);
         }
 
-        if time_stats.update_accum >= METRIC_SAMPLE_INTERVAL {
-            time_stats.ups_estimate = if time_stats.update_count > 0 {
-                time_stats.update_count as f64 / time_stats.update_accum
-            } else {
-                f64::NAN
-            };
-            time_stats.update_accum = 0.0;
-            time_stats.update_count = 0;
-        }
+        // update perf stats
+        self.perf_tracker.sample(delta);
 
+        // update HUD
         let hud = ctx.gui.get_mut::<TimeStatsGui>();
-        hud.update(&TimeStatsD {
-            fps_estimate: time_stats.fps_estimate,
-            ups_estimate: time_stats.ups_estimate,
-            last_sim_time: time_stats.last_sim_time,
-            last_sim_tick: time_stats.last_sim_tick,
-        });
+        hud.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
     }
 
     pub fn process_input(&mut self, _event: GodotInputEvent) {

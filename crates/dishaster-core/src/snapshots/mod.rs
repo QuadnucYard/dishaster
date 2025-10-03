@@ -5,6 +5,8 @@ mod dbg;
 pub use dbg::*;
 use dishrupt_core::display::DisplaySnapshot;
 
+use crate::Tick;
+
 /// Simulation state snapshot for rendering
 pub struct Snapshot {
     /// Display graph data for rendering the current frame.
@@ -18,5 +20,5 @@ pub struct Snapshot {
     /// Simulation timestamp in seconds.
     pub sim_time_seconds: f64,
     /// Total simulation ticks since start.
-    pub sim_tick: u64,
+    pub sim_tick: Tick,
 }

@@ -10,9 +10,9 @@ use crate::prelude::*;
 #[derive(Resource)]
 pub struct Time {
     /// Current tick number in the current simulation frame
-    pub current_tick: u32,
+    pub current_tick: Tick,
     /// Total accumulated ticks since simulation start (persistent across resets)
-    pub total_ticks: u32,
+    pub total_ticks: Tick,
     /// Duration of one simulation tick in seconds (configurable precision)
     pub tick_duration: f64,
     /// Current simulation time calculated from ticks (tick_count * tick_duration)
