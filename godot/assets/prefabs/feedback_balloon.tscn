@@ -1,0 +1,32 @@
+[gd_scene load_steps=4 format=3 uid="uid://qtdfljpklwyy"]
+
+[ext_resource type="Texture2D" uid="uid://ch40877dldcvk" path="res://assets/sprites/emojis/thought_balloon.svg" id="1_wxex4"]
+[ext_resource type="Texture2D" uid="uid://cxtmfmkp10d7q" path="res://assets/sprites/emojis/speech_balloon.svg" id="2_hcv4f"]
+[ext_resource type="Texture2D" uid="uid://bnvburi4tresm" path="res://assets/sprites/emojis/eye_balloon.svg" id="2_pnvpb"]
+
+[node name="FeedbackBalloon" type="Node2D"]
+z_index = 1
+
+[node name="Thought" type="Sprite2D" parent="."]
+position = Vector2(18, -18)
+texture = ExtResource("1_wxex4")
+
+[node name="Icon" type="Sprite2D" parent="Thought"]
+visible = false
+position = Vector2(-1, -2)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_pnvpb")
+
+[node name="Emoji" type="Label" parent="Thought"]
+offset_left = -14.0
+offset_top = -15.0
+offset_right = 12.0
+offset_bottom = 8.0
+text = "😀"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Speech" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(18, -18)
+texture = ExtResource("2_hcv4f")

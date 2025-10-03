@@ -5,13 +5,7 @@ use std::{cmp::Ordering, sync::Arc};
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
 
-use crate::{models::*, prelude::*, resources::*, snapshots::*, systems::*};
-
-/// Simulation event data structure for external observation
-///
-/// Placeholder for future event system that will communicate
-/// game state changes to external observers or UI systems.
-pub struct Event;
+use crate::{components::*, models::*, prelude::*, resources::*, snapshots::*, systems::*};
 
 /// Core simulation engine managing ECS world and system execution
 ///
@@ -132,8 +126,18 @@ impl Simulation {
             next_diner_id: 0,
             spawning_finished: false,
         });
+        self.world.insert_resource(EventLog::default());
         self.world.insert_resource(DayStatus::default());
         self.world.insert_resource(level.into_res());
+
+        self.world
+            .add_observer(|event: On<Add, AgentTag>, mut elog: ResMut<EventLog>| {
+                elog.emit(PresentationEvent::AgentSpawned(event.entity.into()));
+            });
+        self.world
+            .add_observer(|event: On<Remove, AgentTag>, mut elog: ResMut<EventLog>| {
+                elog.emit(PresentationEvent::AgentDespawned(event.entity.into()));
+            });
 
         // Spawn static objects once at startup
         let mut schedule = Schedule::default();
@@ -152,11 +156,6 @@ impl Simulation {
         time.tick();
 
         self.schedule.run(&mut self.world);
-    }
-
-    /// Retrieve all events that occurred during the last simulation step
-    pub fn poll_events(&mut self) -> Vec<Event> {
-        vec![] // Placeholder
     }
 
     /// Create a snapshot of the current simulation state for serialization or debugging
@@ -192,6 +191,12 @@ impl Simulation {
             sim_time_seconds: time.current_time,
             sim_tick: time.total_ticks,
         }
+    }
+
+    /// Retrieve all events that occurred after the last poll
+    pub fn poll_events(&mut self) -> Vec<PresentationEvent> {
+        let mut event_log = self.world.resource_mut::<EventLog>();
+        event_log.drain()
     }
 
     /// Get the root entity of the display hierarchy

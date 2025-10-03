@@ -2,6 +2,10 @@ use dishaster_navigation::NavPath;
 
 use crate::prelude::*;
 
+/// Marker component for identifying agent entities
+#[derive(Component)]
+pub struct AgentTag;
+
 /// Runtime component for movement state and behavior
 #[derive(Component)]
 pub struct Movement {

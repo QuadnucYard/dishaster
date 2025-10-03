@@ -7,7 +7,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-use dishaster_core::{Tick, sim::Simulation, snapshots::Snapshot};
+use dishaster_core::{
+    Tick,
+    sim::Simulation,
+    snapshots::{PresentationEvent, Snapshot},
+};
 use fibre::spsc;
 
 /// A snapshot frame paired with the number of simulation ticks it represents.
@@ -15,6 +19,7 @@ use fibre::spsc;
 pub struct SnapshotFrame {
     pub ticks: Tick,
     pub snapshot: Snapshot,
+    pub events: Vec<PresentationEvent>,
 }
 
 pub struct SimulationRunner {
@@ -105,10 +110,10 @@ impl SimulationRunner {
                 if now.duration_since(last).as_secs_f64() >= dt {
                     last = now;
                     sim.tick();
-                    let snap = sim.snapshot();
                     let _ = tx.send(SnapshotFrame {
                         ticks: 1, // to be updated by receiver
-                        snapshot: snap,
+                        snapshot: sim.snapshot(),
+                        events: sim.poll_events(),
                     });
                 }
                 thread::sleep(Duration::from_millis(1));
@@ -200,6 +205,7 @@ impl SyncSimulationRunner {
             result = Some(SnapshotFrame {
                 ticks,
                 snapshot: self.sim.snapshot(),
+                events: self.sim.poll_events(),
             });
         }
 

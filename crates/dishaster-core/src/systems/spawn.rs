@@ -1,6 +1,7 @@
 mod layout;
 
 use dishrupt_core::{
+    asset::PrefabReference,
     display::{DisplayModel, DisplayState, Transform},
     utils::Modified,
 };
@@ -140,7 +141,8 @@ fn spawn_diner(
 
     let diner_id = spawner.next_diner_id;
     let display_res = model.display.res.clone();
-    commands.spawn((
+    let wrapper = commands.spawn((
+        AgentTag,
         DinerBundle {
             diner: Diner { id: diner_id },
             state: DinerState {
@@ -158,13 +160,38 @@ fn spawn_diner(
         },
         model.into_comp(),
         DisplayState {
-            proto: display_res,
             name: Some(eco_format!("Diner_{}", diner_id)),
             ..Default::default()
         },
         Transform {
             position: pos.extend(0.0),
             parent: Modified::new(Some(display_root.0)),
+            ..Default::default()
+        },
+    ));
+    let wrapper_entity = wrapper.id();
+
+    let _body = commands.spawn((
+        DisplayState {
+            proto: display_res,
+            ..Default::default()
+        },
+        Transform {
+            position: Vec3::ZERO,
+            parent: Modified::new(Some(wrapper_entity)),
+            ..Default::default()
+        },
+    ));
+
+    let _feedback = commands.spawn((
+        DisplayState {
+            proto: PrefabReference::new("feedback_balloon"),
+            name: Some("Feedback".into()),
+            ..Default::default()
+        },
+        Transform {
+            position: vec3(0.0, 0.0, 1.8),
+            parent: Modified::new(Some(wrapper_entity)),
             ..Default::default()
         },
     ));

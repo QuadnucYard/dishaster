@@ -469,6 +469,7 @@ dependencies = [
  "fibre",
  "godot",
  "log",
+ "rustc-hash",
 ]
 
 [[package]]

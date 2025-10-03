@@ -17,6 +17,7 @@ dishaster-godot-ui.workspace = true
 as-any.workspace = true
 env_logger.workspace = true
 fibre.workspace = true
+rustc-hash.workspace = true
 godot.workspace = true
 log.workspace = true
 

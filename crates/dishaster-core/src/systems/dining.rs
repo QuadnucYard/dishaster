@@ -7,7 +7,11 @@ use std::cmp::Ordering;
 
 use dishaster_navigation::NavigationGrid;
 
-use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
+use super::feedback::*;
+use crate::{components::*, constants::*, models::*, prelude::*, resources::*, snapshots::*};
+
+const OBSERVING_FEEDBACK_RATE: f64 = 0.05;
+const DECIDING_FEEDBACK_RATE: f64 = 0.04;
 
 fn speed_factor_for_state(state: DinerStateType) -> f32 {
     match state {
@@ -38,15 +42,20 @@ pub fn update_diner_states(
     canteen: Res<Canteen>,
     time: Res<Time>,
     mut rng: ResMut<GameRng>,
+    mut events: ResMut<EventLog>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
+    let sim_time = time.current_time;
+    let dt = time.tick_duration;
+
     for (entity, mut state, mut targets, diner_model, mut movement, queue_participant) in
         diner_query.iter_mut()
     {
+        let previous_state = state.current;
         // Update state timer using tick duration
         state.state_timer += time.tick_duration as f32;
 
-        let next_state = match state.current {
+        let next_state = match previous_state {
             DinerStateType::Entering => handle_entering(&mut movement, &nav_grid, &mut rng),
             DinerStateType::Observing => handle_observing(
                 &mut state,
@@ -94,9 +103,10 @@ pub fn update_diner_states(
             }
         };
 
-        if next_state != state.current {
+        let transitioned = next_state != previous_state;
+
+        if transitioned {
             if next_state == DinerStateType::MovingToWindow
-                && state.current != DinerStateType::MovingToWindow
                 && let Some(window) = targets.chosen_window
             {
                 commands
@@ -114,11 +124,43 @@ pub fn update_diner_states(
                 commands.entity(entity).remove::<QueueParticipant>();
             }
 
+            if next_state == DinerStateType::BeingServed {
+                events.emit_feedback(FeedbackEvent {
+                    entity: entity.into(),
+                    content: Feedback::Thought(choose_feedback(&mut rng, SERVING_FEEDBACKS).into()),
+                    timestamp: sim_time,
+                })
+            }
+
             state.current = next_state;
             state.state_timer = 0.0;
-        }
 
-        movement.speed_factor = speed_factor_for_state(state.current);
+            movement.speed_factor = speed_factor_for_state(state.current);
+        } else {
+            if state.current == DinerStateType::Observing
+                && rng.random_bool((OBSERVING_FEEDBACK_RATE * dt).min(1.0))
+            {
+                events.emit_feedback(FeedbackEvent {
+                    entity: entity.into(),
+                    content: Feedback::Thought(
+                        choose_feedback(&mut rng, OBSERVING_FEEDBACKS).into(),
+                    ),
+                    timestamp: sim_time,
+                })
+            }
+
+            if state.current == DinerStateType::Deciding
+                && rng.random_bool((DECIDING_FEEDBACK_RATE * dt).min(1.0))
+            {
+                events.emit_feedback(FeedbackEvent {
+                    entity: entity.into(),
+                    content: Feedback::Thought(
+                        choose_feedback(&mut rng, DECIDING_FEEDBACKS).into(),
+                    ),
+                    timestamp: sim_time,
+                });
+            }
+        }
     }
 }
 

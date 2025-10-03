@@ -7,7 +7,7 @@ use std::sync::Arc;
 use rand_chacha::ChaCha8Rng;
 pub use time::Time;
 
-use crate::{models::*, prelude::*};
+use crate::{models::*, prelude::*, snapshots::*};
 
 /// Turn a type into a Bevy resource
 #[derive(Resource, Default, Deref, DerefMut)]
@@ -156,3 +156,19 @@ pub type GameModelRegistryRes = ResWrapper<Arc<GameModelRegistry>>;
 
 /// Resource wrapper for LevelConfig
 pub type LevelConfigRes = ResWrapper<LevelConfig>;
+
+/// Log of presentation events to be processed by the display system
+#[derive(Resource, Default)]
+pub struct EventLog(pub(crate) Vec<PresentationEvent>);
+
+impl EventLog {
+    /// Record a new presentation event
+    pub fn emit(&mut self, event: PresentationEvent) {
+        self.0.push(event);
+    }
+
+    /// Retrieve and clear all logged events
+    pub fn drain(&mut self) -> Vec<PresentationEvent> {
+        std::mem::take(&mut self.0)
+    }
+}

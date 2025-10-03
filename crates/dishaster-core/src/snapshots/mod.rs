@@ -1,9 +1,11 @@
 //! Simulation state snapshots for rendering and debugging.
 
 mod dbg;
+mod events;
 
 pub use dbg::*;
 use dishrupt_core::display::DisplaySnapshot;
+pub use events::*;
 
 use crate::Tick;
 

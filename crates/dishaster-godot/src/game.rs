@@ -1,18 +1,21 @@
+mod agent;
 pub mod perf;
+mod present;
 
 use dishaster_core::{models::LevelConfig, sim::Simulation};
 use dishaster_godot_ui::*;
-use dishrupt_core::prelude::*;
+use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::{display::*, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::SceneContext;
 use godot::{
     classes::{Node, Node2D},
     obj::Gd,
 };
+use rustc_hash::FxHashMap;
 
 use crate::{
     dbgviz::*,
-    game::perf::PerfTracker,
+    game::{agent::AgentController, perf::PerfTracker},
     game_main::GAME_DATA,
     runner::{SnapshotFrame, SyncSimulationRunner},
 };
@@ -25,6 +28,8 @@ pub struct Game {
     dbgviz: DbgViz,
 
     perf_tracker: PerfTracker,
+
+    agents: FxHashMap<EntityId, AgentController>,
 }
 
 impl Game {
@@ -70,17 +75,27 @@ impl Game {
             dbgviz,
 
             perf_tracker: Default::default(),
+
+            agents: Default::default(),
         }
     }
 
     pub fn process(&mut self, delta: f64, ctx: &mut SceneContext) {
         self.perf_tracker.tick_frame();
 
-        if let Some(SnapshotFrame { ticks, snapshot }) = self.sim_runner.tick(delta) {
+        if let Some(SnapshotFrame {
+            ticks,
+            snapshot,
+            events,
+        }) = self.sim_runner.tick(delta)
+        {
             self.perf_tracker.tick_updates(ticks);
 
             self.stage.present(snapshot.display.iter());
             self.dbgviz.update(&snapshot, &self.display_ctx);
+
+            self.process_events(events);
+            self.process_display(delta);
 
             let hud = ctx.gui.get_mut::<TimeStatsGui>();
             hud.update_time(snapshot.sim_tick, snapshot.sim_time_seconds);
