@@ -5,7 +5,7 @@ use godot::prelude::*;
 use super::context::DisplayContext2D;
 use crate::bind::IntoGodot;
 
-#[derive(Deref, DerefMut)]
+#[derive(Debug, Clone, Deref, DerefMut)]
 pub struct GdNode2D(Gd<Node2D>);
 
 impl GdNode2D {
@@ -98,7 +98,7 @@ impl Drop for GodotDisplayNode2D {
             // it seems that the instance is always invalid
             // node.queue_free();
             if !self.node.is_queued_for_deletion() {
-                self.node.clone().free();
+                (*self.node).clone().free();
             }
         }
     }

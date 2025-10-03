@@ -114,7 +114,7 @@ impl DisplayFactory {
             GdNode2D::new(item.create_instance())
         };
         self.active.push(ActiveNode {
-            node: GdNode2D::new(node.clone()),
+            node: node.clone(),
             prefab: item_index,
         });
         node
@@ -179,11 +179,11 @@ pub fn load_or_make_prefab_sync(prefab: &PrefabReference) -> Gd<PackedScene> {
         return load(&prefab_path);
     }
 
+    godot_warn!("Prefab `{}` not found. Try to load as sprite.", prefab_path);
+    let texture_path = format!("{}{}.tres", assets::SPRITES, prefab.path());
     let mut scene = PackedScene::new_gd();
     let mut sprite = Sprite2D::new_alloc();
-    if let Ok(texture) =
-        try_load::<Texture2D>(&format!("{}{}.tres", assets::SPRITES, prefab.path()))
-    {
+    if let Ok(texture) = try_load::<Texture2D>(&texture_path) {
         sprite.set_texture(&texture);
     }
     scene.pack(&sprite);

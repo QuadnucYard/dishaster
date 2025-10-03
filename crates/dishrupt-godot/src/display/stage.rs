@@ -41,11 +41,13 @@ impl Stage {
     pub fn set_display_context(&mut self, ctx: DisplayContext2D) {
         self.display_world.insert_resource(ctx);
     }
-    /*
-       pub fn get_godot_node(&self, display: &Rc<DisplayNode>) -> Option<Rc<GodotDisplayNode2D>> {
-           self.display_table.get(display).cloned()
-       }
-    */
+
+    pub fn get_godot_node(&self, entity: EntityId) -> Option<&GdNode2D> {
+        let e = *self.core_to_view.get(&entity)?;
+        let gd_node = self.display_world.get::<GodotDisplayNode2D>(e)?;
+        Some(&gd_node.node)
+    }
+
     pub fn update(&mut self, elapsed_time: f64) {
         if !self.active {
             return;
@@ -137,9 +139,9 @@ impl Stage {
                 .node
                 .clone();
             if child_node.get_parent().is_some() {
-                child_node.reparent(&parent_node);
+                child_node.reparent(&*parent_node);
             } else {
-                parent_node.add_child(&child_node);
+                parent_node.add_child(&*child_node);
             }
         }
     }
