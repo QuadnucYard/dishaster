@@ -3,7 +3,6 @@ use std::cell::OnceCell;
 use dishaster_godot_ui::*;
 use dishrupt_godot::{bind::BindGodot, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::*;
-use dishrupt_godot_ui::*;
 use godot::{classes::Node, obj::Gd};
 
 use crate::{game::Game, game_main::GAME_DATA};
@@ -45,10 +44,8 @@ impl Scene for GameScene {
     fn enter(&mut self, ctx: &mut SceneContext) {
         let gui = &mut ctx.gui;
 
-        let gaming = gui.get_mut::<GamingLayout>();
-        gaming.show();
-        let time_stats = gui.get_mut::<TimeStatsGui>();
-        time_stats.show();
+        gui.show::<GamingLayout>();
+        gui.show::<TimeStatsGui>();
     }
 
     fn process(&mut self, ctx: &mut SceneContext, delta: f64) {

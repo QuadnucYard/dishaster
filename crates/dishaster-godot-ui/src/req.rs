@@ -1,13 +1,13 @@
 use dishrupt_godot_ui::GuiRequest;
 
-pub struct QuitRequest {}
+pub struct QuitRequest;
 
 impl GuiRequest for QuitRequest {}
 
-pub struct EnterLevelRequest {}
+pub struct EnterLevelRequest;
 
 impl GuiRequest for EnterLevelRequest {}
 
-pub struct ExitLevelRequest {}
+pub struct ExitLevelRequest;
 
 impl GuiRequest for ExitLevelRequest {}

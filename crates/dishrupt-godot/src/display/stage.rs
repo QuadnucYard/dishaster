@@ -67,7 +67,8 @@ impl Stage {
         let ctx = (*self.display_world.resource::<DisplayContext2D>()).clone();
 
         let mut seen = FxHashSet::default();
-        seen.insert(*self.display_root.get().unwrap()); // always keep root
+        let root = *self.display_root.get().expect("stage root not set");
+        seen.insert(root); // always keep root
 
         let mut reparents = Vec::new();
 
@@ -95,11 +96,7 @@ impl Stage {
             if display.transform.parent.is_modified() {
                 reparents.push((
                     display.core_id,
-                    display
-                        .transform
-                        .parent
-                        .get()
-                        .unwrap_or_else(|| *self.display_root.get().unwrap()),
+                    display.transform.parent.get().unwrap_or(root),
                 ));
             }
         }

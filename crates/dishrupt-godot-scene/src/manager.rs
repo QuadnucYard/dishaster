@@ -33,11 +33,11 @@ impl SceneManager {
         &mut self.stack.active_scene
     }
 
-    pub fn inspect_active_scene(&self, f: impl FnOnce(&Box<dyn Scene>)) {
+    pub fn inspect_active_scene(&self, f: impl FnOnce(&dyn Scene)) {
         self.stack.inspect_active_scene(f);
     }
 
-    pub fn inspect_active_scene_mut(&mut self, f: impl FnOnce(&mut Box<dyn Scene>)) {
+    pub fn inspect_active_scene_mut(&mut self, f: impl FnOnce(&mut dyn Scene)) {
         self.stack.inspect_active_scene_mut(f);
     }
 
@@ -85,13 +85,13 @@ impl SceneStack {
         }
     }
 
-    pub fn inspect_active_scene(&self, f: impl FnOnce(&Box<dyn Scene>)) {
-        self.active_scene.as_ref().inspect(|scene| f(scene));
+    pub fn inspect_active_scene(&self, f: impl FnOnce(&dyn Scene)) {
+        self.active_scene.as_ref().inspect(|&scene| f(&**scene));
     }
 
-    pub fn inspect_active_scene_mut(&mut self, f: impl FnOnce(&mut Box<dyn Scene>)) {
+    pub fn inspect_active_scene_mut(&mut self, f: impl FnOnce(&mut dyn Scene)) {
         if let Some(scene) = self.active_scene.as_mut() {
-            f(scene);
+            f(&mut **scene);
         }
     }
 
