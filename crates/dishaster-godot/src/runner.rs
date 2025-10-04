@@ -9,6 +9,7 @@ use std::{
 
 use dishaster_core::{
     Tick,
+    commands::SimCommand,
     sim::Simulation,
     snapshots::{PresentationEvent, Snapshot},
 };
@@ -226,19 +227,9 @@ impl SyncSimulationRunner {
         self.sim.snapshot()
     }
 
-    /// Get the current snapshot without advancing the simulation.
-    pub fn current_snapshot(&mut self) -> Snapshot {
-        self.sim.snapshot()
-    }
-
-    /// Get the current accumulator value (useful for debugging timing).
-    pub fn accumulator(&self) -> f64 {
-        self.accumulator
-    }
-
-    /// Reset the accumulator to zero.
-    /// This can be useful for synchronizing with external timing sources.
-    pub fn reset_accumulator(&mut self) {
-        self.accumulator = 0.0;
+    /// Forward a simulation command to the underlying simulation immediately.
+    pub fn send_command(&mut self, command: SimCommand) {
+        // todo: commands may be queued and handled in batch
+        self.sim.handle_command(command);
     }
 }

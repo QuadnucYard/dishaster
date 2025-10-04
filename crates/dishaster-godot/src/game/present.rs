@@ -1,13 +1,18 @@
 use dishaster_core::snapshots::PresentationEvent;
+use dishrupt_godot_scene::SceneContext;
 
 use super::{Game, agent::AgentController};
 
 impl Game {
-    pub(crate) fn process_events(&mut self, events: Vec<PresentationEvent>) {
+    pub(crate) fn process_events(
+        &mut self,
+        ctx: &mut SceneContext,
+        events: Vec<PresentationEvent>,
+    ) {
         for event in events {
             match event {
                 PresentationEvent::DayCompleted => {
-                    // todo
+                    self.finish_day(ctx, false);
                 }
                 PresentationEvent::AgentSpawned(entity) => {
                     let controller = AgentController::new(

@@ -11,3 +11,15 @@ impl GuiRequest for EnterLevelRequest {}
 pub struct ExitLevelRequest;
 
 impl GuiRequest for ExitLevelRequest {}
+
+pub struct StartRunRequest;
+
+impl GuiRequest for StartRunRequest {}
+
+pub struct NextDayRequest;
+
+impl GuiRequest for NextDayRequest {}
+
+pub struct EndDayRequest;
+
+impl GuiRequest for EndDayRequest {}

@@ -2,7 +2,7 @@ mod agent;
 pub mod perf;
 mod present;
 
-use dishaster_core::{models::LevelConfig, sim::Simulation};
+use dishaster_core::{commands::SimCommand, models::LevelConfig, sim::Simulation};
 use dishaster_godot_ui::*;
 use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::{display::*, input::listener::GodotInputEvent};
@@ -20,21 +20,38 @@ use crate::{
     runner::{SnapshotFrame, SyncSimulationRunner},
 };
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum DayPhase {
+    Preparation,
+    Running,
+    Settlement,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+struct DayTelemetry {
+    #[allow(unused)]
+    seed: u64,
+    day: u32,
+    tick: u32,
+    seconds: f64,
+}
+
 pub struct Game {
-    // sim_runner: SimulationRunner,
     sim_runner: SyncSimulationRunner,
     stage: Stage,
     display_ctx: DisplayContext2D,
     dbgviz: DbgViz,
 
     perf_tracker: PerfTracker,
-
     agents: FxHashMap<EntityId, AgentController>,
+
+    phase: DayPhase,
+    telemetry: DayTelemetry,
 }
 
 impl Game {
     pub fn new(gd: Gd<Node>, level: LevelConfig) -> Self {
-        let db = GAME_DATA.get().unwrap();
+        let db = GAME_DATA.get().expect("game data not initialized");
 
         let map_prefab = &db
             .canteens
@@ -43,12 +60,7 @@ impl Game {
             .display
             .res;
 
-        let mut sim = Simulation::new(db.clone());
-        sim.start(level);
-        let root_entity = sim.root_entity();
-
-        let sim_runner = SyncSimulationRunner::new(sim, 30.0);
-
+        // Set up the map scene
         let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
         let map_scene = load_prefab_sync(map_prefab).instantiate().unwrap();
         stage_root.add_child(&map_scene);
@@ -56,16 +68,34 @@ impl Game {
             .get_node_as::<Node2D>("%Origin")
             .get_global_position();
 
-        let mut stage = Stage::new();
+        // Position the display root at the map origin
         let mut display_root_node = gd.get_node_as::<Node2D>("%DisplayRoot");
         display_root_node.set_position(origin);
         display_root_node.set_z_index(20);
-        stage.set_root(root_entity, GdNode2D::new(display_root_node));
+        let display_root = GdNode2D::new(display_root_node);
         let display_ctx = DisplayContext2D {
             view_scale: Vec3::new(60.0, 50.0, 50.0),
         };
-        stage.set_display_context(display_ctx.clone());
 
+        let telemetry = DayTelemetry {
+            seed: level.seed,
+            day: level.day,
+            tick: 0,
+            seconds: 0.0,
+        };
+
+        // Initialize simulation
+        let mut sim = Simulation::new(db.clone());
+        sim.start(level);
+        let root_entity = sim.root_entity();
+        let sim_runner = SyncSimulationRunner::new(sim, 30.0);
+
+        // Set up stage
+        let mut stage = Stage::new();
+        stage.set_display_context(display_ctx.clone());
+        stage.set_root(root_entity, display_root.clone());
+
+        // Set up debug visualization
         let dbgviz = DbgViz::new(&stage_root, origin);
 
         Self {
@@ -73,10 +103,10 @@ impl Game {
             stage,
             display_ctx,
             dbgviz,
-
             perf_tracker: Default::default(),
-
             agents: Default::default(),
+            phase: DayPhase::Preparation,
+            telemetry,
         }
     }
 
@@ -94,41 +124,79 @@ impl Game {
             self.stage.present(snapshot.display.iter());
             self.dbgviz.update(&snapshot, &self.display_ctx);
 
-            self.process_events(events);
-            self.process_display(delta);
-
-            let hud = ctx.gui.get_mut::<TimeStatsGui>();
-            hud.update_time(snapshot.sim_tick, snapshot.sim_time_seconds);
+            self.process_events(ctx, events);
+            self.telemetry.tick = snapshot.sim_tick;
+            self.telemetry.seconds = snapshot.sim_time_seconds;
         }
 
-        // update perf stats
+        self.process_display(delta);
         self.perf_tracker.sample(delta);
-
-        // update HUD
-        let hud = ctx.gui.get_mut::<TimeStatsGui>();
-        hud.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
+        self.update_hud(ctx);
     }
 
-    pub fn process_input(&mut self, _event: GodotInputEvent) {
-        // TODO: Add your actual input event handling here
-        // You can call self.pause(), self.resume(), and self.is_paused() from your input handling code
-        // Example: if space key pressed, toggle pause state
+    pub fn process_input(&mut self, _event: GodotInputEvent) {}
+
+    pub fn start_day(&mut self, ctx: &mut SceneContext) {
+        ctx.gui.get_mut::<GamingLayout>().apply_state(&DayHudState {
+            day_label: format!("Day {}", self.telemetry.day),
+            phase_label: "Preparation".into(),
+            details: "Review canteen status then press Start Day to begin.".into(),
+            show_start: true,
+            enable_start: true,
+            show_dev: true,
+            enable_dev: false,
+        });
     }
 
-    /*
-    /// Pause the simulation.
-    pub fn pause(&self) {
-        self.sim_runner.pause();
+    pub fn begin_run(&mut self, _ctx: &mut SceneContext) {
+        if self.phase != DayPhase::Preparation {
+            return;
+        }
+        self.phase = DayPhase::Running;
+
+        self.sim_runner.send_command(SimCommand::StartRun);
     }
 
-    /// Resume the simulation.
-    pub fn resume(&self) {
-        self.sim_runner.resume();
+    pub fn force_finish_day(&mut self, ctx: &mut SceneContext) {
+        if self.phase == DayPhase::Running {
+            self.finish_day(ctx, true);
+        }
     }
 
-    /// Check if simulation is currently paused.
-    pub fn is_paused(&self) -> bool {
-        self.sim_runner.is_paused()
+    pub fn finish_day(&mut self, ctx: &mut SceneContext, forced: bool) {
+        if self.phase != DayPhase::Running {
+            return;
+        }
+        self.phase = DayPhase::Settlement;
+
+        if forced {
+            self.sim_runner.send_command(SimCommand::EndRun);
+            self.agents.clear();
+        }
+
+        ctx.gui.hide::<GamingLayout>();
+        ctx.gui.show::<SettlementGui>();
     }
-    */
+
+    fn update_hud(&mut self, ctx: &mut SceneContext) {
+        if self.phase == DayPhase::Running {
+            let layout = ctx.gui.get_mut::<GamingLayout>();
+            let state = DayHudState {
+                day_label: format!("Day {}", self.telemetry.day),
+                phase_label: "Service".into(),
+                details: "Service running.".to_string(),
+                show_start: false,
+                enable_start: false,
+                show_dev: true,
+                enable_dev: true,
+            };
+            layout.apply_state(&state);
+        }
+
+        {
+            let stats = ctx.gui.get_mut::<TimeStatsGui>();
+            stats.update_time(self.telemetry.tick, self.telemetry.seconds);
+            stats.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
+        }
+    }
 }

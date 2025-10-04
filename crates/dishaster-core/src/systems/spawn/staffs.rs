@@ -65,6 +65,7 @@ pub fn spawn_serving_staffs(
                     parent: Modified::new(Some(staff_entity)),
                     ..Default::default()
                 },
+                ChildOf(staff_entity),
             ));
 
             let _feedback_cmd = commands.spawn((
@@ -78,6 +79,7 @@ pub fn spawn_serving_staffs(
                     parent: Modified::new(Some(staff_entity)),
                     ..Default::default()
                 },
+                ChildOf(staff_entity),
             ));
 
             staff_registry.register(window_entity, staff_entity);

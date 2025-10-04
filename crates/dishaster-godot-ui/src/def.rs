@@ -22,6 +22,7 @@ pub fn register_guis(registry: &mut GuiRegistry) {
     register_gui!(registry,
         StartMenuUI => "start/start_menu",
         GamingLayout => "gaming/layout",
+        SettlementGui => "gaming/settlement",
         TimeStatsGui => "gaming/time_stats",
     );
 }

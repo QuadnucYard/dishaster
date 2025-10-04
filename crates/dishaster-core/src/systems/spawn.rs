@@ -15,20 +15,24 @@ use super::prelude::*;
 pub fn update_diner_spawner(
     mut commands: Commands,
     time: Res<Time>,
+    day_status: Res<DayStatus>,
     mut spawner: ResMut<DinerSpawner>,
     provider: Res<DinerProvider>,
     canteen: Res<Canteen>,
     display_root: Res<DisplayRoot>,
     mut rng: ResMut<GameRng>,
 ) {
-    // Check if spawning time is finished using the new time system
-    if spawner.is_spawning_complete(time.current_time) {
-        spawner.spawning_finished = true;
+    if !day_status.started {
+        // Wait for the service phase to begin before spawning diners.
         return;
     }
 
     // Don't spawn new diners if spawning is finished
     if spawner.spawning_finished {
+        return;
+    }
+    if spawner.is_spawning_complete(time.current_time) {
+        spawner.spawning_finished = true;
         return;
     }
 
@@ -177,6 +181,7 @@ fn spawn_diner(
             parent: Modified::new(Some(wrapper_entity)),
             ..Default::default()
         },
+        ChildOf(wrapper_entity),
     ));
 
     let _feedback = commands.spawn((
@@ -190,6 +195,7 @@ fn spawn_diner(
             parent: Modified::new(Some(wrapper_entity)),
             ..Default::default()
         },
+        ChildOf(wrapper_entity),
     ));
 }
 

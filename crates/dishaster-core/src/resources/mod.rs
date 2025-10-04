@@ -149,6 +149,8 @@ impl DinerSpawner {
 pub struct DayStatus {
     /// Number of diners currently active in the canteen
     pub current_diner_count: usize,
+    /// Whether the spawning period has begun for the current day
+    pub started: bool,
     /// Whether the current day has reached completion criteria
     pub completed: bool,
     /// Whether the day completion event has been emitted

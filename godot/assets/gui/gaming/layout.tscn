@@ -9,10 +9,58 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="Exit" type="Button" parent="."]
+[node name="MainPanel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 219.0
-offset_bottom = 95.0
-theme_override_font_sizes/font_size = 32
+layout_mode = 1
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 342.0
+offset_bottom = 366.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="DayLabel" type="Label" parent="MainPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Day 1"
+
+[node name="PhaseLabel" type="Label" parent="MainPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Preparation"
+
+[node name="DetailsLabel" type="RichTextLabel" parent="MainPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 24
+bbcode_enabled = true
+text = "Review today's events and press Start when ready."
+fit_content = true
+scroll_active = false
+
+[node name="ButtonRow" type="VBoxContainer" parent="MainPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StartButton" type="Button" parent="MainPanel/VBoxContainer/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Start Day"
+
+[node name="EndButton" type="Button" parent="MainPanel/VBoxContainer/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "End Day"
+
+[node name="Exit" type="Button" parent="MainPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "Exit"

@@ -25,7 +25,7 @@ impl SceneProcedure for EnterLevelProcedure {
         ctx.scene_stack.inspect_active_scene_mut(|scene| {
             let game_scene = scene.downcast_mut::<GameScene>().expect("game scene");
 
-            game_scene.start_game();
+            game_scene.start_game(ctx.base);
         });
 
         SceneProcedurePoll::Ready

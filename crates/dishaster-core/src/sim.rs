@@ -2,10 +2,14 @@
 
 use std::{cmp::Ordering, sync::Arc};
 
+use bevy_ecs::system::RunSystemOnce;
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
 
-use crate::{components::*, models::*, prelude::*, resources::*, snapshots::*, systems::*};
+use crate::{
+    commands::SimCommand, components::*, models::*, prelude::*, resources::*, snapshots::*,
+    systems::*,
+};
 
 /// Core simulation engine managing ECS world and system execution
 ///
@@ -227,6 +231,33 @@ impl Simulation {
             next_spawn_timer: 0.0,
             next_diner_id: 0,
             spawning_finished: false,
+        }
+    }
+
+    /// Apply a high-level control command from the client runtime.
+    ///
+    /// Commands alter stateful resources directly so that the next simulation tick
+    /// reflects the requested transition without delay.
+    pub fn handle_command(&mut self, command: SimCommand) {
+        match command {
+            SimCommand::StartRun => {
+                let mut day_status = self.world.resource_mut::<DayStatus>();
+                day_status.started = true;
+            }
+            SimCommand::EndRun => {
+                // stop spawning
+                let mut spawner = self.world.resource_mut::<DinerSpawner>();
+                spawner.spawning_finished = true;
+
+                // clear diners
+                let _ = self.world.run_system_once(
+                    |mut commands: Commands, query: Query<Entity, With<Diner>>| {
+                        for entity in query.iter() {
+                            commands.entity(entity).despawn();
+                        }
+                    },
+                );
+            }
         }
     }
 }
