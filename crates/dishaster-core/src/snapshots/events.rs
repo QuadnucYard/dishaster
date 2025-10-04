@@ -2,6 +2,8 @@ use dishrupt_core::{EntityId, prelude::*};
 
 /// Presentation events emitted by the core simulation for client display.
 pub enum PresentationEvent {
+    /// The current day has completed (all diners have exited and time limit reached).
+    DayCompleted,
     /// An agent has spawned in the simulation.
     AgentSpawned(EntityId),
     /// An agent has despawned from the simulation.

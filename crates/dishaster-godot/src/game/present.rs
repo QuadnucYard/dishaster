@@ -6,6 +6,9 @@ impl Game {
     pub(crate) fn process_events(&mut self, events: Vec<PresentationEvent>) {
         for event in events {
             match event {
+                PresentationEvent::DayCompleted => {
+                    // todo
+                }
                 PresentationEvent::AgentSpawned(entity) => {
                     let controller = AgentController::new(
                         entity,

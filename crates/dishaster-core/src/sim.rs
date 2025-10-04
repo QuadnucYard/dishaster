@@ -103,33 +103,8 @@ impl Simulation {
         self.world.insert_resource(DinerProvider {
             model: level.diner_provider.clone(),
         });
-        let spawner_model = level.diner_spawner.clone();
-        let mut curve = spawner_model.spawn_curve.clone();
-        curve.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap_or(Ordering::Equal));
-        curve.dedup_by(|a, b| (a.time - b.time).abs() <= f32::EPSILON);
-        if curve.is_empty() {
-            curve.push(SpawnRateKey {
-                time: 0.0,
-                multiplier: 1.0,
-            });
-        } else if curve[0].time > 0.0 {
-            let initial_multiplier = curve[0].multiplier;
-            curve.insert(
-                0,
-                SpawnRateKey {
-                    time: 0.0,
-                    multiplier: initial_multiplier,
-                },
-            );
-        }
-
-        self.world.insert_resource(DinerSpawner {
-            model: spawner_model,
-            curve,
-            next_spawn_timer: 0.0,
-            next_diner_id: 0,
-            spawning_finished: false,
-        });
+        let spawner = Self::make_diner_spawner(&level.diner_spawner);
+        self.world.insert_resource(spawner);
         self.world.insert_resource(EventLog::default());
         self.world.insert_resource(ServingStaffRegistry::default());
         self.world.insert_resource(ServingCommsQueue::default());
@@ -224,5 +199,34 @@ impl Simulation {
             self.world.resource::<DinerSpawner>(),
         );
         day_status.current_diner_count == 0 && spawner.spawning_finished
+    }
+
+    fn make_diner_spawner(model: &DinerSpawnerModel) -> DinerSpawner {
+        let mut curve = model.spawn_curve.clone();
+        curve.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap_or(Ordering::Equal));
+        curve.dedup_by(|a, b| (a.time - b.time).abs() <= f32::EPSILON);
+        if curve.is_empty() {
+            curve.push(SpawnRateKey {
+                time: 0.0,
+                multiplier: 1.0,
+            });
+        } else if curve[0].time > 0.0 {
+            let initial_multiplier = curve[0].multiplier;
+            curve.insert(
+                0,
+                SpawnRateKey {
+                    time: 0.0,
+                    multiplier: initial_multiplier,
+                },
+            );
+        }
+
+        DinerSpawner {
+            model: model.clone(),
+            curve,
+            next_spawn_timer: 0.0,
+            next_diner_id: 0,
+            spawning_finished: false,
+        }
     }
 }

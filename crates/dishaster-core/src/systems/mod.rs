@@ -2,6 +2,7 @@
 
 mod dining;
 mod feedback;
+mod monitor;
 mod navigation;
 mod queueing;
 mod serving;
@@ -9,6 +10,7 @@ mod spawn;
 
 pub use dining::*;
 pub use feedback::*;
+pub use monitor::*;
 pub use navigation::*;
 pub use queueing::*;
 pub use serving::*;

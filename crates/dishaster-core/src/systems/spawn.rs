@@ -11,12 +11,6 @@ pub use staffs::*;
 
 use super::prelude::*;
 
-/// System to update the current diner count
-pub fn check_day_completion(mut day_status: ResMut<DayStatus>, diner_query: Query<&Diner>) {
-    // Update current diner count
-    day_status.current_diner_count = diner_query.iter().count();
-}
-
 /// System that manages diner spawning based on timing and capacity constraints
 pub fn update_diner_spawner(
     mut commands: Commands,
