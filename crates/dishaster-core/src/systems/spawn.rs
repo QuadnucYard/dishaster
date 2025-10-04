@@ -1,13 +1,15 @@
 mod layout;
+mod staffs;
 
 use dishrupt_core::{
     asset::PrefabReference,
     display::{DisplayModel, DisplayState, Transform},
     utils::Modified,
 };
-pub use layout::spawn_static_objects;
+pub use layout::*;
+pub use staffs::*;
 
-use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
+use super::prelude::*;
 
 /// System to update the current diner count
 pub fn check_day_completion(mut day_status: ResMut<DayStatus>, diner_query: Query<&Diner>) {

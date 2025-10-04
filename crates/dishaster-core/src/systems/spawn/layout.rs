@@ -5,7 +5,7 @@ use dishrupt_core::{
     utils::Modified,
 };
 
-use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
+use crate::systems::prelude::*;
 
 /// System that spawns all static objects (windows, tables, dispensers, collectors) at level start
 pub fn spawn_static_objects(
@@ -50,11 +50,12 @@ fn spawn_windows(
             .collect();
 
         // Spawn window entity with separated data
+        let window_range = canteen.model.windows[window_config.slot_index];
         let window_entity = commands
             .spawn(Window {
                 service_template: service_handle,
                 config: window_config.clone(),
-                position: canteen.model.windows[window_config.slot_index],
+                position: window_range,
             })
             .id();
 

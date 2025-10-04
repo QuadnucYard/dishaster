@@ -7,9 +7,9 @@ use super::prelude::*;
 pub struct CanteenModel {
     /// Unique identifier for this canteen layout
     pub id: ModelId,
-    /// Total width of the dining hall in meters
+    /// Total width of the dining hall (bounding box) in meters
     pub width: Meters,
-    /// Total height of the dining hall in meters
+    /// Total height of the dining hall (bounding box) in meters
     pub height: Meters,
 
     /// Y coordinate where customers enter/exit the hall

@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3 uid="uid://dmvpquqts4q1d"]
+
+[ext_resource type="Texture2D" uid="uid://daph5cjlkk88r" path="res://assets/sprites/emojis/jeans.svg" id="2_2hbbw"]
+[ext_resource type="Texture2D" uid="uid://bcvpmpbp5np22" path="res://assets/sprites/emojis/mans_shoe.svg" id="3_afkup"]
+[ext_resource type="Texture2D" uid="uid://b4neupvch3ad1" path="res://assets/sprites/emojis/1F91A.svg" id="4_i7h20"]
+[ext_resource type="Texture2D" uid="uid://bml5j77263av8" path="res://assets/sprites/emojis/shirt.svg" id="5_b8egn"]
+[ext_resource type="Texture2D" uid="uid://cyl7vn8jf8ug2" path="res://assets/sprites/emojis/sweat_smile.svg" id="6_qx8y5"]
+
+[node name="SampleStaff" type="Node2D"]
+
+[node name="Jeans" type="Sprite2D" parent="."]
+position = Vector2(-4.038968e-28, -16.000004)
+scale = Vector2(0.88888896, 0.88888896)
+texture = ExtResource("2_2hbbw")
+
+[node name="LeftShoe" type="Sprite2D" parent="."]
+position = Vector2(-11.999999, 0)
+rotation = 0.7853982
+scale = Vector2(0.51967824, 0.51967824)
+texture = ExtResource("3_afkup")
+flip_h = true
+
+[node name="RightShoe" type="Sprite2D" parent="."]
+position = Vector2(12, -1)
+rotation = -0.7853982
+scale = Vector2(0.57296884, 0.57296884)
+texture = ExtResource("3_afkup")
+
+[node name="LeftHand" type="Sprite2D" parent="."]
+position = Vector2(-26, -50)
+scale = Vector2(0.30555546, 0.30555546)
+texture = ExtResource("4_i7h20")
+
+[node name="RightHand" type="Sprite2D" parent="."]
+position = Vector2(26, -52)
+scale = Vector2(0.36111143, 0.36111143)
+texture = ExtResource("4_i7h20")
+
+[node name="Shirt" type="Sprite2D" parent="."]
+position = Vector2(3.5527137e-15, -56.000008)
+scale = Vector2(0.88888896, 0.88888896)
+texture = ExtResource("5_b8egn")
+
+[node name="Face" type="Sprite2D" parent="."]
+position = Vector2(0, -38)
+scale = Vector2(0.45833337, 0.45833337)
+texture = ExtResource("6_qx8y5")

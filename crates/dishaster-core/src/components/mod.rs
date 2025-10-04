@@ -4,11 +4,15 @@ mod agent;
 mod canteen;
 mod diner;
 mod physics;
+mod service;
+mod staff;
 
 pub use agent::*;
 pub use canteen::*;
 pub use diner::*;
 pub use physics::*;
+pub use service::*;
+pub use staff::*;
 
 use crate::prelude::*;
 

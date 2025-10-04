@@ -94,15 +94,6 @@ pub struct WindowLayout {
     pub queue_x: Vec<Meters>,
     /// Positions where dishes can be placed
     pub dish_slots: Vec<Rect>,
-    // /// Service constraints
-    // pub constraints: ServiceConstraints,
-}
-
-/// Service limitations and capabilities for a window type
-#[derive(Debug, Clone, Deserialize)]
-pub struct ServiceConstraints {
-    // /// Maximum number of customers that can be served simultaneously
-    // pub max_concurrent_services: u32,
 }
 
 // ===================== Operational Configuration =====================

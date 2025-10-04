@@ -7,8 +7,7 @@ use std::cmp::Ordering;
 
 use dishaster_navigation::NavigationGrid;
 
-use super::feedback::*;
-use crate::{components::*, constants::*, models::*, prelude::*, resources::*, snapshots::*};
+use super::{feedback::*, prelude::*};
 
 const OBSERVING_FEEDBACK_RATE: f64 = 0.05;
 const DECIDING_FEEDBACK_RATE: f64 = 0.04;
@@ -32,6 +31,7 @@ pub fn update_diner_states(
         &CompWrapper<DinerModel>,
         &mut Movement,
         Option<&QueueParticipant>,
+        Option<&mut ServiceSession>,
     )>,
     window_query: Query<(Entity, &Window)>,
     mut table_set: ParamSet<(
@@ -48,12 +48,24 @@ pub fn update_diner_states(
     let sim_time = time.current_time;
     let dt = time.tick_duration;
 
-    for (entity, mut state, mut targets, diner_model, mut movement, queue_participant) in
-        diner_query.iter_mut()
+    for (
+        entity,
+        mut state,
+        mut targets,
+        diner_model,
+        mut movement,
+        queue_participant,
+        service_session,
+    ) in diner_query.iter_mut()
     {
         let previous_state = state.current;
         // Update state timer using tick duration
         state.state_timer += time.tick_duration as f32;
+
+        let has_service_session = service_session.is_some();
+        let service_completed = service_session
+            .as_ref()
+            .is_some_and(|session| session.stage == ServiceStage::Completed);
 
         let next_state = match previous_state {
             DinerStateType::Entering => handle_entering(&mut movement, &nav_grid, &mut rng),
@@ -79,7 +91,13 @@ pub fn update_diner_states(
             ),
             DinerStateType::AtWindow => DinerStateType::Queueing,
             DinerStateType::Queueing => handle_queueing(&movement, queue_participant),
-            DinerStateType::BeingServed => handle_being_served(&mut state),
+            DinerStateType::BeingServed => {
+                if service_completed {
+                    DinerStateType::FindingSeat
+                } else {
+                    DinerStateType::BeingServed
+                }
+            }
             DinerStateType::FindingSeat => handle_finding_seat(
                 entity,
                 &mut state,
@@ -124,14 +142,6 @@ pub fn update_diner_states(
                 commands.entity(entity).remove::<QueueParticipant>();
             }
 
-            if next_state == DinerStateType::BeingServed {
-                events.emit_feedback(FeedbackEvent {
-                    entity: entity.into(),
-                    content: Feedback::Thought(choose_feedback(&mut rng, SERVING_FEEDBACKS).into()),
-                    timestamp: sim_time,
-                })
-            }
-
             state.current = next_state;
             state.state_timer = 0.0;
 
@@ -159,6 +169,21 @@ pub fn update_diner_states(
                     ),
                     timestamp: sim_time,
                 });
+            }
+        }
+
+        if transitioned {
+            if next_state == DinerStateType::BeingServed
+                && !has_service_session
+                && let Some(window) = targets.chosen_window
+            {
+                commands
+                    .entity(entity)
+                    .insert(ServiceSession::new(window, sim_time));
+            }
+
+            if previous_state == DinerStateType::BeingServed && has_service_session {
+                commands.entity(entity).remove::<ServiceSession>();
             }
         }
     }
@@ -317,15 +342,6 @@ fn handle_queueing(
     DinerStateType::Queueing
 }
 
-/// Handles placeholder service timing once the diner reaches the counter.
-fn handle_being_served(state: &mut DinerState) -> DinerStateType {
-    if state.state_timer >= PLACEHOLDER_SERVICE_TIME_S {
-        DinerStateType::FindingSeat
-    } else {
-        DinerStateType::BeingServed
-    }
-}
-
 fn handle_finding_seat(
     entity: Entity,
     state: &mut DinerState,
@@ -478,8 +494,7 @@ fn handle_moving_to_seat(
     }
 
     if movement.pos.close_to(seat_pos, TABLE_SEAT_ARRIVAL_EPS) {
-        movement.path.clear();
-        movement.velocity = Vec2::ZERO;
+        movement.stop();
         return DinerStateType::Eating;
     }
 
@@ -637,7 +652,7 @@ fn find_valid_spot_near(
 fn clamp_to_canteen_with_margin(point: Vec2, canteen: &Canteen) -> Vec2 {
     let margin = DINING_AREA_MARGIN;
     let width = canteen.model.width;
-    let height = canteen.model.height;
+    let height = canteen.model.windows_y;
 
     let (min_x, max_x) = if width <= margin * 2.0 {
         (0.0, width)

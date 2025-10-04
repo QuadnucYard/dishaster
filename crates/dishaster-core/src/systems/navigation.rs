@@ -1,7 +1,7 @@
 use dishaster_navigation::{NavigationGrid, PathRequest, find_path, world_to_tile_dist};
 use dishrupt_core::display::Transform;
 
-use crate::{components::*, constants::*, prelude::*, resources::*};
+use super::prelude::*;
 
 /// System to update the global collision grid
 pub fn build_collision_grid(

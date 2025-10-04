@@ -41,8 +41,12 @@ impl Simulation {
                 update_crowd_field,
                 // Spawn logic may add diners
                 update_diner_spawner,
+                // Deliver delayed serving communications before state updates
+                process_serving_messages,
                 // Agents decide targets and compute paths
                 update_diner_states,
+                // Allocate staff and schedule service events
+                drive_serving_sessions,
                 // Update queue ordering and slot targets before movement
                 update_window_queues,
                 // Move agents along paths
@@ -127,6 +131,8 @@ impl Simulation {
             spawning_finished: false,
         });
         self.world.insert_resource(EventLog::default());
+        self.world.insert_resource(ServingStaffRegistry::default());
+        self.world.insert_resource(ServingCommsQueue::default());
         self.world.insert_resource(DayStatus::default());
         self.world.insert_resource(level.into_res());
 
@@ -141,7 +147,14 @@ impl Simulation {
 
         // Spawn static objects once at startup
         let mut schedule = Schedule::default();
-        schedule.add_systems((spawn_static_objects, build_collision_grid));
+        schedule.add_systems(
+            (
+                spawn_static_objects,
+                spawn_serving_staffs,
+                build_collision_grid,
+            )
+                .chain(),
+        );
         schedule.run(&mut self.world);
     }
 

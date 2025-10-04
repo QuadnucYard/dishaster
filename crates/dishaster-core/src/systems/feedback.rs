@@ -1,10 +1,6 @@
 #![allow(missing_docs)]
 
-use crate::{
-    prelude::*,
-    resources::*,
-    snapshots::{FeedbackEvent, PresentationEvent},
-};
+use super::prelude::*;
 
 // For now, we ue simple emoji strings as feedback indicators.
 // These are converted to graphical balloons in the client.

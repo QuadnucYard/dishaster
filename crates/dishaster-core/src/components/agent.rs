@@ -52,4 +52,11 @@ impl Movement {
     pub fn has_path(&self) -> bool {
         !self.path.is_empty() || self.pending_target.is_some()
     }
+
+    /// Clear the current path and stop movement.
+    pub fn stop(&mut self) {
+        self.path.clear();
+        self.pending_target = None;
+        self.velocity = Vec2::ZERO;
+    }
 }

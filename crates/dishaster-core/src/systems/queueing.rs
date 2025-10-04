@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, collections::HashMap};
 
-use crate::{components::*, constants::*, prelude::*, resources::*};
+use super::prelude::*;
 
 struct WindowQueueLayout {
     front_anchor: Vec2,

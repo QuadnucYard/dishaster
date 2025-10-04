@@ -2,7 +2,7 @@
     (
         id: "main_canteen",
         width: 25.0,
-        height: 15.0,
+        height: 20.0,
         entrances_y: 0.0,
         entrances: [
             (x_min: 5.0, x_max: 7.0),
