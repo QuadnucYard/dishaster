@@ -49,7 +49,9 @@ pub trait Scene: AsAny {
 
     fn enter(&mut self, ctx: &mut SceneContext) {}
 
-    fn leave(&mut self, ctx: &mut SceneContext) {}
+    fn leave(&mut self, ctx: &mut SceneContext) {
+        ctx.gui.hide_all();
+    }
 
     fn process(&mut self, ctx: &mut SceneContext, delta: f64) {}
 

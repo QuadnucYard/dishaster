@@ -47,6 +47,20 @@ impl GuiRegistry {
     pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Box<dyn Gui>> {
         self.guis.values_mut()
     }
+
+    pub fn show<G: Gui + 'static>(&mut self) {
+        self.get_mut::<G>().show();
+    }
+
+    pub fn hide<G: Gui + 'static>(&mut self) {
+        self.get_mut::<G>().hide();
+    }
+
+    pub fn hide_all(&mut self) {
+        for gui in self.iter_mut() {
+            gui.hide();
+        }
+    }
 }
 
 type GuiCmd = Box<dyn FnOnce(&mut GuiRegistry) + Send + 'static>;
@@ -89,6 +103,11 @@ impl GuiCommands {
     pub fn run_reqs(&mut self, f: impl FnMut(Box<dyn GuiRequest>)) {
         let mut guard = self.0.lock().unwrap();
         guard.reqs.drain(..).for_each(f);
+    }
+
+    pub fn take_reqs(&mut self) -> Vec<Box<dyn GuiRequest>> {
+        let mut guard = self.0.lock().unwrap();
+        guard.reqs.drain(..).collect()
     }
 }
 

@@ -1,8 +1,7 @@
 use as_any::Downcast;
 use dishaster_godot_ui::{StartMenuUI, req::*};
 use dishrupt_godot::bind::BindGodot;
-use dishrupt_godot_scene::{Scene, SceneContext, SceneId, SceneProcedure};
-use dishrupt_godot_ui::*;
+use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use godot::{classes::Node, global::godot_print, obj::Gd};
 
 use crate::scenes::proc::details::EnterLevelProcedure;
@@ -32,35 +31,24 @@ impl Scene for StartScene {
     }
 
     fn enter(&mut self, ctx: &mut SceneContext) {
-        let start_menu = ctx.gui.get_mut::<StartMenuUI>();
-        start_menu.show();
-    }
-
-    fn leave(&mut self, ctx: &mut SceneContext) {
-        for gui in ctx.gui.iter_mut() {
-            gui.set_active(false);
-        }
+        ctx.gui.show::<StartMenuUI>();
     }
 
     fn process(&mut self, ctx: &mut SceneContext, _delta: f64) {
         ctx.gui_cmds.run_cmds(ctx.gui);
-        let mut proc: Option<Box<dyn SceneProcedure>> = None;
-        ctx.gui_cmds.run_reqs(|req| {
+
+        for req in ctx.gui_cmds.take_reqs() {
             let req = &*req;
             godot_print!("Got GUI request: {}", std::any::type_name_of_val(req));
 
-            if let Some(_req) = req.downcast_ref::<QuitRequest>() {
+            if req.is::<QuitRequest>() {
                 godot_print!("Quit requested");
                 self.gd.get_tree().unwrap().quit();
             }
 
-            if let Some(_req) = req.downcast_ref::<EnterLevelRequest>() {
-                proc = Some(Box::new(EnterLevelProcedure {}));
+            if req.is::<EnterLevelRequest>() {
+                ctx.schedule(EnterLevelProcedure);
             }
-        });
-
-        if let Some(proc) = proc {
-            ctx.proc = Some(proc);
         }
     }
 }

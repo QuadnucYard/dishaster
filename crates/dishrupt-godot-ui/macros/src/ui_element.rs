@@ -46,9 +46,24 @@ fn create(info: &UIElement, item: &ItemStruct) -> Result<TokenStream> {
 
     let mut item = item.clone();
     let gd = &info.meta.gd;
+    let mut deref_base = quote! {};
     if let Fields::Named(fields) = &mut item.fields {
-        if let Some(base) = &info.meta.base {
-            fields.named.push(parse_quote! { pub base: #base });
+        if let Some(base_ty) = &info.meta.base {
+            fields.named.push(parse_quote! { pub base: #base_ty });
+            deref_base = quote! {
+                impl std::ops::Deref for #ident {
+                    type Target = #base_ty;
+
+                    fn deref(&self) -> &Self::Target {
+                        &self.base
+                    }
+                }
+                impl std::ops::DerefMut for #ident {
+                    fn deref_mut(&mut self) -> &mut Self::Target {
+                        &mut self.base
+                    }
+                }
+            }
         }
         fields.named.push(parse_quote! { gd: godot::obj::Gd<#gd> });
     }
@@ -72,6 +87,8 @@ fn create(info: &UIElement, item: &ItemStruct) -> Result<TokenStream> {
                 Self::new(value)
             }
         }
+
+        #deref_base
 
         unsafe impl Send for #ident {}
         unsafe impl Sync for #ident {}

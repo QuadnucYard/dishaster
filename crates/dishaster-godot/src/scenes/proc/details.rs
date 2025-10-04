@@ -14,7 +14,7 @@ impl SceneProcedure for StartProcedure {
     }
 }
 
-pub struct EnterLevelProcedure();
+pub struct EnterLevelProcedure;
 
 impl SceneProcedure for EnterLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
