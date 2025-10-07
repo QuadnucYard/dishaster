@@ -1,17 +1,23 @@
 use std::{
     cell::OnceCell,
-    sync::{Arc, OnceLock},
+    path::PathBuf,
+    sync::{Arc, Mutex, MutexGuard, OnceLock},
 };
 
 use dishaster_core::models::GameModelRegistry;
 use dishaster_data::DataLoader;
 use dishaster_godot_ui::register_guis;
+use dishaster_persistence::ProgressService;
 use dishrupt_godot::{audio::AudioManager, ext::NodeExt, input::listener::InputListener};
 use dishrupt_godot_scene::{SceneContext, SceneManager};
 use dishrupt_godot_ui::GuiManager;
-use godot::{classes::CanvasLayer, prelude::*};
+use godot::{
+    classes::{CanvasLayer, ProjectSettings},
+    prelude::*,
+};
+use rand::random;
 
-use crate::scenes::{DefaultSceneLoader, proc::details::StartProcedure};
+use crate::scenes::{DefaultSceneLoader, proc::*};
 
 /// The root scene. Handles interaction outside levels.
 #[derive(GodotClass)]
@@ -156,11 +162,20 @@ impl Inner {
 }
 
 pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
+pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService>> = OnceLock::new();
 
 fn init_game_database(loader: impl FnOnce() -> Arc<GameModelRegistry>) {
     GAME_DATA
         .set(loader())
         .unwrap_or_else(|_| panic!("init game database error"));
+}
+
+pub fn progress_service() -> MutexGuard<'static, ProgressService> {
+    PROGRESS_SERVICE
+        .get()
+        .expect("progress service not initialized")
+        .lock()
+        .expect("progress service poisoned")
 }
 
 fn init_game() {
@@ -175,11 +190,23 @@ fn init_game() {
         godot_print!("Loaded {} canteens", db.canteens.len());
         db
     });
-    /* init_local_store(
-        &ProjectSettings::singleton()
-            .globalize_path("user://")
-            .to_string(),
-    ); */
+
+    let save_dir = {
+        let settings = ProjectSettings::singleton();
+        let path: GString = settings.globalize_path("user://");
+        PathBuf::from(path.to_string())
+    };
+
+    let registry = Arc::clone(GAME_DATA.get().expect("game data not initialized"));
+    if PROGRESS_SERVICE
+        .set(Mutex::new(
+            ProgressService::load_or_create(save_dir, registry, None, random())
+                .expect("failed to initialize progress service"),
+        ))
+        .is_err()
+    {
+        panic!("progress service already initialized");
+    }
     /* setup_preference(); */
 }
 
@@ -196,23 +223,5 @@ fn setup_preference() {
     let bus = audio_server.get_bus_index("Sound");
     audio_server.set_bus_volume_db(bus, pref.sound_volume as f32 / 100.0);
     audio_server.set_bus_mute(bus, pref.sound_mute);
-}
- */
-
-/*
-#[cfg(test)]
-mod tests {
-    use crate::game_main::my_init_load;
-
-    extern crate tdsheep_hot;
-
-    #[test]
-    fn test_load_data() {
-        println!("cwd: {:?}", std::env::current_dir().unwrap());
-        std::env::set_current_dir("../../../godot").unwrap();
-        println!("cwd: {:?}", std::env::current_dir().unwrap());
-        tdsheep_service::init_game_database(|| my_init_load("data"));
-        tdsheep_service::game_database();
-    }
 }
  */

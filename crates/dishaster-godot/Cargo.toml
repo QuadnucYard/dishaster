@@ -12,6 +12,7 @@ dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true
 dishaster-core.workspace = true
 dishaster-data.workspace = true
+dishaster-persistence.workspace = true
 dishaster-godot-ui.workspace = true
 
 as-any.workspace = true
@@ -20,6 +21,7 @@ fibre.workspace = true
 rustc-hash.workspace = true
 godot.workspace = true
 log.workspace = true
+rand.workspace = true
 
 [lints]
 # workspace = true

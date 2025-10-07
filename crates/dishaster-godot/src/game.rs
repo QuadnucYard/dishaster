@@ -16,7 +16,7 @@ use rustc_hash::FxHashMap;
 use crate::{
     dbgviz::*,
     game::{agent::AgentController, perf::PerfTracker},
-    game_main::GAME_DATA,
+    game_main::{GAME_DATA, progress_service},
     runner::{SnapshotFrame, SyncSimulationRunner},
 };
 
@@ -173,6 +173,10 @@ impl Game {
             self.sim_runner.send_command(SimCommand::EndRun);
             self.agents.clear();
         }
+
+        progress_service()
+            .complete_day()
+            .expect("failed to complete day");
 
         ctx.gui.hide::<GamingLayout>();
         ctx.gui.show::<SettlementGui>();

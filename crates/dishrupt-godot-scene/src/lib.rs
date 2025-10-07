@@ -1,6 +1,8 @@
 mod manager;
 mod proc;
 
+use std::ops::{Deref, DerefMut};
+
 use as_any::AsAny;
 use dishrupt_godot::{audio::AudioManager, input::listener::GodotInputEvent};
 use dishrupt_godot_ui::{GuiCommands, GuiRegistry};
@@ -26,6 +28,20 @@ impl SceneContext<'_> {
 pub struct SceneProcedureContext<'a> {
     pub base: &'a mut SceneContext<'a>,
     pub scene_stack: &'a mut SceneStack,
+}
+
+impl<'a> Deref for SceneProcedureContext<'a> {
+    type Target = SceneContext<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        self.base
+    }
+}
+
+impl DerefMut for SceneProcedureContext<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.base
+    }
 }
 
 pub enum SceneTransition {

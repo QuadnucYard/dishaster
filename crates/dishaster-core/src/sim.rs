@@ -92,7 +92,7 @@ impl Simulation {
         self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
         self.world.insert_resource(GameRng::new(level.seed));
 
-        let db = (*self.world.resource::<GameModelRegistryRes>()).clone();
+        let db = Arc::clone(self.world.resource::<GameModelRegistryRes>());
         let canteen = db.canteens.get_by_id(&level.canteen).unwrap();
 
         let world_size = canteen.size();

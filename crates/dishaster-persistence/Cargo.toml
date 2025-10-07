@@ -1,0 +1,20 @@
+[package]
+name = "dishaster-persistence"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+ron.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+dishaster-models.workspace = true
+
+[dev-dependencies]
+dishrupt-core.workspace = true
+tempfile.workspace = true
+
+[lints]
+# workspace = trues

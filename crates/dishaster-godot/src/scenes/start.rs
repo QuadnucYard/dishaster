@@ -4,7 +4,7 @@ use dishrupt_godot::bind::BindGodot;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use godot::{classes::Node, global::godot_print, obj::Gd};
 
-use crate::scenes::proc::details::EnterLevelProcedure;
+use crate::scenes::proc::EnterLevelProcedure;
 
 /// The root scene. Handles interaction outside levels.
 pub struct StartScene {

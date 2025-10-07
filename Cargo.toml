@@ -19,6 +19,7 @@ dishaster-navigation = { path = "crates/dishaster-navigation" }
 dishaster-models = { path = "crates/dishaster-models" }
 dishaster-core = { path = "crates/dishaster-core" }
 dishaster-data = { path = "crates/dishaster-data" }
+dishaster-persistence = { path = "crates/dishaster-persistence" }
 dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }
 dishaster-godot = { path = "crates/dishaster-godot" }
 
@@ -50,6 +51,7 @@ rustc-hash = "2"
 serde = { version = "1.0", features = ["derive"] }
 signals2 = "0.3"
 thiserror = "2.0"
+tempfile = "3.10"
 
 [workspace.lints.rust]
 missing_docs = "warn"

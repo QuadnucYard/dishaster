@@ -1,0 +1,132 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use serde::{Deserialize, Serialize};
+
+/// Current version of the progress schema stored on disk.
+pub const USER_PROGRESS_VERSION: u32 = 1;
+
+/// Persistent representation of the player's long-term progress.
+///
+/// The structure only contains stable data that must survive across sessions.
+/// Transient entities live solely inside the simulation and never appear here.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UserProgress {
+    /// Metadata describing file format and timestamps.
+    pub meta: ProgressMeta,
+    /// Player-specific counters and unlock tracking.
+    pub player: PlayerProgress,
+    /// Customized canteen layout modifications.
+    pub canteen_layout: CanteenLayoutState,
+    /// Aggregated memory about diners to drive future generation.
+    pub diner_memory_bank: DinerMemoryBank,
+    /// Cumulative statistics for analytics and balancing.
+    pub stats_aggregate: AggregateStats,
+}
+
+/// Metadata stored alongside the progress payload.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProgressMeta {
+    /// Format schema version to support migrations.
+    pub version: u32,
+    /// Creation timestamp in UTC seconds.
+    pub created_at_utc: u64,
+    /// Last updated timestamp in UTC seconds.
+    pub updated_at_utc: u64,
+}
+
+/// Player-centric state that drives level selection.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlayerProgress {
+    /// Day index starting from one.
+    pub current_day: u32,
+    /// Reputation score used for balancing future systems.
+    pub reputation: f32,
+    /// Base seed for deterministic day generation.
+    pub rng_seed: u64,
+}
+
+/// Snapshot of user-authored canteen layout changes.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct CanteenLayoutState {
+    /// Every object placed by the player inside the dining hall.
+    pub placed_objects: Vec<PlacedObject>,
+}
+
+/// Persistent representation of a single placed object.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlacedObject {
+    /// Stable identifier used for diffing between sessions.
+    pub id: String,
+    /// Prefab path used by the renderer.
+    pub prefab: String,
+    /// Simple semantic kind for quick filtering.
+    pub kind: String,
+    /// Local-space coordinates in meters.
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+/// Aggregated diner knowledge to tweak future spawning.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct DinerMemoryBank {
+    /// Per-profile memories collected over many days.
+    pub entries: Vec<DinerMemoryEntry>,
+}
+
+/// Summary of a single diner profile over multiple visits.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct DinerMemoryEntry {
+    /// Key representing a diner persona bucket.
+    pub diner_key: String,
+    /// Total number of visits observed.
+    pub total_visits: u32,
+    /// Day index of the last encounter.
+    pub last_visit_day: u32,
+    /// Rolling average satisfaction used for balancing.
+    pub avg_satisfaction: f32,
+}
+
+/// Lifetime statistics collected for dashboards and analytics.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct AggregateStats {
+    /// Accumulated profit across all completed days.
+    pub lifetime_profit: f64,
+    /// Total number of diners served.
+    pub lifetime_served: u64,
+    /// Total safety incidents recorded.
+    pub safety_incidents: u32,
+    /// Average satisfaction of the most recent day.
+    pub last_day_avg_satisfaction: f32,
+}
+
+impl UserProgress {
+    /// Create a brand-new progress record for first-time players.
+    pub fn new(seed: u64) -> Self {
+        let now = now_unix();
+        Self {
+            meta: ProgressMeta {
+                version: USER_PROGRESS_VERSION,
+                created_at_utc: now,
+                updated_at_utc: now,
+            },
+            player: PlayerProgress {
+                current_day: 1,
+                reputation: 50.0,
+                rng_seed: seed,
+            },
+            canteen_layout: Default::default(),
+            diner_memory_bank: DinerMemoryBank {
+                ..Default::default()
+            },
+            stats_aggregate: Default::default(),
+        }
+    }
+}
+
+pub(crate) fn now_unix() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
