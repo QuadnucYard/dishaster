@@ -32,6 +32,15 @@ impl Game {
                         agent.feedback.show(&feedback.content);
                     }
                 }
+
+                PresentationEvent::QueryDistanceResponse(resp) => {
+                    godot::global::godot_print!("Distance query response: {:?}", resp);
+                }
+                PresentationEvent::QueryDistancesResponse(resp) => {
+                    self.dbgviz
+                        .distance_overlay
+                        .present(&resp, &self.display_ctx);
+                }
             }
         }
     }

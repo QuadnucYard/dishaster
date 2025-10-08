@@ -1,17 +1,19 @@
 mod collision_overlay;
 mod crowd_overlay;
+mod distance_overlay;
 mod movement_overlay;
 
 use dishaster_core::snapshots::Snapshot;
 use dishrupt_godot::display::DisplayContext2D;
 use godot::{classes::Node2D, prelude::*};
 
-use self::{collision_overlay::*, crowd_overlay::*, movement_overlay::*};
+use self::{collision_overlay::*, crowd_overlay::*, distance_overlay::*, movement_overlay::*};
 
 pub struct DbgViz {
-    collision_overlay: CollisionDebugOverlay,
-    crowd_overlay: CrowdDebugOverlay,
-    movement_overlay: MovementDebugOverlay,
+    pub collision_overlay: CollisionDebugOverlay,
+    pub distance_overlay: DistanceDebugOverlay,
+    pub crowd_overlay: CrowdDebugOverlay,
+    pub movement_overlay: MovementDebugOverlay,
 }
 
 impl DbgViz {
@@ -20,6 +22,10 @@ impl DbgViz {
         let mut collision_root = root.get_node_as::<Node2D>("%CollisionDebugOverlay");
         collision_root.set_position(origin);
         let collision_overlay = CollisionDebugOverlay::new(collision_root);
+
+        let mut distance_root = root.get_node_as::<Node2D>("%DistanceDebugOverlay");
+        distance_root.set_position(origin);
+        let distance_overlay = DistanceDebugOverlay::new(distance_root);
 
         let mut crowd_root = root.get_node_as::<Node2D>("%CrowdDebugOverlay");
         crowd_root.set_position(origin);
@@ -31,6 +37,7 @@ impl DbgViz {
 
         Self {
             collision_overlay,
+            distance_overlay,
             crowd_overlay,
             movement_overlay,
         }

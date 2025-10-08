@@ -9,6 +9,9 @@ y_sort_enabled = true
 [node name="CollisionDebugOverlay" type="Node2D" parent="Stage"]
 unique_name_in_owner = true
 
+[node name="DistanceDebugOverlay" type="Node2D" parent="Stage"]
+unique_name_in_owner = true
+
 [node name="CrowdDebugOverlay" type="Node2D" parent="Stage"]
 unique_name_in_owner = true
 

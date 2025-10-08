@@ -257,6 +257,31 @@ impl Simulation {
                     },
                 );
             }
+
+            SimCommand::QueryDistance(pos) => {
+                let resp = {
+                    let nav_grid = self.world.resource_mut::<ResWrapper<NavigationGrid>>();
+                    nav_grid
+                        .try_world_to_grid(pos)
+                        .map(|cell| nav_grid.get_distance(cell))
+                };
+                let mut events = self.world.resource_mut::<EventLog>();
+                events.emit(PresentationEvent::QueryDistanceResponse(resp));
+            }
+            SimCommand::QueryDistances => {
+                let resp = {
+                    let nav_grid = self.world.resource_mut::<ResWrapper<NavigationGrid>>();
+                    let distances = nav_grid.distance_field();
+                    QueryDistancesResponse {
+                        width: distances.rows(),
+                        height: distances.cols(),
+                        cell_size: nav_grid.cell_size(),
+                        data: distances.flatten().clone(),
+                    }
+                };
+                let mut events = self.world.resource_mut::<EventLog>();
+                events.emit(PresentationEvent::QueryDistancesResponse(resp));
+            }
         }
     }
 }

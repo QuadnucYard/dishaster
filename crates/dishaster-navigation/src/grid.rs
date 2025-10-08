@@ -13,7 +13,7 @@ pub struct NavigationGrid {
     /// Occupancy grid for quick lookup of occupied cells
     occupancy: Grid<bool>,
     /// Distance field for obstacle avoidance
-    distance: Grid<f64>,
+    distance: Grid<f32>,
     /// Obstacles for use with the dodgy library
     obstacles: Vec<Obstacle>,
     /// Crowd cost field for soft avoidance of other agents
@@ -21,7 +21,7 @@ pub struct NavigationGrid {
 }
 
 impl NavigationGrid {
-    const CLEARANCE_EPS: f32 = -0.1;
+    const CLEARANCE_EPS: f32 = 0.1;
 
     /// Create a new collision grid with default cell size
     pub fn new(world_size: Vec2, cell_size: f32) -> Self {
@@ -72,7 +72,7 @@ impl NavigationGrid {
 
     /// Convert world coordinates to grid cell coordinates
     pub fn try_world_to_grid(&self, position: Vec2) -> Option<UVec2> {
-        self.bound_tile((position / self.cell_size).floor().as_ivec2())
+        self.bound_tile(self.world_to_igrid(position))
     }
 
     /// Convert grid cell coordinates back to world position (cell center)
@@ -105,14 +105,24 @@ impl NavigationGrid {
 
     /// Check if a cell is traversable given an entity radius
     pub fn is_traversable(&self, cell: UVec2, radius: f32) -> bool {
-        (self.distance[(cell.x as usize, cell.y as usize)] as f32) * self.cell_size
-            > radius + Self::CLEARANCE_EPS
+        self.get_distance(cell) > radius + Self::CLEARANCE_EPS
     }
 
     /// Check if a world position is traversable given an entity radius
     pub fn is_pos_traversable(&self, pos: Vec2, radius: f32) -> bool {
         self.try_world_to_grid(pos)
             .is_some_and(|cell| self.is_traversable(cell, radius))
+    }
+
+    /// Get the distance field grid
+    pub fn distance_field(&self) -> &Grid<f32> {
+        &self.distance
+    }
+
+    /// Get the distance to the nearest obstacle from a specific cell
+    #[inline]
+    pub fn get_distance(&self, cell: UVec2) -> f32 {
+        self.distance[(cell.x as usize, cell.y as usize)]
     }
 
     /// Begin rebuilding the navigation grid with a builder pattern
@@ -157,9 +167,12 @@ impl NavigationGrid {
         self.distance = Grid::from_vec(
             edt::edt(
                 self.occupancy.iter().as_slice(),
-                (self.grid_size.x, self.grid_size.y),
+                (self.grid_size.y, self.grid_size.x),
                 true,
-            ),
+            )
+            .into_iter()
+            .map(|d| d as f32 * self.cell_size)
+            .collect(),
             self.grid_size.y,
         );
     }

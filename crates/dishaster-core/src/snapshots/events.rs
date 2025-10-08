@@ -10,6 +10,11 @@ pub enum PresentationEvent {
     AgentDespawned(EntityId),
     /// Agent feedback.
     Feedback(FeedbackEvent),
+
+    /// Response to a distance query.
+    QueryDistanceResponse(Option<f32>),
+    /// Response to a distance field query.
+    QueryDistancesResponse(QueryDistancesResponse),
 }
 
 /// Feedback emitted by core simulation systems for client presentation.
@@ -30,4 +35,17 @@ pub enum Feedback {
     Thought(EcoString),
     /// Spoken feedback with implicit content.
     Speech,
+}
+
+/// Response to a distance field query.
+#[derive(Debug, Clone)]
+pub struct QueryDistancesResponse {
+    /// Width of the grid in cells.
+    pub width: usize,
+    /// Height of the grid in cells.
+    pub height: usize,
+    /// Size of each cell in world units.
+    pub cell_size: f32,
+    /// Flattened col-major grid of distances.
+    pub data: Vec<f32>,
 }

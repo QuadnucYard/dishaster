@@ -9,7 +9,8 @@ use dishrupt_godot::{display::*, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::SceneContext;
 use godot::{
     classes::{Node, Node2D},
-    obj::Gd,
+    global::MouseButton,
+    prelude::*,
 };
 use rustc_hash::FxHashMap;
 
@@ -37,8 +38,11 @@ struct DayTelemetry {
 }
 
 pub struct Game {
+    root: Gd<Node>,
+
     sim_runner: SyncSimulationRunner,
     stage: Stage,
+    stage_origin: Vector2,
     display_ctx: DisplayContext2D,
     dbgviz: DbgViz,
 
@@ -99,8 +103,10 @@ impl Game {
         let dbgviz = DbgViz::new(&stage_root, origin);
 
         Self {
+            root: gd,
             sim_runner,
             stage,
+            stage_origin: origin,
             display_ctx,
             dbgviz,
             perf_tracker: Default::default(),
@@ -134,8 +140,28 @@ impl Game {
         self.update_hud(ctx);
     }
 
-    pub fn process_input(&mut self, _event: GodotInputEvent) {}
+    pub fn process_input(&mut self, event: GodotInputEvent) {
+        #[allow(clippy::single_match)]
+        match event {
+            GodotInputEvent::Button(e) => {
+                if e.button == MouseButton::LEFT && !e.pressed {
+                    let canvas_pos = screen_to_canvas(&self.root, e.position);
+                    let sim_pos = self.to_map_pos(canvas_pos);
+                    // godot_print!("click map： {canvas_pos} {sim_pos}");
+                    self.sim_runner
+                        .send_command(SimCommand::QueryDistance(sim_pos));
+                }
+            }
+            _ => {}
+        }
+    }
 
+    fn to_map_pos(&self, pos: Vector2) -> Vec2 {
+        self.display_ctx
+            .to_simulation_space(pos - self.stage_origin)
+    }
+
+    /// Called just after construction
     pub fn start_day(&mut self, ctx: &mut SceneContext) {
         ctx.gui.get_mut::<GamingLayout>().apply_state(&DayHudState {
             day_label: format!("Day {}", self.telemetry.day),
@@ -146,6 +172,8 @@ impl Game {
             show_dev: true,
             enable_dev: false,
         });
+
+        self.sim_runner.send_command(SimCommand::QueryDistances);
     }
 
     pub fn begin_run(&mut self, _ctx: &mut SceneContext) {
@@ -203,4 +231,12 @@ impl Game {
             stats.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
         }
     }
+}
+
+fn screen_to_canvas(root: &Gd<Node>, screen_pos: Vector2) -> Vector2 {
+    root.get_viewport()
+        .unwrap()
+        .get_canvas_transform()
+        .affine_inverse()
+        * screen_pos
 }
