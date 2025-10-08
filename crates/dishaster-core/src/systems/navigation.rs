@@ -153,6 +153,10 @@ pub fn update_agent_movement(
             continue;
         }
 
+        // Steering: adjust velocity towards desired
+        let steer = velocity - movement.velocity;
+        let velocity = movement.velocity + steer * accel * dt;
+
         // Update position by velocity
         movement.velocity = velocity;
         movement.pos += velocity * dt;
