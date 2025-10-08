@@ -177,9 +177,10 @@ pub fn update_diner_states(
                 && !has_service_session
                 && let Some(window) = targets.chosen_window
             {
+                let lane_index = queue_participant.and_then(|queue| queue.lane_index);
                 commands
                     .entity(entity)
-                    .insert(ServiceSession::new(window, sim_time));
+                    .insert(ServiceSession::new(window, sim_time, lane_index));
             }
 
             if previous_state == DinerStateType::BeingServed && has_service_session {

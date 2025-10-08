@@ -20,8 +20,10 @@ pub fn spawn_serving_staffs(
             (canteen.model.windows_y + WINDOW_STAFF_OFFSET).clamp(0.0, canteen.model.height);
         let service_template = registry.window_services.get(window.service_template);
 
-        for (queue_index, &pos_x) in service_template.layout.queue_x.iter().enumerate() {
-            let pos_x = window.position.x_min + pos_x;
+        debug_assert!(!service_template.layout.queue_x.is_empty());
+        let queue_offsets = &service_template.layout.queue_x;
+        for (queue_index, &offset_x) in queue_offsets.iter().enumerate() {
+            let pos_x = window.position.x_min + offset_x;
             let staff_pos = vec2(pos_x, staff_y);
 
             let display_res = PrefabReference::new("staffs/sample_staff"); // placeholder

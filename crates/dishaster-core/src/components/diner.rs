@@ -53,6 +53,8 @@ pub struct QueueParticipant {
     pub joined_at: f64,
     /// Current zero-based index within the queue ordering
     pub slot_index: usize,
+    /// Queue lane index assigned to this diner (None until distributed by the queue system)
+    pub lane_index: Option<usize>,
 }
 
 impl QueueParticipant {
@@ -62,6 +64,7 @@ impl QueueParticipant {
             window,
             joined_at,
             slot_index: 0,
+            lane_index: None,
         }
     }
 }

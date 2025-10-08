@@ -7,6 +7,8 @@ pub struct ServiceSession {
     pub window: Entity,
     /// Staff entity assigned to the session, if available.
     pub staff: Option<Entity>,
+    /// Queue lane index the diner belongs to, used to pick the matching staff.
+    pub lane_index: Option<usize>,
     /// Current progress in the counter interaction.
     pub stage: ServiceStage,
     /// Requested dish information for feedback and billing.
@@ -17,10 +19,11 @@ pub struct ServiceSession {
 
 impl ServiceSession {
     /// Create a new service session for the given window.
-    pub fn new(window: Entity, now: f64) -> Self {
+    pub fn new(window: Entity, now: f64, lane_index: Option<usize>) -> Self {
         Self {
             window,
             staff: None,
+            lane_index,
             stage: ServiceStage::AssignStaff,
             request: None,
             started_at: now,

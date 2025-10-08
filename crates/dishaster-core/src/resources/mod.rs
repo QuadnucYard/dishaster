@@ -2,9 +2,10 @@
 
 mod time;
 
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use rand_chacha::ChaCha8Rng;
+use rustc_hash::FxHashMap;
 pub use time::Time;
 
 use crate::{models::*, prelude::*, snapshots::*};
@@ -182,7 +183,7 @@ impl EventLog {
 /// Bi-directional lookup between service windows and their assigned serving staff.
 #[derive(Resource, Default)]
 pub struct ServingStaffRegistry {
-    window_to_staff: HashMap<Entity, Vec<Entity>>,
+    window_to_staff: FxHashMap<Entity, Vec<Entity>>,
 }
 
 impl ServingStaffRegistry {

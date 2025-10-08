@@ -212,25 +212,22 @@ pub fn drive_serving_sessions(
                     // Window has no configured staff; keep waiting.
                     continue;
                 };
-                let mut chosen_staff: Option<Entity> = None;
-                for &candidate in staff_candidates {
-                    if staff_query
-                        .get(candidate)
-                        .map(|(_, state, _)| state.is_idle())
-                        .unwrap_or(false)
-                    {
-                        chosen_staff = Some(candidate);
-                        break;
-                    }
-                }
-                let Some(staff_entity) = chosen_staff else {
-                    // Everyone is busy, so try again once a staff member frees up.
+                let Some(lane_index) = session.lane_index else {
+                    // Lane not yet known; retry after queue assignment stabilizes.
+                    continue;
+                };
+                let Some(&staff_entity) = staff_candidates.get(lane_index) else {
+                    // Layout mismatch between queues and staff; wait for correction.
                     continue;
                 };
                 let Ok((staff_meta, mut staff_state, mut staff_movement)) =
                     staff_query.get_mut(staff_entity)
                 else {
                     // Staff entity might have despawned; let the next tick retry.
+                    continue;
+                };
+                if !staff_state.is_idle() {
+                    // Staff is still finishing another order; try again next frame.
                     continue;
                 };
 
