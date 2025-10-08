@@ -91,13 +91,9 @@ impl Stage {
                 update_godot_display_node2d(&mut node, display, &ctx);
                 let e = self.display_world.spawn(node).id();
                 self.core_to_view.insert(display.core_id, e);
-            }
 
-            if display.transform.parent.is_modified() {
-                reparents.push((
-                    display.core_id,
-                    display.transform.parent.get().unwrap_or(root),
-                ));
+                // currently do not support reparenting.
+                reparents.push((display.core_id, display.transform.parent.unwrap_or(root)));
             }
         }
 

@@ -1,7 +1,6 @@
 use dishrupt_core::{
     asset::PrefabReference,
     display::{DisplayState, Transform},
-    utils::Modified,
 };
 
 use crate::systems::prelude::*;
@@ -50,7 +49,7 @@ pub fn spawn_serving_staffs(
                 },
                 Transform {
                     position: staff_pos.extend(0.0),
-                    parent: Modified::new(Some(display_root.0)),
+                    parent: Some(display_root.0),
                     ..Default::default()
                 },
             ));
@@ -62,7 +61,7 @@ pub fn spawn_serving_staffs(
                 },
                 Transform {
                     position: Vec3::ZERO,
-                    parent: Modified::new(Some(staff_entity)),
+                    parent: Some(staff_entity),
                     ..Default::default()
                 },
                 ChildOf(staff_entity),
@@ -76,7 +75,7 @@ pub fn spawn_serving_staffs(
                 },
                 Transform {
                     position: vec3(0.0, 0.0, 1.8),
-                    parent: Modified::new(Some(staff_entity)),
+                    parent: Some(staff_entity),
                     ..Default::default()
                 },
                 ChildOf(staff_entity),

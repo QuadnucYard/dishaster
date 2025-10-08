@@ -1,5 +1,3 @@
-use std::num::NonZero;
-
 // use bevy_color::Color;
 use serde::{Deserialize, Serialize};
 
@@ -75,7 +73,7 @@ pub struct Transform {
     /// In radians
     pub rotation: f32,
 
-    pub parent: Modified<Option<Entity>>,
+    pub parent: Option<Entity>,
 }
 
 impl Default for Transform {
@@ -84,28 +82,23 @@ impl Default for Transform {
             position: Vec3::ZERO,
             scale: Vec3::ONE,
             rotation: 0.0,
-            parent: None.into(),
+            parent: None,
         }
     }
 }
 
 impl Transform {
-    pub fn snapshot(&mut self) -> TransformSnapshot {
-        let parent = self
-            .parent
-            .clone()
-            .map(|v| v.map(|e| EntityId(NonZero::new(e.to_bits()).unwrap())));
-        self.parent.reset_modified();
+    pub fn snapshot(&self) -> TransformSnapshot {
         TransformSnapshot {
             position: self.position,
             scale: self.scale,
             rotation: self.rotation,
-            parent,
+            parent: self.parent.map(Into::into),
         }
     }
 
     pub fn detach(&mut self) {
-        *self.parent = None;
+        self.parent = None;
     }
 }
 
@@ -116,7 +109,7 @@ pub struct TransformSnapshot {
     /// In radians
     pub rotation: f32,
 
-    pub parent: Modified<Option<EntityId>>,
+    pub parent: Option<EntityId>,
 }
 
 // ===

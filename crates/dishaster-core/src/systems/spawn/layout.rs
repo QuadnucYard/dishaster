@@ -1,10 +1,7 @@
 //! Static canteen layout spawning systems
 
 use dishaster_navigation::BoxCollider;
-use dishrupt_core::{
-    display::{DisplayState, Transform},
-    utils::Modified,
-};
+use dishrupt_core::display::{DisplayState, Transform};
 
 use crate::systems::prelude::*;
 
@@ -135,7 +132,7 @@ fn spawn_tables(
             },
             Transform {
                 position: placement.center_pos.extend(0.0),
-                parent: Modified::new(Some(display_root.0)),
+                parent: Some(display_root.0),
                 ..Default::default()
             },
         ));

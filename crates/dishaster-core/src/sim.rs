@@ -154,14 +154,13 @@ impl Simulation {
     ///
     /// This function is expected to be idempotent: multiple calls between ticks
     /// should yield identical results.
-    /// (current exceptions: modification flags are reset on read)
     pub fn snapshot(&mut self) -> Snapshot {
         let mut query = self
             .world
             .query::<(Entity, &DisplayState, &mut Transform)>();
         let display = query
             .iter_mut(&mut self.world)
-            .map(|(e, d, mut t)| DisplaySnapshot {
+            .map(|(e, d, t)| DisplaySnapshot {
                 core_id: e.into(),
                 proto: d.proto.clone(),
                 name: d.name.clone(),

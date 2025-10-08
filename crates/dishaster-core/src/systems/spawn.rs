@@ -4,7 +4,6 @@ mod staffs;
 use dishrupt_core::{
     asset::PrefabReference,
     display::{DisplayModel, DisplayState, Transform},
-    utils::Modified,
 };
 pub use layout::*;
 pub use staffs::*;
@@ -165,7 +164,7 @@ fn spawn_diner(
         },
         Transform {
             position: pos.extend(0.0),
-            parent: Modified::new(Some(display_root.0)),
+            parent: Some(display_root.0),
             ..Default::default()
         },
     ));
@@ -178,7 +177,7 @@ fn spawn_diner(
         },
         Transform {
             position: Vec3::ZERO,
-            parent: Modified::new(Some(wrapper_entity)),
+            parent: Some(wrapper_entity),
             ..Default::default()
         },
         ChildOf(wrapper_entity),
@@ -192,7 +191,7 @@ fn spawn_diner(
         },
         Transform {
             position: vec3(0.0, 0.0, 1.8),
-            parent: Modified::new(Some(wrapper_entity)),
+            parent: Some(wrapper_entity),
             ..Default::default()
         },
         ChildOf(wrapper_entity),
