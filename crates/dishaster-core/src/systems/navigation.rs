@@ -49,7 +49,10 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
 impl Movement {
     /// Request a path to the specified target position.
     pub fn request_path(&mut self, target: Vec2) {
+        log::debug!("Path requested to ({:.2}, {:.2})", target.x, target.y);
+
         self.pending_target = Some(target);
+        self.target_reached = false;
     }
 
     /// Computes a new path to the specified target, updating the target position and path.
@@ -62,8 +65,25 @@ impl Movement {
             impatience: self.impatience,
             grid: nav_grid,
         }) {
+            log::debug!(
+                "Path from ({:.2}, {:.2}) to ({:.2}, {:.2}) found with {} waypoints",
+                self.pos.x,
+                self.pos.y,
+                target.x,
+                target.y,
+                path.len()
+            );
+
             self.path = path;
         } else {
+            log::debug!(
+                "Path from ({:.2}, {:.2}) to ({:.2}, {:.2}) not found",
+                self.pos.x,
+                self.pos.y,
+                target.x,
+                target.y
+            );
+
             self.path.clear();
         }
     }
@@ -102,7 +122,7 @@ pub fn update_agent_movement(
     let dt = time.tick_duration as f32;
     let waypoint_eps = PATH_WAYPOINT_EPS;
     let accel = 5.0; // Steering acceleration factor
-    let stop_eps = 0.5; // Distance to target to stop moving
+    let stop_eps = 0.1; // Distance to target to stop moving
 
     let get_next_velocity = |movement: &Movement| -> Vec2 {
         let Some(next_pos) = movement.path.next() else {
@@ -166,6 +186,10 @@ pub fn update_agent_movement(
             && movement.pos.close_to(next, waypoint_eps)
         {
             movement.path.pop();
+            if movement.path.is_empty() {
+                movement.velocity = Vec2::ZERO;
+                movement.target_reached = true;
+            }
         }
 
         // Randomly re-find path due to crowd update

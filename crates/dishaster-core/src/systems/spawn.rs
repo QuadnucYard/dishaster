@@ -125,7 +125,7 @@ fn spawn_diner(
     let pos = {
         let x_range = canteen.model.entrances.choose(rng).unwrap();
         let x = rng.random_range(x_range.x_min..x_range.x_max);
-        Vec2::new(x, canteen.model.entrances_y)
+        Vec2::new(x, canteen.model.entrances_y + 0.5)
     };
 
     spawner.next_diner_id += 1;

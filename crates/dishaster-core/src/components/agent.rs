@@ -26,6 +26,8 @@ pub struct Movement {
     pub path: NavPath,
     /// The target position to move towards.
     pub pending_target: Option<Vec2>,
+    /// Whether the target has been reached.
+    pub target_reached: bool,
     /// The last tick when the path was calculated. It is set when a new path is assigned.
     pub last_path_tick: Tick,
 }
@@ -41,6 +43,7 @@ impl Default for Movement {
             pos: Vec2::ZERO,
             velocity: Vec2::ZERO,
             path: Default::default(),
+            target_reached: false,
             pending_target: None,
             last_path_tick: 0,
         }

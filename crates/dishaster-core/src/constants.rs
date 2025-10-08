@@ -9,7 +9,7 @@ use crate::models::Meters;
 pub const QUEUE_SPACING: Meters = 0.5;
 
 /// Radius used when picking a wander/observation target
-pub const WANDER_RADIUS: Meters = 2.0;
+pub const WANDER_RADIUS: Meters = 5.0;
 
 /// Forward offset (in +Y) from the window line to approach and order
 /// Represents the distance a diner stands from the counter to order.

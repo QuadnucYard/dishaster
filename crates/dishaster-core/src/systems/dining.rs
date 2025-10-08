@@ -250,7 +250,7 @@ fn handle_observing(
     }
 
     // If the diner has reached their observation spot, transition to deciding.
-    if !movement.has_path() {
+    if movement.target_reached {
         return DinerStateType::Deciding;
     }
 
@@ -319,7 +319,7 @@ fn handle_moving_to_window(
         return DinerStateType::MovingToWindow;
     }
 
-    if !movement.has_path() {
+    if movement.target_reached {
         return DinerStateType::Queueing;
     }
 
@@ -333,7 +333,7 @@ fn handle_queueing(
 ) -> DinerStateType {
     if let Some(queue) = queue_participant
         && queue.slot_index == 0
-        && !movement.has_path()
+        && movement.target_reached
     {
         return DinerStateType::BeingServed;
     }
@@ -630,14 +630,14 @@ fn find_valid_spot_near(
     rng: &mut GameRng,
 ) -> Vec2 {
     /// Attempts when searching for a valid (non-colliding) random spot
-    pub const FIND_SPOT_ATTEMPTS: usize = 12;
+    pub const FIND_SPOT_ATTEMPTS: usize = 32;
 
     for _ in 0..FIND_SPOT_ATTEMPTS {
         let angle = rng.random_range(0.0..std::f32::consts::PI * 2.0);
         let distance = rng.random_range(radius * 0.5..radius);
         let point = center + Vec2::from_angle(angle) * distance;
 
-        if nav_grid.is_pos_traversable(point, 0.8) {
+        if nav_grid.is_pos_traversable(point, 0.5) {
             // here we use a loose body radius
             return point;
         }
