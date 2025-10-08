@@ -39,6 +39,12 @@ impl NavPath {
         self.waypoints.last().copied()
     }
 
+    /// Get the last waypoint.
+    #[inline]
+    pub fn last(&self) -> Option<Vec2> {
+        self.waypoints.first().copied()
+    }
+
     /// Pop and return the next waypoint from the path.
     #[inline]
     pub fn pop(&mut self) -> Option<Vec2> {

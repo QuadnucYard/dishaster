@@ -80,19 +80,41 @@ impl NavigationGrid {
 
         let mut new_velocities = Vec::with_capacity(dodgy_agents.len());
 
-        for i in 0..dodgy_agents.len() {
-            let neighbours = dodgy_agents[..i]
-                .iter()
-                .chain(dodgy_agents[(i + 1)..].iter())
-                .collect::<Vec<_>>();
-            let nearby_obstacles = self.obstacles().iter().collect::<Vec<_>>();
+        const NEIGHBOR_RADIUS: f32 = 3.0;
+        const NEIGHBOR_RADIUS_SQ: f32 = NEIGHBOR_RADIUS * NEIGHBOR_RADIUS;
+        const MAX_NEIGHBORS: usize = 8;
+        let mut neighbors = Vec::with_capacity(MAX_NEIGHBORS); // reused
+        let mut nearby_obstacles = Vec::new(); // reused
 
-            let preferred_velocity = (agents[i].goal.into_dodgy() - dodgy_agents[i].position)
+        for (i, agent) in dodgy_agents.iter().enumerate() {
+            // Gather only nearby agents so the solver does not consider the whole crowd.
+            neighbors.clear();
+            for (j, candidate) in dodgy_agents.iter().enumerate() {
+                if j != i
+                    && candidate.position.distance_squared(agent.position) <= NEIGHBOR_RADIUS_SQ
+                {
+                    neighbors.push(candidate);
+                    if neighbors.len() == MAX_NEIGHBORS {
+                        break;
+                    }
+                }
+            }
+
+            let preferred_velocity = (agents[i].goal.into_dodgy() - agent.position)
                 .normalize_or_zero()
-                * dodgy_agents[i].max_velocity;
+                * agent.max_velocity;
 
-            let avoidance_velocity = dodgy_agents[i].compute_avoiding_velocity(
-                &neighbours,
+            nearby_obstacles.clear();
+            for obstacle in self.obstacles() {
+                if let dodgy::Obstacle::Closed { vertices } = obstacle
+                    && is_obstacle_within_radius(agent.position, vertices, NEIGHBOR_RADIUS)
+                {
+                    nearby_obstacles.push(obstacle);
+                }
+            }
+
+            let avoidance_velocity = agent.compute_avoiding_velocity(
+                &neighbors,
                 &nearby_obstacles,
                 preferred_velocity,
                 time_step,
@@ -103,4 +125,41 @@ impl NavigationGrid {
 
         new_velocities
     }
+}
+
+fn is_obstacle_within_radius(pos: dodgy::Vec2, vertices: &[dodgy::Vec2], radius: f32) -> bool {
+    if vertices.is_empty() {
+        return false;
+    }
+
+    let mut min_x = vertices[0].x;
+    let mut max_x = vertices[0].x;
+    let mut min_y = vertices[0].y;
+    let mut max_y = vertices[0].y;
+
+    // Determine the obstacle's axis-aligned bounding box.
+    for vertex in &vertices[1..] {
+        min_x = min_x.min(vertex.x);
+        max_x = max_x.max(vertex.x);
+        min_y = min_y.min(vertex.y);
+        max_y = max_y.max(vertex.y);
+    }
+
+    let dx = if pos.x < min_x {
+        min_x - pos.x
+    } else if pos.x > max_x {
+        pos.x - max_x
+    } else {
+        0.0
+    };
+
+    let dy = if pos.y < min_y {
+        min_y - pos.y
+    } else if pos.y > max_y {
+        pos.y - max_y
+    } else {
+        0.0
+    };
+
+    dx + dy <= radius
 }

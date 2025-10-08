@@ -637,8 +637,8 @@ fn find_valid_spot_near(
         let distance = rng.random_range(radius * 0.5..radius);
         let point = center + Vec2::from_angle(angle) * distance;
 
-        if nav_grid.is_pos_traversable(point, 0.3) {
-            // TODO: use actual diner radius
+        if nav_grid.is_pos_traversable(point, 0.8) {
+            // here we use a loose body radius
             return point;
         }
     }

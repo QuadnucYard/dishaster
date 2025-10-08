@@ -8,7 +8,7 @@ mod path;
 mod pathfinding;
 
 mod prelude {
-    pub use bevy_math::{IVec2, Rect, USizeVec2, UVec2, Vec2};
+    pub use bevy_math::*;
 }
 
 pub use avoidance::*;

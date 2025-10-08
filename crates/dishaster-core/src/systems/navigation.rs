@@ -89,10 +89,10 @@ pub fn run_path_requests(
 /// This system advances Movement.pos using velocity-based steering for smoother
 /// movement and turns. Agents accelerate towards desired velocity, clamped to max speed.
 pub fn update_agent_movement(
-    time: Res<Time>,
-    _canteen: Res<Canteen>,
-    nav_grid: Res<ResWrapper<NavigationGrid>>,
     mut query: Query<&mut Movement>,
+    nav_grid: Res<ResWrapper<NavigationGrid>>,
+    time: Res<Time>,
+    mut rng: ResMut<GameRng>,
 ) {
     let dt = time.tick_duration as f32;
     let waypoint_eps = PATH_WAYPOINT_EPS;
@@ -158,14 +158,22 @@ pub fn update_agent_movement(
         {
             movement.path.pop();
         }
+
+        // Randomly re-find path due to crowd update
+        const PATH_COOLDOWN_TICKS: Tick = 300;
+        if movement.pending_target.is_none()
+            && let Some(last) = movement.path.last()
+            && time.current_tick - movement.last_path_tick >= PATH_COOLDOWN_TICKS
+            && rng.random_bool(0.01)
+        {
+            movement.request_path(last);
+        }
     }
 }
 
 /// Keep display Transform in sync with Movement position (x,y), preserving z.
 pub fn sync_transform_with_movement(mut query: Query<(&Movement, &mut Transform)>) {
     for (movement, mut transform) in query.iter_mut() {
-        transform.position.x = movement.pos.x;
-        transform.position.y = movement.pos.y;
-        // z remains unchanged (layering is handled by display logic)
+        transform.position = movement.pos.extend(0.0);
     }
 }
