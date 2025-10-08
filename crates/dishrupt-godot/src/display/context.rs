@@ -1,4 +1,5 @@
 use dishrupt_core::prelude::*;
+use godot::builtin::Vector2;
 
 // pub trait DisplayContext<S, T> {}
 
@@ -19,9 +20,9 @@ impl DisplayContext2D {
     ///
     /// x' = x * s_x,
     /// y' = y * s_y - z * s_z.
-    pub fn to_display_space(&self, pos: Vec3) -> Vec2 {
+    pub fn to_display_space(&self, pos: Vec3) -> Vector2 {
         let pos = pos * self.view_scale;
-        Vec2::new(pos.x, pos.y - pos.z)
+        Vector2::new(pos.x, pos.y - pos.z)
     }
 
     /// Convert a position in display space to simulation space.
@@ -29,7 +30,7 @@ impl DisplayContext2D {
     ///
     /// x = x' / s_x,
     /// y = y' / s_y.
-    pub fn to_simulation_space(&self, pos: Vec2) -> Vec2 {
+    pub fn to_simulation_space(&self, pos: Vector2) -> Vec2 {
         Vec2::new(pos.x / self.view_scale.x, pos.y / self.view_scale.y)
     }
 }

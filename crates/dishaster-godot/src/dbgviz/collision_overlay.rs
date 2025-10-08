@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use dishaster_core::snapshots::{CollisionCellDebugSnapshot, CollisionGridDebugSnapshot};
 use dishrupt_core::prelude::*;
-use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
+use dishrupt_godot::display::DisplayContext2D;
 use godot::{
     classes::{Line2D, Node2D},
     prelude::*,
@@ -75,8 +75,7 @@ impl CollisionDebugOverlay {
         ];
 
         for corner in &corners {
-            let display = ctx.to_display_space(*corner);
-            points.push(display.into_godot());
+            points.push(ctx.to_display_space(*corner));
         }
         if let Some(first) = points.get(0) {
             points.push(first);

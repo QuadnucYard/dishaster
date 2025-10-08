@@ -111,7 +111,7 @@ pub fn update_godot_display_node2d(
 ) {
     let node = &mut node_handle.node;
     let transform = &snapshot.transform;
-    node.set_position(ctx.to_display_space(transform.position).into_godot());
+    node.set_position(ctx.to_display_space(transform.position));
     // node.set_z_index((pos.z * 1e2) as i32);
     node.set_rotation(transform.rotation);
     node.set_scale(transform.scale.xy().into_godot());

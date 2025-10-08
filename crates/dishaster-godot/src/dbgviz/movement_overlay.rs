@@ -5,7 +5,7 @@ use std::{
 
 use dishaster_core::snapshots::MovementDebugSnapshot;
 use dishrupt_core::{EntityId, prelude::*};
-use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
+use dishrupt_godot::display::DisplayContext2D;
 use godot::{
     classes::{Line2D, Node2D},
     prelude::*,
@@ -109,14 +109,13 @@ impl MovementDebugOverlay {
         nodes: &mut MovementDebugNodes,
         snapshot: &MovementDebugSnapshot,
         ctx: &DisplayContext2D,
-        display_pos: Vec2,
+        display_pos: Vector2,
     ) {
         let mut points = PackedVector2Array::new();
         for waypoint in &snapshot.path {
-            let display = ctx.to_display_space(waypoint.extend(0.0));
-            points.push(display.into_godot());
+            points.push(ctx.to_display_space(waypoint.extend(0.0)));
         }
-        points.push(display_pos.into_godot());
+        points.push(display_pos);
 
         nodes.path.set_points(&points);
         nodes.path.set_visible(!snapshot.path.is_empty());
@@ -126,7 +125,7 @@ impl MovementDebugOverlay {
         nodes: &mut MovementDebugNodes,
         snapshot: &MovementDebugSnapshot,
         ctx: &DisplayContext2D,
-        display_pos: Vec2,
+        display_pos: Vector2,
     ) {
         if snapshot.velocity.length_squared() <= f32::EPSILON {
             nodes.velocity_line.set_visible(false);
@@ -137,8 +136,8 @@ impl MovementDebugOverlay {
         let display_target = ctx.to_display_space(target.extend(0.0));
 
         let mut points = PackedVector2Array::new();
-        points.push(display_pos.into_godot());
-        points.push(display_target.into_godot());
+        points.push(display_pos);
+        points.push(display_target);
 
         nodes.velocity_line.set_points(&points);
         nodes.velocity_line.set_visible(true);
@@ -157,7 +156,7 @@ impl MovementDebugOverlay {
             let offset = Vec2::from_angle(angle) * POSITION_RADIUS;
             let sample = snapshot.position + offset;
             let display = ctx.to_display_space(sample.extend(0.0));
-            points.push(display.into_godot());
+            points.push(display);
         }
         if let Some(first) = points.get(0) {
             points.push(first);

@@ -92,7 +92,7 @@ impl CrowdDebugOverlay {
         let min_coord = snapshot.origin;
         let top_left_world = min_coord.as_vec2() * snapshot.cell_size;
         let top_left_display = ctx.to_display_space(top_left_world.extend(0.0));
-        self.sprite.set_position(top_left_display.into_godot());
+        self.sprite.set_position(top_left_display);
         self.sprite.set_visible(true);
     }
 }
