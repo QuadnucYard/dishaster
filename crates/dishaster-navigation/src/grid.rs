@@ -115,42 +115,45 @@ impl NavigationGrid {
             .is_some_and(|cell| self.is_traversable(cell, radius))
     }
 
-    /// Rebuild the spatial grid from current collider positions
-    ///
-    /// This should be called every frame or when entities move to keep
-    /// the spatial hash accurate for collision detection.
-    pub fn update<'a>(&mut self, colliders: impl Iterator<Item = &'a BoxCollider>) {
-        // Clear the grid
+    /// Begin rebuilding the navigation grid with a builder pattern
+    pub fn rebuild(&mut self) -> NavigationGridBuilder<'_> {
+        self.clear();
+        NavigationGridBuilder { grid: self }
+    }
+
+    /// Clear the grid
+    fn clear(&mut self) {
         self.occupancy.fill(false);
         self.obstacles.clear();
+    }
 
-        // Rebuild from current query
-        for collider in colliders {
-            // Store collider for quick lookup
-            self.obstacles.push(Obstacle::Closed {
-                vertices: vec![
-                    (collider.center + Vec2::new(-collider.size.x / 2.0, -collider.size.y / 2.0))
-                        .into_dodgy(),
-                    (collider.center + Vec2::new(collider.size.x / 2.0, -collider.size.y / 2.0))
-                        .into_dodgy(),
-                    (collider.center + Vec2::new(collider.size.x / 2.0, collider.size.y / 2.0))
-                        .into_dodgy(),
-                    (collider.center + Vec2::new(-collider.size.x / 2.0, collider.size.y / 2.0))
-                        .into_dodgy(),
-                ],
-            });
+    fn add_collider(&mut self, collider: &BoxCollider) {
+        // Store collider for quick lookup
+        self.obstacles.push(Obstacle::Closed {
+            vertices: vec![
+                (collider.center + Vec2::new(-collider.size.x / 2.0, -collider.size.y / 2.0))
+                    .into_dodgy(),
+                (collider.center + Vec2::new(collider.size.x / 2.0, -collider.size.y / 2.0))
+                    .into_dodgy(),
+                (collider.center + Vec2::new(collider.size.x / 2.0, collider.size.y / 2.0))
+                    .into_dodgy(),
+                (collider.center + Vec2::new(-collider.size.x / 2.0, collider.size.y / 2.0))
+                    .into_dodgy(),
+            ],
+        });
 
-            // Add to spatial grid
-            for cell_coord in self.get_occupied_cells(collider.center, collider.size) {
-                let cell_coord = cell_coord.as_usizevec2();
-                if cell_coord.x >= self.grid_size.x || cell_coord.y >= self.grid_size.y {
-                    continue; // Out of bounds
-                }
-                self.occupancy[(cell_coord.x, cell_coord.y)] = true;
+        // Add to spatial grid
+        for cell_coord in self.get_occupied_cells(collider.center, collider.size) {
+            let cell_coord = cell_coord.as_usizevec2();
+            if cell_coord.x >= self.grid_size.x || cell_coord.y >= self.grid_size.y {
+                continue; // Out of bounds
             }
+            self.occupancy[(cell_coord.x, cell_coord.y)] = true;
         }
+    }
 
-        // Recompute distance field for obstacle avoidance
+    /// Recompute distance field for obstacle avoidance
+    fn recompute_distance_field(&mut self) {
         self.distance = Grid::from_vec(
             edt::edt(
                 self.occupancy.iter().as_slice(),
@@ -159,5 +162,34 @@ impl NavigationGrid {
             ),
             self.grid_size.y,
         );
+    }
+}
+
+/// Builder for incrementally constructing a navigation grid
+pub struct NavigationGridBuilder<'a> {
+    grid: &'a mut NavigationGrid,
+}
+
+impl NavigationGridBuilder<'_> {
+    /// Add a collider to the navigation grid
+    pub fn add_collider(&mut self, collider: &BoxCollider) -> &mut Self {
+        self.grid.add_collider(collider);
+        self
+    }
+
+    /// Add multiple colliders to the navigation grid
+    pub fn add_colliders<'a>(
+        &mut self,
+        colliders: impl Iterator<Item = &'a BoxCollider>,
+    ) -> &mut Self {
+        for collider in colliders {
+            self.grid.add_collider(collider);
+        }
+        self
+    }
+
+    /// Finalize the grid construction and recompute distance field
+    pub fn done(&mut self) {
+        self.grid.recompute_distance_field();
     }
 }

@@ -15,8 +15,27 @@ pub struct BoxCollider {
 }
 
 impl BoxCollider {
+    /// Create a BoxCollider from a Bevy Rect
+    pub fn from_rect(rect: Rect) -> Self {
+        Self {
+            center: rect.center(),
+            size: rect.size(),
+        }
+    }
+
+    /// Create a BoxCollider from center position and size
+    pub fn from_center_size(center: Vec2, size: Vec2) -> Self {
+        Self { center, size }
+    }
+
     /// Converts the collider to a Bevy Rect for intersection testing
     pub fn extent(&self) -> Rect {
         Rect::from_center_size(self.center, self.size)
+    }
+}
+
+impl From<Rect> for BoxCollider {
+    fn from(value: Rect) -> Self {
+        Self::from_rect(value)
     }
 }

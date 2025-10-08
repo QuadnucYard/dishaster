@@ -1,5 +1,6 @@
 //! Static canteen layout spawning systems
 
+use dishaster_navigation::BoxCollider;
 use dishrupt_core::{
     display::{DisplayState, Transform},
     utils::Modified,
@@ -27,6 +28,8 @@ fn spawn_windows(
     level: &Res<LevelConfigRes>,
     registry: &Res<GameModelRegistryRes>,
 ) {
+    let mut last_window_x = 0.0;
+
     for window_config in &level.window_configurations {
         let service_handle = registry
             .window_services
@@ -63,7 +66,40 @@ fn spawn_windows(
         commands.entity(window_entity).insert(WindowDishes {
             dishes: active_dishes,
         });
+
+        // Fill spaces between windows with colliders
+        commands.spawn(
+            BoxCollider::from_rect(Rect::new(
+                last_window_x,
+                canteen.model.windows_y,
+                window_range.x_min,
+                canteen.model.height,
+            ))
+            .into_comp(),
+        );
+        last_window_x = window_range.x_max;
     }
+
+    commands.spawn(
+        BoxCollider::from_rect(Rect::new(
+            last_window_x,
+            canteen.model.windows_y,
+            canteen.model.width,
+            canteen.model.height,
+        ))
+        .into_comp(),
+    );
+
+    // Add a small gap to isolate the hall
+    commands.spawn(
+        BoxCollider::from_rect(Rect::new(
+            0.0,
+            canteen.model.windows_y - 0.05,
+            canteen.model.width,
+            canteen.model.windows_y + 0.05,
+        ))
+        .into_comp(),
+    );
 }
 
 fn spawn_tables(
@@ -92,10 +128,7 @@ fn spawn_tables(
                 occupants: vec![None; model.seats],
                 dirtiness: 0.0,
             },
-            BoxCollider(dishaster_navigation::BoxCollider {
-                center: placement.center_pos,
-                size: model.size.as_vec2(),
-            }),
+            BoxCollider::from_center_size(placement.center_pos, model.size.as_vec2()).into_comp(),
             DisplayState {
                 proto: model.display.res.clone(),
                 ..Default::default()

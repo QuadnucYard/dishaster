@@ -88,7 +88,7 @@ impl Game {
         let mut sim = Simulation::new(db.clone());
         sim.start(level);
         let root_entity = sim.root_entity();
-        let sim_runner = SyncSimulationRunner::new(sim, 30.0);
+        let sim_runner = SyncSimulationRunner::new(sim, 60.0);
 
         // Set up stage
         let mut stage = Stage::new();

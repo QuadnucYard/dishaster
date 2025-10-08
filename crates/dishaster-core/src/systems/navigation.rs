@@ -1,4 +1,6 @@
-use dishaster_navigation::{NavigationGrid, PathRequest, find_path, world_to_tile_dist};
+use dishaster_navigation::{
+    BoxCollider, NavigationGrid, PathRequest, find_path, world_to_tile_dist,
+};
 use dishrupt_core::display::Transform;
 
 use super::prelude::*;
@@ -6,10 +8,13 @@ use super::prelude::*;
 /// System to update the global collision grid
 pub fn build_collision_grid(
     mut nav_grid: ResMut<ResWrapper<NavigationGrid>>,
-    query: Query<&BoxCollider>,
+    query: Query<&CompWrapper<BoxCollider>>,
 ) {
     log::info!("Rebuilding collision grid...");
-    nav_grid.update(query.iter().map(|c| &**c));
+    nav_grid
+        .rebuild()
+        .add_colliders(query.iter().map(|c| &**c))
+        .done();
 }
 
 /// Rebuild crowd cost field from current diner positions
