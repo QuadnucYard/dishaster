@@ -1,5 +1,6 @@
 use dishaster_navigation::NavigationGrid;
 use dishrupt_core::EntityId;
+use rustc_hash::FxHashMap;
 
 use crate::{components::*, prelude::*, resources::*, sim::Simulation};
 
@@ -8,6 +9,8 @@ use crate::{components::*, prelude::*, resources::*, sim::Simulation};
 pub struct DebugFeatureFlags {
     /// Include per-agent movement debug data.
     pub movement: bool,
+    /// Include queue lane debug data.
+    pub queues: bool,
     /// Include collision grid occupancy visualization data.
     pub nav_grid: bool,
     /// Include crowd cost field visualization data.
@@ -19,6 +22,7 @@ impl DebugFeatureFlags {
     pub const fn all() -> Self {
         Self {
             movement: true,
+            queues: true,
             nav_grid: true,
             crowd_field: true,
         }
@@ -28,6 +32,7 @@ impl DebugFeatureFlags {
     pub const fn none() -> Self {
         Self {
             movement: false,
+            queues: false,
             nav_grid: false,
             crowd_field: false,
         }
@@ -44,6 +49,38 @@ pub struct MovementDebugSnapshot {
     pub velocity: Vec2,
     /// Remaining waypoints describing the agent's planned path.
     pub path: Vec<Vec2>,
+}
+
+/// Debug payload describing a queue lane and its occupants.
+pub struct QueueLaneDebugSnapshot {
+    /// Identifier of the lane entity itself.
+    pub lane_id: EntityId,
+    /// Anchor position of the queue lane in simulation space.
+    pub anchor: Vec2,
+    /// Direction vector pointing from the anchor toward the rear of the queue.
+    pub direction: Vec2,
+    /// Latest estimated rear position of the queue.
+    pub rear_pos: Vec2,
+    /// Members currently occupying the queue, ordered from front to back.
+    pub members: Vec<QueueMemberDebugSnapshot>,
+    /// Agents with intents to join the queue, typically approaching the rear.
+    pub intents: Vec<QueueIntentDebugSnapshot>,
+}
+
+/// Debug payload describing an individual queue member.
+pub struct QueueMemberDebugSnapshot {
+    /// Identifier of the agent occupying the queue.
+    pub core_id: EntityId,
+    /// Current simulation-space position of the agent.
+    pub position: Vec2,
+}
+
+/// Debug payload describing an active queue intent.
+pub struct QueueIntentDebugSnapshot {
+    /// Identifier of the agent planning to join the queue.
+    pub core_id: EntityId,
+    /// Current simulation-space position of the agent.
+    pub position: Vec2,
 }
 
 /// Debug visualization payload for a single collision grid cell.
@@ -80,7 +117,7 @@ pub struct CrowdFieldDebugSnapshot {
 
 impl Simulation {
     pub(crate) fn snapshot_movement(&mut self) -> Option<Vec<MovementDebugSnapshot>> {
-        if !self.debug_flags.nav_grid {
+        if !self.debug_flags.movement {
             return None;
         }
 
@@ -96,6 +133,54 @@ impl Simulation {
                 })
                 .collect(),
         )
+    }
+
+    pub(crate) fn snapshot_queue(&mut self) -> Option<Vec<QueueLaneDebugSnapshot>> {
+        if !self.debug_flags.queues {
+            return None;
+        }
+
+        let mut intents_by_lane: FxHashMap<Entity, Vec<_>> = FxHashMap::default();
+        let mut intent_query = self.world.query::<(Entity, &QueueIntent, &Movement)>();
+        for (entity, intent, movement) in intent_query.iter(&self.world) {
+            intents_by_lane
+                .entry(intent.lane)
+                .or_default()
+                .push(QueueIntentDebugSnapshot {
+                    core_id: entity.into(),
+                    position: movement.pos,
+                });
+        }
+
+        let mut lane_query = self
+            .world
+            .query::<(Entity, &QueueLane, &QueueLaneMembers)>();
+        let lanes = lane_query
+            .iter(&self.world)
+            .map(|(lane_entity, lane, members)| {
+                let mut member_snapshots = Vec::with_capacity(members.members.len());
+                for &member_entity in members.members.iter() {
+                    let Some(movement) = self.world.get::<Movement>(member_entity) else {
+                        continue;
+                    };
+                    member_snapshots.push(QueueMemberDebugSnapshot {
+                        core_id: member_entity.into(),
+                        position: movement.pos,
+                    });
+                }
+
+                QueueLaneDebugSnapshot {
+                    lane_id: lane_entity.into(),
+                    anchor: lane.anchor,
+                    direction: lane.direction,
+                    rear_pos: members.rear_pos,
+                    members: member_snapshots,
+                    intents: intents_by_lane.remove(&lane_entity).unwrap_or_default(),
+                }
+            })
+            .collect::<Vec<_>>();
+
+        if lanes.is_empty() { None } else { Some(lanes) }
     }
 
     pub(crate) fn snapshot_collision(&mut self) -> Option<CollisionGridDebugSnapshot> {

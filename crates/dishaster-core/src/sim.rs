@@ -160,6 +160,7 @@ impl Simulation {
             .collect();
 
         let movement_debug = self.snapshot_movement();
+        let queue_debug = self.snapshot_queue();
         let collision_debug = self.snapshot_collision();
         let crowd_debug = self.snapshot_crowd();
 
@@ -168,6 +169,7 @@ impl Simulation {
         Snapshot {
             display,
             movement_debug,
+            queue_debug,
             collision_debug,
             crowd_debug,
             sim_time_seconds: time.current_time,

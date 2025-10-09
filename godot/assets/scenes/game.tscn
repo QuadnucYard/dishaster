@@ -23,5 +23,9 @@ y_sort_enabled = true
 unique_name_in_owner = true
 z_index = 30
 
+[node name="QueueDebugOverlay" type="Node2D" parent="Stage"]
+unique_name_in_owner = true
+z_index = 31
+
 [node name="Camera2D" type="Camera2D" parent="Stage"]
 position = Vector2(960, 540)

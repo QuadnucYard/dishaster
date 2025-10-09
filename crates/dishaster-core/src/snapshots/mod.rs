@@ -15,6 +15,8 @@ pub struct Snapshot {
     pub display: Vec<DisplaySnapshot>,
     /// Per-agent movement debug data collected for visualization.
     pub movement_debug: Option<Vec<MovementDebugSnapshot>>,
+    /// Queue lane debug data collected for visualization.
+    pub queue_debug: Option<Vec<QueueLaneDebugSnapshot>>,
     /// Collision grid occupancy data when debug is enabled.
     pub collision_debug: Option<CollisionGridDebugSnapshot>,
     /// Crowd cost field data when debug is enabled.

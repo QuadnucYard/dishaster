@@ -11,7 +11,7 @@ use godot::{
     prelude::*,
 };
 
-const POSITION_RADIUS: f32 = 0.15;
+const POSITION_RADIUS: f32 = 0.05;
 const VELOCITY_SCALE: f32 = 0.5;
 const PATH_WIDTH: f32 = 2.0;
 const VELOCITY_WIDTH: f32 = 2.5;
