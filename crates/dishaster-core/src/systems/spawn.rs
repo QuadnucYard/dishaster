@@ -1,14 +1,27 @@
 mod layout;
+mod queues;
 mod staffs;
 
+use bevy_ecs::schedule::ScheduleConfigs;
 use dishrupt_core::{
     asset::PrefabReference,
     display::{DisplayModel, DisplayState, Transform},
 };
 pub use layout::*;
+pub use queues::*;
 pub use staffs::*;
 
 use super::prelude::*;
+
+/// Initial spawning systems to run at level start
+pub fn initial_spawning_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + 'static>> {
+    (
+        spawn_static_objects,
+        spawn_window_queues,
+        spawn_serving_staffs,
+    )
+        .chain()
+}
 
 /// System that manages diner spawning based on timing and capacity constraints
 pub fn update_diner_spawner(
@@ -132,10 +145,9 @@ fn spawn_diner(
 
     log::info!(
         target: "diner",
-        "spawn: id={} pos=({:.2},{:.2})",
+        "spawn: id={} pos={:.2}",
         spawner.next_diner_id,
-        pos.x,
-        pos.y
+        pos
     );
 
     let diner_id = spawner.next_diner_id;
@@ -144,16 +156,13 @@ fn spawn_diner(
         AgentTag,
         DinerBundle {
             diner: Diner { id: diner_id },
-            state: DinerState {
-                current: DinerStateType::Entering,
-                state_timer: 0.0,
-                satisfaction: DEFAULT_DINER_SATISFACTION,
-            },
+            goal: DinerGoalState::default(),
             targets: DinerTargets::default(),
             movement: Movement {
                 pos,
                 radius: rng.random_range(0.2..0.4),
                 impatience: rng.random_range(0.0..1.0), // TODO: base on model
+                avoidance_responsibility: rng.random_range(1.0..3.0),
                 ..Default::default()
             },
         },
@@ -196,34 +205,4 @@ fn spawn_diner(
         },
         ChildOf(wrapper_entity),
     ));
-}
-
-/// System to clean up diners who have left.
-pub fn despawn_leaving_diners(
-    mut commands: Commands,
-    query: Query<(Entity, &Diner, &DinerState, &Movement)>,
-    canteen: Res<Canteen>,
-) {
-    for (entity, diner, state, movement) in query.iter() {
-        if state.current != DinerStateType::Leaving {
-            continue;
-        }
-        // Check if diner has reached any of the exits.
-        // If close enough to any exit point on an entrance range, despawn.
-        let reached_exit = canteen.model.entrances.iter().any(|xr| {
-            let clamped_x = movement.pos.x.clamp(xr.x_min, xr.x_max);
-            let exit_point = Vec2::new(clamped_x, canteen.model.entrances_y);
-            movement.pos.close_to(exit_point, EXIT_ARRIVAL_EPS)
-        });
-        if reached_exit {
-            log::info!(
-                target: "diner",
-                "despawn: id={} pos=({:.2},{:.2})",
-                diner.id,
-                movement.pos.x,
-                movement.pos.y
-            );
-            commands.entity(entity).despawn();
-        }
-    }
 }

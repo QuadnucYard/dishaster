@@ -6,7 +6,7 @@ use crate::{components::Movement, prelude::*};
 #[derive(Bundle)]
 pub struct DinerBundle {
     pub diner: Diner,
-    pub state: DinerState,
+    pub goal: DinerGoalState,
     pub targets: DinerTargets,
     pub movement: Movement,
 }
@@ -18,15 +18,60 @@ pub struct Diner {
     pub id: u32,
 }
 
-/// Runtime diner state
+/// Current goal state of the diner
 #[derive(Component)]
-pub struct DinerState {
-    /// Current state in the state machine
-    pub current: DinerStateType,
-    /// State entry time for timing
-    pub state_timer: f32,
-    /// Current satisfaction level
-    pub satisfaction: f32,
+pub struct DinerGoalState {
+    /// Current goal
+    pub current: DinerGoal,
+    /// State entry time for timing. Internal use only.
+    pub timer: f32,
+}
+
+impl Default for DinerGoalState {
+    fn default() -> Self {
+        Self {
+            current: DinerGoal::Enter,
+            timer: 0.0,
+        }
+    }
+}
+
+impl DinerGoalState {
+    /// Transition to the next goal state, resetting the timer.
+    pub fn update(&mut self, next_goal: DinerGoal) {
+        self.current = next_goal;
+        self.timer = 0.0;
+    }
+
+    /// Reset the state timer to zero.
+    pub fn reset_timer(&mut self) {
+        self.timer = 0.0;
+    }
+}
+
+/// Possible goals for a diner in the canteen
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DinerGoal {
+    /// Just spawned, moving into the canteen
+    Enter,
+    /// Observing available windows to decide
+    Observe,
+    /// Deciding which window to approach
+    DecideWindow,
+    /// Moving to the chosen window
+    QueueForWindow,
+    /// Being served at the window
+    GetServed,
+    /// Moving to find a seat
+    FindSeat,
+    /// Moving to the assigned seat
+    MoveToSeat,
+    /// Eating the meal at the seat
+    Eat,
+    /// Moving to the dish return area
+    ReturnDishes,
+    /// Leaving the canteen
+    Leave,
 }
 
 /// Diner's current targets and decisions
@@ -36,37 +81,10 @@ pub struct DinerTargets {
     pub observing_window: Option<Entity>,
     /// Currently chosen window entity
     pub chosen_window: Option<Entity>,
-    /// Currently chosen table entity
-    pub chosen_table: Option<Entity>,
-    /// Seat index reserved at the chosen table
-    pub chosen_seat: Option<usize>,
+    /// Currently chosen table entity and seat index
+    pub chosen_seat: Option<(Entity, usize)>,
     /// Dish collector the diner will visit after eating
     pub collector_target: Option<Entity>,
-}
-
-/// Marker component while a diner participates in a queue at a window
-#[derive(Component)]
-pub struct QueueParticipant {
-    /// Service window this diner intends to order from
-    pub window: Entity,
-    /// Simulation time when the diner joined the queue (seconds)
-    pub joined_at: f64,
-    /// Current zero-based index within the queue ordering
-    pub slot_index: usize,
-    /// Queue lane index assigned to this diner (None until distributed by the queue system)
-    pub lane_index: Option<usize>,
-}
-
-impl QueueParticipant {
-    /// Create a new queue participant entry at the moment a diner joins the queue
-    pub fn new(window: Entity, joined_at: f64) -> Self {
-        Self {
-            window,
-            joined_at,
-            slot_index: 0,
-            lane_index: None,
-        }
-    }
 }
 
 /// Persistent memory component for diner data across days
@@ -80,33 +98,4 @@ pub struct DinerMemory {
     pub average_satisfaction: f32,
     /// Learned preferences and adaptations
     pub learned_preferences: Vec<EcoString>,
-}
-
-/// State machine for diner behavior
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DinerStateType {
-    /// Entering the canteen and moving to an observation area.
-    Entering,
-    /// Wandering to observe different windows before making a choice.
-    Observing,
-    /// Pausing to decide on a window after observation.
-    Deciding,
-    /// Moving towards the chosen window.
-    MovingToWindow,
-    /// Arrived at the window and preparing to enter the queue.
-    AtWindow,
-    /// Standing in the queue and waiting to reach the counter.
-    Queueing,
-    /// Currently being served at the counter.
-    BeingServed,
-    /// Looking for an available seat after receiving food.
-    FindingSeat,
-    /// Walking towards the reserved seat.
-    MovingToSeat,
-    /// Sitting at the table and consuming the meal.
-    Eating,
-    /// Returning trays and leftovers before leaving.
-    ReturningDishes,
-    /// Leaving the canteen.
-    Leaving,
 }

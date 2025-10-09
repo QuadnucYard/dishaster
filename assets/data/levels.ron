@@ -99,8 +99,8 @@
                 decisiveness: (0.2, 0.8),
                 adaptiveness: (0.1, 0.6),
                 leave_probability: (0.05, 0.3),
-                observation_time: (5.0, 15.0),
-                decision_time: (2.0, 8.0),
+                observation_time: (15.0, 30.0),
+                decision_time: (3.0, 8.0),
                 eating_time: (300.0, 900.0),
             ),
             movement: (

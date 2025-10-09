@@ -48,18 +48,16 @@ impl Simulation {
                 // Deliver delayed serving communications before state updates
                 process_serving_messages,
                 // Agents decide targets and compute paths
-                update_diner_states,
+                dining_systems(),
                 // Allocate staff and schedule service events
                 drive_serving_sessions,
                 // Update queue ordering and slot targets before movement
-                update_window_queues,
+                (update_queue_members, update_queue_intents),
                 // Move agents along paths
                 run_path_requests,
                 update_agent_movement,
                 // Sync visuals to movement positions
                 sync_transform_with_movement,
-                // Despawn agents who reached exits and update counts
-                despawn_leaving_diners,
                 check_day_completion,
             )
                 .chain(),
@@ -126,14 +124,7 @@ impl Simulation {
 
         // Spawn static objects once at startup
         let mut schedule = Schedule::default();
-        schedule.add_systems(
-            (
-                spawn_static_objects,
-                spawn_serving_staffs,
-                build_collision_grid,
-            )
-                .chain(),
-        );
+        schedule.add_systems((initial_spawning_systems(), build_collision_grid).chain());
         schedule.run(&mut self.world);
     }
 

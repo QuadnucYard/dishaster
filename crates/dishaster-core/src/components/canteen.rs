@@ -8,7 +8,7 @@ pub struct Window {
     /// Player configuration
     pub config: WindowConfiguration,
     /// Position in the canteen (should correspond to canteen layout)
-    pub position: XRange,
+    pub location: XSegment,
 }
 
 /// Active dishes in a window - separate component for better data locality

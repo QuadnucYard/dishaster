@@ -49,7 +49,7 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
 impl Movement {
     /// Request a path to the specified target position.
     pub fn request_path(&mut self, target: Vec2) {
-        log::debug!("Path requested to ({:.2}, {:.2})", target.x, target.y);
+        log::trace!("Path requested to {target:.2}");
 
         self.pending_target = Some(target);
         self.target_reached = false;
@@ -65,24 +65,16 @@ impl Movement {
             impatience: self.impatience,
             grid: nav_grid,
         }) {
-            log::debug!(
-                "Path from ({:.2}, {:.2}) to ({:.2}, {:.2}) found with {} waypoints",
-                self.pos.x,
-                self.pos.y,
-                target.x,
-                target.y,
-                path.len()
+            log::trace!(
+                "Path from {:.2} to {:.2} found with {} waypoints",
+                self.pos,
+                target,
+                path.len(),
             );
 
             self.path = path;
         } else {
-            log::debug!(
-                "Path from ({:.2}, {:.2}) to ({:.2}, {:.2}) not found",
-                self.pos.x,
-                self.pos.y,
-                target.x,
-                target.y
-            );
+            log::trace!("Path from {:.2} to {:.2} not found", self.pos, target);
 
             self.path.clear();
         }
@@ -160,7 +152,7 @@ pub fn update_agent_movement(
             goal: m.path.next().unwrap_or(m.pos),
             radius: m.radius,
             max_velocity: m.walking_speed * m.speed_factor,
-            avoidance_responsibility: 1.0, // TODO
+            avoidance_responsibility: m.avoidance_responsibility,
         })
         .collect::<Vec<_>>();
 
@@ -200,6 +192,7 @@ pub fn update_agent_movement(
             && rng.random_bool(0.01)
         {
             movement.request_path(last);
+            log::debug!("Randomly re-requesting path to {last:.2}",);
         }
     }
 }

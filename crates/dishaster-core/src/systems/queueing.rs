@@ -1,154 +1,140 @@
-use std::cmp::Ordering;
-
+use ordered_float::NotNan;
 use rustc_hash::FxHashMap;
 
 use super::prelude::*;
 
-struct WindowQueueLayout {
-    lanes: Vec<Vec2>,
+/// System that updates entities with QueueIntent to move them to the end of the specified queue lane.
+pub fn update_queue_intents(
+    mut commands: Commands,
+    preparer_query: Query<(Entity, &mut Movement, &QueueIntent)>,
+    lane_query: Query<&QueueLaneMembers>,
+    mut rng: ResMut<GameRng>,
+) {
+    for (entity, mut movement, intent) in preparer_query {
+        if movement.has_path() {
+            continue;
+        }
+        let Ok(members) = lane_query.get(intent.lane) else {
+            log::warn!(
+                target: "queue",
+                "QueueIntent entity {:?} references invalid lane {:?}",
+                entity,
+                intent.lane
+            );
+            continue;
+        };
+        // Determine the target position at the rear of the queue
+        let offset = vec2(rng.random_range(-0.05..0.05), rng.random_range(-0.05..0.05)); // Slight random offset to avoid perfect overlap
+        let target_position = members.rear_pos + offset;
+
+        if movement.pos.close_to(target_position, 0.2) {
+            log::debug!(
+                target: "queue",
+                "Entity {:?} reached end of queue lane {:?} at position {:?}",
+                entity,
+                intent.lane,
+                target_position
+            );
+            movement.stop();
+            // Reached the end of the queue, become a QueueMember
+            commands.entity(entity).remove::<QueueIntent>();
+            commands
+                .entity(entity)
+                .insert(QueueMember::new(intent.lane));
+        } else {
+            // Request a path to the target position
+            log::debug!(
+                target: "queue",
+                "Entity {:?} moving to queue lane {:?} at position {:?}",
+                entity,
+                intent.lane,
+                target_position
+            );
+            movement.request_path(target_position);
+        }
+    }
 }
 
-/// Update queue slot assignments and movement targets for diners at service windows.
-pub fn update_window_queues(
+/// System that updates the positions of all QueueMember entities to maintain the queue formation.
+pub fn update_queue_members(
     mut commands: Commands,
-    canteen: Res<Canteen>,
-    registry: Res<GameModelRegistryRes>,
-    windows: Query<(Entity, &Window)>,
-    mut diners: Query<(
-        Entity,
-        &mut Movement,
-        &mut QueueParticipant,
-        &DinerState,
-        &DinerTargets,
-    )>,
+    mut member_query: Query<(Entity, &mut Movement, &mut QueueMember)>,
+    mut lane_query: Query<(Entity, &QueueLane, &mut QueueLaneMembers)>,
+    mut rng: ResMut<GameRng>,
 ) {
-    // Pre-compute queue lane layouts per window for quick lookup.
-    let mut layout_cache = FxHashMap::default();
-    for (window_entity, window) in windows.iter() {
-        let service = registry.window_services.get(window.service_template);
-        let queue_positions_world: Vec<f32> = if service.layout.queue_x.is_empty() {
-            vec![window.position.center()]
-        } else {
-            service
-                .layout
-                .queue_x
-                .iter()
-                .map(|offset| window.position.x_min + *offset)
-                .collect()
-        };
-        let front_y =
-            (canteen.model.windows_y - WINDOW_APPROACH_OFFSET).clamp(0.0, canteen.model.height);
-        let lanes = queue_positions_world
-            .into_iter()
-            .map(|x| Vec2::new(x.clamp(0.0, canteen.model.width), front_y))
-            .collect();
-        layout_cache.insert(window_entity, WindowQueueLayout { lanes });
-    }
-
-    if layout_cache.is_empty() {
-        return;
-    }
-
-    // Group queue participants per window ordered by join time.
-    let mut window_buckets: FxHashMap<Entity, Vec<(Entity, f64, Option<usize>)>> =
-        FxHashMap::default();
-    let mut stale_participants: Vec<Entity> = Vec::new();
-
-    for (entity, _movement, mut queue_entry, state, targets) in diners.iter_mut() {
-        if !matches!(
-            state.current,
-            DinerStateType::MovingToWindow | DinerStateType::Queueing | DinerStateType::BeingServed
-        ) {
-            stale_participants.push(entity);
-            continue;
-        }
-
-        if let Some(chosen) = targets.chosen_window {
-            queue_entry.window = chosen;
-        }
-
-        if layout_cache.contains_key(&queue_entry.window) {
-            window_buckets.entry(queue_entry.window).or_default().push((
+    // Collect members by lane
+    let mut lane_to_members: FxHashMap<Entity, Vec<(Entity, Vec2, f32)>> = FxHashMap::default();
+    for (entity, movement, member) in member_query.iter() {
+        let Ok((_, _, members)) = lane_query.get(member.lane) else {
+            log::warn!(
+                target: "queue",
+                "QueueMember {} references invalid lane {}",
                 entity,
-                queue_entry.joined_at,
-                queue_entry.lane_index,
-            ));
+                member.lane
+            );
+            // Invalid lane reference, remove the QueueMember component
+            commands.entity(entity).remove::<QueueMember>();
+            continue;
+        };
+
+        let distance = -movement.pos.dot(members.rear_pos); // Negative dot product for distance along lane direction
+        lane_to_members
+            .entry(member.lane)
+            .or_default()
+            .push((entity, movement.pos, distance));
+    }
+
+    // Sort and assign rankings within each lane
+    for (lane_entity, mut members) in lane_to_members {
+        let Ok((_, lane, mut lane_members)) = lane_query.get_mut(lane_entity) else {
+            log::warn!(target: "queue", "Invalid lane entity {}", lane_entity);
+            continue;
+        };
+        // Sort by distance to rear position (closest first)
+        members.sort_by_key(|&(_, _, dist)| NotNan::new(dist).unwrap());
+
+        // Update each member's ranking and rebuild the members list
+        lane_members.members.clear();
+        for (rank, &(entity, _, _)) in members.iter().enumerate() {
+            if let Ok((_, _, mut member)) = member_query.get_mut(entity) {
+                member.ranking = rank;
+                lane_members.members.push(entity);
+            }
+        }
+
+        // Update rear position for the next member
+        lane_members.rear_pos = if let Some(last_member_entity) = lane_members.members.last()
+            && let Ok((_, last_movement, _)) = member_query.get_mut(*last_member_entity)
+        {
+            last_movement.pos - lane.direction * 0.5 // Assuming 0.5 units spacing
         } else {
-            stale_participants.push(entity);
-        }
-    }
-
-    for members in window_buckets.values_mut() {
-        members.sort_by(|a, b| {
-            a.1.partial_cmp(&b.1)
-                .unwrap_or(Ordering::Equal)
-                .then_with(|| a.0.index().cmp(&b.0.index()))
-        });
-    }
-
-    let mut slot_lookup = FxHashMap::default();
-    for members in window_buckets.values() {
-        for (idx, (entity, _, _)) in members.iter().enumerate() {
-            slot_lookup.insert(*entity, idx);
-        }
-    }
-
-    let mut lane_lookup = FxHashMap::default();
-    for (window, members) in &window_buckets {
-        let Some(layout) = layout_cache.get(window) else {
-            continue;
-        };
-        let lane_count = layout.lanes.len().max(1);
-        let mut lane_loads = vec![0usize; lane_count];
-        for (entity, _, prev_lane) in members.iter() {
-            let previous = prev_lane.and_then(|lane| (lane < lane_count).then_some(lane));
-            let lane = previous.unwrap_or_else(|| {
-                lane_loads
-                    .iter()
-                    .enumerate()
-                    .min_by_key(|(_, count)| *count)
-                    .map(|(idx, _)| idx)
-                    .unwrap_or(0)
-            });
-            lane_loads[lane] += 1;
-            lane_lookup.insert(*entity, lane);
-        }
-    }
-
-    for (entity, mut movement, mut queue_entry, _state, _targets) in diners.iter_mut() {
-        let Some(slot_index) = slot_lookup.get(&entity) else {
-            continue;
+            lane.anchor
         };
 
-        let Some(layout) = layout_cache.get(&queue_entry.window) else {
-            stale_participants.push(entity);
-            continue;
-        };
-
-        let lane_index = lane_lookup
-            .get(&entity)
-            .copied()
-            .unwrap_or(0)
-            .min(layout.lanes.len().saturating_sub(1));
-        queue_entry.slot_index = *slot_index;
-        queue_entry.lane_index = Some(lane_index);
-        let depth = *slot_index as f32;
-        let anchor = layout
-            .lanes
-            .get(lane_index)
-            .copied()
-            .or_else(|| layout.lanes.first().copied())
-            .unwrap_or(Vec2::ZERO);
-        let mut target = Vec2::new(anchor.x, (anchor.y - depth * QUEUE_SPACING).max(0.0));
-        target.x = target.x.clamp(0.0, canteen.model.width);
-        target.y = target.y.clamp(0.0, canteen.model.height);
-
-        if !movement.pos.close_to(target, 0.2) {
-            movement.request_path(target);
+        // Maintain the queue formation
+        for (i, member_entity) in lane_members.members.iter().enumerate() {
+            let target_pos = if i == 0 {
+                // First in line goes to the anchor position
+                lane.anchor
+            } else {
+                // Subsequent members position behind the previous one
+                members[i - 1].1 - lane.direction * 0.5 // Assuming 0.5 units spacing
+            };
+            let offset = vec2(rng.random_range(-0.1..0.1), rng.random_range(-0.1..0.1)); // Slight random offset to avoid perfect overlap
+            let target_pos = target_pos + offset;
+            let Ok((_, mut movement, _)) = member_query.get_mut(*member_entity) else {
+                continue;
+            };
+            if !movement.pos.close_to(target_pos, 0.3) && !movement.has_path() {
+                movement.request_path(target_pos);
+                log::debug!(
+                    target: "queue",
+                    "Entity {} in lane {} moving to position {:.2}",
+                    member_entity,
+                    lane_entity,
+                    target_pos
+                );
+            }
         }
-    }
-
-    for entity in stale_participants {
-        commands.entity(entity).remove::<QueueParticipant>();
     }
 }

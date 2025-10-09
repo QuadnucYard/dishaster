@@ -55,7 +55,11 @@ fn spawn_windows(
             .spawn(Window {
                 service_template: service_handle,
                 config: window_config.clone(),
-                position: window_range,
+                location: XSegment::new(
+                    window_range.x_min,
+                    window_range.x_max,
+                    canteen.model.windows_y,
+                ),
             })
             .id();
 

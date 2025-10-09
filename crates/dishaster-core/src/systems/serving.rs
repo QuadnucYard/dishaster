@@ -263,6 +263,13 @@ pub fn drive_serving_sessions(
                     && !staff_movement.pos.close_to(target, 0.1)
                 {
                     staff_movement.request_path(target);
+                    log::debug!(
+                        target: "staff",
+                        "staff {} moving to align with diner {} at {:.2}",
+                        staff_entity,
+                        diner,
+                        target
+                    );
                 }
 
                 // Give the diner immediate feedback that their order was heard so they
@@ -293,6 +300,13 @@ pub fn drive_serving_sessions(
                     && staff_movement.pending_target.is_none()
                 {
                     staff_movement.request_path(target);
+                    log::debug!(
+                        target: "staff",
+                        "staff {} moving to align with diner {} at {:.2}",
+                        staff_entity,
+                        diner,
+                        target
+                    );
                 }
             }
             ServiceStage::Completed => {}
@@ -336,6 +350,6 @@ fn staff_alignment_target(
     let y = (canteen.model.windows_y + WINDOW_STAFF_OFFSET).clamp(0.0, canteen.model.height);
     let x = diner_pos
         .x
-        .clamp(window.position.x_min, window.position.x_max);
+        .clamp(window.location.x_min, window.location.x_max);
     Some(Vec2::new(x, y))
 }

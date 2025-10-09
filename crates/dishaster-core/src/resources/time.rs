@@ -41,16 +41,6 @@ impl Time {
         self.current_time = self.current_tick as f64 * self.tick_duration;
     }
 
-    /// Get current simulation time in seconds as high-precision f64
-    pub fn current_time_seconds(&self) -> f64 {
-        self.current_time
-    }
-
-    /// Get current simulation time as f32 for systems requiring float precision
-    pub fn current_time_f32(&self) -> f32 {
-        self.current_time as f32
-    }
-
     /// Reset time state to initial values
     ///
     /// Resets current_tick, total_ticks, and current_time to zero

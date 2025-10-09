@@ -60,6 +60,34 @@ impl XRange {
     }
 }
 
+/// Horizontal line segment defined by X range and Y coordinate
+#[derive(Debug, Clone, Copy, Deserialize)]
+pub struct XSegment {
+    /// Minimum X coordinate of the range
+    pub x_min: Meters,
+    /// Maximum X coordinate of the range
+    pub x_max: Meters,
+    /// Y coordinate for the segment line
+    pub y: Meters,
+}
+
+impl XSegment {
+    /// Create a new X segment with specified bounds and Y position
+    pub fn new(x_min: Meters, x_max: Meters, y: Meters) -> Self {
+        Self { x_min, x_max, y }
+    }
+
+    /// Calculate the center point of this range
+    pub fn center(&self) -> Vec2 {
+        vec2((self.x_min + self.x_max) / 2.0, self.y)
+    }
+
+    /// Calculate the width of this range
+    pub fn width(&self) -> Meters {
+        self.x_max - self.x_min
+    }
+}
+
 /// Generic min-max value range for statistical distributions
 ///
 /// Used throughout the simulation for defining probability ranges,

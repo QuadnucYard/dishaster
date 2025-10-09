@@ -23,7 +23,7 @@ pub fn spawn_serving_staffs(
         debug_assert!(!service_template.layout.queue_x.is_empty());
         let queue_offsets = &service_template.layout.queue_x;
         for (queue_index, &offset_x) in queue_offsets.iter().enumerate() {
-            let pos_x = window.position.x_min + offset_x;
+            let pos_x = window.location.x_min + offset_x;
             let staff_pos = vec2(pos_x, staff_y);
 
             let display_res = PrefabReference::new("staffs/sample_staff"); // placeholder
