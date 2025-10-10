@@ -8,13 +8,12 @@ use crate::systems::prelude::*;
 /// System that spawns all serving staff at level start, associated with their respective windows
 pub fn spawn_serving_staffs(
     mut commands: Commands,
-    windows: Query<(Entity, &Window)>,
+    windows: Query<(Entity, &Window, &LaneOwner)>,
     canteen: Res<Canteen>,
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
-    mut staff_registry: ResMut<ServingStaffRegistry>,
 ) {
-    for (window_entity, window) in windows.iter() {
+    for (window_entity, window, lane_owner) in windows.iter() {
         // Spawn serving staff associated with this window.
         let staff_y =
             (canteen.model.windows_y + WINDOW_STAFF_OFFSET).clamp(0.0, canteen.model.height);
@@ -83,7 +82,12 @@ pub fn spawn_serving_staffs(
                 ChildOf(staff_entity),
             ));
 
-            staff_registry.register(window_entity, staff_entity);
+            // Link staff to the corresponding lane
+            if let Some(&lane_entity) = lane_owner.lanes.get(queue_index) {
+                commands.entity(lane_entity).insert(StaffForLane {
+                    staff: staff_entity,
+                });
+            }
         }
     }
 }

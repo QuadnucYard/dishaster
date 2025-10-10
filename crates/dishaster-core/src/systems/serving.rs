@@ -29,119 +29,154 @@ struct QueuedServingMessage {
     message: ServingMessage,
 }
 
+struct ServingMessage {
+    diner: Entity,
+    staff: Entity,
+    kind: ServingMessageKind,
+}
+
 /// Distinct steps in the serving conversation.
-enum ServingMessage {
-    OrderSpoken { diner: Entity, staff: Entity },
-    StaffConfirmed { diner: Entity, staff: Entity },
-    DishReady { diner: Entity, staff: Entity },
+enum ServingMessageKind {
+    OrderSpoken,
+    StaffConfirmed,
+    DishReady,
 }
 
 /// Advance serving conversations using queued messages.
 pub fn process_serving_messages(
-    mut queue: ResMut<ServingCommsQueue>,
-    time: Res<Time>,
     mut sessions: Query<(Entity, &mut ServiceSession)>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement)>,
+    mut queue: ResMut<ServingCommsQueue>,
     mut events: ResMut<EventLog>,
+    time: Res<Time>,
     mut rng: ResMut<GameRng>,
 ) {
     let now = time.current_time;
     // Deliver any elapsed step so the diner and staff state machines stay in sync.
     let ready = queue.take_ready(now).collect::<Vec<_>>();
 
-    for message in ready {
-        match message {
-            ServingMessage::OrderSpoken { diner, staff } => {
-                let Ok((_, session)) = sessions.get_mut(diner) else {
-                    // Diner is gone or session ended; free the staff slot.
-                    release_staff(&mut staff_query, staff, now);
-                    continue;
-                };
+    for ServingMessage { diner, staff, kind } in ready {
+        let Ok((_, mut staff_state, _)) = staff_query.get_mut(staff) else {
+            log::warn!(
+                target: "serving",
+                "Staff entity not found: {staff:?}"
+            );
+            continue;
+        };
+        let Ok((_, mut session)) = sessions.get_mut(diner) else {
+            log::warn!(
+                target: "serving",
+                "Diner session not found: {diner:?}"
+            );
+            // Diner is gone or session ended; free the staff slot.
+            release_staff(&mut staff_state, now);
+            continue;
+        };
+        let Some(request) = session.request.as_ref() else {
+            // No active order means the chain already resolved; free staff.
+            release_staff(&mut staff_state, now);
+            continue;
+        };
+
+        match kind {
+            ServingMessageKind::OrderSpoken => {
                 if session.stage != ServiceStage::WaitingForStaffResponse
                     || session.staff != Some(staff)
                 {
+                    log::warn!(
+                        target: "serving",
+                        "Stale diner session: {diner:?} staff: {staff:?}"
+                    );
                     // Ignore stale messages that belong to an older assignment.
                     continue;
                 }
-                let Some(request) = session.request.as_ref() else {
-                    // No active order means the chain already resolved; free staff.
-                    release_staff(&mut staff_query, staff, now);
-                    continue;
-                };
-                // Confirm the staff member is still involved and surface the spoken order
-                // back to the customer so both sides stay aligned.
-                if let Ok((_, mut staff_state, _)) = staff_query.get_mut(staff) {
-                    staff_state.last_update_time = now;
-                    let feedback = Feedback::Thought(eco_format!("{}?", request.dish_name));
-                    events.emit_feedback(FeedbackEvent {
-                        entity: staff.into(),
-                        content: feedback,
-                        timestamp: now,
-                    });
-                    let delay = rng.random_range(STAFF_CONFIRM_DELAY_MIN..STAFF_CONFIRM_DELAY_MAX);
-                    // Queue the verbal confirmation after a short pause to simulate speech.
-                    queue.schedule(
-                        now + f64::from(delay),
-                        ServingMessage::StaffConfirmed { diner, staff },
-                    );
-                }
+
+                log::debug!(
+                    target: "serving",
+                    "Staff entity found: {staff:?}"
+                );
+                staff_state.last_update_time = now;
+                let feedback = Feedback::Thought(eco_format!("{}?", request.dish_name));
+                events.emit_feedback(FeedbackEvent {
+                    entity: staff.into(),
+                    content: feedback,
+                    timestamp: now,
+                });
+                let delay = rng.random_range(STAFF_CONFIRM_DELAY_MIN..STAFF_CONFIRM_DELAY_MAX);
+                // Queue the verbal confirmation after a short pause to simulate speech.
+                queue.schedule(
+                    now + delay as f64,
+                    ServingMessage {
+                        diner,
+                        staff,
+                        kind: ServingMessageKind::StaffConfirmed,
+                    },
+                );
             }
-            ServingMessage::StaffConfirmed { diner, staff } => {
-                let Ok((_, mut session)) = sessions.get_mut(diner) else {
-                    // Session vanished before confirmation landed.
-                    release_staff(&mut staff_query, staff, now);
-                    continue;
-                };
+            ServingMessageKind::StaffConfirmed => {
                 if session.stage != ServiceStage::WaitingForStaffResponse
                     || session.staff != Some(staff)
                 {
                     // Someone else took over; drop the duplicated reply.
                     continue;
                 }
+
                 // The staff member accepted the task, so we wait for food prep.
-                session.stage = ServiceStage::WaitingForDish;
-
-                let Some(request) = session.request.as_ref() else {
-                    // Bail if the order payload disappeared while confirming.
-                    release_staff(&mut staff_query, staff, now);
-                    continue;
-                };
+                staff_state.last_update_time = now;
                 let confirm_feedback = Feedback::Thought(eco_format!("{}", request.dish_name));
-                let base = request.base_service_time.max(0.5);
+                events.emit_feedback(FeedbackEvent {
+                    entity: staff.into(),
+                    content: confirm_feedback.clone(),
+                    timestamp: now,
+                });
+                let diner_feedback =
+                    Feedback::Thought(choose_feedback(&mut rng, DECIDING_FEEDBACKS).into());
+                events.emit_feedback(FeedbackEvent {
+                    entity: diner.into(),
+                    content: diner_feedback,
+                    timestamp: now,
+                });
 
-                if let Ok((_, mut staff_state, _)) = staff_query.get_mut(staff) {
-                    staff_state.last_update_time = now;
-                    events.emit_feedback(FeedbackEvent {
-                        entity: staff.into(),
-                        content: confirm_feedback.clone(),
-                        timestamp: now,
-                    });
-                    let diner_feedback =
-                        Feedback::Thought(choose_feedback(&mut rng, DECIDING_FEEDBACKS).into());
-                    events.emit_feedback(FeedbackEvent {
-                        entity: diner.into(),
-                        content: diner_feedback,
-                        timestamp: now,
-                    });
+                log::debug!(
+                    target: "serving",
+                    "Staff {} confirmed order for diner {}: {}",
+                    staff,
+                    diner,
+                    request.dish_name
+                );
 
-                    // Randomize prep time to avoid robotic behaviour each day.
+                // Randomize prep time.
+                let prep_time = {
+                    let base = request.base_service_time;
                     let variation = rng
                         .random_range(-STAFF_SERVICE_TIME_VARIATION..STAFF_SERVICE_TIME_VARIATION);
-                    let prep_time = (base * (1.0 + variation)).max(0.8);
-                    // Schedule the ready notification to finish the conversation.
-                    queue.schedule(
-                        now + f64::from(prep_time),
-                        ServingMessage::DishReady { diner, staff },
-                    );
-                }
-            }
-            ServingMessage::DishReady { diner, staff } => {
-                let Ok((_, mut session)) = sessions.get_mut(diner) else {
-                    // Diner left before the dish was ready; nothing to deliver.
-                    release_staff(&mut staff_query, staff, now);
-                    continue;
+                    base * (1.0 + variation)
                 };
+                // Schedule the ready notification to finish the conversation.
+                queue.schedule(
+                    now + prep_time as f64,
+                    ServingMessage {
+                        diner,
+                        staff,
+                        kind: ServingMessageKind::DishReady,
+                    },
+                );
+
+                session.stage = ServiceStage::WaitingForDish; // Defer it to avoid borrow checker issues
+            }
+            ServingMessageKind::DishReady => {
+                log::debug!(
+                    target: "serving",
+                    "Dish ready for diner {}",
+                    diner,
+                );
+
                 if session.stage != ServiceStage::WaitingForDish || session.staff != Some(staff) {
+                    log::warn!(
+                        target: "serving",
+                        "Inconsistent session state for diner {}",
+                        diner,
+                    );
                     // Another staffer already completed the order.
                     continue;
                 }
@@ -153,7 +188,6 @@ pub fn process_serving_messages(
                 };
 
                 let staff_feedback = Feedback::Thought(eco_format!("{} ✅", request.dish_name));
-
                 events.emit_feedback(FeedbackEvent {
                     entity: staff.into(),
                     content: staff_feedback,
@@ -167,39 +201,39 @@ pub fn process_serving_messages(
                     timestamp: now,
                 });
 
-                release_staff(&mut staff_query, staff, now);
+                log::debug!(
+                    target: "serving",
+                    "Staff {} completed order for diner {}: {}",
+                    staff,
+                    diner,
+                    request.dish_name
+                );
+
+                release_staff(&mut staff_state, now);
                 session.staff = None;
             }
         }
     }
 }
 
-fn release_staff(
-    query: &mut Query<(&ServingStaff, &mut ServingStaffState, &mut Movement)>,
-    staff: Entity,
-    now: f64,
-) {
-    // Reset the staff state so they re-enter the idle pool when conversations abort early
-    // or when we detect stale messages.
-    if let Ok((_staff_meta, mut state, mut movement)) = query.get_mut(staff) {
-        state.reset(now);
-        movement.stop();
-    }
+/// Reset the staff state so they re-enter the idle pool when conversations abort early
+/// or when we detect stale messages.
+fn release_staff(staff_state: &mut ServingStaffState, now: f64) {
+    staff_state.reset(now);
 }
 
 /// Progress service sessions by allocating staff and queuing conversation beats.
 pub fn drive_serving_sessions(
     mut sessions: Query<(Entity, &mut ServiceSession, &Movement), With<Diner>>,
-    staff_registry: Res<ServingStaffRegistry>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement), Without<Diner>>,
     window_query: Query<&WindowDishes>,
+    lane_query: Query<(&StaffForLane,)>,
     windows: Query<&Window>,
     registry: Res<GameModelRegistryRes>,
     mut comms: ResMut<ServingCommsQueue>,
     mut rng: ResMut<GameRng>,
     time: Res<Time>,
     mut events: ResMut<EventLog>,
-    canteen: Res<Canteen>,
 ) {
     let now = time.current_time;
 
@@ -208,19 +242,12 @@ pub fn drive_serving_sessions(
         // waits on delayed conversation steps, or concludes the interaction.
         match session.stage {
             ServiceStage::AssignStaff => {
-                let Some(staff_candidates) = staff_registry.staff_for(session.window) else {
-                    // Window has no configured staff; keep waiting.
-                    continue;
-                };
-                let Some(lane_index) = session.lane_index else {
-                    // Lane not yet known; retry after queue assignment stabilizes.
-                    continue;
-                };
-                let Some(&staff_entity) = staff_candidates.get(lane_index) else {
+                let Ok((staff_for_lane,)) = lane_query.get(session.lane) else {
                     // Layout mismatch between queues and staff; wait for correction.
                     continue;
                 };
-                let Ok((staff_meta, mut staff_state, mut staff_movement)) =
+                let staff_entity = staff_for_lane.staff;
+                let Ok((staff, mut staff_state, mut staff_movement)) =
                     staff_query.get_mut(staff_entity)
                 else {
                     // Staff entity might have despawned; let the next tick retry.
@@ -258,8 +285,7 @@ pub fn drive_serving_sessions(
                 staff_state.status = ServingStaffStatus::HandlingOrder;
                 staff_state.current_session = Some(diner);
                 staff_state.last_update_time = now;
-                if let Some(target) =
-                    staff_alignment_target(diner_movement.pos, staff_meta, &windows, &canteen)
+                if let Some(target) = staff_alignment_target(diner_movement.pos, staff, &windows)
                     && !staff_movement.pos.close_to(target, 0.1)
                 {
                     staff_movement.request_path(target);
@@ -283,19 +309,20 @@ pub fn drive_serving_sessions(
                 let delay = rng.random_range(ORDER_SPEECH_DELAY_MIN..ORDER_SPEECH_DELAY_MAX);
                 comms.schedule(
                     now + f64::from(delay),
-                    ServingMessage::OrderSpoken {
+                    ServingMessage {
                         diner,
                         staff: staff_entity,
+                        kind: ServingMessageKind::OrderSpoken,
                     },
                 );
             }
             ServiceStage::WaitingForStaffResponse | ServiceStage::WaitingForDish => {
                 // Keep the assigned staff aligned with the diner while the conversation plays out.
                 if let Some(staff_entity) = session.staff
-                    && let Ok((staff_meta, _state, mut staff_movement)) =
+                    && let Ok((staff, _state, mut staff_movement)) =
                         staff_query.get_mut(staff_entity)
                     && let Some(target) =
-                        staff_alignment_target(diner_movement.pos, staff_meta, &windows, &canteen)
+                        staff_alignment_target(diner_movement.pos, staff, &windows)
                     && !staff_movement.pos.close_to(target, 0.1)
                     && staff_movement.pending_target.is_none()
                 {
@@ -344,12 +371,10 @@ fn staff_alignment_target(
     diner_pos: Vec2,
     staff: &ServingStaff,
     windows: &Query<&Window>,
-    canteen: &Canteen,
 ) -> Option<Vec2> {
     let window = windows.get(staff.window).ok()?;
-    let y = (canteen.model.windows_y + WINDOW_STAFF_OFFSET).clamp(0.0, canteen.model.height);
-    let x = diner_pos
-        .x
-        .clamp(window.location.x_min, window.location.x_max);
-    Some(Vec2::new(x, y))
+    Some(vec2(
+        (diner_pos.x).clamp(window.location.x_min, window.location.x_max),
+        window.location.y + WINDOW_STAFF_OFFSET,
+    ))
 }

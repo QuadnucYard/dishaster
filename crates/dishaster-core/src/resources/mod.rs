@@ -5,7 +5,6 @@ mod time;
 use std::sync::Arc;
 
 use rand_chacha::ChaCha8Rng;
-use rustc_hash::FxHashMap;
 pub use time::Time;
 
 use crate::{models::*, prelude::*, snapshots::*};
@@ -177,28 +176,5 @@ impl EventLog {
     /// Retrieve and clear all logged events
     pub fn drain(&mut self) -> Vec<PresentationEvent> {
         std::mem::take(&mut self.0)
-    }
-}
-
-/// Bi-directional lookup between service windows and their assigned serving staff.
-#[derive(Resource, Default)]
-pub struct ServingStaffRegistry {
-    window_to_staff: FxHashMap<Entity, Vec<Entity>>,
-}
-
-impl ServingStaffRegistry {
-    /// Register a staff entity responsible for a given window.
-    pub fn register(&mut self, window: Entity, staff: Entity) {
-        self.window_to_staff.entry(window).or_default().push(staff);
-    }
-
-    /// Resolve every staff entity assigned to the provided window.
-    pub fn staff_for(&self, window: Entity) -> Option<&[Entity]> {
-        self.window_to_staff.get(&window).map(Vec::as_slice)
-    }
-
-    /// Remove the staff mapping when the window shuts down or the staff despawns.
-    pub fn unregister(&mut self, window: Entity) {
-        self.window_to_staff.remove(&window);
     }
 }

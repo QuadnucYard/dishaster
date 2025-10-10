@@ -61,3 +61,10 @@ pub struct ServingStaffBundle {
     /// Navigation state used to walk toward diners and service points.
     pub movement: Movement,
 }
+
+/// Component linking a queue lane to its assigned staff member.
+#[derive(Component)]
+pub struct StaffForLane {
+    /// Staff entity assigned to this lane.
+    pub staff: Entity,
+}

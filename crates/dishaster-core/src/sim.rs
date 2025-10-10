@@ -108,7 +108,6 @@ impl Simulation {
         let spawner = Self::make_diner_spawner(&level.diner_spawner);
         self.world.insert_resource(spawner);
         self.world.insert_resource(EventLog::default());
-        self.world.insert_resource(ServingStaffRegistry::default());
         self.world.insert_resource(ServingCommsQueue::default());
         self.world.insert_resource(DayStatus::default());
         self.world.insert_resource(level.into_res());

@@ -15,6 +15,7 @@ pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + '
             handle_observe_goal,
             handle_decide_goal,
             handle_queue_for_window_goal,
+            handle_get_served_goal,
             handle_find_seat_goal,
             handle_move_to_seat_goal,
             handle_eat_goal,
@@ -158,55 +159,90 @@ fn handle_decide_goal(
             continue;
         };
 
-        if rng.random_bool(0.7) {
-            log::info!(target: "diner", "decision: choose_window entity={window_entity:?}");
+        if !rng.random_bool(0.7) {
+            continue;
+        }
 
-            // Give feedback
-            if rng.random_bool(0.5) {
-                events.emit_feedback(FeedbackEvent {
-                    entity: entity.into(),
-                    content: Feedback::Thought(
-                        choose_feedback(&mut rng, DECIDING_FEEDBACKS).into(),
-                    ),
-                    timestamp: time.current_time,
-                });
-            }
+        log::info!(target: "diner", "decision: choose_window entity={window_entity:?}");
 
-            targets.chosen_window = Some(window_entity);
+        // Give feedback
+        if rng.random_bool(0.5) {
+            events.emit_feedback(FeedbackEvent {
+                entity: entity.into(),
+                content: Feedback::Thought(choose_feedback(&mut rng, DECIDING_FEEDBACKS).into()),
+                timestamp: time.current_time,
+            });
+        }
 
-            // Choose a lane with the shortest queue of that window
-            let lane_entity = window_query
-                .get(window_entity)
-                .expect("window should exist")
-                .lanes
-                .iter()
-                .map(|&lane_entity| (lane_entity, lane_query.get(lane_entity).unwrap().1))
-                .min_by_key(|(_, members)| members.members.len())
-                .map(|(lane_entity, _)| lane_entity)
-                .expect("window should have at least one lane");
+        targets.chosen_window = Some(window_entity);
 
-            commands
-                .entity(entity)
-                .insert(QueueIntent::new(lane_entity)); // intent to queue
+        // Choose a lane with the shortest queue of that window
+        let lane_entity = window_query
+            .get(window_entity)
+            .expect("window should exist")
+            .lanes
+            .iter()
+            .map(|&lane_entity| (lane_entity, lane_query.get(lane_entity).unwrap().1))
+            .min_by_key(|(_, members)| members.members.len())
+            .map(|(lane_entity, _)| lane_entity)
+            .expect("window should have at least one lane");
 
-            goal.update(DinerGoal::QueueForWindow);
+        commands
+            .entity(entity)
+            .insert(QueueIntent::new(lane_entity)); // intent to queue
 
+        goal.update(DinerGoal::QueueForWindow);
+    }
+}
+
+fn handle_queue_for_window_goal(
+    mut commands: Commands,
+    diner_query: Query<(Entity, &mut DinerGoalState, &QueueMember)>,
+    lane_query: Query<(&QueueLane,)>,
+    time: Res<Time>,
+) {
+    for (entity, mut goal, queue_member) in diner_query {
+        if !goal.is(DinerGoal::QueueForWindow) {
+            continue;
+        }
+
+        if queue_member.ranking == 0
+            && let Ok((lane,)) = lane_query.get(queue_member.lane)
+        {
+            goal.update(DinerGoal::GetServed);
+            commands.entity(entity).insert(ServiceSession::new(
+                lane.owner,
+                queue_member.lane,
+                time.current_time,
+            ));
             continue;
         }
     }
 }
 
-fn handle_queue_for_window_goal(diner_query: Query<(&mut DinerGoalState, &QueueMember)>) {
-    for (mut goal, queue_member) in diner_query {
-        if !goal.is(DinerGoal::QueueForWindow) {
+fn handle_get_served_goal(
+    mut commands: Commands,
+    diner_query: Query<(Entity, &mut DinerGoalState, &ServiceSession)>,
+) {
+    for (entity, mut goal, session) in diner_query {
+        if !goal.is(DinerGoal::GetServed) {
             continue;
         }
 
-        if queue_member.ranking == 0 {
-            goal.update(DinerGoal::GetServed);
-            // todo: start session
+        if session.stage != ServiceStage::Completed {
             continue;
         }
+
+        log::debug!(
+            target: "diner",
+            "diner {} finished being served, moving to find seat",
+            entity
+        );
+
+        // Service completed, remove session and move to finding a seat
+        commands.entity(entity).remove::<QueueMember>();
+        commands.entity(entity).remove::<ServiceSession>();
+        goal.update(DinerGoal::FindSeat);
     }
 }
 
@@ -221,34 +257,37 @@ fn handle_find_seat_goal(
             continue;
         }
 
-        if goal.timer > 3.0 && rng.random_bool(0.1) {
-            if let Some((table_entity, seat_index)) =
-                find_seat(movement.pos, &table_query, &mut rng)
+        if !(goal.timer > 3.0 && rng.random_bool(0.1)) {
+            continue;
+        }
+
+        if let Some((table_entity, seat_index)) = find_seat(movement.pos, &table_query, &mut rng) {
+            let table = table_query.get(table_entity).unwrap().1;
+            targets.chosen_seat = Some((table_entity, seat_index));
+            let seat_pos = table.seat_positions[seat_index];
+            log::debug!(
+                target: "diner",
+                "found_seat: table={table_entity:?} seat={seat_index} target={:.2}",
+                seat_pos
+            );
+            movement.request_path(seat_pos);
+            goal.update(DinerGoal::MoveToSeat);
+        } else {
+            log::debug!(
+                target: "diner",
+                "find_seat: no seats available, wandering"
+            );
+            // Retry later. Wonder around a bit.
+            goal.reset_timer();
+            if let Some(spot) =
+                try_find_valid_spot_near(movement.pos, WANDER_RADIUS, &nav_grid, &mut rng)
             {
-                let table = table_query.get(table_entity).unwrap().1;
-                targets.chosen_seat = Some((table_entity, seat_index));
-                movement.request_path(table.seat_positions[seat_index]);
+                movement.request_path(spot);
                 log::debug!(
                     target: "diner",
-                    "found_seat: table={table_entity:?} seat={seat_index} target={:.2}",
-                    table.seat_positions[seat_index]
+                    "find_seat: wandering to {:.2}",
+                    spot
                 );
-                goal.update(DinerGoal::MoveToSeat);
-                continue;
-            } else {
-                // Retry later. Wonder around a bit.
-                goal.reset_timer();
-                if let Some(spot) =
-                    try_find_valid_spot_near(movement.pos, WANDER_RADIUS, &nav_grid, &mut rng)
-                {
-                    movement.request_path(spot);
-                    log::debug!(
-                        target: "diner",
-                        "find_seat: wandering to {:.2}",
-                        spot
-                    );
-                }
-                continue;
             }
         }
     }
@@ -267,7 +306,7 @@ fn find_seat(
     let (table_entity, table) = table_query
         .iter()
         .filter(|(_, table)| table.occupants.iter().any(|o| o.is_none()))
-        .max_by_key(|(_, table)| {
+        .min_by_key(|(_, table)| {
             let distance = pos.distance_squared(table.center_pos);
             let dirtiness = table.dirtiness;
             let occupancy = table.occupants.iter().filter(|o| o.is_some()).count();
@@ -303,6 +342,10 @@ fn handle_move_to_seat_goal(
         }
 
         let Some((table_entity, seat_index)) = targets.chosen_seat else {
+            log::debug!(
+                target: "diner",
+                "move_to_seat: no seat chosen, going back to finding"
+            );
             // No seat chosen any more, go back to finding
             goal.update(DinerGoal::FindSeat);
             continue;
@@ -315,6 +358,10 @@ fn handle_move_to_seat_goal(
 
         // Check if the chosen seat is still valid
         if table.occupants[seat_index].is_some() {
+            log::debug!(
+                target: "diner",
+                "move_to_seat: seat taken, need to find another"
+            );
             // Seat taken, need to find another
             targets.chosen_seat = None;
             goal.update(DinerGoal::FindSeat);
@@ -324,11 +371,27 @@ fn handle_move_to_seat_goal(
         // Check reaching the seat
         let seat_pos = table.seat_positions[seat_index];
         if movement.pos.close_to(seat_pos, TABLE_SEAT_ARRIVAL_EPS) {
+            log::debug!(
+                target: "diner",
+                "seated: table={table_entity:?} seat={seat_index} pos={:.2}",
+                seat_pos
+            );
+            // Reached the seat
             movement.stop();
             movement.pos = seat_pos; // snap to seat position
             table.occupants[seat_index] = Some(entity); // Mark the seat as occupied
             goal.update(DinerGoal::Eat);
             continue;
+        }
+
+        if !movement.has_path() {
+            // Somehow lost path, re-request
+            movement.request_path(seat_pos);
+            log::debug!(
+                target: "diner",
+                "move_to_seat: diner={entity:?} re-requesting path to table={table_entity:?} seat={seat_index} target={:.2}",
+                seat_pos
+            );
         }
     }
 }
@@ -360,6 +423,12 @@ fn handle_eat_goal(
         table.dirtiness += rng.random_range(0.01..0.2); // increase dirtiness
         table.occupants[seat_index] = None; // Free the seat
         targets.chosen_seat = None;
+
+        log::debug!(
+            target: "diner",
+            "finished_eating: table={table_entity:?} seat={seat_index} pos={:.2}",
+            table.seat_positions[seat_index]
+        );
 
         goal.update(DinerGoal::ReturnDishes);
     }

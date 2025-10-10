@@ -78,6 +78,8 @@ pub struct LaneOwner {
 /// A queue lane in the canteen.
 #[derive(Component)]
 pub struct QueueLane {
+    /// Entity that owns this lane (e.g., a service window).
+    pub owner: Entity,
     /// Anchor position of the lane (x, y), for reference
     pub anchor: Vec2,
     /// Direction vector of the lane (normalized)

@@ -19,6 +19,7 @@ pub fn spawn_window_queues(
             let lane_entity = commands
                 .spawn((
                     QueueLane {
+                        owner: window_entity,
                         anchor: lane_anchor,
                         direction: Vec2::Y, // Towards the window
                     },

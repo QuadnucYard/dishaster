@@ -84,6 +84,11 @@ pub fn update_queue_members(
             .push((entity, movement.pos, distance));
     }
 
+    // Clear members
+    for (_, _, mut members) in lane_query.iter_mut() {
+        members.members.clear();
+    }
+
     // Sort and assign rankings within each lane
     for (lane_entity, mut members) in lane_to_members {
         let Ok((_, lane, mut lane_members)) = lane_query.get_mut(lane_entity) else {
@@ -94,7 +99,6 @@ pub fn update_queue_members(
         members.sort_by_key(|&(_, _, dist)| NotNan::new(dist).unwrap());
 
         // Update each member's ranking and rebuild the members list
-        lane_members.members.clear();
         for (rank, &(entity, _, _)) in members.iter().enumerate() {
             if let Ok((_, _, mut member)) = member_query.get_mut(entity) {
                 member.ranking = rank;

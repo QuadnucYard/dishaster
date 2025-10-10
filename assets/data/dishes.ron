@@ -5,7 +5,7 @@
         characteristics: (
             quality_range: (0.7, 1.0),
             safety_level: 0.95,
-            serving_time: 10.0,
+            serving_time: 5.0,
         ),
         properties: (
             tags: ["staple", "vegetarian", "gluten-free"],

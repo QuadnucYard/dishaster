@@ -118,7 +118,7 @@ fn spawn_tables(
         let seat_positions = (0..model.seats)
             .map(|i| {
                 let local_x = (i as f32 + 0.5) / model.seats as f32 * model.size.width; // relative to top-left
-                placement.center_pos + Vec2::new(local_x, 0.0) - model.size.as_vec2() / 2.0
+                placement.center_pos - model.size.as_vec2() / 2.0 + Vec2::new(local_x, -0.5)
             })
             .collect();
         commands.spawn((

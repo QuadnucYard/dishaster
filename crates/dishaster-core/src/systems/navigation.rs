@@ -49,7 +49,7 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
 impl Movement {
     /// Request a path to the specified target position.
     pub fn request_path(&mut self, target: Vec2) {
-        log::trace!("Path requested to {target:.2}");
+        log::trace!(target: "navigation", "Path requested to {target:.2}");
 
         self.pending_target = Some(target);
         self.target_reached = false;
@@ -58,6 +58,13 @@ impl Movement {
     /// Computes a new path to the specified target, updating the target position and path.
     /// If no valid path is found, the path is cleared.
     fn compute_new_path(&mut self, target: Vec2, nav_grid: &NavigationGrid) {
+        // Precheck
+        if !nav_grid.is_pos_traversable(target, self.radius) {
+            log::debug!(target: "navigation", "Path target {:.2} not traversable", target);
+            self.path.clear();
+            return;
+        }
+
         if let Some(path) = find_path(PathRequest {
             start: self.pos,
             end: target,
@@ -66,6 +73,7 @@ impl Movement {
             grid: nav_grid,
         }) {
             log::trace!(
+                target: "navigation",
                 "Path from {:.2} to {:.2} found with {} waypoints",
                 self.pos,
                 target,
@@ -74,7 +82,7 @@ impl Movement {
 
             self.path = path;
         } else {
-            log::trace!("Path from {:.2} to {:.2} not found", self.pos, target);
+            log::debug!(target: "navigation", "Path from {:.2} to {:.2} not found", self.pos, target);
 
             self.path.clear();
         }
