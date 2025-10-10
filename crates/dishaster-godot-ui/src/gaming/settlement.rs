@@ -1,4 +1,4 @@
-use crate::{prelude::*, req::*};
+use crate::{prelude::*, req::GameRequest};
 
 #[derive(UITree)]
 #[ui_tree]
@@ -16,12 +16,12 @@ impl Gui for SettlementGui {
     fn start(&mut self, commands: GuiCommands) {
         let cmd = commands.clone();
         self.next_day.on_click.connect(move || {
-            cmd.push_req(NextDayRequest);
+            cmd.push_req(GameRequest::NextDay);
         });
 
         let cmd = commands.clone();
         self.exit_button.on_click.connect(move || {
-            cmd.push_req(ExitLevelRequest);
+            cmd.push_req(GameRequest::ExitLevel);
         });
     }
 }

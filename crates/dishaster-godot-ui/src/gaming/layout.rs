@@ -1,7 +1,4 @@
-use crate::{
-    prelude::*,
-    req::{EndDayRequest, ExitLevelRequest, StartRunRequest},
-};
+use crate::{prelude::*, req::GameRequest};
 
 /// Describes the information to display in the in-game day loop overlay during
 /// active play (preparation or service phases).
@@ -46,17 +43,17 @@ impl Gui for GamingLayout {
     fn start(&mut self, commands: GuiCommands) {
         let cmd = commands.clone();
         self.start_button.on_click.connect(move || {
-            cmd.push_req(StartRunRequest);
+            cmd.push_req(GameRequest::StartRun);
         });
 
         let cmd = commands.clone();
         self.dev_end_button.on_click.connect(move || {
-            cmd.push_req(EndDayRequest);
+            cmd.push_req(GameRequest::EndRun);
         });
 
         let cmd = commands.clone();
         self.exit_button.on_click.connect(move || {
-            cmd.push_req(ExitLevelRequest);
+            cmd.push_req(GameRequest::ExitLevel);
         });
     }
 }

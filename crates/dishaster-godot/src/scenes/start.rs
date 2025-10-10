@@ -39,15 +39,17 @@ impl Scene for StartScene {
 
         for req in ctx.gui_cmds.take_reqs() {
             let req = &*req;
-            godot_print!("Got GUI request: {}", std::any::type_name_of_val(req));
+            let req = req.downcast_ref::<GameRequest>().expect("game request");
 
-            if req.is::<QuitRequest>() {
-                godot_print!("Quit requested");
-                self.gd.get_tree().unwrap().quit();
-            }
-
-            if req.is::<EnterLevelRequest>() {
-                ctx.schedule(EnterLevelProcedure);
+            match *req {
+                GameRequest::Quit => {
+                    godot_print!("Quit requested");
+                    self.gd.get_tree().unwrap().quit();
+                }
+                GameRequest::EnterLevel => {
+                    ctx.schedule(EnterLevelProcedure);
+                }
+                _ => panic!("should not happen in start menu"),
             }
         }
     }

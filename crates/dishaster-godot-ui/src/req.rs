@@ -1,30 +1,20 @@
 use dishrupt_godot_ui::GuiRequest;
 
-pub struct QuitRequest;
+pub enum GameRequest {
+    /// Quite the game application.
+    Quit,
+    /// Start a new game run at the current level.
+    EnterLevel,
+    /// Exit the current game run and return to the main menu.
+    ExitLevel,
+    /// Start the current run (from preparation phase).
+    StartRun,
+    /// End the current run immediately.
+    EndRun,
+    /// Skip to the next day (from settlement phase).
+    NextDay,
+    /// Change the simulation ticks-per-second rate.
+    SetTps(f32),
+}
 
-impl GuiRequest for QuitRequest {}
-
-pub struct EnterLevelRequest;
-
-impl GuiRequest for EnterLevelRequest {}
-
-pub struct ExitLevelRequest;
-
-impl GuiRequest for ExitLevelRequest {}
-
-pub struct StartRunRequest;
-
-impl GuiRequest for StartRunRequest {}
-
-pub struct NextDayRequest;
-
-impl GuiRequest for NextDayRequest {}
-
-pub struct EndDayRequest;
-
-impl GuiRequest for EndDayRequest {}
-
-/// Request to change the simulation ticks-per-second rate.
-pub struct SetTpsRequest(pub f32);
-
-impl GuiRequest for SetTpsRequest {}
+impl GuiRequest for GameRequest {}

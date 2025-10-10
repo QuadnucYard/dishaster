@@ -1,4 +1,4 @@
-use crate::{prelude::*, req::SetTpsRequest};
+use crate::{prelude::*, req::GameRequest};
 
 #[derive(UITree)]
 #[ui_tree]
@@ -48,7 +48,7 @@ impl Gui for TimeStatsGui {
     fn start(&mut self, commands: GuiCommands) {
         let cmd = commands.clone();
         self.tps_slider.on_value_change.connect(move |value| {
-            cmd.push_req(SetTpsRequest(value));
+            cmd.push_req(GameRequest::SetTps(value));
         });
     }
 }
