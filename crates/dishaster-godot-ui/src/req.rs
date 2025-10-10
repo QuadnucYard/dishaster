@@ -23,3 +23,8 @@ impl GuiRequest for NextDayRequest {}
 pub struct EndDayRequest;
 
 impl GuiRequest for EndDayRequest {}
+
+/// Request to change the simulation ticks-per-second rate.
+pub struct SetTpsRequest(pub f32);
+
+impl GuiRequest for SetTpsRequest {}

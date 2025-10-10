@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, req::SetTpsRequest};
 
 #[derive(UITree)]
 #[ui_tree]
@@ -7,6 +7,10 @@ pub struct TimeStatsGui {
     pub perf_label: LabelA,
     #[child("%TimeLabel")]
     pub time_label: LabelA,
+    #[child("%TpsSlider")]
+    pub tps_slider: SliderA,
+    #[child("%TpsValueLabel")]
+    pub tps_value_label: LabelA,
 }
 
 impl TimeStatsGui {
@@ -26,11 +30,25 @@ impl TimeStatsGui {
 
         self.perf_label.set_text(&text);
     }
+
+    /// Update the displayed ticks-per-second value and keep the slider in sync.
+    pub fn set_tps_display(&mut self, tps: f32) {
+        let clamped = tps.max(1.0);
+        self.tps_value_label.set_text(&format!("{clamped:.0}"));
+        if (self.tps_slider.get_value() - clamped).abs() > f32::EPSILON {
+            self.tps_slider.set_value(clamped);
+        }
+    }
 }
 
 #[ui_tree_api]
 impl UITree for TimeStatsGui {}
 
 impl Gui for TimeStatsGui {
-    fn start(&mut self, _cmd: GuiCommands) {}
+    fn start(&mut self, commands: GuiCommands) {
+        let cmd = commands.clone();
+        self.tps_slider.on_value_change.connect(move |value| {
+            cmd.push_req(SetTpsRequest(value));
+        });
+    }
 }

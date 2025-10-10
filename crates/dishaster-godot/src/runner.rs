@@ -188,14 +188,16 @@ impl SyncSimulationRunner {
     /// * `Some(Snapshot)` if the simulation ticked and produced a new snapshot
     /// * `None` if the accumulator hasn't reached the tick threshold yet
     pub fn tick(&mut self, dt: f64) -> Option<SnapshotFrame> {
-        let fixed_dt: f64 = 1.0 / self.tps;
-
         self.accumulator += dt;
 
         let mut result = None;
         let mut ticks = 0;
 
-        while self.accumulator >= fixed_dt {
+        loop {
+            let fixed_dt = 1.0 / self.tps.max(1.0);
+            if self.accumulator < fixed_dt {
+                break;
+            }
             // Advance simulation by one fixed timestep
             self.sim.tick();
             ticks += 1;
@@ -231,5 +233,18 @@ impl SyncSimulationRunner {
     pub fn send_command(&mut self, command: SimCommand) {
         // todo: commands may be queued and handled in batch
         self.sim.handle_command(command);
+    }
+
+    /// Update the target ticks-per-second rate used for fixed-step advancement.
+    pub fn set_tps(&mut self, tps: f64) {
+        let clamped = tps.clamp(1.0, 480.0);
+        if (self.tps - clamped).abs() > f64::EPSILON {
+            self.tps = clamped;
+        }
+    }
+
+    /// Retrieve the current ticks-per-second target.
+    pub fn tps(&self) -> f64 {
+        self.tps
     }
 }

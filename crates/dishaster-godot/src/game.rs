@@ -92,7 +92,8 @@ impl Game {
         let mut sim = Simulation::new(db.clone());
         sim.start(level);
         let root_entity = sim.root_entity();
-        let sim_runner = SyncSimulationRunner::new(sim, 60.0);
+        let default_tps = 60.0;
+        let sim_runner = SyncSimulationRunner::new(sim, default_tps);
 
         // Set up stage
         let mut stage = Stage::new();
@@ -147,7 +148,7 @@ impl Game {
                 if e.button == MouseButton::LEFT && !e.pressed {
                     let canvas_pos = screen_to_canvas(&self.root, e.position);
                     let sim_pos = self.to_map_pos(canvas_pos);
-                    // godot_print!("click map： {canvas_pos} {sim_pos}");
+                    godot_print!("click map： {canvas_pos} {sim_pos}");
                     self.sim_runner
                         .send_command(SimCommand::QueryDistance(sim_pos));
                 }
@@ -172,6 +173,10 @@ impl Game {
             show_dev: true,
             enable_dev: false,
         });
+
+        ctx.gui
+            .get_mut::<TimeStatsGui>()
+            .set_tps_display(self.sim_runner.tps() as f32);
 
         self.sim_runner.send_command(SimCommand::QueryDistances);
     }
@@ -230,6 +235,20 @@ impl Game {
             stats.update_time(self.telemetry.tick, self.telemetry.seconds);
             stats.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
         }
+    }
+
+    /// Update the simulation tick rate and refresh related UI state.
+    pub fn set_tps(&mut self, ctx: &mut SceneContext, requested_tps: f32) {
+        let clamped = requested_tps.clamp(10.0, 240.0) as f64;
+        if (self.sim_runner.tps() - clamped).abs() <= f64::EPSILON {
+            return;
+        }
+
+        self.sim_runner.set_tps(clamped);
+
+        ctx.gui
+            .get_mut::<TimeStatsGui>()
+            .set_tps_display(clamped as f32);
     }
 }
 

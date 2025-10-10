@@ -3,7 +3,7 @@ use dishaster_core::models::LevelConfig;
 use dishaster_godot_ui::{req::*, *};
 use dishrupt_godot::{bind::BindGodot, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::*;
-use godot::{classes::Node, global::godot_print, obj::Gd};
+use godot::{classes::Node, prelude::*};
 
 use crate::{game::Game, scenes::proc::*};
 
@@ -53,7 +53,13 @@ impl Scene for GameScene {
 
         for req in ctx.gui_cmds.take_reqs() {
             let req = &*req;
-            godot_print!("Got GUI request: {}", std::any::type_name_of_val(req));
+
+            if let Some(game) = self.game.as_mut()
+                && let Some(req) = req.downcast_ref::<SetTpsRequest>()
+            {
+                game.set_tps(ctx, req.0);
+                continue;
+            }
 
             if req.is::<StartRunRequest>()
                 && let Some(game) = self.game.as_mut()
