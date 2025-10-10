@@ -1,5 +1,6 @@
 pub mod asset;
 pub mod display;
+mod ecs;
 mod ext;
 pub mod model_registry;
 pub mod prelude;

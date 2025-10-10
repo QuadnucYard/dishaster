@@ -2,7 +2,7 @@ use dishaster_navigation::NavigationGrid;
 use dishrupt_core::EntityId;
 use rustc_hash::FxHashMap;
 
-use crate::{components::*, prelude::*, resources::*, sim::Simulation};
+use crate::{components::*, prelude::*, sim::Simulation};
 
 /// Feature gates controlling which debug payloads are exported.
 #[derive(Debug, Clone, Copy)]

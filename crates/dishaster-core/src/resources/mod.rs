@@ -9,29 +9,6 @@ pub use time::Time;
 
 use crate::{models::*, prelude::*, snapshots::*};
 
-/// Turn a type into a Bevy resource
-#[derive(Resource, Default, Deref, DerefMut)]
-pub struct ResWrapper<T>(T);
-
-impl<T> From<T> for ResWrapper<T> {
-    fn from(value: T) -> Self {
-        Self(value)
-    }
-}
-
-/// Extension trait to convert any type into a ResourceWrapper
-pub trait IntoResource {
-    /// Wrap this value in a ResourceWrapper for use as a Bevy resource
-    fn into_res(self) -> ResWrapper<Self>
-    where
-        Self: Sized,
-    {
-        ResWrapper::from(self)
-    }
-}
-
-impl<T> IntoResource for T {}
-
 /// Root entity for all display-related objects in the scene
 #[derive(Resource)]
 pub struct DisplayRoot(pub Entity);

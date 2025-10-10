@@ -532,6 +532,7 @@ version = "0.1.0"
 dependencies = [
  "bevy_ecs",
  "bevy_math",
+ "derive_more",
  "ecow",
  "rustc-hash",
  "serde",
