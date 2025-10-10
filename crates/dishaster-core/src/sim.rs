@@ -96,8 +96,6 @@ impl Simulation {
         let world_size = canteen.size();
         self.world
             .insert_resource(NavigationGrid::new(world_size, 0.1).into_res());
-        self.world
-            .insert_resource(CrowdCostField::new(world_size, 0.1).into_res());
 
         self.world.insert_resource(Canteen {
             model: canteen.clone(),

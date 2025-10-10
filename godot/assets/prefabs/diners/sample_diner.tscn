@@ -29,21 +29,21 @@ scale = Vector2(0.57296884, 0.57296884)
 texture = ExtResource("2_n0mje")
 
 [node name="LeftHand" type="Sprite2D" parent="."]
-position = Vector2(-26, -50)
+position = Vector2(-24.000002, -48.000004)
 scale = Vector2(0.30555546, 0.30555546)
 texture = ExtResource("3_y3akv")
 
 [node name="RightHand" type="Sprite2D" parent="."]
-position = Vector2(26, -52)
+position = Vector2(24.000002, -48.000004)
 scale = Vector2(0.36111143, 0.36111143)
 texture = ExtResource("3_y3akv")
 
 [node name="Shirt" type="Sprite2D" parent="."]
-position = Vector2(1, -44)
+position = Vector2(2.1175824e-22, -41.000004)
 scale = Vector2(0.88888896, 0.88888896)
 texture = ExtResource("4_jly6e")
 
 [node name="Face" type="Sprite2D" parent="."]
-position = Vector2(1, -70)
+position = Vector2(0, -64)
 scale = Vector2(0.45833337, 0.45833337)
 texture = ExtResource("5_ywdyx")

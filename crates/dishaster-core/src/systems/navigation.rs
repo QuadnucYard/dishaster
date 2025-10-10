@@ -23,9 +23,9 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
 
     for movement in query.iter() {
         let center = movement.pos;
-        let influence_radius = movement.radius * 5.0;
+        let influence_radius = movement.radius * 4.;
         let r2 = influence_radius.squared();
-        let max_extra = movement.radius * 5.0; // todo: improve model
+        let max_extra = movement.radius * 10.0; // todo: improve model
 
         // Compute bounding tiles
         let tile_radius = world_to_tile_dist(influence_radius, grid.cell_size()).ceil() as i32;
@@ -37,8 +37,8 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
                 };
                 let d2 = center.distance_squared(grid.tile_to_world(t));
                 if d2 <= influence_radius.squared() {
-                    // Smooth decay: extra = m * (r / d)^2
-                    let extra = max_extra * (r2 / (d2 + 1.0));
+                    // Smooth decay: extra = m * (r^2 / (d^2 + e))
+                    let extra = max_extra * (r2 / (d2 + 0.1));
                     grid.crowd.add_cost(t, extra);
                 }
             }

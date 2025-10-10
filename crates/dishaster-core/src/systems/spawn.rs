@@ -161,7 +161,7 @@ fn spawn_diner(
             movement: Movement {
                 pos,
                 radius: rng.random_range(0.2..0.4),
-                impatience: rng.random_range(0.0..1.0), // TODO: base on model
+                impatience: rng.random_range(0.5..1.0), // TODO: base on model
                 avoidance_responsibility: rng.random_range(1.0..3.0),
                 ..Default::default()
             },
@@ -199,7 +199,7 @@ fn spawn_diner(
             ..Default::default()
         },
         Transform {
-            position: vec3(0.0, 0.0, 1.8),
+            position: vec3(0.0, 0.0, 1.7),
             parent: Some(wrapper_entity),
             ..Default::default()
         },

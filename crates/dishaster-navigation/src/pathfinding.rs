@@ -50,7 +50,7 @@ pub fn find_path(request: PathRequest) -> Option<NavPath> {
             {
                 let base = if d.x == 0 || d.y == 0 { 100 } else { 141 }; // Diagonal cost ~ sqrt(2)*100
                 let extra = request.grid.crowd.sample(cell) * request.impatience * 100.0;
-                let cost = base + extra.ceil() as i32;
+                let cost = base + extra.floor() as i32;
                 neighbors.push((cell, cost));
             }
         }
