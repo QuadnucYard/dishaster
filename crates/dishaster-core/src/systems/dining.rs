@@ -28,7 +28,7 @@ pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + '
 
 fn update_diner_goals(diner_query: Query<(&mut DinerGoalState,)>, time: Res<Time>) {
     for (mut goal,) in diner_query {
-        goal.timer += time.tick_duration as f32;
+        goal.step(time.tick_duration as f32);
     }
 }
 
@@ -38,7 +38,7 @@ fn handle_enter_goal(
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
     for (mut goal, mut movement) in diner_query {
-        if goal.current != DinerGoal::Enter {
+        if !goal.is(DinerGoal::Enter) {
             continue;
         }
 
@@ -78,7 +78,7 @@ fn handle_observe_goal(
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
     for (entity, mut goal, mut targets, mut movement, diner_model) in diner_query {
-        if goal.current != DinerGoal::Observe {
+        if !goal.is(DinerGoal::Observe) {
             continue;
         }
 
@@ -141,7 +141,7 @@ fn handle_decide_goal(
     mut events: ResMut<EventLog>,
 ) {
     for (entity, mut goal, mut targets, diner_model) in diner_query {
-        if goal.current != DinerGoal::DecideWindow {
+        if !goal.is(DinerGoal::DecideWindow) {
             continue;
         }
 
@@ -198,7 +198,7 @@ fn handle_decide_goal(
 
 fn handle_queue_for_window_goal(diner_query: Query<(&mut DinerGoalState, &QueueMember)>) {
     for (mut goal, queue_member) in diner_query {
-        if goal.current != DinerGoal::QueueForWindow {
+        if !goal.is(DinerGoal::QueueForWindow) {
             continue;
         }
 
@@ -217,7 +217,7 @@ fn handle_find_seat_goal(
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
     for (mut goal, mut targets, mut movement) in diner_query {
-        if goal.current != DinerGoal::FindSeat {
+        if !goal.is(DinerGoal::FindSeat) {
             continue;
         }
 
@@ -298,7 +298,7 @@ fn handle_move_to_seat_goal(
     mut table_query: Query<(Entity, &mut DiningTable)>,
 ) {
     for (entity, mut goal, mut targets, mut movement) in diner_query {
-        if goal.current != DinerGoal::MoveToSeat {
+        if !goal.is(DinerGoal::MoveToSeat) {
             continue;
         }
 
@@ -343,7 +343,7 @@ fn handle_eat_goal(
     mut rng: ResMut<GameRng>,
 ) {
     for (mut goal, mut targets, diner_model) in diner_query {
-        if goal.current != DinerGoal::Eat {
+        if !goal.is(DinerGoal::Eat) {
             continue;
         }
 
@@ -374,7 +374,7 @@ fn handle_return_dishes_goal(
     }
 
     for (mut goal, mut targets, mut movement) in diner_query {
-        if goal.current != DinerGoal::ReturnDishes {
+        if !goal.is(DinerGoal::ReturnDishes) {
             continue;
         }
 
@@ -416,7 +416,7 @@ fn handle_leave_goal(
     mut rng: ResMut<GameRng>,
 ) {
     for (entity, goal, mut movement) in diner_query {
-        if goal.current != DinerGoal::Leave {
+        if !goal.is(DinerGoal::Leave) {
             continue;
         }
 

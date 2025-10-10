@@ -22,7 +22,9 @@ pub struct Diner {
 #[derive(Component)]
 pub struct DinerGoalState {
     /// Current goal
-    pub current: DinerGoal,
+    current: DinerGoal,
+    /// Optional next goal to transition to in the next update
+    pending: Option<DinerGoal>,
     /// State entry time for timing. Internal use only.
     pub timer: f32,
 }
@@ -31,16 +33,30 @@ impl Default for DinerGoalState {
     fn default() -> Self {
         Self {
             current: DinerGoal::Enter,
+            pending: None,
             timer: 0.0,
         }
     }
 }
 
 impl DinerGoalState {
+    /// Check if the diner is currently in the given goal state.
+    pub fn is(&self, goal: DinerGoal) -> bool {
+        self.current == goal
+    }
+
     /// Transition to the next goal state, resetting the timer.
     pub fn update(&mut self, next_goal: DinerGoal) {
-        self.current = next_goal;
-        self.timer = 0.0;
+        self.pending = Some(next_goal);
+    }
+
+    /// Step the internal timer and apply any pending goal transitions.
+    pub fn step(&mut self, delta_time: f32) {
+        if let Some(next) = self.pending.take() {
+            self.current = next;
+            self.timer = 0.0;
+        }
+        self.timer += delta_time;
     }
 
     /// Reset the state timer to zero.

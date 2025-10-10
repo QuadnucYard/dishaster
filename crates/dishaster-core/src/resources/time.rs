@@ -40,14 +40,4 @@ impl Time {
         // Calculate current time from tick count to avoid floating point accumulation errors
         self.current_time = self.current_tick as f64 * self.tick_duration;
     }
-
-    /// Reset time state to initial values
-    ///
-    /// Resets current_tick, total_ticks, and current_time to zero
-    /// while preserving the original tick_duration.
-    pub fn reset(&mut self) {
-        self.current_tick = 0;
-        self.total_ticks = 0;
-        self.current_time = 0.0;
-    }
 }
