@@ -15,8 +15,7 @@ pub fn spawn_serving_staffs(
 ) {
     for (window_entity, window, lane_owner) in windows.iter() {
         // Spawn serving staff associated with this window.
-        let staff_y =
-            (canteen.model.windows_y + WINDOW_STAFF_OFFSET).clamp(0.0, canteen.model.height);
+        let staff_y = canteen.model.windows_y + WINDOW_STAFF_OFFSET;
         let service_template = registry.window_services.get(window.service_template);
 
         debug_assert!(!service_template.layout.queue_x.is_empty());

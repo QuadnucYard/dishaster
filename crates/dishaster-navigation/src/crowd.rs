@@ -24,7 +24,11 @@ pub struct CrowdCostField {
 impl CrowdCostField {
     /// Create a new crowd field for the provided world size.
     pub fn new(world_size: Vec2, cell_size: f32) -> Self {
-        let cell_size = cell_size.max(0.001);
+        assert!(
+            world_size.x > 0.0 && world_size.y > 0.0,
+            "world size must be positive"
+        );
+        assert!(cell_size > 0.0, "cell size must be positive");
         let dims = Self::tile_counts(world_size.x, world_size.y, cell_size);
 
         Self {
@@ -44,15 +48,15 @@ impl CrowdCostField {
         if extra <= 0.0 {
             return;
         }
-        if let Some((row, col)) = self.index(tile) {
-            self.grid[(row, col)] += extra;
+        if let Some(idx) = self.index(tile) {
+            self.grid[idx] += extra;
         }
     }
 
     /// Sample cost at a tile (0 if none)
     pub fn sample(&self, tile: Tile) -> Cost {
         self.index(tile)
-            .map(|(row, col)| self.grid[(row, col)])
+            .map(|idx| self.grid[idx])
             .unwrap_or_default()
     }
 
@@ -73,8 +77,8 @@ impl CrowdCostField {
 
     fn tile_counts(world_width: f32, world_height: f32, cell_size: f32) -> USizeVec2 {
         USizeVec2::new(
-            ((world_width / cell_size).ceil() as usize).max(1),
-            ((world_height / cell_size).ceil() as usize).max(1),
+            (world_width / cell_size).ceil() as usize,
+            (world_height / cell_size).ceil() as usize,
         )
     }
 

@@ -237,9 +237,8 @@ impl SyncSimulationRunner {
 
     /// Update the target ticks-per-second rate used for fixed-step advancement.
     pub fn set_tps(&mut self, tps: f64) {
-        let clamped = tps.clamp(1.0, 480.0);
-        if (self.tps - clamped).abs() > f64::EPSILON {
-            self.tps = clamped;
+        if (self.tps - tps).abs() > f64::EPSILON {
+            self.tps = tps;
         }
     }
 

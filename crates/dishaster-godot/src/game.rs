@@ -239,16 +239,15 @@ impl Game {
 
     /// Update the simulation tick rate and refresh related UI state.
     pub fn set_tps(&mut self, ctx: &mut SceneContext, requested_tps: f32) {
-        let clamped = requested_tps.clamp(10.0, 240.0) as f64;
-        if (self.sim_runner.tps() - clamped).abs() <= f64::EPSILON {
+        if (self.sim_runner.tps() - requested_tps as f64).abs() <= f64::EPSILON {
             return;
         }
 
-        self.sim_runner.set_tps(clamped);
+        self.sim_runner.set_tps(requested_tps as f64);
 
         ctx.gui
             .get_mut::<TimeStatsGui>()
-            .set_tps_display(clamped as f32);
+            .set_tps_display(requested_tps);
     }
 }
 
