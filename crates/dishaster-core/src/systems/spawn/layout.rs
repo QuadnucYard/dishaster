@@ -1,9 +1,15 @@
 //! Static canteen layout spawning systems
 
 use dishaster_navigation::BoxCollider;
-use dishrupt_core::display::{DisplayState, Transform};
+use dishrupt_core::{
+    asset::PrefabReference,
+    display::{DisplayState, Transform},
+};
 
 use crate::systems::prelude::*;
+
+const PRICE_LABEL_OFFSET: Vec3 = vec3(0.0, 0.2, 0.05);
+const PRICE_LABEL_PREFAB: &str = "dishes/price_label";
 
 /// System that spawns all static objects (windows, tables, dispensers, collectors) at level start
 pub fn spawn_static_objects(
@@ -12,8 +18,16 @@ pub fn spawn_static_objects(
     level: Res<LevelConfigRes>,
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
+    mut events: ResMut<EventLog>,
 ) {
-    spawn_windows(&mut commands, &canteen, &level, &registry);
+    spawn_windows(
+        &mut commands,
+        &canteen,
+        &level,
+        &registry,
+        &display_root,
+        &mut events,
+    );
     spawn_tables(&mut commands, &level, &registry, &display_root);
     spawn_dispensers(&mut commands, &level, &registry);
     spawn_collectors(&mut commands, &level, &registry);
@@ -24,14 +38,17 @@ fn spawn_windows(
     canteen: &Res<Canteen>,
     level: &Res<LevelConfigRes>,
     registry: &Res<GameModelRegistryRes>,
+    display_root: &DisplayRoot,
+    events: &mut ResMut<EventLog>,
 ) {
     let mut last_window_x = 0.0;
 
-    for window_config in &level.window_configurations {
+    for (i, window_config) in level.window_configurations.iter().enumerate() {
         let service_handle = registry
             .window_services
             .get_handle_by_id(&window_config.service_template)
             .expect("Window service not found in registry");
+        let service_template = registry.window_services.get(service_handle);
 
         // Create active dishes from configuration
         let active_dishes: Vec<ActiveDish> = window_config
@@ -51,17 +68,39 @@ fn spawn_windows(
 
         // Spawn window entity with separated data
         let window_range = canteen.model.windows[window_config.slot_index];
+        let window_location = XSegment::new(
+            window_range.center() - service_template.layout.size.width / 2.0,
+            window_range.center() + service_template.layout.size.width / 2.0,
+            canteen.model.windows_y,
+        );
         let window_entity = commands
-            .spawn(Window {
-                service_template: service_handle,
-                config: window_config.clone(),
-                location: XSegment::new(
-                    window_range.x_min,
-                    window_range.x_max,
-                    canteen.model.windows_y,
-                ),
-            })
+            .spawn((
+                Window {
+                    service_template: service_handle,
+                    config: window_config.clone(),
+                    location: window_location,
+                },
+                DisplayState {
+                    proto: service_template.display.res.clone(),
+                    name: Some(eco_format!("Window_{}", i)),
+                    ..Default::default()
+                },
+                Transform {
+                    position: window_location.center().extend(0.0), // align by top-center
+                    parent: Some(display_root.0),
+                    ..Default::default()
+                },
+            ))
             .id();
+
+        spawn_dish_presentations(
+            commands,
+            window_entity,
+            &active_dishes,
+            service_template,
+            registry,
+            events,
+        );
 
         // Add dishes as separate component for better data locality
         commands.entity(window_entity).insert(WindowDishes {
@@ -101,6 +140,90 @@ fn spawn_windows(
         ))
         .into_comp(),
     );
+}
+
+fn spawn_dish_presentations(
+    commands: &mut Commands,
+    window_entity: Entity,
+    dishes: &[ActiveDish],
+    service_template: &WindowServiceModel,
+    registry: &Res<GameModelRegistryRes>,
+    events: &mut ResMut<EventLog>,
+) {
+    if dishes.is_empty() {
+        return;
+    }
+
+    let layout = &service_template.layout;
+    if layout.dish_slots.is_empty() {
+        return;
+    }
+
+    for active in dishes {
+        let slot_index = active.assignment.slot_index;
+        let Some(slot_rect) = layout.dish_slots.get(slot_index) else {
+            continue;
+        };
+
+        let dish_handle = registry
+            .dishes
+            .get_handle_by_id(&active.assignment.dish_id)
+            .expect("Dish not found in registry");
+        let dish_model = registry.dishes.get(dish_handle);
+
+        let wrapper_entity = commands
+            .spawn((
+                DisplayState {
+                    name: Some(eco_format!("WindowDish_Slot{}", slot_index)),
+                    ..Default::default()
+                },
+                Transform {
+                    position: (slot_rect.center() - vec2(layout.size.width / 2.0, 0.0)).extend(0.0),
+                    parent: Some(window_entity),
+                    ..Default::default()
+                },
+                ChildOf(window_entity),
+            ))
+            .id();
+
+        commands.spawn((
+            DisplayState {
+                proto: dish_model.display.res.clone(),
+                ..Default::default()
+            },
+            Transform {
+                parent: Some(wrapper_entity),
+                ..Default::default()
+            },
+            ChildOf(wrapper_entity),
+        ));
+
+        commands.spawn((
+            DisplayState {
+                proto: PrefabReference::new(PRICE_LABEL_PREFAB),
+                name: Some("Price".into()), // required for referencing in scripts
+                ..Default::default()
+            },
+            Transform {
+                position: PRICE_LABEL_OFFSET,
+                parent: Some(wrapper_entity),
+                ..Default::default()
+            },
+            ChildOf(wrapper_entity),
+        ));
+
+        events.emit(PresentationEvent::DishSpawned(
+            wrapper_entity.into(),
+            format_price(&active.assignment.pricing),
+        ));
+    }
+}
+
+fn format_price(pricing: &PricingConfig) -> EcoString {
+    match pricing.method {
+        PricingMethod::PerPortion(amount) => eco_format!("¥{amount:.1}"),
+        PricingMethod::ByWeight(rate) => eco_format!("¥{rate:.1}"),
+    }
 }
 
 fn spawn_tables(

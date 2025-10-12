@@ -3,7 +3,7 @@
         id: "main_food_window",
         window_type: General,
         name: "大伙",
-        compatible_dishes: ["steamed_rice", "braised_pork", "mapo_tofu", "kung_pao_chicken"],
+        compatible_dishes: ["rice"],
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [0.5, 1.5],
@@ -14,6 +14,7 @@
                 (min: (1.0, 0.5), max: (1.5, 1.0)),
             ],
         ),
+        display: (res: "windows/sample_window"),
     ),
     (
         id: "soup_window",
@@ -25,5 +26,6 @@
             queue_x: [1.0],
             dish_slots: [],
         ),
+        display: (res: "windows/sample_window"),
     ),
 ]

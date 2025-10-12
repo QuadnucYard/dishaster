@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://w7ov8gwqu5bn"]
+
+[sub_resource type="Gradient" id="Gradient_cakfy"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0.3654661, 0.8483022, 0.69997704, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_aexwg"]
+gradient = SubResource("Gradient_cakfy")
+width = 120
+height = 100
+
+[node name="SampleWindow" type="Node2D"]
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(0, 47)
+texture = SubResource("GradientTexture2D_aexwg")

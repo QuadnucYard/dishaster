@@ -8,6 +8,8 @@ pub enum PresentationEvent {
     AgentSpawned(EntityId),
     /// An agent has despawned from the simulation.
     AgentDespawned(EntityId),
+    /// A dish has spawned in the simulation. Includes the dish price.
+    DishSpawned(EntityId, EcoString),
     /// Agent feedback.
     Feedback(FeedbackEvent),
 

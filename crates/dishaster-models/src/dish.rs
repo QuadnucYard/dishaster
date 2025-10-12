@@ -1,3 +1,5 @@
+use dishrupt_core::display::DisplayModel;
+
 use super::prelude::*;
 
 // ===================== Core Dish Models =====================
@@ -11,8 +13,8 @@ pub struct DishModel {
     pub name: EcoString,
     /// Base characteristics - can be extended without breaking changes
     pub characteristics: DishCharacteristics,
-    /// Extensible properties for future features
-    pub properties: DishProperties,
+    /// Prefab used to render this dish in debug or game views.
+    pub display: DisplayModel,
 }
 
 impl HasId for DishModel {
@@ -26,20 +28,11 @@ impl HasId for DishModel {
 pub struct DishCharacteristics {
     /// Quality range this dish can achieve
     pub quality_range: MinMax<f32>,
-    /// Base safety level (affects contamination)
-    pub safety_level: f32,
+    /// Base risk level (affects contamination)
+    #[serde(default)]
+    pub risk_level: f32,
     /// Base serving time
     pub serving_time: Seconds,
-}
-
-/// Extensible properties container - easy to add new fields
-/// TODO: this needs rework for new models. do not use it if not suitable.
-#[derive(Debug, Clone, Deserialize)]
-pub struct DishProperties {
-    /// Optional tags for future preference matching
-    pub tags: Vec<EcoString>,
-    /// Optional category for future categorization
-    pub category: Option<EcoString>,
 }
 
 /// Different pricing strategies for dishes
@@ -77,6 +70,8 @@ pub struct WindowServiceModel {
     pub compatible_dishes: Vec<ModelId>,
     /// Physical layout
     pub layout: WindowLayout,
+    /// Display model
+    pub display: DisplayModel,
 }
 
 impl HasId for WindowServiceModel {
@@ -88,11 +83,11 @@ impl HasId for WindowServiceModel {
 /// Physical layout configuration for a service window
 #[derive(Debug, Clone, Deserialize)]
 pub struct WindowLayout {
-    /// Physical width of the service window
+    /// Physical size of the service window
     pub size: Size,
     /// X-axis positions for customer queueing
     pub queue_x: Vec<Meters>,
-    /// Positions where dishes can be placed
+    /// Positions where dishes can be placed. Relative to the top-left corner.
     pub dish_slots: Vec<Rect>,
 }
 

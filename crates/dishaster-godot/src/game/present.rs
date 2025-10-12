@@ -1,7 +1,7 @@
 use dishaster_core::snapshots::PresentationEvent;
 use dishrupt_godot_scene::SceneContext;
 
-use super::{Game, agent::AgentController};
+use super::{Game, controllers::*};
 
 impl Game {
     pub(crate) fn process_events(
@@ -22,13 +22,24 @@ impl Game {
                             .cloned()
                             .expect("missing godot node for agent"),
                     );
-                    self.agents.insert(entity, controller);
+                    self.dc.agents.insert(entity, controller);
                 }
                 PresentationEvent::AgentDespawned(entity) => {
-                    self.agents.remove(&entity);
+                    self.dc.agents.remove(&entity);
+                }
+                PresentationEvent::DishSpawned(entity, price_str) => {
+                    let mut controller = DishController::new(
+                        entity,
+                        self.stage
+                            .get_godot_node(entity)
+                            .cloned()
+                            .expect("missing godot node for dish"),
+                    );
+                    controller.set_price(&price_str);
+                    self.dc.dishes.insert(entity, controller);
                 }
                 PresentationEvent::Feedback(feedback) => {
-                    if let Some(agent) = self.agents.get_mut(&feedback.entity) {
+                    if let Some(agent) = self.dc.agents.get_mut(&feedback.entity) {
                         agent.feedback.show(&feedback.content);
                     }
                 }
@@ -46,7 +57,7 @@ impl Game {
     }
 
     pub(crate) fn process_display(&mut self, delta: f64) {
-        for agent in self.agents.values_mut() {
+        for agent in self.dc.agents.values_mut() {
             agent.process(delta);
         }
     }

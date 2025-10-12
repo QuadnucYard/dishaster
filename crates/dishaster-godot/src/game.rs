@@ -1,6 +1,11 @@
 mod agent;
+mod dish;
 pub mod perf;
 mod present;
+
+mod controllers {
+    pub use super::{agent::AgentController, dish::DishController};
+}
 
 use dishaster_core::{commands::SimCommand, models::LevelConfig, sim::Simulation};
 use dishaster_godot_ui::*;
@@ -14,9 +19,9 @@ use godot::{
 };
 use rustc_hash::FxHashMap;
 
+use self::{controllers::*, perf::PerfTracker};
 use crate::{
     dbgviz::*,
-    game::{agent::AgentController, perf::PerfTracker},
     game_main::{GAME_DATA, progress_service},
     runner::{SnapshotFrame, SyncSimulationRunner},
 };
@@ -47,10 +52,16 @@ pub struct Game {
     dbgviz: DbgViz,
 
     perf_tracker: PerfTracker,
-    agents: FxHashMap<EntityId, AgentController>,
+    dc: DisplayControllers,
 
     phase: DayPhase,
     telemetry: DayTelemetry,
+}
+
+#[derive(Default)]
+struct DisplayControllers {
+    agents: FxHashMap<EntityId, AgentController>,
+    dishes: FxHashMap<EntityId, DishController>,
 }
 
 impl Game {
@@ -111,7 +122,7 @@ impl Game {
             display_ctx,
             dbgviz,
             perf_tracker: Default::default(),
-            agents: Default::default(),
+            dc: Default::default(),
             phase: DayPhase::Preparation,
             telemetry,
         }
@@ -204,7 +215,7 @@ impl Game {
 
         if forced {
             self.sim_runner.send_command(SimCommand::EndRun);
-            self.agents.clear();
+            self.dc.agents.clear();
         }
 
         progress_service()
