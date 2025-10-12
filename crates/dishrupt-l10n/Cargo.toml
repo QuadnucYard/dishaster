@@ -1,0 +1,14 @@
+[package]
+name = "dishrupt-l10n"
+version.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+fluent.workspace = true
+fluent-templates.workspace = true
+unic-langid.workspace = true
+
+[lints]
+workspace = true

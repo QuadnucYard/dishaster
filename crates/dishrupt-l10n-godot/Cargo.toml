@@ -1,0 +1,14 @@
+[package]
+name = "dishrupt-l10n-godot"
+version.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-l10n.workspace = true
+
+godot.workspace = true
+
+[lints]
+workspace = true

@@ -1,4 +1,4 @@
-[gd_scene load_steps=0 format=3 uid="uid://ckietib4g2q0d"]
+[gd_scene format=3 uid="uid://ckietib4g2q0d"]
 
 [node name="Settlement" type="Control"]
 layout_mode = 3
@@ -12,15 +12,11 @@ mouse_filter = 1
 [node name="Panel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 24.0
 offset_top = 24.0
 offset_right = 420.0
 offset_bottom = 360.0
+grow_horizontal = 0
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
@@ -37,28 +33,29 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 bbcode_enabled = true
-scroll_active = false
 text = "Service finished in 03:00."
+scroll_active = false
 
 [node name="GuidanceLabel" type="RichTextLabel" parent="Panel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 1
 bbcode_enabled = true
-scroll_active = false
 text = "Press Next Day to continue."
+scroll_active = false
 
 [node name="ButtonRow" type="HBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="NextDayButton" type="Button" parent="Panel/VBox/ButtonRow"]
+[node name="NextDayButton" type="LocalizedButton" parent="Panel/VBox/ButtonRow"]
+message_id = "next-day.label"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Next Day"
 
-[node name="ExitButton" type="Button" parent="Panel/VBox/ButtonRow"]
+[node name="ExitButton" type="LocalizedButton" parent="Panel/VBox/ButtonRow"]
+message_id = "exit-level.label"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 24

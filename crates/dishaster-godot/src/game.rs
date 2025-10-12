@@ -12,6 +12,7 @@ use dishaster_godot_ui::*;
 use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::{display::*, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::SceneContext;
+use dishrupt_l10n_godot::tr;
 use godot::{
     classes::{Node, Node2D},
     global::MouseButton,
@@ -176,8 +177,8 @@ impl Game {
     /// Called just after construction
     pub fn start_day(&mut self, ctx: &mut SceneContext) {
         ctx.gui.get_mut::<GamingLayout>().apply_state(&DayHudState {
-            day_label: format!("Day {}", self.telemetry.day),
-            phase_label: "Preparation".into(),
+            day_label: tr!("day-display.label", "day" = self.telemetry.day),
+            phase_label: tr!("phase-preparation.label"),
             details: "Review canteen status then press Start Day to begin.".into(),
             show_start: true,
             enable_start: true,
@@ -230,8 +231,8 @@ impl Game {
         if self.phase == DayPhase::Running {
             let layout = ctx.gui.get_mut::<GamingLayout>();
             let state = DayHudState {
-                day_label: format!("Day {}", self.telemetry.day),
-                phase_label: "Service".into(),
+                day_label: tr!("day-display.label", "day" = self.telemetry.day),
+                phase_label: tr!("phase-running.label"),
                 details: "Service running.".to_string(),
                 show_start: false,
                 enable_start: false,

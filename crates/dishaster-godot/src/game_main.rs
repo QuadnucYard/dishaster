@@ -11,6 +11,7 @@ use dishaster_persistence::ProgressService;
 use dishrupt_godot::{audio::AudioManager, ext::NodeExt, input::listener::InputListener};
 use dishrupt_godot_scene::{SceneContext, SceneManager};
 use dishrupt_godot_ui::GuiManager;
+use dishrupt_l10n_godot::LocalizationManager;
 use godot::{
     classes::{CanvasLayer, ProjectSettings},
     prelude::*,
@@ -33,7 +34,7 @@ struct Inner {
     scene_manager: SceneManager,
     gui: GuiManager,
     audio: AudioManager,
-    // l10n_server: LocalizationServer,
+    l10n: LocalizationManager,
     input_listener: Gd<InputListener>,
 
     late_initialized: bool,
@@ -78,13 +79,12 @@ impl Inner {
         let audio_root = root.get_or_add_node_as("AudioRoot");
 
         let input_listener = root.get_or_add_node_of_type::<InputListener>();
-        // input_listener.bind_mut().base_mut().set_process_mode(ProcessMode::ALWAYS);
 
         Self {
             scene_manager: SceneManager::new(scene_root.upcast(), DefaultSceneLoader),
             gui: GuiManager::new(gui_root.upcast()),
             audio: AudioManager::new(audio_root),
-            // l10n_server: Default::default(),
+            l10n: Default::default(),
             input_listener,
 
             late_initialized: false,
@@ -99,9 +99,9 @@ impl Inner {
     }
 
     fn ready_late(&mut self) {
-        println!("collect localized elements...");
-        // self.l10n_server.collect(self.ui_master.root.gd());
-        // self.l10n_server.update();
+        godot_print!("collect localized elements...");
+        self.l10n.collect(self.gui.root.gd());
+        self.l10n.update();
     }
 
     fn process(&mut self, delta: f64) {
