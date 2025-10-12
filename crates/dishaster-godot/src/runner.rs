@@ -23,6 +23,21 @@ pub struct SnapshotFrame {
     pub events: Vec<PresentationEvent>,
 }
 
+impl SnapshotFrame {
+    fn extend(&mut self, other: SnapshotFrame) {
+        self.ticks = other.ticks;
+        self.snapshot = other.snapshot;
+        self.events.extend(other.events);
+    }
+}
+
+fn extend_frame(current: &mut Option<SnapshotFrame>, other: SnapshotFrame) {
+    match current {
+        Some(snap) => snap.extend(other),
+        None => *current = Some(other),
+    }
+}
+
 pub struct SimulationRunner {
     snapshot_receiver: SnapshotReceiver,
     #[allow(unused)]
@@ -134,9 +149,9 @@ impl SimulationRunner {
     }
 
     pub fn poll_snapshot(&mut self) -> Option<SnapshotFrame> {
-        let mut last_snap = None;
+        let mut last_snap: Option<SnapshotFrame> = None;
         while let Ok(snap) = self.snapshot_receiver.0.try_recv() {
-            last_snap = Some(snap);
+            extend_frame(&mut last_snap, snap);
         }
         last_snap
     }
@@ -190,7 +205,7 @@ impl SyncSimulationRunner {
     pub fn tick(&mut self, dt: f64) -> Option<SnapshotFrame> {
         self.accumulator += dt;
 
-        let mut result = None;
+        let mut result: Option<SnapshotFrame> = None;
         let mut ticks = 0;
 
         loop {
@@ -205,11 +220,14 @@ impl SyncSimulationRunner {
             // Subtract fixed dt, keeping any remainder for next frame
             self.accumulator -= fixed_dt;
 
-            result = Some(SnapshotFrame {
-                ticks,
-                snapshot: self.sim.snapshot(),
-                events: self.sim.poll_events(),
-            });
+            extend_frame(
+                &mut result,
+                SnapshotFrame {
+                    ticks,
+                    snapshot: self.sim.snapshot(),
+                    events: self.sim.poll_events(),
+                },
+            );
         }
 
         result
