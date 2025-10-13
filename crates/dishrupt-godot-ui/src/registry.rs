@@ -1,6 +1,5 @@
 use std::{
     any::TypeId,
-    collections::HashMap,
     sync::{Arc, Mutex},
 };
 
@@ -14,7 +13,8 @@ pub trait Gui: UITree {
 
 #[derive(Default)]
 pub struct GuiRegistry {
-    guis: HashMap<TypeId, Box<dyn Gui>>,
+    // We use a Vec here to ensure stable addresses for the Gui trait objects.
+    guis: Vec<(TypeId, Box<dyn Gui>)>,
 }
 
 impl GuiRegistry {
@@ -23,29 +23,33 @@ impl GuiRegistry {
     }
 
     pub fn register<G: Gui + 'static>(&mut self, gui: G) {
-        self.guis.insert(TypeId::of::<G>(), Box::new(gui));
+        self.guis.push((TypeId::of::<G>(), Box::new(gui)));
     }
 
     pub fn get<G: Gui + 'static>(&self) -> &G {
+        let id = TypeId::of::<G>();
         self.guis
-            .get(&TypeId::of::<G>())
-            .map(|g| unsafe { &*Box::as_ptr(g).cast::<G>() })
+            .iter()
+            .find(|(ty, _)| id == *ty)
+            .map(|(_, g)| unsafe { &*Box::as_ptr(g).cast::<G>() })
             .unwrap()
     }
 
     pub fn get_mut<G: Gui + 'static>(&mut self) -> &mut G {
+        let id = TypeId::of::<G>();
         self.guis
-            .get_mut(&TypeId::of::<G>())
-            .map(|g| unsafe { &mut *Box::as_mut_ptr(g).cast::<G>() })
+            .iter_mut()
+            .find(|(ty, _)| id == *ty)
+            .map(|(_, g)| unsafe { &mut *Box::as_mut_ptr(g).cast::<G>() })
             .unwrap()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Box<dyn Gui>> {
-        self.guis.values()
+        self.guis.iter().map(|(_, g)| g)
     }
 
     pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Box<dyn Gui>> {
-        self.guis.values_mut()
+        self.guis.iter_mut().map(|(_, g)| g)
     }
 
     pub fn show<G: Gui + 'static>(&mut self) {
