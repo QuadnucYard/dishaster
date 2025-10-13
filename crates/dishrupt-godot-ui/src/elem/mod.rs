@@ -1,6 +1,7 @@
 mod button;
 mod control;
 mod label;
+mod line_edit;
 mod progress;
 mod slider;
 mod texture_rect;
@@ -9,6 +10,7 @@ pub use button::{ButtonA, TextButtonA, TextureButtonA};
 pub use control::ControlA;
 use godot::{classes::Control, obj::Gd};
 pub use label::{LabelA, RichLabelA};
+pub use line_edit::LineEditA;
 pub use progress::ProgressBarA;
 pub use slider::SliderA;
 pub use texture_rect::TextureRectA;

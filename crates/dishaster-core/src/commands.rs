@@ -1,6 +1,8 @@
 //! Simulation commands and control interfaces.
 
-use crate::prelude::*;
+use dishrupt_core::EntityId;
+
+use crate::{models::PricingMethod, prelude::*};
 
 /// Commands that can be sent to the simulation from external sources.
 pub enum SimCommand {
@@ -8,6 +10,14 @@ pub enum SimCommand {
     StartRun,
     /// Finish the current run immediately.
     EndRun,
+
+    /// Apply edited dish pricing before starting service.
+    UpdateDishPricing {
+        /// Entity ID of the dish being updated.
+        dish_entity: EntityId,
+        /// Updated pricing configuration selected by the player.
+        pricing: PricingMethod,
+    },
 
     /// Request distance to a target point from the navigation grid.
     QueryDistance(Vec2),

@@ -80,6 +80,12 @@ impl Scene for GameScene {
                         game.set_tps(ctx, tps);
                     }
                 }
+
+                GameRequest::ApplyDishPrice { dish, method } => {
+                    if let Some(game) = self.game.as_mut() {
+                        game.set_dish_price(dish, method);
+                    }
+                }
             }
         }
     }

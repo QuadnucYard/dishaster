@@ -1,3 +1,5 @@
+use dishaster_models::PricingMethod;
+use dishrupt_core::EntityId;
 use dishrupt_godot_ui::GuiRequest;
 
 pub enum GameRequest {
@@ -15,6 +17,13 @@ pub enum GameRequest {
     NextDay,
     /// Change the simulation ticks-per-second rate.
     SetTps(f32),
+    // /// Request opening the dish price editor for a given dish entity.
+    // OpenDishPriceEditor(EntityId),
+    /// Apply the player's chosen pricing to a dish slot.
+    ApplyDishPrice {
+        dish: EntityId,
+        method: PricingMethod,
+    },
 }
 
 impl GuiRequest for GameRequest {}

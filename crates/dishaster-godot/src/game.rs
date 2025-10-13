@@ -8,7 +8,11 @@ mod controllers {
     pub use super::{agent::AgentController, dish::DishController};
 }
 
-use dishaster_core::{commands::SimCommand, models::LevelConfig, sim::Simulation};
+use dishaster_core::{
+    commands::SimCommand,
+    models::{LevelConfig, PricingMethod},
+    sim::Simulation,
+};
 use dishaster_godot_ui::*;
 use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::display::*;
@@ -240,5 +244,16 @@ impl Game {
         ctx.gui
             .get_mut::<TimeStatsGui>()
             .set_tps_display(requested_tps);
+    }
+
+    pub fn set_dish_price(&mut self, dish: EntityId, pricing: PricingMethod) {
+        self.send_sim_command(SimCommand::UpdateDishPricing {
+            dish_entity: dish,
+            pricing,
+        });
+
+        if let Some(controller) = self.dc.dishes.get_mut(&dish) {
+            controller.set_price(pricing);
+        }
     }
 }

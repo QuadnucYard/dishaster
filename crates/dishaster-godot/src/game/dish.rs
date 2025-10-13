@@ -1,6 +1,10 @@
 use dishaster_core::{models::PricingMethod, snapshots::DishViewModel};
+use dishaster_godot_ui::{DishPricePopup, DishPriceView};
 use dishrupt_core::EntityId;
-use dishrupt_godot::{display::*, ext::NodeExt};
+use dishrupt_godot::{display::*, ext::NodeExt, input::event::MouseButtonEvent};
+use dishrupt_godot_scene::SceneContext;
+use dishrupt_godot_ui::*;
+use dishrupt_l10n_godot::tr;
 use godot::{
     classes::{Area2D, Label},
     prelude::*,
@@ -38,21 +42,36 @@ impl DishController {
     }
 
     pub fn set_view_model(&mut self, vm: DishViewModel) {
-        self.set_price(&match vm.pricing {
-            PricingMethod::PerPortion(val) => format!("${:.1}", val),
-            PricingMethod::ByWeight(val) => format!("${:.1}", val),
-        });
+        self.set_price(vm.pricing);
         self.original_price = Some(vm.pricing);
         self.view_model = Some(vm);
     }
 
-    pub fn set_price(&mut self, price_str: &str) {
-        self.price_label.set_text(price_str);
+    pub fn set_price(&mut self, pricing: PricingMethod) {
+        self.price_label.set_text(&match pricing {
+            PricingMethod::PerPortion(val) => format!("${:.1}", val),
+            PricingMethod::ByWeight(val) => format!("${:.1}", val),
+        });
     }
 }
 
 impl Pickable for DishController {
     fn collider_instance_id(&self) -> InstanceId {
         self.area.instance_id_unchecked()
+    }
+
+    fn on_click(&mut self, ctx: &mut SceneContext, event: &MouseButtonEvent) {
+        if !event.pressed
+            && let (Some(vm), Some(orig_price)) = (&self.view_model, &self.original_price)
+        {
+            let popup = ctx.gui.get_mut::<DishPricePopup>();
+            popup.set_view(DishPriceView {
+                entity: vm.entity,
+                dish_name: tr!("dish-{}.name", vm.dish_id),
+                original_price: *orig_price,
+                current_price: vm.pricing,
+            });
+            popup.show();
+        }
     }
 }

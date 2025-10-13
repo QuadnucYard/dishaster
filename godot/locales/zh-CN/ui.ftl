@@ -1,11 +1,15 @@
 ### UI Translations
 
-## Start Menu
+## Start Menu and Commons
 
 start =
     .label = 开始
 quit =
     .label = 退出
+apply =
+    .label = 应用
+cancel =
+    .label = 取消
 
 ## In Game
 
@@ -24,3 +28,17 @@ phase-running =
     .label = 运营阶段
 day-display =
     .label = 第 { $day } 天
+
+price-by-portion =
+    .label = 按份计价
+price-by-weight =
+    .label = 按重量计价
+
+dish-name =
+    .label = 菜名
+dish-price-adjust =
+    .label = 调整价格
+price-by-portion-display =
+    .label = /份
+price-by-weight-display =
+    .label = /kg

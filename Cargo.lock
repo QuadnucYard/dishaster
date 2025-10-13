@@ -488,8 +488,11 @@ dependencies = [
 name = "dishaster-godot-ui"
 version = "0.1.0"
 dependencies = [
+ "dishaster-models",
+ "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-godot-ui",
+ "dishrupt-l10n-godot",
  "godot",
  "signals2",
 ]

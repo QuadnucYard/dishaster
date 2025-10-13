@@ -8,7 +8,7 @@ use godot::prelude::*;
 #[derive(GodotClass)]
 #[class(base=Button, init)]
 pub struct LocalizedButton {
-    /// The message id to use for this button's text.
+    /// The message id to use for this Button's text.
     #[export]
     pub message_id: GString,
 }
@@ -17,7 +17,16 @@ pub struct LocalizedButton {
 #[derive(GodotClass)]
 #[class(base=Label, init)]
 pub struct LocalizedLabel {
-    /// The message id to use for this label's text.
+    /// The message id to use for this Label's text.
     #[export]
     pub message_id: GString,
+}
+
+/// A label with a localization key.
+#[derive(GodotClass)]
+#[class(base=LineEdit, init)]
+pub struct LocalizedLineEdit {
+    /// The message id to use for this LineEdit's placeholder text.
+    #[export]
+    pub placeholder_message_id: GString,
 }
