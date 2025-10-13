@@ -5,6 +5,7 @@ use godot::{
     obj::Gd,
 };
 
+#[derive(Debug)]
 pub struct MouseButtonEvent {
     pub position: Vector2,
     pub button: MouseButton,
@@ -16,6 +17,7 @@ pub struct MouseButtonEvent {
     pub raw: Gd<InputEventMouseButton>,
 }
 
+#[derive(Debug)]
 pub struct MouseMotionEvent {
     pub position: Vector2,
     pub ctrl_key: bool,
@@ -24,6 +26,7 @@ pub struct MouseMotionEvent {
     pub raw: Gd<InputEventMouseMotion>,
 }
 
+#[derive(Debug)]
 pub struct KeyEvent {
     pub keycode: Key,
     pub raw: Gd<InputEventKey>,

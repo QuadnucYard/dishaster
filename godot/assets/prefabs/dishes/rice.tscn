@@ -1,9 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://cbf870wwfwjop"]
+[gd_scene load_steps=3 format=3 uid="uid://cbf870wwfwjop"]
 
 [ext_resource type="Texture2D" uid="uid://tj2psheu4xjk" path="res://assets/sprites/emojis/rice.svg" id="1_rcp1t"]
 
-[node name="SteamedRice" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rcp1t"]
+size = Vector2(32, 24)
+
+[node name="SteamedRice" type="Area2D"]
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0, -8)
 texture = ExtResource("1_rcp1t")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_rcp1t")

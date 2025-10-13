@@ -7,6 +7,7 @@ use godot::{
 
 use super::event::{KeyEvent, MouseButtonEvent, MouseMotionEvent};
 
+#[derive(Debug)]
 pub enum GodotInputEvent {
     Button(MouseButtonEvent),
     Motion(MouseMotionEvent),

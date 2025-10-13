@@ -84,12 +84,12 @@ impl Scene for GameScene {
         }
     }
 
-    fn input(&mut self, _ctx: &mut SceneContext, event: GodotInputEvent) {
+    fn input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
         let Some(game) = self.game.as_mut() else {
             return;
         };
 
-        game.process_input(event);
+        game.process_input(ctx, event);
     }
 }
 

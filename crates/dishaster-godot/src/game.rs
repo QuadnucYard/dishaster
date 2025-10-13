@@ -1,5 +1,6 @@
 mod agent;
 mod dish;
+mod input;
 pub mod perf;
 mod present;
 
@@ -10,12 +11,11 @@ mod controllers {
 use dishaster_core::{commands::SimCommand, models::LevelConfig, sim::Simulation};
 use dishaster_godot_ui::*;
 use dishrupt_core::{EntityId, prelude::*};
-use dishrupt_godot::{display::*, input::listener::GodotInputEvent};
+use dishrupt_godot::display::*;
 use dishrupt_godot_scene::SceneContext;
 use dishrupt_l10n_godot::tr;
 use godot::{
     classes::{Node, Node2D},
-    global::MouseButton,
     prelude::*,
 };
 use rustc_hash::FxHashMap;
@@ -150,26 +150,8 @@ impl Game {
         self.update_hud(ctx);
     }
 
-    pub fn process_input(&mut self, event: GodotInputEvent) {
-        #[allow(clippy::single_match)]
-        match event {
-            GodotInputEvent::Button(e) => {
-                if e.button == MouseButton::LEFT && !e.pressed {
-                    let canvas_pos = screen_to_canvas(&self.root, e.position);
-                    let sim_pos = self.to_map_pos(canvas_pos);
-                    godot_print!("click map： {canvas_pos} {sim_pos}");
-                    self.sim_runner
-                        .send_command(SimCommand::QueryDistance(sim_pos));
-                }
-            }
-            _ => {}
-        }
-    }
-
-    fn to_map_pos(&self, pos: Vector2) -> Vec2 {
-        self.stage
-            .display_context()
-            .to_simulation_space(pos - self.stage_origin)
+    pub fn send_sim_command(&mut self, command: SimCommand) {
+        self.sim_runner.send_command(command);
     }
 
     /// Called just after construction
@@ -188,7 +170,7 @@ impl Game {
             .get_mut::<TimeStatsGui>()
             .set_tps_display(self.sim_runner.tps() as f32);
 
-        self.sim_runner.send_command(SimCommand::QueryDistances);
+        self.send_sim_command(SimCommand::QueryDistances);
     }
 
     pub fn begin_run(&mut self, _ctx: &mut SceneContext) {
@@ -197,7 +179,7 @@ impl Game {
         }
         self.phase = DayPhase::Running;
 
-        self.sim_runner.send_command(SimCommand::StartRun);
+        self.send_sim_command(SimCommand::StartRun);
     }
 
     pub fn force_finish_day(&mut self, ctx: &mut SceneContext) {
@@ -213,7 +195,7 @@ impl Game {
         self.phase = DayPhase::Settlement;
 
         if forced {
-            self.sim_runner.send_command(SimCommand::EndRun);
+            self.send_sim_command(SimCommand::EndRun);
             self.dc.agents.clear();
         }
 
@@ -259,12 +241,4 @@ impl Game {
             .get_mut::<TimeStatsGui>()
             .set_tps_display(requested_tps);
     }
-}
-
-fn screen_to_canvas(root: &Gd<Node>, screen_pos: Vector2) -> Vector2 {
-    root.get_viewport()
-        .unwrap()
-        .get_canvas_transform()
-        .affine_inverse()
-        * screen_pos
 }

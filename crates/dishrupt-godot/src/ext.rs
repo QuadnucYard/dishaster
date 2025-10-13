@@ -24,7 +24,7 @@ pub trait NodeExt {
     where
         T: GodotClass + Inherits<Node>;
 
-    fn get_node_of_type<T>(&self) -> Option<Gd<T>>
+    fn get_child_of_type<T>(&self) -> Option<Gd<T>>
     where
         T: GodotClass + Inherits<Node>;
 
@@ -54,7 +54,7 @@ impl NodeExt for Node {
         self.move_child(child, index);
     }
 
-    fn get_node_of_type<T>(&self) -> Option<Gd<T>>
+    fn get_child_of_type<T>(&self) -> Option<Gd<T>>
     where
         T: GodotClass + Inherits<Node>,
     {
