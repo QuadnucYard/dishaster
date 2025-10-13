@@ -5,10 +5,12 @@ use crate::{models::*, prelude::*};
 pub struct Window {
     /// Static configuration reference
     pub service_template: ModelHandle<WindowServiceModel>,
-    /// Player configuration
-    pub config: WindowConfiguration,
+    /// Index of this window within the canteen
+    pub slot_index: usize,
     /// Position in the canteen (should correspond to canteen layout)
     pub location: XSegment,
+    /// Whether the window is currently open for service
+    pub enabled: bool,
 }
 
 /// Active dishes in a window - separate component for better data locality
@@ -16,6 +18,13 @@ pub struct Window {
 pub struct WindowDishes {
     /// Currently available dishes in this window
     pub dishes: Vec<ActiveDish>,
+}
+
+/// An active dish available at a service window
+#[derive(Component)]
+pub struct Dish {
+    /// Pricing method for this dish
+    pub pricing: PricingMethod,
 }
 
 /// Dining table component for customer seating areas

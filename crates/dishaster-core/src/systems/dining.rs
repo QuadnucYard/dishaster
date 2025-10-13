@@ -88,7 +88,7 @@ fn handle_observe_goal(
             || goal.timer > diner_model.behavior.observation_time && !movement.has_path()
         {
             // Simple logic: pick a random available window to observe.
-            let available_windows = window_query.iter().filter(|(_, w)| w.config.is_enabled);
+            let available_windows = window_query.iter().filter(|(_, w)| w.enabled);
 
             let Some((window_entity, window)) = available_windows.choose(&mut rng) else {
                 // No windows available, decide to leave.

@@ -27,7 +27,8 @@ impl Game {
                 PresentationEvent::AgentDespawned(entity) => {
                     self.dc.agents.remove(&entity);
                 }
-                PresentationEvent::DishSpawned(entity, price_str) => {
+                PresentationEvent::DishSpawned(vm) => {
+                    let entity = vm.entity;
                     let mut controller = DishController::new(
                         entity,
                         self.stage
@@ -35,7 +36,7 @@ impl Game {
                             .cloned()
                             .expect("missing godot node for dish"),
                     );
-                    controller.set_price(&price_str);
+                    controller.set_view_model(vm);
                     self.dc.dishes.insert(entity, controller);
                 }
                 PresentationEvent::Feedback(feedback) => {

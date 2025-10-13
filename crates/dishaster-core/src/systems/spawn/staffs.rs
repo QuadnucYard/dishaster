@@ -40,11 +40,7 @@ pub fn spawn_serving_staffs(
                     },
                 },
                 DisplayState {
-                    name: Some(eco_format!(
-                        "Staff_{}_{}",
-                        window.config.slot_index,
-                        queue_index
-                    )),
+                    name: Some(eco_format!("Staff_{}_{}", window.slot_index, queue_index)),
                     ..Default::default()
                 },
                 Transform {

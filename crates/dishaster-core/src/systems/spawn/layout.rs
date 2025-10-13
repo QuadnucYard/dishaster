@@ -77,8 +77,9 @@ fn spawn_windows(
             .spawn((
                 Window {
                     service_template: service_handle,
-                    config: window_config.clone(),
+                    slot_index: window_config.slot_index,
                     location: window_location,
+                    enabled: window_config.is_enabled,
                 },
                 DisplayState {
                     proto: service_template.display.res.clone(),
@@ -212,17 +213,11 @@ fn spawn_dish_presentations(
             ChildOf(wrapper_entity),
         ));
 
-        events.emit(PresentationEvent::DishSpawned(
-            wrapper_entity.into(),
-            format_price(&active.assignment.pricing),
-        ));
-    }
-}
-
-fn format_price(pricing: &PricingConfig) -> EcoString {
-    match pricing.method {
-        PricingMethod::PerPortion(amount) => eco_format!("¥{amount:.1}"),
-        PricingMethod::ByWeight(rate) => eco_format!("¥{rate:.1}"),
+        events.emit(PresentationEvent::DishSpawned(DishViewModel {
+            entity: wrapper_entity.into(),
+            dish_id: active.assignment.dish_id.clone(),
+            pricing: active.assignment.pricing.method,
+        }));
     }
 }
 

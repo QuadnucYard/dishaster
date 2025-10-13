@@ -26,3 +26,9 @@ impl From<Entity> for EntityId {
         EntityId(NonZeroU64::new(entity.to_bits()).expect("Entity should never be zero"))
     }
 }
+
+impl From<EntityId> for Entity {
+    fn from(value: EntityId) -> Self {
+        Entity::from_bits(value.0.get())
+    }
+}

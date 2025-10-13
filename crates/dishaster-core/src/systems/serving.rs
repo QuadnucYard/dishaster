@@ -362,7 +362,7 @@ fn choose_service_request(
     Some(ServiceRequest {
         dish_id: active.assignment.dish_id.clone(),
         dish_slot: active.assignment.slot_index,
-        dish_name: dish_model.name.clone(),
+        dish_name: dish_model.id.clone().to_string(), // Use the model ID as a fallback name
         base_service_time: dish_model.characteristics.serving_time,
     })
 }

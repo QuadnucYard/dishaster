@@ -1,7 +1,6 @@
 [
     (
         id: "rice",
-        name: "米饭",
         characteristics: (
             quality_range: (0.7, 1.0),
             serving_time: 5.0,

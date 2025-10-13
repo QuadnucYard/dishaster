@@ -1,4 +1,7 @@
+use dishaster_models::PricingMethod;
 use dishrupt_core::{EntityId, prelude::*};
+
+use crate::models::ModelId;
 
 /// Presentation events emitted by the core simulation for client display.
 pub enum PresentationEvent {
@@ -8,8 +11,8 @@ pub enum PresentationEvent {
     AgentSpawned(EntityId),
     /// An agent has despawned from the simulation.
     AgentDespawned(EntityId),
-    /// A dish has spawned in the simulation. Includes the dish price.
-    DishSpawned(EntityId, EcoString),
+    /// A dish has spawned in the simulation with its pricing snapshot.
+    DishSpawned(DishViewModel),
     /// Agent feedback.
     Feedback(FeedbackEvent),
 
@@ -17,6 +20,17 @@ pub enum PresentationEvent {
     QueryDistanceResponse(Option<f32>),
     /// Response to a distance field query.
     QueryDistancesResponse(QueryDistancesResponse),
+}
+
+/// Snapshot of a dish display instance for presentation systems.
+#[derive(Debug, Clone)]
+pub struct DishViewModel {
+    /// Display entity backing this dish presentation.
+    pub entity: EntityId,
+    /// Dish model identifier for lookup and metadata.
+    pub dish_id: ModelId,
+    /// Current pricing configuration applied to this slot.
+    pub pricing: PricingMethod,
 }
 
 /// Feedback emitted by core simulation systems for client presentation.

@@ -9,8 +9,6 @@ use super::prelude::*;
 pub struct DishModel {
     /// Unique identifier for this dish type
     pub id: ModelId,
-    /// Display name of the dish
-    pub name: EcoString,
     /// Base characteristics - can be extended without breaking changes
     pub characteristics: DishCharacteristics,
     /// Prefab used to render this dish in debug or game views.
@@ -36,7 +34,7 @@ pub struct DishCharacteristics {
 }
 
 /// Different pricing strategies for dishes
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Copy, Deserialize)]
 pub enum PricingMethod {
     /// Fixed price per serving
     PerPortion(f32),
@@ -122,9 +120,6 @@ pub struct DishAssignment {
 pub struct PricingConfig {
     /// Base price set by player
     pub method: PricingMethod,
-    /// Any modifiers (can be extended)
-    #[serde(default)]
-    pub modifiers: Vec<PriceModifier>,
 }
 
 /// Pricing adjustments applied to base dish prices

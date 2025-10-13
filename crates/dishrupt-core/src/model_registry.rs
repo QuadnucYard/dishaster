@@ -20,6 +20,16 @@ impl ModelId {
     pub fn new(name: impl Into<EcoString>) -> Self {
         Self(name.into())
     }
+
+    pub fn to_string(self) -> EcoString {
+        self.0
+    }
+}
+
+impl std::fmt::Display for ModelId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
 }
 
 /// Trait for models that have a unique identifier
