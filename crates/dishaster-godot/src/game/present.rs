@@ -50,7 +50,7 @@ impl Game {
                 PresentationEvent::QueryDistancesResponse(resp) => {
                     self.dbgviz
                         .distance_overlay
-                        .present(&resp, &self.display_ctx);
+                        .present(&resp, self.stage.display_context());
                 }
             }
         }

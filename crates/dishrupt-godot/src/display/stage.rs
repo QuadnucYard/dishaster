@@ -6,10 +6,10 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use super::{DisplayFactory, GodotDisplayNode2D, context::DisplayContext2D};
 use crate::display::node::{GdNode2D, update_godot_display_node2d};
 
-#[derive(Default)]
 pub struct Stage {
     factory: DisplayFactory,
 
+    display_ctx: DisplayContext2D,
     display_world: World,
     /// Map from display entity to Godot node
     core_to_view: FxHashMap<EntityId, Entity>,
@@ -20,8 +20,19 @@ pub struct Stage {
 }
 
 impl Stage {
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(display_ctx: DisplayContext2D) -> Self {
+        Self {
+            factory: Default::default(),
+            display_ctx,
+            display_world: Default::default(),
+            core_to_view: Default::default(),
+            display_root: Default::default(),
+            active: false,
+        }
+    }
+
+    pub fn display_context(&self) -> &DisplayContext2D {
+        &self.display_ctx
     }
 
     pub fn set_root(&mut self, display_id: EntityId, gd_node: GdNode2D) {
@@ -36,10 +47,6 @@ impl Stage {
         self.core_to_view.insert(display_id, root_entity);
         self.active = true;
         self.factory.init();
-    }
-
-    pub fn set_display_context(&mut self, ctx: DisplayContext2D) {
-        self.display_world.insert_resource(ctx);
     }
 
     pub fn get_godot_node(&self, entity: EntityId) -> Option<&GdNode2D> {
@@ -64,7 +71,7 @@ impl Stage {
     }
 
     pub fn present<'a>(&mut self, displays: impl Iterator<Item = &'a DisplaySnapshot>) {
-        let ctx = (*self.display_world.resource::<DisplayContext2D>()).clone();
+        let ctx = &self.display_ctx;
 
         let mut seen = FxHashSet::default();
         let root = *self.display_root.get().expect("stage root not set");
@@ -80,7 +87,7 @@ impl Stage {
                 // update existing node
                 let mut entity_ref = self.display_world.entity_mut(*e);
                 let mut node = entity_ref.get_mut::<GodotDisplayNode2D>().unwrap();
-                update_godot_display_node2d(&mut node, display, &ctx);
+                update_godot_display_node2d(&mut node, display, ctx);
             } else {
                 // create new node
                 let mut gd_node = self.factory.create(&display.proto);
@@ -88,7 +95,7 @@ impl Stage {
                     gd_node.set_name(name.as_str());
                 }
                 let mut node = GodotDisplayNode2D::new_bind(gd_node, display.core_id);
-                update_godot_display_node2d(&mut node, display, &ctx);
+                update_godot_display_node2d(&mut node, display, ctx);
                 let e = self.display_world.spawn(node).id();
                 self.core_to_view.insert(display.core_id, e);
 

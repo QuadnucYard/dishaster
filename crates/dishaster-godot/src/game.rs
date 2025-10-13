@@ -49,7 +49,6 @@ pub struct Game {
     sim_runner: SyncSimulationRunner,
     stage: Stage,
     stage_origin: Vector2,
-    display_ctx: DisplayContext2D,
     dbgviz: DbgViz,
 
     perf_tracker: PerfTracker,
@@ -108,8 +107,7 @@ impl Game {
         let sim_runner = SyncSimulationRunner::new(sim, default_tps);
 
         // Set up stage
-        let mut stage = Stage::new();
-        stage.set_display_context(display_ctx.clone());
+        let mut stage = Stage::new(display_ctx);
         stage.set_root(root_entity, display_root.clone());
 
         // Set up debug visualization
@@ -120,7 +118,6 @@ impl Game {
             sim_runner,
             stage,
             stage_origin: origin,
-            display_ctx,
             dbgviz,
             perf_tracker: Default::default(),
             dc: Default::default(),
@@ -141,7 +138,7 @@ impl Game {
             self.perf_tracker.tick_updates(ticks);
 
             self.stage.present(snapshot.display.iter());
-            self.dbgviz.update(&snapshot, &self.display_ctx);
+            self.dbgviz.update(&snapshot, self.stage.display_context());
 
             self.process_events(ctx, events);
             self.telemetry.tick = snapshot.sim_tick;
@@ -170,7 +167,8 @@ impl Game {
     }
 
     fn to_map_pos(&self, pos: Vector2) -> Vec2 {
-        self.display_ctx
+        self.stage
+            .display_context()
             .to_simulation_space(pos - self.stage_origin)
     }
 

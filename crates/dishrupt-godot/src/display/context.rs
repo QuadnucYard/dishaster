@@ -4,7 +4,7 @@ use godot::builtin::Vector2;
 // pub trait DisplayContext<S, T> {}
 
 /// The context for translation vectors between simulation space and display space.
-#[derive(Resource, Clone)]
+#[derive(Clone)]
 pub struct DisplayContext2D {
     /// Scale factors for each axis from simulation space to display space.
     pub view_scale: Vec3,
