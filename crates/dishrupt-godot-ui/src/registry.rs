@@ -98,20 +98,19 @@ impl GuiCommands {
     }
 
     pub fn run_cmds(&mut self, gui: &mut GuiRegistry) {
-        let mut guard = self.0.lock().unwrap();
-        for cmd in guard.cmds.drain(..) {
+        // Drain the commands to avoid holding the lock while executing them
+        let cmds = self.0.lock().unwrap().cmds.drain(..).collect::<Vec<_>>();
+        for cmd in cmds {
             cmd(gui);
         }
     }
 
     pub fn run_reqs(&mut self, f: impl FnMut(Box<dyn GuiRequest>)) {
-        let mut guard = self.0.lock().unwrap();
-        guard.reqs.drain(..).for_each(f);
+        self.take_reqs().into_iter().for_each(f);
     }
 
     pub fn take_reqs(&mut self) -> Vec<Box<dyn GuiRequest>> {
-        let mut guard = self.0.lock().unwrap();
-        guard.reqs.drain(..).collect()
+        self.0.lock().unwrap().reqs.drain(..).collect::<Vec<_>>()
     }
 }
 
