@@ -1,4 +1,4 @@
-use dishaster_navigation::NavPath;
+use dishaster_navigation::{NavPath, PathTarget};
 
 use crate::prelude::*;
 
@@ -27,7 +27,7 @@ pub struct Movement {
     /// The calculated path to the target_pos.
     pub path: NavPath,
     /// The target position to move towards.
-    pub pending_target: Option<Vec2>,
+    pub pending_target: Option<PathTarget>,
     /// Whether the target has been reached.
     pub target_reached: bool,
     /// The last tick when the path was calculated. It is set when a new path is assigned.

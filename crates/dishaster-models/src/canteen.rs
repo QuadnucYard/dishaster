@@ -88,10 +88,15 @@ pub struct CollectorModel {
     pub id: ModelId,
     /// Physical dimensions of the collector
     pub size: Size,
+    /// Area in front of the collector where diners can drop off dishes.
+    /// Relative to the center position of the collector.
+    pub reception_area: Rect,
     /// Maximum number of dishes that can be stored
     pub capacity: u32,
     /// Processing capacity per time unit
     pub processing_capacity: Seconds,
+    /// Display model
+    pub display: DisplayModel,
 }
 
 impl HasId for CollectorModel {

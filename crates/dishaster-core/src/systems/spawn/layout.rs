@@ -30,7 +30,7 @@ pub fn spawn_static_objects(
     );
     spawn_tables(&mut commands, &level, &registry, &display_root);
     spawn_dispensers(&mut commands, &level, &registry);
-    spawn_collectors(&mut commands, &level, &registry);
+    spawn_collectors(&mut commands, &level, &registry, &display_root);
 }
 
 fn spawn_windows(
@@ -306,17 +306,35 @@ fn spawn_collectors(
     commands: &mut Commands,
     level: &Res<LevelConfigRes>,
     registry: &GameModelRegistry,
+    display_root: &DisplayRoot,
 ) {
     // Spawn dish collectors
-    for collector_placement in &level.collector_placements {
+    for placement in &level.collector_placements {
         let collector_handle = registry
             .collectors
-            .get_handle_by_id(&collector_placement.model)
+            .get_handle_by_id(&placement.model)
             .expect("Dish collector model not found in registry");
-        commands.spawn(DishCollector {
-            model: collector_handle,
-            center_pos: collector_placement.center_pos,
-            current_load: 0,
-        });
+        let model = registry.collectors.get(collector_handle);
+        commands.spawn((
+            DishCollector {
+                model: collector_handle,
+                center_pos: placement.center_pos,
+                reception_area: Rect::from_center_size(
+                    placement.center_pos + model.reception_area.center(),
+                    model.reception_area.size(),
+                ),
+                current_load: 0,
+            },
+            BoxCollider::from_center_size(placement.center_pos, model.size.as_vec2()).into_comp(),
+            DisplayState {
+                proto: model.display.res.clone(),
+                ..Default::default()
+            },
+            Transform {
+                position: placement.center_pos.extend(0.0),
+                parent: Some(display_root.0),
+                ..Default::default()
+            },
+        ));
     }
 }

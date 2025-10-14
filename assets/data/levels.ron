@@ -109,7 +109,12 @@
         ],
         tray_dispenser_placements: [],
         chopstick_dispenser_placements: [],
-        collector_placements: [],
+        collector_placements: [
+            (
+                model: "main_dish_return",
+                center_pos: (22.0, 2.0),
+            ),
+        ],
         diner_provider: (
             attributes:  (
                 hunger: (0.3, 0.8),
@@ -136,7 +141,7 @@
         ),
         diner_spawner: (
             run_length: 3600.0,
-            base_rate_per_min: 45.0,
+            base_rate_per_min: 15.0,
             spawn_curve: [
                 (time: 0.0, multiplier: 0.6),
                 (time: 600.0, multiplier: 1.0),

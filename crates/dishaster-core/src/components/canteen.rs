@@ -71,6 +71,8 @@ pub struct DishCollector {
     pub model: ModelHandle<CollectorModel>,
     /// Physical center position of the collector
     pub center_pos: Vec2,
+    /// Area in front of the collector where diners can drop off dishes
+    pub reception_area: Rect,
     /// Current number of plates waiting to be processed
     pub current_load: u32,
 }

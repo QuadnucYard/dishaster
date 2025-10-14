@@ -1,6 +1,4 @@
-use dishaster_navigation::{
-    BoxCollider, NavigationGrid, PathRequest, find_path, world_to_tile_dist,
-};
+use dishaster_navigation::*;
 use dishrupt_core::display::Transform;
 
 use super::prelude::*;
@@ -51,15 +49,25 @@ impl Movement {
     pub fn request_path(&mut self, target: Vec2) {
         log::trace!(target: "navigation", "Path requested to {target:.2}");
 
-        self.pending_target = Some(target);
+        self.pending_target = Some(PathTarget::Point(target));
+        self.target_reached = false;
+    }
+
+    /// Request a path to the specified target position.
+    pub fn request_path_to_rect(&mut self, target: Rect) {
+        log::trace!(target: "navigation", "Path requested to {target:?}");
+
+        self.pending_target = Some(PathTarget::Rect(target));
         self.target_reached = false;
     }
 
     /// Computes a new path to the specified target, updating the target position and path.
     /// If no valid path is found, the path is cleared.
-    fn compute_new_path(&mut self, target: Vec2, nav_grid: &NavigationGrid) {
+    fn compute_new_path(&mut self, target: PathTarget, nav_grid: &NavigationGrid) {
         // Precheck
-        if !nav_grid.is_pos_traversable(target, self.radius) {
+        if let PathTarget::Point(target) = target
+            && !nav_grid.is_pos_traversable(target, self.radius)
+        {
             log::debug!(target: "navigation", "Path target {:.2} not traversable", target);
             self.path.clear();
             return;
@@ -67,7 +75,7 @@ impl Movement {
 
         if let Some(path) = find_path(PathRequest {
             start: self.pos,
-            end: target,
+            target,
             radius: self.radius,
             impatience: self.impatience,
             grid: nav_grid,

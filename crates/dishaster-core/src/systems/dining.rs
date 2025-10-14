@@ -460,7 +460,7 @@ fn handle_return_dishes_goal(
             };
 
             targets.collector_target = Some(collector_entity);
-            movement.request_path(collector.center_pos); // fixme: should plan a path close to that point
+            movement.request_path_to_rect(collector.reception_area);
             log::debug!(
                 target: "diner",
                 "returning_dishes: target={collector_entity:?} pos={:.2}",
