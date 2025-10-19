@@ -15,6 +15,8 @@ pub struct DebugFeatureFlags {
     pub nav_grid: bool,
     /// Include crowd cost field visualization data.
     pub crowd_field: bool,
+    /// Include diner debug data.
+    pub diners: bool,
 }
 
 impl DebugFeatureFlags {
@@ -25,6 +27,7 @@ impl DebugFeatureFlags {
             queues: true,
             nav_grid: true,
             crowd_field: true,
+            diners: true,
         }
     }
 
@@ -35,8 +38,23 @@ impl DebugFeatureFlags {
             queues: false,
             nav_grid: false,
             crowd_field: false,
+            diners: false,
         }
     }
+}
+
+/// Collection of debug visualization snapshots.
+pub struct DebugSnapshots {
+    /// Per-agent movement debug data collected for visualization.
+    pub movement: Option<Vec<MovementDebugSnapshot>>,
+    /// Queue lane debug data collected for visualization.
+    pub queues: Option<Vec<QueueLaneDebugSnapshot>>,
+    /// Collision grid occupancy data when debug is enabled.
+    pub collision: Option<CollisionGridDebugSnapshot>,
+    /// Crowd cost field data when debug is enabled.
+    pub crowd: Option<CrowdFieldDebugSnapshot>,
+    /// Diner debug snapshots
+    pub diners: Option<Vec<DinerDebugSnapshot>>,
 }
 
 /// Debug visualization payload for an agent's movement state.
@@ -115,8 +133,26 @@ pub struct CrowdFieldDebugSnapshot {
     pub costs: Vec<f32>,
 }
 
+/// Debug visualization payload for a diner entity.
+pub struct DinerDebugSnapshot {
+    /// Identifier of the core entity this debug data describes.
+    pub core_id: EntityId,
+    /// Current goal state as a string.
+    pub goal_str: EcoString,
+}
+
 impl Simulation {
-    pub(crate) fn snapshot_movement(&mut self) -> Option<Vec<MovementDebugSnapshot>> {
+    pub(crate) fn snapshot_debug(&mut self) -> DebugSnapshots {
+        DebugSnapshots {
+            movement: self.snapshot_movement(),
+            queues: self.snapshot_queue(),
+            collision: self.snapshot_collision(),
+            crowd: self.snapshot_crowd(),
+            diners: self.snapshot_diners(),
+        }
+    }
+
+    fn snapshot_movement(&mut self) -> Option<Vec<MovementDebugSnapshot>> {
         if !self.debug_flags.movement {
             return None;
         }
@@ -135,7 +171,7 @@ impl Simulation {
         )
     }
 
-    pub(crate) fn snapshot_queue(&mut self) -> Option<Vec<QueueLaneDebugSnapshot>> {
+    fn snapshot_queue(&mut self) -> Option<Vec<QueueLaneDebugSnapshot>> {
         if !self.debug_flags.queues {
             return None;
         }
@@ -180,10 +216,10 @@ impl Simulation {
             })
             .collect::<Vec<_>>();
 
-        if lanes.is_empty() { None } else { Some(lanes) }
+        Some(lanes)
     }
 
-    pub(crate) fn snapshot_collision(&mut self) -> Option<CollisionGridDebugSnapshot> {
+    fn snapshot_collision(&mut self) -> Option<CollisionGridDebugSnapshot> {
         None
         // if !self.debug_flags.nav_grid {
         //     return None;
@@ -214,7 +250,7 @@ impl Simulation {
         // })
     }
 
-    pub(crate) fn snapshot_crowd(&mut self) -> Option<CrowdFieldDebugSnapshot> {
+    fn snapshot_crowd(&mut self) -> Option<CrowdFieldDebugSnapshot> {
         if !self.debug_flags.crowd_field {
             return None;
         }
@@ -230,5 +266,22 @@ impl Simulation {
             dimensions,
             costs: tiles,
         })
+    }
+
+    fn snapshot_diners(&mut self) -> Option<Vec<DinerDebugSnapshot>> {
+        if !self.debug_flags.diners {
+            return None;
+        }
+
+        let mut diner_query = self.world.query::<(Entity, &DinerGoalState)>();
+        Some(
+            diner_query
+                .iter(&self.world)
+                .map(|(entity, goals)| DinerDebugSnapshot {
+                    core_id: entity.into(),
+                    goal_str: eco_format!("{:?}", goals.current()),
+                })
+                .collect(),
+        )
     }
 }

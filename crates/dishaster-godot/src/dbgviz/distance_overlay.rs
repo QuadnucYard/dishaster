@@ -57,17 +57,14 @@ impl DistanceDebugOverlay {
 
         let image_dims = IVec2::new(width as i32, height as i32);
         if self.image_size != image_dims {
-            self.image = Some(
-                Image::create(image_dims.x, image_dims.y, false, Format::RGBA8)
-                    .expect("failed to allocate crowd heatmap image"),
-            );
             self.image_size = image_dims;
+            self.image = None; // Force reallocation of image
         }
 
-        let image = self
-            .image
-            .as_mut()
-            .expect("heatmap image must be allocated at this point");
+        let image = self.image.get_or_insert_with(|| {
+            Image::create(image_dims.x, image_dims.y, false, Format::RGBA8)
+                .expect("failed to allocate crowd heatmap image")
+        });
 
         update_buffer(&mut self.pixel_buffer, snapshot);
         let byte_array = PackedByteArray::from_iter(self.pixel_buffer.iter().copied());

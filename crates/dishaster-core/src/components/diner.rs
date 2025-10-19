@@ -45,6 +45,11 @@ impl DinerGoalState {
         self.current == goal
     }
 
+    /// Get the current goal state.
+    pub fn current(&self) -> DinerGoal {
+        self.current
+    }
+
     /// Transition to the next goal state, resetting the timer.
     pub fn update(&mut self, next_goal: DinerGoal) {
         self.pending = Some(next_goal);

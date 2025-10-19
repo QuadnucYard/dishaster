@@ -4,7 +4,7 @@ mod distance_overlay;
 mod movement_overlay;
 mod queue_overlay;
 
-use dishaster_core::snapshots::Snapshot;
+use dishaster_core::snapshots::DebugSnapshots;
 use dishrupt_godot::display::DisplayContext2D;
 use godot::{classes::Node2D, prelude::*};
 
@@ -53,14 +53,14 @@ impl DbgViz {
         }
     }
 
-    pub fn update(&mut self, snapshot: &Snapshot, display_ctx: &DisplayContext2D) {
+    pub fn update(&mut self, snapshot: &DebugSnapshots, display_ctx: &DisplayContext2D) {
         self.collision_overlay
-            .present(snapshot.collision_debug.as_ref(), display_ctx);
+            .present(snapshot.collision.as_ref(), display_ctx);
         self.crowd_overlay
-            .present(snapshot.crowd_debug.as_ref(), display_ctx);
+            .present(snapshot.crowd.as_ref(), display_ctx);
         self.movement_overlay
-            .present(snapshot.movement_debug.as_ref(), display_ctx);
+            .present(snapshot.movement.as_ref(), display_ctx);
         self.queue_overlay
-            .present(snapshot.queue_debug.as_ref(), display_ctx);
+            .present(snapshot.queues.as_ref(), display_ctx);
     }
 }

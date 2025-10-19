@@ -2,6 +2,8 @@ mod layout;
 mod queues;
 mod staffs;
 
+use std::sync::LazyLock;
+
 use bevy_ecs::schedule::ScheduleConfigs;
 use dishrupt_core::{
     asset::PrefabReference,
@@ -192,14 +194,33 @@ fn spawn_diner(
         ChildOf(wrapper_entity),
     ));
 
+    static FEEDBACK_PROTO: LazyLock<PrefabReference> =
+        LazyLock::new(|| PrefabReference::new("feedback_balloon"));
+    static DEBUG_PROTO: LazyLock<PrefabReference> =
+        LazyLock::new(|| PrefabReference::new("agent_debug"));
+
     let _feedback = commands.spawn((
         DisplayState {
-            proto: PrefabReference::new("feedback_balloon"),
+            proto: FEEDBACK_PROTO.clone(),
             name: Some("Feedback".into()),
             ..Default::default()
         },
         Transform {
             position: vec3(0.0, 0.0, 1.7),
+            parent: Some(wrapper_entity),
+            ..Default::default()
+        },
+        ChildOf(wrapper_entity),
+    ));
+
+    let _debug = commands.spawn((
+        DisplayState {
+            proto: DEBUG_PROTO.clone(),
+            name: Some("Debug".into()),
+            ..Default::default()
+        },
+        Transform {
+            position: vec3(0.0, 0.0, 1.8),
             parent: Some(wrapper_entity),
             ..Default::default()
         },

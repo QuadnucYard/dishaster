@@ -1,4 +1,4 @@
-use dishaster_core::snapshots::PresentationEvent;
+use dishaster_core::snapshots::{DebugSnapshots, PresentationEvent};
 use dishrupt_godot_scene::SceneContext;
 
 use super::{Game, controllers::*};
@@ -60,6 +60,16 @@ impl Game {
     pub(crate) fn process_display(&mut self, delta: f64) {
         for agent in self.dc.agents.values_mut() {
             agent.process(delta);
+        }
+    }
+
+    pub(crate) fn update_other_debug(&mut self, snapshot: &DebugSnapshots) {
+        if let Some(diner_debugs) = &snapshot.diners {
+            for diner_debug in diner_debugs {
+                if let Some(agent) = self.dc.agents.get_mut(&diner_debug.core_id) {
+                    agent.update_debug(&diner_debug.goal_str);
+                }
+            }
         }
     }
 }

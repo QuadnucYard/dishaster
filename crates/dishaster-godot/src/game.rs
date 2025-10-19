@@ -142,7 +142,9 @@ impl Game {
             self.perf_tracker.tick_updates(ticks);
 
             self.stage.present(snapshot.display.iter());
-            self.dbgviz.update(&snapshot, self.stage.display_context());
+            self.dbgviz
+                .update(&snapshot.debug, self.stage.display_context());
+            self.update_other_debug(&snapshot.debug);
 
             self.process_events(ctx, events);
             self.telemetry.tick = snapshot.sim_tick;

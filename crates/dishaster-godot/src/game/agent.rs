@@ -12,6 +12,7 @@ pub struct AgentController {
 
     root: GdNode2D,
     pub feedback: FeedbackController,
+    debug: Option<AgentDebugController>,
 }
 
 impl AgentController {
@@ -19,16 +20,25 @@ impl AgentController {
         let mut feedback = FeedbackController::new(node.get_node_as("Feedback"));
         feedback.root.set_visible(false);
 
+        let debug = node.try_get_node_as("Debug").map(AgentDebugController::new);
+
         Self {
             entity,
 
             feedback,
             root: node,
+            debug,
         }
     }
 
     pub fn process(&mut self, delta: f64) {
         self.feedback.process(delta);
+    }
+
+    pub fn update_debug(&mut self, goal_str: &str) {
+        if let Some(debug) = &mut self.debug {
+            debug.goal_label.set_text(goal_str);
+        }
     }
 }
 
@@ -81,5 +91,19 @@ impl FeedbackController {
         }
         self.root.set_visible(true);
         self.lifetime = Some(BALLOON_LIFETIME);
+    }
+}
+
+pub struct AgentDebugController {
+    // root: Gd<Node2D>,
+    goal_label: Gd<Label>,
+}
+
+impl AgentDebugController {
+    pub fn new(node: Gd<Node2D>) -> Self {
+        Self {
+            goal_label: node.get_node_as("GoalLabel"),
+            // root: node,
+        }
     }
 }
