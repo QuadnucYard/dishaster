@@ -1,12 +1,11 @@
 //! Dishaster core logic and data structures
 
 mod command_handle;
-pub mod commands;
 pub mod components;
 pub(crate) mod constants;
 pub mod resources;
 pub mod sim;
-pub mod snapshots;
+mod snapshot;
 pub mod systems;
 
 /// Re-export of dishaster_models

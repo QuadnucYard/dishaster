@@ -1,10 +1,8 @@
 use as_any::Downcast;
+use dishaster_godot_game::progress_service;
 use dishrupt_godot_scene::*;
 
-use crate::{
-    game_main::progress_service,
-    scenes::{GameScene, StartScene},
-};
+use crate::scenes::{GameScene, StartScene};
 
 pub struct StartProcedure;
 

@@ -1,11 +1,12 @@
 use as_any::Downcast;
-use dishaster_core::models::LevelConfig;
+use dishaster_core::{models::LevelConfig, sim::Simulation};
+use dishaster_godot_game::Game;
 use dishaster_godot_ui::{req::*, *};
 use dishrupt_godot::{bind::BindGodot, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::*;
 use godot::{classes::Node, prelude::*};
 
-use crate::{game::Game, scenes::proc::*};
+use crate::scenes::proc::*;
 
 /// The in-game scene. Recreate the inner `Game` instance on each run.
 pub struct GameScene {
@@ -101,7 +102,7 @@ impl Scene for GameScene {
 
 impl GameScene {
     pub fn start_game(&mut self, ctx: &mut SceneContext, level: LevelConfig) {
-        let mut game = Game::new(self.gd(), level);
+        let mut game = Game::new(self.gd(), level, |db| Box::new(Simulation::new(db)));
         game.start_day(ctx);
         self.game = Some(game);
     }

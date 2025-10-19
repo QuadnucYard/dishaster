@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use dishaster_core::snapshots::{CollisionCellDebugSnapshot, CollisionGridDebugSnapshot};
+use dishaster_channel::snapshots::{CollisionCellDebugSnapshot, CollisionGridDebugSnapshot};
 use dishrupt_core::prelude::*;
 use dishrupt_godot::display::DisplayContext2D;
 use godot::{

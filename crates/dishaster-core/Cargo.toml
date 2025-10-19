@@ -8,12 +8,11 @@ edition.workspace = true
 [dependencies]
 dishrupt-core.workspace = true
 dishaster-models.workspace = true
+dishaster-channel.workspace = true
 dishaster-navigation.workspace = true
 
 bevy_ecs.workspace = true
-bevy_math.workspace = true
 derive_more.workspace = true
-ecow.workspace = true
 log.workspace = true
 ordered-float.workspace = true
 rand.workspace = true

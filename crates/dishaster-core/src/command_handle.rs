@@ -1,16 +1,15 @@
 use bevy_ecs::system::RunSystemOnce;
+use dishaster_channel::{commands::SimCommand, events::*};
 use dishaster_navigation::*;
 
-use crate::{
-    commands::SimCommand, components::*, prelude::*, resources::*, sim::Simulation, snapshots::*,
-};
+use crate::{components::*, prelude::*, resources::*, sim::Simulation};
 
 impl Simulation {
     /// Apply a high-level control command from the client runtime.
     ///
     /// Commands alter stateful resources directly so that the next simulation tick
     /// reflects the requested transition without delay.
-    pub fn handle_command(&mut self, command: SimCommand) {
+    pub(crate) fn handle_command_impl(&mut self, command: SimCommand) {
         match command {
             SimCommand::StartRun => {
                 let mut day_status = self.world.resource_mut::<DayStatus>();

@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use dishaster_channel::ISimulation;
 use dishaster_core::{models::*, sim::*};
 use dishrupt_core::{asset::PrefabReference, display::DisplayModel};
 

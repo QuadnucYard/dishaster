@@ -4,10 +4,11 @@ mod time;
 
 use std::sync::Arc;
 
+use dishaster_channel::events::PresentationEvent;
 use rand_chacha::ChaCha8Rng;
 pub use time::Time;
 
-use crate::{models::*, prelude::*, snapshots::*};
+use crate::{models::*, prelude::*};
 
 /// Root entity for all display-related objects in the scene
 #[derive(Resource)]

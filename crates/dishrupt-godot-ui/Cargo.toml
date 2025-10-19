@@ -9,7 +9,6 @@ edition.workspace = true
 dishrupt-godot-ui-macros = { path = "macros" }
 
 as-any.workspace = true
-bevy_ecs.workspace = true
 godot.workspace = true
 signals2.workspace = true
 

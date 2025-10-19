@@ -19,10 +19,12 @@ dishrupt-godot-scene = { path = "crates/dishrupt-godot-scene" }
 
 dishaster-navigation = { path = "crates/dishaster-navigation" }
 dishaster-models = { path = "crates/dishaster-models" }
+dishaster-channel = { path = "crates/dishaster-channel" }
 dishaster-core = { path = "crates/dishaster-core" }
 dishaster-data = { path = "crates/dishaster-data" }
 dishaster-persistence = { path = "crates/dishaster-persistence" }
 dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }
+dishaster-godot-game = { path = "crates/dishaster-godot-game" }
 dishaster-godot = { path = "crates/dishaster-godot" }
 
 bevy_color = { version = "0.17.0", default-features = false, features = ["std"] }

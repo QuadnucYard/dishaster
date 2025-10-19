@@ -18,7 +18,7 @@ pub use spawn::*;
 
 /// Common imports for systems
 mod prelude {
-    pub use crate::{
-        components::*, constants::*, models::*, prelude::*, resources::*, snapshots::*,
-    };
+    pub use dishaster_channel::events::*;
+
+    pub use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
 }

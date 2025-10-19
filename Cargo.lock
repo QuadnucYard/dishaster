@@ -424,16 +424,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "dishaster-channel"
+version = "0.1.0"
+dependencies = [
+ "dishaster-models",
+ "dishrupt-core",
+]
+
+[[package]]
 name = "dishaster-core"
 version = "0.1.0"
 dependencies = [
  "bevy_ecs",
- "bevy_math",
  "derive_more",
+ "dishaster-channel",
  "dishaster-models",
  "dishaster-navigation",
  "dishrupt-core",
- "ecow",
  "log",
  "ordered-float",
  "rand",
@@ -461,19 +468,17 @@ dependencies = [
  "as-any",
  "dishaster-core",
  "dishaster-data",
+ "dishaster-godot-game",
  "dishaster-godot-ui",
  "dishaster-persistence",
- "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-godot-scene",
  "dishrupt-godot-ui",
  "dishrupt-l10n-godot",
  "env_logger",
- "fibre",
  "godot",
  "log",
  "rand",
- "rustc-hash",
 ]
 
 [[package]]
@@ -482,6 +487,24 @@ version = "0.1.0"
 dependencies = [
  "dishaster-godot",
  "godot",
+]
+
+[[package]]
+name = "dishaster-godot-game"
+version = "0.1.0"
+dependencies = [
+ "dishaster-channel",
+ "dishaster-godot-ui",
+ "dishaster-models",
+ "dishaster-persistence",
+ "dishrupt-core",
+ "dishrupt-godot",
+ "dishrupt-godot-scene",
+ "dishrupt-godot-ui",
+ "dishrupt-l10n",
+ "fibre",
+ "godot",
+ "rustc-hash",
 ]
 
 [[package]]
@@ -514,7 +537,6 @@ dependencies = [
  "edt",
  "grid",
  "pathfinding",
- "rustc-hash",
 ]
 
 [[package]]
@@ -527,7 +549,6 @@ dependencies = [
  "ron",
  "serde",
  "tempfile",
- "thiserror 2.0.17",
 ]
 
 [[package]]
@@ -569,7 +590,6 @@ name = "dishrupt-godot-ui"
 version = "0.1.0"
 dependencies = [
  "as-any",
- "bevy_ecs",
  "dishrupt-godot-ui-macros",
  "godot",
  "signals2",

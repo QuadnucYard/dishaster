@@ -4,7 +4,7 @@ mod distance_overlay;
 mod movement_overlay;
 mod queue_overlay;
 
-use dishaster_core::snapshots::DebugSnapshots;
+use dishaster_channel::snapshots::DebugSnapshots;
 use dishrupt_godot::display::DisplayContext2D;
 use godot::{classes::Node2D, prelude::*};
 

@@ -1,7 +1,7 @@
-use dishaster_models::PricingMethod;
-use dishrupt_core::{EntityId, prelude::*};
+//! Presentation events emitted by the core simulation for client display.
 
-use crate::models::ModelId;
+use dishaster_models::{ModelId, PricingMethod};
+use dishrupt_core::{EntityId, prelude::*};
 
 /// Presentation events emitted by the core simulation for client display.
 pub enum PresentationEvent {

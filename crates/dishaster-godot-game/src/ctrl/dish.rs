@@ -1,16 +1,17 @@
-use dishaster_core::{models::PricingMethod, snapshots::DishViewModel};
+use dishaster_channel::events::DishViewModel;
 use dishaster_godot_ui::{DishPricePopup, DishPriceView};
+use dishaster_models::PricingMethod;
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, ext::NodeExt, input::event::MouseButtonEvent};
 use dishrupt_godot_scene::SceneContext;
 use dishrupt_godot_ui::*;
-use dishrupt_l10n_godot::tr;
+use dishrupt_l10n::tr;
 use godot::{
     classes::{Area2D, Label},
     prelude::*,
 };
 
-use crate::game::input::Pickable;
+use crate::input::Pickable;
 
 #[allow(unused)]
 pub struct DishController {

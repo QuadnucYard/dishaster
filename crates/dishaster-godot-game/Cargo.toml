@@ -1,26 +1,24 @@
 [package]
-name = "dishaster-godot"
+name = "dishaster-godot-game"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
+dishrupt-core.workspace = true
 dishrupt-godot.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true
-dishrupt-l10n-godot.workspace = true
-dishaster-core.workspace = true
-dishaster-data.workspace = true
+dishrupt-l10n.workspace = true
+dishaster-models.workspace = true
+dishaster-channel.workspace = true
 dishaster-persistence.workspace = true
-dishaster-godot-game.workspace = true
 dishaster-godot-ui.workspace = true
 
-as-any.workspace = true
-env_logger.workspace = true
+fibre.workspace = true
+rustc-hash.workspace = true
 godot.workspace = true
-log.workspace = true
-rand.workspace = true
 
 [lints]
 # workspace = true

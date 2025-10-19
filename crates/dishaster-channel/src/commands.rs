@@ -1,8 +1,7 @@
 //! Simulation commands and control interfaces.
 
-use dishrupt_core::EntityId;
-
-use crate::{models::PricingMethod, prelude::*};
+use dishaster_models::PricingMethod;
+use dishrupt_core::{EntityId, prelude::*};
 
 /// Commands that can be sent to the simulation from external sources.
 pub enum SimCommand {

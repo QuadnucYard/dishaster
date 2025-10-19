@@ -1,6 +1,6 @@
 use std::iter::FromIterator;
 
-use dishaster_core::snapshots::QueryDistancesResponse;
+use dishaster_channel::events::QueryDistancesResponse;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
 use godot::{

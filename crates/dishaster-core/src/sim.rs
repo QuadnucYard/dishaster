@@ -2,11 +2,12 @@
 
 use std::sync::Arc;
 
+use dishaster_channel::{ISimulation, commands::SimCommand, events::*, snapshots::*};
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
 use ordered_float::OrderedFloat;
 
-use crate::{components::*, models::*, prelude::*, resources::*, snapshots::*, systems::*};
+use crate::{components::*, models::*, prelude::*, resources::*, systems::*};
 
 /// Core simulation engine managing ECS world and system execution
 ///
@@ -76,13 +77,15 @@ impl Simulation {
     pub fn debug_flags(&self) -> DebugFeatureFlags {
         self.debug_flags
     }
+}
 
+impl ISimulation for Simulation {
     /// Initialize and start a simulation level with the given configuration
     ///
     /// Sets up all level-specific resources including RNG seed, diner providers,
     /// spawning parameters, and static world objects. Must be called before
     /// the first tick() to properly initialize the simulation state.
-    pub fn start(&mut self, level: LevelConfig) {
+    fn start(&mut self, level: LevelConfig) {
         const DEFAULT_TIMESTEP_S: f64 = 0.1;
         self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
         self.world.insert_resource(GameRng::new(level.seed));
@@ -127,7 +130,7 @@ impl Simulation {
     /// Executes all registered systems in the proper order to update
     /// entity states, handle interactions, and progress the simulation.
     /// This should be called at regular intervals to maintain simulation flow.
-    pub fn tick(&mut self) {
+    fn tick(&mut self) {
         // Check if time resource exists and advance it, or create a new one
         let mut time = self.world.resource_mut::<Time>();
         time.tick();
@@ -139,7 +142,7 @@ impl Simulation {
     ///
     /// This function is expected to be idempotent: multiple calls between ticks
     /// should yield identical results.
-    pub fn snapshot(&mut self) -> Snapshot {
+    fn snapshot(&mut self) -> Snapshot {
         let mut query = self
             .world
             .query::<(Entity, &DisplayState, &mut Transform)>();
@@ -166,16 +169,22 @@ impl Simulation {
     }
 
     /// Retrieve all events that occurred after the last poll
-    pub fn poll_events(&mut self) -> Vec<PresentationEvent> {
+    fn poll_events(&mut self) -> Vec<PresentationEvent> {
         let mut event_log = self.world.resource_mut::<EventLog>();
         event_log.drain()
     }
 
     /// Get the root entity of the display hierarchy
-    pub fn root_entity(&self) -> EntityId {
+    fn root_entity(&self) -> EntityId {
         self.world.resource::<DisplayRoot>().0.into()
     }
 
+    fn handle_command(&mut self, command: SimCommand) {
+        self.handle_command_impl(command);
+    }
+}
+
+impl Simulation {
     /// Check if the current day is complete (spawning finished and all diners left)
     pub fn is_day_complete(&self) -> bool {
         let (day_status, spawner) = (

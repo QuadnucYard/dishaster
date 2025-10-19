@@ -1,35 +1,45 @@
-mod agent;
-mod dish;
+//! Dishaster Godot Game Module
+
+mod ctrl;
+mod dbgviz;
 mod input;
 pub mod perf;
 mod present;
+pub mod runner;
 
-mod controllers {
-    pub use super::{agent::AgentController, dish::DishController};
-}
+use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
-use dishaster_core::{
-    commands::SimCommand,
-    models::{LevelConfig, PricingMethod},
-    sim::Simulation,
-};
+use dishaster_channel::{ISimulation, commands::SimCommand};
 use dishaster_godot_ui::*;
+use dishaster_models::{GameModelRegistry, LevelConfig, PricingMethod};
+use dishaster_persistence::ProgressService;
 use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::display::*;
 use dishrupt_godot_scene::SceneContext;
-use dishrupt_l10n_godot::tr;
+use dishrupt_l10n::tr;
 use godot::{
     classes::{Node, Node2D},
     prelude::*,
 };
 use rustc_hash::FxHashMap;
 
-use self::{controllers::*, perf::PerfTracker};
+use self::{ctrl::*, perf::PerfTracker};
 use crate::{
     dbgviz::*,
-    game_main::{GAME_DATA, progress_service},
+    // game_main::{GAME_DATA, progress_service},
     runner::{SnapshotFrame, SyncSimulationRunner},
 };
+
+pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
+pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService>> = OnceLock::new();
+
+pub fn progress_service() -> MutexGuard<'static, ProgressService> {
+    PROGRESS_SERVICE
+        .get()
+        .expect("progress service not initialized")
+        .lock()
+        .expect("progress service poisoned")
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum DayPhase {
@@ -69,7 +79,11 @@ struct DisplayControllers {
 }
 
 impl Game {
-    pub fn new(gd: Gd<Node>, level: LevelConfig) -> Self {
+    pub fn new(
+        gd: Gd<Node>,
+        level: LevelConfig,
+        sim_creator: impl FnOnce(Arc<GameModelRegistry>) -> Box<dyn ISimulation>,
+    ) -> Self {
         let db = GAME_DATA.get().expect("game data not initialized");
 
         let map_prefab = &db
@@ -104,7 +118,7 @@ impl Game {
         };
 
         // Initialize simulation
-        let mut sim = Simulation::new(db.clone());
+        let mut sim = sim_creator(db.clone());
         sim.start(level);
         let root_entity = sim.root_entity();
         let default_tps = 60.0;

@@ -7,11 +7,8 @@ use std::{
     time::{Duration, Instant},
 };
 
-use dishaster_core::{
-    Tick,
-    commands::SimCommand,
-    sim::Simulation,
-    snapshots::{PresentationEvent, Snapshot},
+use dishaster_channel::{
+    ISimulation, Tick, commands::SimCommand, events::PresentationEvent, snapshots::Snapshot,
 };
 use fibre::spsc;
 
@@ -93,7 +90,7 @@ impl Drop for SimController {
 pub struct SnapshotReceiver(spsc::BoundedSyncReceiver<SnapshotFrame>);
 
 impl SimulationRunner {
-    pub fn new(mut sim: Simulation, tps: f64) -> Self {
+    pub fn new(mut sim: Box<dyn ISimulation + Send>, tps: f64) -> Self {
         // create channel
         let (tx, rx) = spsc::bounded_sync::<SnapshotFrame>(3);
 
@@ -178,14 +175,14 @@ impl SimulationRunner {
 /// Unlike `SimulationRunner` which runs asynchronously in a background thread,
 /// this runner gives you direct control over when and how much the simulation advances.
 pub struct SyncSimulationRunner {
-    sim: Simulation,
+    sim: Box<dyn ISimulation>,
     accumulator: f64,
     tps: f64,
 }
 
 impl SyncSimulationRunner {
     /// Create a new synchronous simulation runner.
-    pub fn new(sim: Simulation, tps: f64) -> Self {
+    pub fn new(sim: Box<dyn ISimulation>, tps: f64) -> Self {
         Self {
             sim,
             accumulator: 0.0,

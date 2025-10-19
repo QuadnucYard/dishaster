@@ -9,7 +9,6 @@ edition.workspace = true
 anyhow.workspace = true
 ron.workspace = true
 serde.workspace = true
-thiserror.workspace = true
 dishaster-models.workspace = true
 
 [dev-dependencies]

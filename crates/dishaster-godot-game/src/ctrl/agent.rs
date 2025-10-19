@@ -1,4 +1,4 @@
-use dishaster_core::snapshots::Feedback;
+use dishaster_channel::events::Feedback;
 use dishrupt_core::EntityId;
 use dishrupt_godot::display::*;
 use godot::{

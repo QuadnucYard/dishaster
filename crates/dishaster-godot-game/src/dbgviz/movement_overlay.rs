@@ -3,7 +3,7 @@ use std::{
     f32::consts::TAU,
 };
 
-use dishaster_core::snapshots::MovementDebugSnapshot;
+use dishaster_channel::snapshots::MovementDebugSnapshot;
 use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::display::DisplayContext2D;
 use godot::{

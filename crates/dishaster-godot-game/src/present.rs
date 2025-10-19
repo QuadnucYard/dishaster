@@ -1,7 +1,7 @@
-use dishaster_core::snapshots::{DebugSnapshots, PresentationEvent};
+use dishaster_channel::{events::PresentationEvent, snapshots::DebugSnapshots};
 use dishrupt_godot_scene::SceneContext;
 
-use super::{Game, controllers::*};
+use super::{Game, ctrl::*};
 
 impl Game {
     pub(crate) fn process_events(

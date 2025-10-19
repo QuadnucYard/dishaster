@@ -1,11 +1,12 @@
 use std::{
     cell::OnceCell,
     path::PathBuf,
-    sync::{Arc, Mutex, MutexGuard, OnceLock},
+    sync::{Arc, Mutex},
 };
 
 use dishaster_core::models::GameModelRegistry;
 use dishaster_data::DataLoader;
+use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE};
 use dishaster_godot_ui::register_guis;
 use dishaster_persistence::ProgressService;
 use dishrupt_godot::{audio::AudioManager, ext::NodeExt, input::listener::InputListener};
@@ -161,21 +162,10 @@ impl Inner {
     }
 }
 
-pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
-pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService>> = OnceLock::new();
-
 fn init_game_database(loader: impl FnOnce() -> Arc<GameModelRegistry>) {
     GAME_DATA
         .set(loader())
         .unwrap_or_else(|_| panic!("init game database error"));
-}
-
-pub fn progress_service() -> MutexGuard<'static, ProgressService> {
-    PROGRESS_SERVICE
-        .get()
-        .expect("progress service not initialized")
-        .lock()
-        .expect("progress service poisoned")
 }
 
 fn init_game() {

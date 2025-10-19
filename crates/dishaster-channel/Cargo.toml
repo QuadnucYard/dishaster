@@ -1,16 +1,13 @@
 [package]
-name = "dishaster-navigation"
+name = "dishaster-channel"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
-bevy_math.workspace = true
-dodgy.workspace = true
-edt.workspace = true
-grid.workspace = true
-pathfinding.workspace = true
+dishrupt-core.workspace = true
+dishaster-models.workspace = true
 
 [lints]
 workspace = true

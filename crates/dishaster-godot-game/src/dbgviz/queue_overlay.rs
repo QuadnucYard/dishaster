@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use dishaster_core::snapshots::{
+use dishaster_channel::snapshots::{
     QueueIntentDebugSnapshot, QueueLaneDebugSnapshot, QueueMemberDebugSnapshot,
 };
 use dishrupt_core::EntityId;

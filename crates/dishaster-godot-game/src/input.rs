@@ -1,4 +1,4 @@
-use dishaster_core::commands::SimCommand;
+use dishaster_channel::commands::SimCommand;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::input::{event::MouseButtonEvent, listener::GodotInputEvent};
 use dishrupt_godot_scene::SceneContext;
@@ -8,7 +8,7 @@ use godot::{
     prelude::*,
 };
 
-use crate::game::{DayPhase, Game};
+use crate::{DayPhase, Game};
 
 impl Game {
     pub fn process_input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
