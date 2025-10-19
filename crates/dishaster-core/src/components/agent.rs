@@ -28,7 +28,9 @@ pub struct Movement {
     pub path: NavPath,
     /// The target position to move towards.
     pub pending_target: Option<PathTarget>,
-    /// Whether the target has been reached.
+    /// The current target being pursued along the path.
+    pub current_target: Option<PathTarget>,
+    /// Whether the last requested target has been reached.
     pub target_reached: bool,
     /// The last tick when the path was calculated. It is set when a new path is assigned.
     pub last_path_tick: Tick,
@@ -48,6 +50,7 @@ impl Default for Movement {
             path: Default::default(),
             target_reached: false,
             pending_target: None,
+            current_target: None,
             last_path_tick: 0,
         }
     }
@@ -60,9 +63,10 @@ impl Movement {
     }
 
     /// Clear the current path and stop movement.
-    pub fn stop(&mut self) {
+    pub fn stop_as_reached(&mut self) {
         self.path.clear();
         self.pending_target = None;
+        self.current_target = None;
         self.target_reached = true;
         self.velocity = Vec2::ZERO;
     }

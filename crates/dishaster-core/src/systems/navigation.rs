@@ -45,6 +45,14 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
 }
 
 impl Movement {
+    /// Request a path to the specified target (point or rect).
+    pub fn request_path_any(&mut self, target: PathTarget) {
+        log::trace!(target: "navigation", "Path requested to {target:.2}");
+
+        self.pending_target = Some(target);
+        self.target_reached = false;
+    }
+
     /// Request a path to the specified target position.
     pub fn request_path(&mut self, target: Vec2) {
         log::trace!(target: "navigation", "Path requested to {target:.2}");
@@ -65,12 +73,25 @@ impl Movement {
     /// If no valid path is found, the path is cleared.
     fn compute_new_path(&mut self, target: PathTarget, nav_grid: &NavigationGrid) {
         // Precheck
-        if let PathTarget::Point(target) = target
-            && !nav_grid.is_pos_traversable(target, self.radius)
-        {
-            log::debug!(target: "navigation", "Path target {:.2} not traversable", target);
-            self.path.clear();
-            return;
+        match target {
+            PathTarget::Point(target) => {
+                if !nav_grid.is_pos_traversable(target, self.radius) {
+                    log::debug!(target: "navigation", "Path target {:.2} not traversable", target);
+                    self.path.clear();
+                    return;
+                }
+                if self.pos.close_to(target, 0.1) {
+                    self.set_reached();
+                    return;
+                }
+            }
+            PathTarget::Rect(target) => {
+                if target.inflate(0.15).contains(self.pos) {
+                    log::debug!(target: "navigation", "Pos {} already inside target rect {:?}", self.pos, target);
+                    self.set_reached();
+                    return;
+                }
+            }
         }
 
         if let Some(path) = find_path(PathRequest {
@@ -88,12 +109,21 @@ impl Movement {
                 path.len(),
             );
 
+            self.current_target = Some(target);
+            self.target_reached = false;
             self.path = path;
         } else {
             log::debug!(target: "navigation", "Path from {:.2} to {:.2} not found", self.pos, target);
 
             self.path.clear();
         }
+    }
+
+    fn set_reached(&mut self) {
+        self.path.clear();
+        self.target_reached = true;
+        self.current_target = None;
+        self.velocity = Vec2::ZERO;
     }
 }
 
@@ -188,6 +218,7 @@ pub fn update_agent_movement(
         // Update position by velocity
         movement.velocity = velocity;
         movement.pos += velocity * dt;
+        movement.pos = nav_grid.clamp(movement.pos); // Keep within bounds
 
         // Update next_waypoint
         if let Some(next) = movement.path.next()
@@ -197,18 +228,19 @@ pub fn update_agent_movement(
             if movement.path.is_empty() {
                 movement.velocity = Vec2::ZERO;
                 movement.target_reached = true;
+                movement.current_target = None;
             }
         }
 
         // Randomly re-find path due to crowd update
         const PATH_COOLDOWN_TICKS: Tick = 300;
         if movement.pending_target.is_none()
-            && let Some(last) = movement.path.last()
+            && let Some(target) = movement.current_target
             && time.current_tick - movement.last_path_tick >= PATH_COOLDOWN_TICKS
             && rng.random_bool(0.01)
         {
-            movement.request_path(last);
-            log::debug!("Randomly re-requesting path to {last:.2}",);
+            movement.request_path_any(target);
+            log::debug!("Randomly re-requesting path to {target:.2}",);
         }
     }
 }

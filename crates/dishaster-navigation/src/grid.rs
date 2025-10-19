@@ -49,6 +49,12 @@ impl NavigationGrid {
         self.cell_size
     }
 
+    /// Clamp a world position to be within the grid bounds
+    pub fn clamp(&self, pos: Vec2) -> Vec2 {
+        let max = self.grid_size.as_vec2() * self.cell_size;
+        pos.clamp(Vec2::ZERO, max)
+    }
+
     /// Ensure a tile coordinate is within grid bounds
     pub fn bound_tile(&self, tile: IVec2) -> Option<UVec2> {
         if tile.x < 0 || tile.y < 0 {

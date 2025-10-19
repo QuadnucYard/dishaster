@@ -35,7 +35,7 @@ pub fn update_queue_intents(
                 intent.lane,
                 target_position
             );
-            movement.stop();
+            movement.stop_as_reached();
             // Reached the end of the queue, become a QueueMember
             commands.entity(entity).remove::<QueueIntent>();
             commands

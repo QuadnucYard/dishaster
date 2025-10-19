@@ -101,6 +101,8 @@ pub struct DinerTargets {
     pub chosen_seat: Option<(Entity, usize)>,
     /// Dish collector the diner will visit after eating
     pub collector_target: Option<Entity>,
+    /// Exit target position to leave the canteen
+    pub exit_target: Option<()>,
 }
 
 /// Persistent memory component for diner data across days

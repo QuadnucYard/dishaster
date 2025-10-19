@@ -240,8 +240,10 @@ fn handle_get_served_goal(
         );
 
         // Service completed, remove session and move to finding a seat
-        commands.entity(entity).remove::<QueueMember>();
-        commands.entity(entity).remove::<ServiceSession>();
+        commands
+            .entity(entity)
+            .remove::<QueueMember>()
+            .remove::<ServiceSession>();
         goal.update(DinerGoal::FindSeat);
     }
 }
@@ -267,11 +269,10 @@ fn handle_find_seat_goal(
             let seat_pos = table.seat_positions[seat_index];
             log::debug!(
                 target: "diner",
-                "found_seat: table={table_entity:?} seat={seat_index} target={:.2}",
-                seat_pos
+                "found_seat: table={table_entity:?} seat={seat_index} target={seat_pos:.2}",
             );
-            movement.request_path(seat_pos);
             goal.update(DinerGoal::MoveToSeat);
+            // The navigation is left for MoveToSeat handler
         } else {
             log::debug!(
                 target: "diner",
@@ -377,7 +378,7 @@ fn handle_move_to_seat_goal(
                 seat_pos
             );
             // Reached the seat
-            movement.stop();
+            movement.stop_as_reached();
             movement.pos = seat_pos; // snap to seat position
             table.occupants[seat_index] = Some(entity); // Mark the seat as occupied
             goal.update(DinerGoal::Eat);
@@ -470,9 +471,19 @@ fn handle_return_dishes_goal(
         }
 
         if movement.target_reached {
-            targets.collector_target = None;
-
+            if goal.timer < 2.0 {
+                // Simulate time taken to return dishes
+                continue;
+            }
+            log::debug!(
+                target: "diner",
+                "dishes_returned: pos={:.2}",
+                movement.pos
+            );
+            movement.stop_as_reached();
             goal.update(DinerGoal::Leave);
+        } else {
+            goal.reset_timer();
         }
     }
 }
@@ -480,16 +491,20 @@ fn handle_return_dishes_goal(
 /// Handles the diner leaving the canteen.
 fn handle_leave_goal(
     mut commands: Commands,
-    diner_query: Query<(Entity, &mut DinerGoalState, &mut Movement)>,
+    diner_query: Query<(
+        Entity,
+        &mut DinerGoalState,
+        &mut DinerTargets,
+        &mut Movement,
+    )>,
     canteen: Res<Canteen>,
-    mut rng: ResMut<GameRng>,
 ) {
-    for (entity, goal, mut movement) in diner_query {
+    for (entity, goal, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::Leave) {
             continue;
         }
 
-        if !movement.has_path() {
+        if targets.exit_target.is_none() {
             let best_exit = canteen
                 .model
                 .entrances
@@ -501,21 +516,19 @@ fn handle_leave_goal(
                     NotNan::new(distance).unwrap()
                 })
                 .expect("should have at least one exit");
-            let best_exit_point = vec2(
-                if best_exit.width() > 0.6 {
-                    rng.random_range((best_exit.x_min + 0.3)..(best_exit.x_max - 0.3))
-                } else {
-                    best_exit.center()
-                },
-                canteen.model.entrances_y,
-            );
 
-            movement.request_path(best_exit_point);
+            let best_exit_area = Rect::new(
+                best_exit.x_min + 0.3,
+                canteen.model.entrances_y,
+                best_exit.x_max - 0.3,
+                canteen.model.entrances_y + 0.3,
+            );
+            targets.exit_target = Some(());
+            movement.request_path_to_rect(best_exit_area);
             log::debug!(
                 target: "diner",
-                "leaving: pos={:.2} target={:.2}",
-                movement.pos,
-                best_exit_point
+                "leaving: pos={:.2} target={:?}",
+                movement.pos, best_exit_area
             );
             continue;
         }
