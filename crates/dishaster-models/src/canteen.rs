@@ -67,12 +67,16 @@ pub struct DispenserModel {
     pub id: ModelId,
     /// Physical dimensions of the dispenser
     pub size: Size,
+    /// Area in front of the dispenser where diners can receive items.
+    pub reception_area: Rect,
     /// Maximum capacity
     pub capacity: u32,
     /// Initial stock of items
     pub initial_stock: u32,
     /// Time required to dispense
     pub processing_time: Seconds,
+    /// Display model
+    pub display: DisplayModel,
 }
 
 impl HasId for DispenserModel {

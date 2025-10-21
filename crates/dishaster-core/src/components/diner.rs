@@ -6,6 +6,7 @@ use crate::{components::Movement, prelude::*};
 #[derive(Bundle)]
 pub struct DinerBundle {
     pub diner: Diner,
+    pub state: DinerState,
     pub goal: DinerGoalState,
     pub targets: DinerTargets,
     pub movement: Movement,
@@ -16,6 +17,17 @@ pub struct DinerBundle {
 pub struct Diner {
     /// Unique identifier for this diner instance. Useless yet.
     pub id: u32,
+}
+
+/// Current state of the diner
+#[derive(Component, Default)]
+pub struct DinerState {
+    /// Whether the diner has a tray
+    pub has_tray: bool,
+    /// Whether the diner has chopsticks
+    pub has_chopsticks: bool,
+    /// Whether the diner has been served
+    pub is_served: bool,
 }
 
 /// Current goal state of the diner
@@ -79,6 +91,10 @@ pub enum DinerGoal {
     Observe,
     /// Deciding which window to approach
     DecideWindow,
+    /// Moving to pick up a tray
+    PickTray,
+    /// Moving to pick up chopsticks
+    PickChopsticks,
     /// Moving to the chosen window
     QueueForWindow,
     /// Being served at the window
@@ -102,6 +118,10 @@ pub struct DinerTargets {
     pub observing_window: Option<Entity>,
     /// Currently chosen window entity
     pub chosen_window: Option<Entity>,
+    /// Currently chosen tray dispenser entity
+    pub tray_target: Option<Entity>,
+    /// Currently chosen chopstick dispenser entity
+    pub chopstick_target: Option<Entity>,
     /// Currently chosen table entity and seat index
     pub chosen_seat: Option<(Entity, usize)>,
     /// Dish collector the diner will visit after eating

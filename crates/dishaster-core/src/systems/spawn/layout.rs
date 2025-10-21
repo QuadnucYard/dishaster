@@ -29,7 +29,7 @@ pub fn spawn_static_objects(
         &mut events,
     );
     spawn_tables(&mut commands, &level, &registry, &display_root);
-    spawn_dispensers(&mut commands, &level, &registry);
+    spawn_dispensers(&mut commands, &level, &registry, &display_root);
     spawn_collectors(&mut commands, &level, &registry, &display_root);
 }
 
@@ -265,20 +265,18 @@ fn spawn_dispensers(
     commands: &mut Commands,
     level: &Res<LevelConfigRes>,
     registry: &Res<GameModelRegistryRes>,
+    display_root: &DisplayRoot,
 ) {
-    // Spawn tray dispensers
-    for dispenser_placement in &level.tray_dispenser_placements {
-        spawn_dispenser(commands, registry, dispenser_placement, DispenserType::Tray);
-    }
-
-    // Spawn chopstick dispensers
-    for dispenser_placement in &level.chopstick_dispenser_placements {
-        spawn_dispenser(
-            commands,
-            registry,
-            dispenser_placement,
+    for (placements, ty) in [
+        (&level.tray_dispenser_placements, DispenserType::Tray),
+        (
+            &level.chopstick_dispenser_placements,
             DispenserType::Chopstick,
-        );
+        ),
+    ] {
+        for dispenser_placement in placements {
+            spawn_dispenser(commands, registry, dispenser_placement, ty, display_root);
+        }
     }
 }
 
@@ -287,19 +285,36 @@ fn spawn_dispenser(
     registry: &GameModelRegistry,
     placement: &DispenserPlacement,
     dispenser_type: DispenserType,
+    display_root: &DisplayRoot,
 ) {
     let dispenser_handle = registry
         .dispensers
         .get_handle_by_id(&placement.model)
         .expect("Dispenser model not found in registry");
-    let dispenser_model = registry.dispensers.get(dispenser_handle);
+    let model = registry.dispensers.get(dispenser_handle);
 
-    commands.spawn(Dispenser {
-        model: dispenser_handle,
-        center_pos: placement.center_pos,
-        current_stock: dispenser_model.initial_stock,
-        dispenser_type,
-    });
+    commands.spawn((
+        Dispenser {
+            model: dispenser_handle,
+            center_pos: placement.center_pos,
+            reception_area: Rect::from_center_size(
+                placement.center_pos + model.reception_area.center(),
+                model.reception_area.size(),
+            ),
+            current_stock: model.initial_stock,
+            dispenser_type,
+        },
+        BoxCollider::from_center_size(placement.center_pos, model.size.as_vec2()).into_comp(),
+        DisplayState {
+            proto: model.display.res.clone(),
+            ..Default::default()
+        },
+        Transform {
+            position: placement.center_pos.extend(0.0),
+            parent: Some(display_root.0),
+            ..Default::default()
+        },
+    ));
 }
 
 fn spawn_collectors(

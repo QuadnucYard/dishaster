@@ -107,13 +107,14 @@
             (center_pos: (22., 10.), model: "normal_table"),
             (center_pos: (22., 12.), model: "normal_table"),
         ],
-        tray_dispenser_placements: [],
-        chopstick_dispenser_placements: [],
+        tray_dispenser_placements: [
+            (center_pos: (7.0, 14.0), model: "chopstick_dispenser"),
+        ],
+        chopstick_dispenser_placements: [
+            (center_pos: (15.0, 14.0), model: "tray_dispenser"),
+        ],
         collector_placements: [
-            (
-                model: "main_dish_return",
-                center_pos: (22.0, 2.0),
-            ),
+            (center_pos: (22.0, 2.0), model: "main_dish_return"),
         ],
         diner_provider: (
             attributes:  (
@@ -128,7 +129,7 @@
                 leave_probability: (0.05, 0.3),
                 observation_time: (15.0, 30.0),
                 decision_time: (3.0, 8.0),
-                eating_time: (300.0, 900.0),
+                eating_time: (30.0, 90.0),
             ),
             movement: (
                 movement_speed: (1.0, 3.0),

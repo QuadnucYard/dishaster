@@ -158,6 +158,7 @@ fn spawn_diner(
         AgentTag,
         DinerBundle {
             diner: Diner { id: diner_id },
+            state: DinerState::default(),
             goal: DinerGoalState::default(),
             targets: DinerTargets::default(),
             movement: Movement {

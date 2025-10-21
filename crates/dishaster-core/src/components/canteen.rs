@@ -49,6 +49,8 @@ pub struct Dispenser {
     pub model: ModelHandle<DispenserModel>,
     /// Physical center position of the dispenser
     pub center_pos: Vec2,
+    /// Area in front of the dispenser where diners can receive items
+    pub reception_area: Rect,
     /// Current number of items in stock
     pub current_stock: u32,
     /// What type of items this dispenser provides
@@ -56,7 +58,7 @@ pub struct Dispenser {
 }
 
 /// Types of items that dispensers can provide
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DispenserType {
     /// Dispenses serving trays
     Tray,

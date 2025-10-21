@@ -14,6 +14,8 @@ pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + '
             handle_enter_goal,
             handle_observe_goal,
             handle_decide_goal,
+            handle_pick_tray_goal,
+            handle_pick_chopsticks_goal,
             handle_queue_for_window_goal,
             handle_get_served_goal,
             handle_find_seat_goal,
@@ -128,15 +130,12 @@ fn handle_observe_goal(
 }
 
 fn handle_decide_goal(
-    mut commands: Commands,
     diner_query: Query<(
         Entity,
         &mut DinerGoalState,
         &mut DinerTargets,
         &CompWrapper<DinerModel>,
     )>,
-    lane_query: Query<(Entity, &QueueLaneMembers)>,
-    window_query: Query<&LaneOwner, With<Window>>,
     time: Res<Time>,
     mut rng: ResMut<GameRng>,
     mut events: ResMut<EventLog>,
@@ -176,38 +175,168 @@ fn handle_decide_goal(
 
         targets.chosen_window = Some(window_entity);
 
-        // Choose a lane with the shortest queue of that window
-        let lane_entity = window_query
-            .get(window_entity)
-            .expect("window should exist")
-            .lanes
-            .iter()
-            .map(|&lane_entity| (lane_entity, lane_query.get(lane_entity).unwrap().1))
-            .min_by_key(|(_, members)| members.members.len())
-            .map(|(lane_entity, _)| lane_entity)
-            .expect("window should have at least one lane");
+        goal.update(DinerGoal::PickTray);
+    }
+}
 
-        commands
-            .entity(entity)
-            .insert(QueueIntent::new(lane_entity)); // intent to queue
+fn handle_pick_tray_goal(
+    diner_query: Query<(
+        Entity,
+        &mut DinerState,
+        &mut DinerGoalState,
+        &mut DinerTargets,
+        &mut Movement,
+    )>,
+    dispenser_query: Query<(Entity, &Dispenser)>,
+    mut rng: ResMut<GameRng>,
+) {
+    for (entity, mut state, mut goal, mut targets, mut movement) in diner_query {
+        if !goal.is(DinerGoal::PickTray) {
+            continue;
+        }
 
-        goal.update(DinerGoal::QueueForWindow);
+        if targets.tray_target.is_none() {
+            // Choose the closest tray dispenser
+            let Some((dispenser_entity, dispenser)) = dispenser_query
+                .iter()
+                .filter(|(_, d)| d.dispenser_type == DispenserType::Tray)
+                .min_by_key(|(_, d)| {
+                    let distance = movement.pos.distance_squared(d.center_pos);
+                    NotNan::new(distance).unwrap()
+                })
+            else {
+                // No dispensers available
+                continue;
+            };
+            targets.tray_target = Some(dispenser_entity);
+            log::debug!(
+                target: "diner",
+                "picking_tray: target={dispenser_entity:?}"
+            );
+            movement.request_path_to_rect(dispenser.reception_area);
+            continue;
+        }
+
+        if movement.target_reached {
+            // Reached the dispenser
+            log::debug!(
+                target: "diner",
+                "picked_tray: entity={entity:?}"
+            );
+            state.has_tray = true;
+            goal.update(if rng.random_bool(0.3) {
+                // 30% chance to pick chopsticks next
+                DinerGoal::PickChopsticks
+            } else {
+                DinerGoal::QueueForWindow
+            });
+            continue;
+        }
+    }
+}
+
+fn handle_pick_chopsticks_goal(
+    diner_query: Query<(
+        Entity,
+        &mut DinerState,
+        &mut DinerGoalState,
+        &mut DinerTargets,
+        &mut Movement,
+    )>,
+    dispenser_query: Query<(Entity, &Dispenser)>,
+) {
+    for (entity, mut state, mut goal, mut targets, mut movement) in diner_query {
+        if !goal.is(DinerGoal::PickChopsticks) {
+            continue;
+        }
+
+        if targets.chopstick_target.is_none() {
+            // Choose the closest tray dispenser
+            let Some((dispenser_entity, dispenser)) = dispenser_query
+                .iter()
+                .filter(|(_, d)| d.dispenser_type == DispenserType::Chopstick)
+                .min_by_key(|(_, d)| {
+                    let distance = movement.pos.distance_squared(d.center_pos);
+                    NotNan::new(distance).unwrap()
+                })
+            else {
+                // No dispensers available
+                continue;
+            };
+            targets.chopstick_target = Some(dispenser_entity);
+            log::debug!(
+                target: "diner",
+                "picked_chopsticks: target={dispenser_entity:?}"
+            );
+            movement.request_path_to_rect(dispenser.reception_area);
+            continue;
+        }
+
+        if movement.target_reached {
+            // Reached the dispenser
+            log::debug!(
+                target: "diner",
+                "picked_chopsticks: entity={entity:?}"
+            );
+            state.has_chopsticks = true;
+            goal.update(if state.is_served {
+                DinerGoal::FindSeat
+            } else {
+                println!("Chopsticks picked before being served!");
+                DinerGoal::QueueForWindow
+            });
+            continue;
+        }
     }
 }
 
 fn handle_queue_for_window_goal(
     mut commands: Commands,
-    diner_query: Query<(Entity, &mut DinerGoalState, &QueueMember)>,
-    lane_query: Query<(&QueueLane,)>,
+    diner_query: Query<(
+        Entity,
+        &mut DinerGoalState,
+        &DinerTargets,
+        Option<&QueueIntent>,
+        Option<&QueueMember>,
+    )>,
+    window_query: Query<&LaneOwner, With<Window>>,
+    lane_query: Query<(&QueueLane, &QueueLaneMembers)>,
     time: Res<Time>,
 ) {
-    for (entity, mut goal, queue_member) in diner_query {
+    for (entity, mut goal, targets, queue_intent, queue_member) in diner_query {
         if !goal.is(DinerGoal::QueueForWindow) {
             continue;
         }
 
-        if queue_member.ranking == 0
-            && let Ok((lane,)) = lane_query.get(queue_member.lane)
+        if queue_intent.is_none() && queue_member.is_none() {
+            // Not yet queued, choose a lane to queue for
+            let Some(window_entity) = targets.chosen_window else {
+                // No chosen window, go back to deciding
+                goal.update(DinerGoal::DecideWindow);
+                continue;
+            };
+
+            // Choose a lane with the shortest queue of that window
+            let lane_entity = window_query
+                .get(window_entity)
+                .expect("window should exist")
+                .lanes
+                .iter()
+                .map(|&lane_entity| (lane_entity, lane_query.get(lane_entity).unwrap().1))
+                .min_by_key(|(_, members)| members.members.len())
+                .map(|(lane_entity, _)| lane_entity)
+                .expect("window should have at least one lane");
+
+            commands
+                .entity(entity)
+                .insert(QueueIntent::new(lane_entity)); // intent to queue
+
+            continue;
+        }
+
+        if let Some(queue_member) = queue_member
+            && queue_member.ranking == 0
+            && let Ok((lane, _)) = lane_query.get(queue_member.lane)
         {
             goal.update(DinerGoal::GetServed);
             commands.entity(entity).insert(ServiceSession::new(
@@ -222,9 +351,15 @@ fn handle_queue_for_window_goal(
 
 fn handle_get_served_goal(
     mut commands: Commands,
-    diner_query: Query<(Entity, &mut DinerGoalState, &ServiceSession)>,
+    diner_query: Query<(
+        Entity,
+        &mut DinerState,
+        &mut DinerGoalState,
+        &DinerTargets,
+        &ServiceSession,
+    )>,
 ) {
-    for (entity, mut goal, session) in diner_query {
+    for (entity, mut state, mut goal, targets, session) in diner_query {
         if !goal.is(DinerGoal::GetServed) {
             continue;
         }
@@ -244,7 +379,12 @@ fn handle_get_served_goal(
             .entity(entity)
             .remove::<QueueMember>()
             .remove::<ServiceSession>();
-        goal.update(DinerGoal::FindSeat);
+        state.is_served = true;
+        goal.update(if targets.chopstick_target.is_some() {
+            DinerGoal::FindSeat
+        } else {
+            DinerGoal::PickChopsticks // need chopsticks
+        });
     }
 }
 
