@@ -159,8 +159,8 @@ pub fn update_agent_movement(
 ) {
     let dt = time.tick_duration as f32;
     let waypoint_eps = PATH_WAYPOINT_EPS;
-    let accel = 5.0; // Steering acceleration factor
-    let stop_eps = 0.1; // Distance to target to stop moving
+    let accel = 4.0; // Steering acceleration factor
+    let stop_eps = 0.01; // Distance to target to stop moving
 
     let get_next_velocity = |movement: &Movement| -> Vec2 {
         let Some(next_pos) = movement.path.next() else {
@@ -183,11 +183,7 @@ pub fn update_agent_movement(
         let max_speed = movement.walking_speed * movement.speed_factor;
         let desired_velocity = dir * max_speed;
 
-        // Steering: adjust velocity towards desired
-        let steer = desired_velocity - movement.velocity;
-        let velocity = movement.velocity + steer * accel * dt;
-
-        velocity.clamp_length_max(max_speed)
+        desired_velocity.clamp_length_max(max_speed)
     };
 
     let nav_agents = query

@@ -162,7 +162,7 @@ fn spawn_diner(
             targets: DinerTargets::default(),
             movement: Movement {
                 pos,
-                radius: rng.random_range(0.2..0.4),
+                radius: rng.random_range(0.1..0.2),
                 impatience: rng.random_range(0.5..1.0), // TODO: base on model
                 avoidance_responsibility: rng.random_range(1.0..3.0),
                 ..Default::default()
