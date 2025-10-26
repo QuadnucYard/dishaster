@@ -3,6 +3,7 @@ use dishaster_godot_ui::{req::GameRequest, *};
 use dishaster_models::PricingMethod;
 use dishrupt_core::EntityId;
 use dishrupt_godot_scene::SceneContext;
+use godot::global::godot_print;
 
 use crate::Game;
 
@@ -25,6 +26,23 @@ impl Game {
 
             GameRequest::ApplyDishPrice { dish, method } => {
                 self.set_dish_price(dish, method);
+            }
+
+            GameRequest::TrialStart(entity) => {
+                godot_print!("Starting trial for entity {:?}", entity);
+                self.send_sim_command(SimCommand::TrialStart(entity));
+            }
+            GameRequest::TrialIntroDone => {
+                godot_print!("Trial intro done");
+                self.send_sim_command(SimCommand::TrialLaunch);
+            }
+            GameRequest::TrialChooseKeyword(ref keyword) => {
+                godot_print!("Trial choose keyword: {:?}", keyword);
+                self.send_sim_command(SimCommand::TrialChooseKeyword(keyword.clone()));
+            }
+            GameRequest::TrialResponseDone => {
+                godot_print!("Trial response done");
+                self.send_sim_command(SimCommand::TrialProceed);
             }
         }
     }

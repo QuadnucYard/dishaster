@@ -25,6 +25,7 @@ pub fn register_guis(registry: &mut GuiRegistry) {
         DishPricePopup => "gaming/price_editor",
         SettlementGui => "gaming/settlement",
         TimeStatsGui => "gaming/time_stats",
+        TrialGui => "gaming/trial",
     );
 }
 

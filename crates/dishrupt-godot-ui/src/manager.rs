@@ -28,10 +28,10 @@ impl GuiManager {
         self.cmds.run_cmds(&mut self.registry);
     }
 
-    pub fn process(&mut self) {
+    pub fn process(&mut self, delta: f64) {
         for gui in self.registry.iter_mut() {
             if gui.is_active() {
-                gui.process();
+                gui.process(self.cmds.clone(), delta);
             }
         }
     }

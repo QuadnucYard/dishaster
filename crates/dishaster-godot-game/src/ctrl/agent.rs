@@ -1,4 +1,5 @@
 use dishaster_channel::events::Feedback;
+use dishaster_godot_ui::req::GameRequest;
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, input::event::MouseButtonEvent};
 use dishrupt_godot_scene::SceneContext;
@@ -20,7 +21,7 @@ pub struct AgentController {
 
 impl AgentController {
     pub fn new(entity: EntityId, node: GdNode2D) -> Self {
-        let mut feedback = FeedbackController::new(node.get_node_as("Feedback"));
+        let mut feedback = FeedbackController::new(entity, node.get_node_as("Feedback"));
         feedback.root.set_visible(false);
 
         let debug = node.try_get_node_as("Debug").map(AgentDebugController::new);
@@ -52,6 +53,9 @@ impl AgentController {
 }
 
 pub struct FeedbackController {
+    /// The agent entity this feedback belongs to.
+    entity: EntityId,
+
     root: Gd<Node2D>, // actually Area2D
     thought: Gd<Node2D>,
     thought_emoji: Gd<Label>,
@@ -61,8 +65,10 @@ pub struct FeedbackController {
 }
 
 impl FeedbackController {
-    pub fn new(node: Gd<Node2D>) -> Self {
+    pub fn new(entity: EntityId, node: Gd<Node2D>) -> Self {
         Self {
+            entity,
+
             thought: node.get_node_as("Thought"),
             thought_emoji: node.get_node_as("Thought/Emoji"),
             speech: node.get_node_as("Speech"),
@@ -73,11 +79,11 @@ impl FeedbackController {
     }
 
     pub fn process(&mut self, delta: f64) {
-        let Some(t) = self.lifetime else {
+        let Some(t) = &mut self.lifetime else {
             return;
         };
-        let t = t - delta;
-        if t <= 0.0 {
+        *t -= delta;
+        if *t <= 0.0 {
             self.root.set_visible(false);
             self.lifetime = None;
         }
@@ -85,7 +91,7 @@ impl FeedbackController {
 
     pub fn show(&mut self, feedback: &Feedback) {
         /// How long feedback balloons last on screen (placeholder value).
-        const BALLOON_LIFETIME: f64 = 1.0;
+        const BALLOON_LIFETIME: f64 = 3.0;
 
         match feedback {
             Feedback::Thought(emoji) => {
@@ -108,8 +114,8 @@ impl Pickable for FeedbackController {
         self.root.instance_id_unchecked()
     }
 
-    fn on_click(&mut self, _ctx: &mut SceneContext, event: &MouseButtonEvent) {
-        godot_print!("Clicked on agent feedback: {:?}", event);
+    fn on_click(&mut self, ctx: &mut SceneContext, _event: &MouseButtonEvent) {
+        ctx.gui_cmds.push_req(GameRequest::TrialStart(self.entity));
     }
 }
 

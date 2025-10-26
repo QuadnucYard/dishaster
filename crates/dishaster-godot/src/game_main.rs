@@ -129,7 +129,7 @@ impl Inner {
         }
 
         // process UI
-        self.gui.process();
+        self.gui.process(delta);
 
         // process active scene
         {

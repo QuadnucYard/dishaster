@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bnvburi4tresm" path="res://assets/sprites/emojis/eye_balloon.svg" id="2_pnvpb"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hcv4f"]
-radius = 17.0
+radius = 20.0
 
 [node name="FeedbackBalloon" type="Area2D"]
 z_index = 1

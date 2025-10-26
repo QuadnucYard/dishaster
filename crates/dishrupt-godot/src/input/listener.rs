@@ -109,6 +109,7 @@ impl INode for InputListener {
             }),
             e @ InputEventKey => GodotInputEvent::Key(KeyEvent {
                 keycode: e.get_keycode(),
+                pressed: e.is_pressed(),
                 raw: e,
             }),
             _ => return,

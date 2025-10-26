@@ -18,8 +18,6 @@ pub trait UITree: VNode {
     /// Called when the tree is hidden
     fn on_disable(&mut self) {}
 
-    fn process(&mut self) {}
-
     fn is_visible(&self) -> bool {
         self.root().is_visible()
     }

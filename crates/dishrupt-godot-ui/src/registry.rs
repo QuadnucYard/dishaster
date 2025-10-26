@@ -9,6 +9,8 @@ use crate::UITree;
 
 pub trait Gui: UITree {
     fn start(&mut self, _commands: GuiCommands) {}
+
+    fn process(&mut self, _commands: GuiCommands, _delta: f64) {}
 }
 
 #[derive(Default)]

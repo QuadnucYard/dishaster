@@ -1,5 +1,8 @@
 use dishaster_channel::{events::PresentationEvent, snapshots::DebugSnapshots};
+use dishaster_godot_ui::TrialGui;
 use dishrupt_godot_scene::SceneContext;
+use dishrupt_godot_ui::UITree;
+use godot::global::godot_print;
 
 use super::{Game, ctrl::*};
 
@@ -53,6 +56,32 @@ impl Game {
                     self.dbgviz
                         .distance_overlay
                         .present(&resp, self.stage.display_context());
+                }
+
+                PresentationEvent::TrialIntro(intro) => {
+                    godot_print!("Received trial intro: {:?}", intro);
+
+                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                    trial_gui.intro(intro);
+                    trial_gui.show();
+                }
+                PresentationEvent::TrialLeftSpeak(speech) => {
+                    godot_print!("Received trial speech (left): {:?}", speech);
+
+                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                    trial_gui.left_speak(speech);
+                }
+                PresentationEvent::TrialRightSpeak(speech) => {
+                    godot_print!("Received trial speech (right): {:?}", speech);
+
+                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                    trial_gui.right_speak(speech);
+                }
+                PresentationEvent::TrialEnd => {
+                    godot_print!("Received trial end");
+
+                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                    trial_gui.hide();
                 }
             }
         }

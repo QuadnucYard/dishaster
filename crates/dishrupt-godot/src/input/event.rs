@@ -30,6 +30,7 @@ pub struct MouseMotionEvent {
 pub struct KeyEvent {
     pub keycode: Key,
     pub raw: Gd<InputEventKey>,
+    pub pressed: bool,
 }
 
 impl KeyEvent {

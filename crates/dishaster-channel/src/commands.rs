@@ -27,4 +27,15 @@ pub enum SimCommand {
     QueryDistance(Vec2),
     /// Request distance field data from the navigation grid.
     QueryDistances,
+
+    /// Start a trial for the given diner entity.
+    TrialStart(EntityId),
+    /// Launch the trial after intro is complete.
+    TrialLaunch,
+    /// Choose a keyword during the trial.
+    TrialChooseKeyword(EcoString),
+    /// Timeout the current trial response.
+    TrialTimeout,
+    /// Proceed to the next dialogue of the trial.
+    TrialProceed,
 }

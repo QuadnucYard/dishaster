@@ -1,10 +1,11 @@
 use dishaster_channel::commands::SimCommand;
+use dishaster_godot_ui::req::GameRequest;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::input::{event::MouseButtonEvent, listener::GodotInputEvent};
 use dishrupt_godot_scene::SceneContext;
 use godot::{
     classes::{Area2D, Node, Node2D, PhysicsPointQueryParameters2D},
-    global::MouseButton,
+    global::{Key, MouseButton},
     prelude::*,
 };
 
@@ -12,7 +13,6 @@ use crate::Game;
 
 impl Game {
     pub fn process_input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
-        #[allow(clippy::single_match)]
         match event {
             GodotInputEvent::Button(e) => {
                 if e.button == MouseButton::LEFT && !e.pressed {
@@ -25,6 +25,15 @@ impl Game {
                     godot_print!("click map： {canvas_pos} {sim_pos}");
                     self.sim_runner
                         .send_command(SimCommand::QueryDistance(sim_pos));
+                }
+            }
+            GodotInputEvent::Key(key) => {
+                if key.pressed
+                    && key.keycode == Key::Q
+                    && let Some(diner) = self.dc.agents.keys().next()
+                {
+                    godot_print!("DEV: Starting trial for diner {:?}", diner);
+                    ctx.gui_cmds.push_req(GameRequest::TrialStart(*diner));
                 }
             }
             _ => {}

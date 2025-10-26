@@ -1,6 +1,6 @@
 //! Presentation events emitted by the core simulation for client display.
 
-use dishaster_models::{ModelId, PricingMethod};
+use dishaster_models::{ModelId, PricingMethod, TrialIntro, TrialSpeech};
 use dishrupt_core::{EntityId, prelude::*};
 
 /// Presentation events emitted by the core simulation for client display.
@@ -20,6 +20,15 @@ pub enum PresentationEvent {
     QueryDistanceResponse(Option<f32>),
     /// Response to a distance field query.
     QueryDistancesResponse(QueryDistancesResponse),
+
+    /// Show trial intro.
+    TrialIntro(TrialIntro),
+    /// Trial diner speaks.
+    TrialLeftSpeak(TrialSpeech),
+    /// Trial player responds.
+    TrialRightSpeak(TrialSpeech),
+    /// Trial has ended.
+    TrialEnd,
 }
 
 /// Snapshot of a dish display instance for presentation systems.

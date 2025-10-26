@@ -7,6 +7,7 @@ pub mod resources;
 pub mod sim;
 mod snapshot;
 pub mod systems;
+pub mod trial;
 
 /// Re-export of dishaster_models
 pub mod models {
