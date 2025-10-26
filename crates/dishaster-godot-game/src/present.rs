@@ -15,13 +15,14 @@ impl Game {
                     self.finish_day(ctx, false);
                 }
                 PresentationEvent::AgentSpawned(entity) => {
-                    let controller = AgentController::new(
+                    let mut controller = AgentController::new(
                         entity,
                         self.stage
                             .get_godot_node(entity)
                             .cloned()
                             .expect("missing godot node for agent"),
                     );
+                    controller.set_debug_enabled(self.debug_enabled);
                     self.dc.agents.insert(entity, controller);
                 }
                 PresentationEvent::AgentDespawned(entity) => {

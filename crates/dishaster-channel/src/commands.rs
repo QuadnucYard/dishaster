@@ -3,8 +3,13 @@
 use dishaster_models::PricingMethod;
 use dishrupt_core::{EntityId, prelude::*};
 
+use crate::snapshots::DebugFlags;
+
 /// Commands that can be sent to the simulation from external sources.
 pub enum SimCommand {
+    /// Set debug flags.
+    SetDebugFlags(DebugFlags),
+
     /// Start a new run (spawning diners, etc.)
     StartRun,
     /// Finish the current run immediately.

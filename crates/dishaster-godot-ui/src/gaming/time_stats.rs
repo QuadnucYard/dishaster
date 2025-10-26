@@ -11,6 +11,8 @@ pub struct TimeStatsGui {
     pub tps_slider: SliderA,
     #[child("%TpsValueLabel")]
     pub tps_value_label: LabelA,
+    #[child("%DebugSwitch")]
+    pub debug_switch: ButtonA,
 }
 
 impl TimeStatsGui {
@@ -49,6 +51,11 @@ impl Gui for TimeStatsGui {
         let cmd = commands.clone();
         self.tps_slider.on_value_change.connect(move |value| {
             cmd.push_req(GameRequest::SetTps(value));
+        });
+
+        let cmd = commands.clone();
+        self.debug_switch.on_toggle.connect(move |pressed| {
+            cmd.push_req(GameRequest::SetDebugMode(pressed));
         });
     }
 }

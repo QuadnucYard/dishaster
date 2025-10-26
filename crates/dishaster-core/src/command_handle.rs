@@ -11,6 +11,10 @@ impl Simulation {
     /// reflects the requested transition without delay.
     pub(crate) fn handle_command_impl(&mut self, command: SimCommand) {
         match command {
+            SimCommand::SetDebugFlags(debug_flags) => {
+                self.debug_flags = debug_flags;
+            }
+
             SimCommand::StartRun => {
                 let mut day_status = self.world.resource_mut::<DayStatus>();
                 day_status.started = true;

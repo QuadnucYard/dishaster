@@ -17,6 +17,8 @@ pub enum GameRequest {
     NextDay,
     /// Change the simulation ticks-per-second rate.
     SetTps(f32),
+    /// Enable or disable debug mode.
+    SetDebugMode(bool),
     // /// Request opening the dish price editor for a given dish entity.
     // OpenDishPriceEditor(EntityId),
     /// Apply the player's chosen pricing to a dish slot.

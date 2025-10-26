@@ -20,7 +20,7 @@ pub struct Simulation {
     /// System execution schedule defining update order and dependencies
     schedule: Schedule,
     /// Debug feature configuration for snapshot export.
-    pub(crate) debug_flags: DebugFeatureFlags,
+    pub(crate) debug_flags: DebugFlags,
 }
 
 impl Simulation {
@@ -64,17 +64,17 @@ impl Simulation {
         Self {
             world,
             schedule,
-            debug_flags: DebugFeatureFlags::all(),
+            debug_flags: DebugFlags::none(),
         }
     }
 
     /// Update the debug feature configuration for snapshot export.
-    pub fn set_debug_flags(&mut self, flags: DebugFeatureFlags) {
+    pub fn set_debug_flags(&mut self, flags: DebugFlags) {
         self.debug_flags = flags;
     }
 
     /// Retrieve the current debug feature configuration.
-    pub fn debug_flags(&self) -> DebugFeatureFlags {
+    pub fn debug_flags(&self) -> DebugFlags {
         self.debug_flags
     }
 }

@@ -47,7 +47,7 @@ text = "TPS"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-max_value = 240.0
+max_value = 480.0
 value = 60.0
 
 [node name="TpsValueLabel" type="Label" parent="VBoxContainer/TpsRow"]
@@ -56,3 +56,8 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "60"
 horizontal_alignment = 1
+
+[node name="DebugSwitch" type="CheckButton" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Debug"

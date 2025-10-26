@@ -31,6 +31,12 @@ impl AgentController {
         }
     }
 
+    pub fn set_debug_enabled(&mut self, enabled: bool) {
+        if let Some(debug) = &mut self.debug {
+            debug.goal_label.set_visible(enabled);
+        }
+    }
+
     pub fn process(&mut self, delta: f64) {
         self.feedback.process(delta);
     }

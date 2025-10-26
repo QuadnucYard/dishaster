@@ -81,6 +81,11 @@ impl Scene for GameScene {
                         game.set_tps(ctx, tps);
                     }
                 }
+                GameRequest::SetDebugMode(mode) => {
+                    if let Some(game) = self.game.as_mut() {
+                        game.set_debug_mode(mode);
+                    }
+                }
 
                 GameRequest::ApplyDishPrice { dish, method } => {
                     if let Some(game) = self.game.as_mut() {

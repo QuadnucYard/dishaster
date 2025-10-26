@@ -40,6 +40,10 @@ impl MovementDebugOverlay {
         }
     }
 
+    pub fn set_visible(&mut self, visible: bool) {
+        self.root.set_visible(visible);
+    }
+
     pub fn present(
         &mut self,
         snapshots: Option<&Vec<MovementDebugSnapshot>>,

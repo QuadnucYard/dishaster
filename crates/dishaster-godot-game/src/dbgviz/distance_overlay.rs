@@ -41,6 +41,10 @@ impl DistanceDebugOverlay {
         }
     }
 
+    pub fn set_visible(&mut self, visible: bool) {
+        self.sprite.set_visible(visible);
+    }
+
     pub fn present(&mut self, snapshot: &QueryDistancesResponse, ctx: &DisplayContext2D) {
         if snapshot.data.is_empty() {
             self.sprite.set_visible(false);

@@ -18,7 +18,7 @@ pub struct Snapshot {
 
 /// Feature gates controlling which debug payloads are exported.
 #[derive(Debug, Clone, Copy)]
-pub struct DebugFeatureFlags {
+pub struct DebugFlags {
     /// Include per-agent movement debug data.
     pub movement: bool,
     /// Include queue lane debug data.
@@ -31,7 +31,7 @@ pub struct DebugFeatureFlags {
     pub diners: bool,
 }
 
-impl DebugFeatureFlags {
+impl DebugFlags {
     /// Enable all debug features.
     pub const fn all() -> Self {
         Self {
