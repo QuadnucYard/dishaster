@@ -54,43 +54,28 @@ impl Scene for GameScene {
 
         for req in ctx.gui_cmds.take_reqs() {
             let req = &*req;
-            let req = req.downcast_ref::<GameRequest>().expect("game request");
+
+            if let Some(req) = req.downcast_ref::<GameRequest>() {
+                if let Some(game) = self.game.as_mut() {
+                    match req {
+                        GameRequest::NextDay => {
+                            // This is handled specially to allow for scheduling
+                            ctx.schedule(AdvanceLevelProcedure)
+                        }
+                        _ => game.handle_request(ctx, req),
+                    }
+                }
+                continue;
+            }
+
+            let req = req.downcast_ref::<AppRequest>().expect("app request");
 
             match *req {
-                GameRequest::Quit | GameRequest::EnterLevel => {
+                AppRequest::Quit | AppRequest::EnterLevel => {
                     panic!("should be handled in main menu")
                 }
-                GameRequest::ExitLevel => {
+                AppRequest::ExitLevel => {
                     ctx.schedule(ExitLevelProcedure);
-                }
-                GameRequest::StartRun => {
-                    if let Some(game) = self.game.as_mut() {
-                        game.begin_run(ctx);
-                    }
-                }
-                GameRequest::EndRun => {
-                    if let Some(game) = self.game.as_mut() {
-                        game.force_finish_day(ctx);
-                    }
-                }
-                GameRequest::NextDay => {
-                    ctx.schedule(AdvanceLevelProcedure);
-                }
-                GameRequest::SetTps(tps) => {
-                    if let Some(game) = self.game.as_mut() {
-                        game.set_tps(ctx, tps);
-                    }
-                }
-                GameRequest::SetDebugMode(mode) => {
-                    if let Some(game) = self.game.as_mut() {
-                        game.set_debug_mode(mode);
-                    }
-                }
-
-                GameRequest::ApplyDishPrice { dish, method } => {
-                    if let Some(game) = self.game.as_mut() {
-                        game.set_dish_price(dish, method);
-                    }
                 }
             }
         }

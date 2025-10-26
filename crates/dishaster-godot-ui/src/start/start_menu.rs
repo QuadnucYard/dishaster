@@ -1,4 +1,4 @@
-use crate::{prelude::*, req::GameRequest};
+use crate::{prelude::*, req::AppRequest};
 
 #[derive(UITree)]
 #[ui_tree]
@@ -16,12 +16,12 @@ impl Gui for StartMenuUI {
     fn start(&mut self, commands: GuiCommands) {
         let cmd = commands.clone();
         self.start_btn.on_click.connect(move || {
-            cmd.push_req(GameRequest::EnterLevel);
+            cmd.push_req(AppRequest::EnterLevel);
         });
 
         let cmd = commands.clone();
         self.quit_btn.on_click.connect(move || {
-            cmd.push_req(GameRequest::Quit);
+            cmd.push_req(AppRequest::Quit);
         });
     }
 }

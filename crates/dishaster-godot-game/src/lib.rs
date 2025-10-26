@@ -2,6 +2,7 @@
 
 mod ctrl;
 mod dbgviz;
+mod handle_request;
 mod input;
 pub mod perf;
 mod present;
@@ -9,9 +10,9 @@ pub mod runner;
 
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
-use dishaster_channel::{ISimulation, commands::SimCommand, snapshots::DebugFlags};
+use dishaster_channel::{ISimulation, commands::SimCommand};
 use dishaster_godot_ui::*;
-use dishaster_models::{GameModelRegistry, LevelConfig, PricingMethod};
+use dishaster_models::{GameModelRegistry, LevelConfig};
 use dishaster_persistence::ProgressService;
 use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::display::*;
@@ -252,47 +253,6 @@ impl Game {
             let stats = ctx.gui.get_mut::<TimeStatsGui>();
             stats.update_time(self.telemetry.tick, self.telemetry.seconds);
             stats.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
-        }
-    }
-
-    /// Update the simulation tick rate and refresh related UI state.
-    pub fn set_tps(&mut self, ctx: &mut SceneContext, requested_tps: f32) {
-        if (self.sim_runner.tps() - requested_tps as f64).abs() <= f64::EPSILON {
-            return;
-        }
-
-        self.sim_runner.set_tps(requested_tps as f64);
-
-        ctx.gui
-            .get_mut::<TimeStatsGui>()
-            .set_tps_display(requested_tps);
-    }
-
-    pub fn set_debug_mode(&mut self, debug_mode: bool) {
-        self.debug_enabled = debug_mode;
-
-        self.send_sim_command(SimCommand::SetDebugFlags(if debug_mode {
-            DebugFlags::all()
-        } else {
-            DebugFlags::none()
-        }));
-
-        self.dbgviz.distance_overlay.set_visible(debug_mode);
-        self.dbgviz.movement_overlay.set_visible(debug_mode);
-
-        for agent in self.dc.agents.values_mut() {
-            agent.set_debug_enabled(debug_mode);
-        }
-    }
-
-    pub fn set_dish_price(&mut self, dish: EntityId, pricing: PricingMethod) {
-        self.send_sim_command(SimCommand::UpdateDishPricing {
-            dish_entity: dish,
-            pricing,
-        });
-
-        if let Some(controller) = self.dc.dishes.get_mut(&dish) {
-            controller.set_price(pricing);
         }
     }
 }

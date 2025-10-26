@@ -1,4 +1,7 @@
-use crate::{prelude::*, req::GameRequest};
+use crate::{
+    prelude::*,
+    req::{AppRequest, GameRequest},
+};
 
 /// Describes the information to display in the in-game day loop overlay during
 /// active play (preparation or service phases).
@@ -53,7 +56,7 @@ impl Gui for GamingLayout {
 
         let cmd = commands.clone();
         self.exit_button.on_click.connect(move || {
-            cmd.push_req(GameRequest::ExitLevel);
+            cmd.push_req(AppRequest::ExitLevel);
         });
     }
 }

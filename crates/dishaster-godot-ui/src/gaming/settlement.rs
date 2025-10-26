@@ -1,4 +1,7 @@
-use crate::{prelude::*, req::GameRequest};
+use crate::{
+    prelude::*,
+    req::{AppRequest, GameRequest},
+};
 
 #[derive(UITree)]
 #[ui_tree]
@@ -21,7 +24,7 @@ impl Gui for SettlementGui {
 
         let cmd = commands.clone();
         self.exit_button.on_click.connect(move || {
-            cmd.push_req(GameRequest::ExitLevel);
+            cmd.push_req(AppRequest::ExitLevel);
         });
     }
 }
