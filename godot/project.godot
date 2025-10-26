@@ -14,6 +14,7 @@ config/name="dishaster"
 run/main_scene="uid://clow4hmvvd6pr"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="uid://bhdj1bfq6t8gx"
+config/windows_native_icon="res://icon.ico"
 
 [display]
 
