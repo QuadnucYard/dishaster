@@ -16,6 +16,11 @@ fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
     println!("✓ Loaded {} tables", registry.tables.len());
     println!("✓ Loaded {} dispensers", registry.dispensers.len());
     println!("✓ Loaded {} collectors", registry.collectors.len());
+    println!(
+        "✓ Loaded {} + {} trial statements",
+        registry.trial.diner_speeches.len(),
+        registry.trial.responses.len()
+    );
 
     Ok(())
 }

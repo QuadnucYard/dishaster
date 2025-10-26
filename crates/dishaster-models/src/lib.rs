@@ -5,6 +5,7 @@ mod diner;
 mod dish;
 mod level;
 mod misc;
+mod trial;
 
 pub use canteen::*;
 pub use diner::*;
@@ -12,6 +13,7 @@ pub use dish::*;
 pub use level::*;
 pub use misc::*;
 pub use prelude::ModelId;
+pub use trial::*;
 
 mod prelude {
     pub use dishrupt_core::{
@@ -58,4 +60,7 @@ pub struct GameModelRegistry {
     pub dispensers: ModelRegistry<DispenserModel>,
     /// Dish collection point configurations
     pub collectors: ModelRegistry<CollectorModel>,
+
+    /// Trial corpus
+    pub trial: TrialCorpus,
 }

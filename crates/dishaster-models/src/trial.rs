@@ -1,0 +1,70 @@
+use dishrupt_core::prelude::EcoString;
+
+use super::prelude::*;
+
+/// The corpus of trial speeches and responses.
+#[derive(Debug, Default)]
+pub struct TrialCorpus {
+    /// Speeches made by the diner (left participant).
+    pub diner_speeches: Vec<TrialSpeech>,
+    /// Possible responses made by the player (right participant).
+    pub responses: Vec<TrialResponse>,
+}
+
+/// A single speech made by a trial participant.
+#[derive(Debug, Clone, Deserialize)]
+pub struct TrialSpeech {
+    /// The text of the statement.
+    pub text: EcoString,
+    /// The appearance associated with the statement.
+    #[serde(flatten)]
+    pub appearance: TrialParticipantAppearance,
+}
+
+/// The appearance of a trial participant.
+#[derive(Debug, Clone, Deserialize)]
+pub struct TrialParticipantAppearance {
+    /// The emoji of the statement.
+    pub emotion: char,
+    /// Optional gesture associated with the response.
+    pub gesture: Option<char>,
+}
+
+/// A possible response during a trial.
+#[derive(Debug, Clone, Deserialize)]
+pub struct TrialResponse {
+    /// The kind of trial response.
+    pub kind: TrialResponseKind,
+    /// A brief summary of the response.
+    pub summary: EcoString,
+    /// The content of the response.
+    #[serde(flatten)]
+    pub content: TrialSpeech,
+}
+
+/// The kind of trial response.
+#[allow(missing_docs)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TrialResponseKind {
+    Agreement,
+    Objection,
+    Perjury,
+    Question,
+}
+
+/*
+pub struct TrialOption {
+    pub kind: TrialResponseKind,
+    pub summary: EcoString,
+}
+ */
+
+/// Introduction data for a trial.
+#[derive(Debug)]
+pub struct TrialIntro {
+    /// Appearance of the left participant.
+    pub left: TrialParticipantAppearance,
+    /// Appearance of the right participant.
+    pub right: TrialParticipantAppearance,
+}

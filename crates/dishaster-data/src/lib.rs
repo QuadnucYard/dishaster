@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, bail};
 use dishaster_models::GameModelRegistry;
 use dishrupt_core::model_registry::*;
+use serde::Deserialize;
 use thiserror::Error;
 
 /// Error types for data loading operations
@@ -16,6 +17,9 @@ pub enum DataError {
     /// RON parsing or deserialization failed
     #[error("Failed to parse RON data: {0}")]
     RonError(#[from] ron::error::SpannedError),
+    /// TOML parsing or deserialization failed
+    #[error("Failed to parse TOML data: {0}")]
+    TomlError(#[from] toml::de::Error),
     /// Data validation or consistency check failed
     #[error("Data validation failed: {0}")]
     ValidationError(String),
@@ -83,6 +87,9 @@ impl DataLoader {
         self.load_to_registry(&mut registry.dispensers, "dispensers.ron")?;
         self.load_to_registry(&mut registry.collectors, "collectors.ron")?;
 
+        registry.trial.diner_speeches = self.load_corpus("trial/corpus.toml")?;
+        registry.trial.responses = self.load_corpus("trial/corpus_r.toml")?;
+
         Ok(registry)
     }
 
@@ -115,5 +122,21 @@ impl DataLoader {
             .with_default_extension(Extensions::UNWRAP_NEWTYPES | Extensions::IMPLICIT_SOME);
         let data = options.from_str(&content)?;
         Ok(data)
+    }
+
+    fn load_corpus<T>(&self, filename: &str) -> anyhow::Result<Vec<T>>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        #[derive(Deserialize)]
+        struct Items<T> {
+            item: Vec<T>,
+        }
+
+        let path: PathBuf = self.assets_path.join(filename);
+        let content = std::fs::read_to_string(path)?;
+        let data = toml::from_str::<Items<T>>(&content)
+            .with_context(|| format!("Loading corpus {filename}"))?;
+        Ok(data.item)
     }
 }
