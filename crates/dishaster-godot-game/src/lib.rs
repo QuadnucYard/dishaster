@@ -192,14 +192,18 @@ impl Game {
             .get_mut::<TimeStatsGui>()
             .set_tps_display(self.sim_runner.tps() as f32);
 
+        ctx.gui.get_mut::<DishPricePopup>().enabled = true;
+
         self.send_sim_command(SimCommand::QueryDistances);
     }
 
-    pub fn begin_run(&mut self, _ctx: &mut SceneContext) {
+    pub fn begin_run(&mut self, ctx: &mut SceneContext) {
         if self.phase != DayPhase::Preparation {
             return;
         }
         self.phase = DayPhase::Running;
+
+        ctx.gui.get_mut::<DishPricePopup>().enabled = false;
 
         self.send_sim_command(SimCommand::StartRun);
     }

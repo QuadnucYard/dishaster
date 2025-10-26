@@ -8,7 +8,7 @@ use godot::{
     prelude::*,
 };
 
-use crate::{DayPhase, Game};
+use crate::Game;
 
 impl Game {
     pub fn process_input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
@@ -16,12 +16,7 @@ impl Game {
         match event {
             GodotInputEvent::Button(e) => {
                 if e.button == MouseButton::LEFT && !e.pressed {
-                    if self.phase == DayPhase::Preparation
-                        && let Some(pickable) = self.pick(e.position)
-                    {
-                        #[allow(mutable_transmutes)]
-                        let pickable: &mut dyn Pickable = unsafe { std::mem::transmute(pickable) };
-                        pickable.on_click(ctx, &e);
+                    if self.try_process_picking(ctx, &e).is_some() {
                         return;
                     }
 
@@ -36,6 +31,15 @@ impl Game {
         }
     }
 
+    fn try_process_picking(&mut self, ctx: &mut SceneContext, e: &MouseButtonEvent) -> Option<()> {
+        let pickable = self.pick(e.position)?;
+
+        #[allow(mutable_transmutes)]
+        let pickable: &mut dyn Pickable = unsafe { std::mem::transmute(pickable) };
+        pickable.on_click(ctx, e);
+        Some(())
+    }
+
     fn pick(&self, position: Vector2) -> Option<&dyn Pickable> {
         get_pickable_under_mouse(&self.root.clone().cast(), position, |area| {
             self.get_pickable_of(&area)
@@ -44,11 +48,14 @@ impl Game {
 
     fn get_pickable_of(&self, gd: &Gd<Area2D>) -> Option<&dyn Pickable> {
         let instance_id = gd.instance_id_unchecked();
-        self.dc
-            .dishes
-            .values()
+        self.get_pickables()
             .find(|t| t.collider_instance_id() == instance_id)
+    }
+
+    fn get_pickables(&self) -> impl Iterator<Item = &dyn Pickable> {
+        (self.dc.dishes.values())
             .map(|t| -> &dyn Pickable { t })
+            .chain((self.dc.agents.values()).map(|t| -> &dyn Pickable { &t.feedback }))
     }
 
     fn to_map_pos(&self, pos: Vector2) -> Vec2 {

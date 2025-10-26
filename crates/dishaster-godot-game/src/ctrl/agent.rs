@@ -1,10 +1,13 @@
 use dishaster_channel::events::Feedback;
 use dishrupt_core::EntityId;
-use dishrupt_godot::display::*;
+use dishrupt_godot::{display::*, input::event::MouseButtonEvent};
+use dishrupt_godot_scene::SceneContext;
 use godot::{
     classes::{Label, Node2D},
-    obj::Gd,
+    prelude::*,
 };
+
+use crate::input::Pickable;
 
 #[allow(unused)]
 pub struct AgentController {
@@ -49,7 +52,7 @@ impl AgentController {
 }
 
 pub struct FeedbackController {
-    root: Gd<Node2D>,
+    root: Gd<Node2D>, // actually Area2D
     thought: Gd<Node2D>,
     thought_emoji: Gd<Label>,
     speech: Gd<Node2D>,
@@ -97,6 +100,16 @@ impl FeedbackController {
         }
         self.root.set_visible(true);
         self.lifetime = Some(BALLOON_LIFETIME);
+    }
+}
+
+impl Pickable for FeedbackController {
+    fn collider_instance_id(&self) -> InstanceId {
+        self.root.instance_id_unchecked()
+    }
+
+    fn on_click(&mut self, _ctx: &mut SceneContext, event: &MouseButtonEvent) {
+        godot_print!("Clicked on agent feedback: {:?}", event);
     }
 }
 

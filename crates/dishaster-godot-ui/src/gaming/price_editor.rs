@@ -64,6 +64,8 @@ pub struct DishPricePopup {
     cancel_btn: ButtonA,
 
     state: Option<PopupState>,
+
+    pub enabled: bool,
 }
 
 #[ui_tree_api]

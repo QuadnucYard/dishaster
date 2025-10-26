@@ -1,10 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://qtdfljpklwyy"]
+[gd_scene load_steps=5 format=3 uid="uid://qtdfljpklwyy"]
 
 [ext_resource type="Texture2D" uid="uid://ch40877dldcvk" path="res://assets/sprites/emojis/thought_balloon.svg" id="1_wxex4"]
 [ext_resource type="Texture2D" uid="uid://cxtmfmkp10d7q" path="res://assets/sprites/emojis/speech_balloon.svg" id="2_hcv4f"]
 [ext_resource type="Texture2D" uid="uid://bnvburi4tresm" path="res://assets/sprites/emojis/eye_balloon.svg" id="2_pnvpb"]
 
-[node name="FeedbackBalloon" type="Node2D"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_hcv4f"]
+radius = 17.0
+
+[node name="FeedbackBalloon" type="Area2D"]
 z_index = 1
 
 [node name="Thought" type="Sprite2D" parent="."]
@@ -30,3 +33,7 @@ vertical_alignment = 1
 visible = false
 position = Vector2(18, -18)
 texture = ExtResource("2_hcv4f")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(17, -21)
+shape = SubResource("CircleShape2D_hcv4f")

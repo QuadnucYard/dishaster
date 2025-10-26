@@ -63,9 +63,10 @@ impl Pickable for DishController {
 
     fn on_click(&mut self, ctx: &mut SceneContext, event: &MouseButtonEvent) {
         if !event.pressed
+            && let popup = ctx.gui.get_mut::<DishPricePopup>()
+            && popup.enabled
             && let (Some(vm), Some(orig_price)) = (&self.view_model, &self.original_price)
         {
-            let popup = ctx.gui.get_mut::<DishPricePopup>();
             popup.set_view(DishPriceView {
                 entity: vm.entity,
                 dish_name: tr!("dish-{}.name", vm.dish_id),
