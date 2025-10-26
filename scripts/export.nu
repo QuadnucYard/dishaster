@@ -12,6 +12,10 @@ def main [--platform: string = "windows", --release] {
     } else {
         "export/debug"
     }
+    if ($target_dir | path exists) {
+        print "Clean existing export files..."
+        rm -r $target_dir # clean up old export
+    }
     mkdir $target_dir
 
     let preset_name = if $platform == "windows" {
@@ -29,6 +33,7 @@ def main [--platform: string = "windows", --release] {
     cd ..
 
     # Copy resources
-    cp -r assets/data $"($target_dir)/data"
-    cp -r godot/locales $"($target_dir)/locales"
+    cp -r assets/data $target_dir
+    cp -r godot/locales $target_dir
+    cp LICENSE $target_dir
 }
