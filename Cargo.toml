@@ -34,7 +34,7 @@ bevy_ecs = { version = "0.17.0", default-features = false, features = [
 ] }
 bevy_math = { version = "0.17.0", default-features = false, features = ["std", "serialize"] }
 
-godot = "0.4.0"
+godot = "0.4.1"
 
 anyhow = "1.0"
 as-any = "0.3"
@@ -45,7 +45,7 @@ edt = "0.2"
 env_logger = "0.11"
 fibre = "0.5"
 fluent = "0.17"
-fluent-templates = { version = "0.13", features = ["walkdir"], default-features = false }
+fluent-templates = { version = "0.13.2", features = ["walkdir"], default-features = false }
 grid = "1.0"
 log = "0.4"
 ordered-float = "5"
@@ -74,6 +74,9 @@ type_complexity = "allow"
 
 [profile.dev]
 opt-level = 2
+
+[profile.test]
+opt-level = 1
 
 [profile.profiling]
 inherits = "release"
