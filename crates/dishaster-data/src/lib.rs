@@ -33,10 +33,41 @@ impl DataLoader {
         if !std::fs::exists(&assets_path).is_ok_and(|exists| exists) {
             bail!(DataError::IoError(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
-                format!("Assets path does not exist: {}", assets_path.display()),
+                format!(
+                    "Assets path does not exist: {}. The current working directory is: {:?}",
+                    assets_path.display(),
+                    std::env::current_dir()
+                ),
             )));
         }
         Ok(Self { assets_path })
+    }
+
+    /// Create a new data loader, falling back to an alternative path if the primary does not exist
+    pub fn new_with_fallback(
+        assets_path: impl AsRef<Path>,
+        fallback_path: impl AsRef<Path>,
+    ) -> anyhow::Result<Self> {
+        let assets_path = assets_path.as_ref().to_path_buf();
+        if !std::fs::exists(&assets_path).is_ok_and(|exists| exists) {
+            let fallback_path = fallback_path.as_ref().to_path_buf();
+            if !std::fs::exists(&fallback_path).is_ok_and(|exists| exists) {
+                bail!(DataError::IoError(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    format!(
+                        "Both assets path and fallback path do not exist: {}, {}. The current working directory is: {:?}",
+                        assets_path.display(),
+                        fallback_path.display(),
+                        std::env::current_dir()
+                    ),
+                )));
+            }
+            Ok(Self {
+                assets_path: fallback_path,
+            })
+        } else {
+            Ok(Self { assets_path })
+        }
     }
 
     /// Load all game data and populate the model registry

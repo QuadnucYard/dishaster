@@ -29,6 +29,11 @@ pub mod private {
     static LANG: LazyLock<Mutex<LanguageIdentifier>> =
         LazyLock::new(|| unic_langid::langid!("zh-CN").into());
 
+    /// Triggers the initialization of LOCALES.
+    pub fn init() {
+        LOCALES.fallback();
+    }
+
     fn add_builtin(bundle: &mut FluentBundle<Arc<FluentResource>>) {
         // The builtin function in v0.16.1 are missing, so we have to implement them by ourself.
         bundle
@@ -56,7 +61,7 @@ pub mod private {
     }
 }
 
-pub use private::try_tr_plain;
+pub use private::{init, try_tr_plain};
 
 /// Translate a message id into message string. Returns [`String`].
 ///

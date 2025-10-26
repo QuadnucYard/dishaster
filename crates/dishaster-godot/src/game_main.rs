@@ -51,13 +51,18 @@ impl INode for GameMain {
 
         godot_print!("Main loop initialize");
 
-        init_game();
+        match std::panic::catch_unwind(init_game) {
+            Ok(_) => {
+                godot_print!("Init load complete!");
 
-        godot_print!("Init load complete!");
-
-        let mut inner = Inner::new(self.base().clone().upcast());
-        inner.ready();
-        let _ = self.inner.set(inner);
+                let mut inner = Inner::new(self.base().clone().upcast());
+                inner.ready();
+                let _ = self.inner.set(inner);
+            }
+            Err(e) => {
+                godot_error!("Panic during init_game: {:?}", e);
+            }
+        }
     }
 
     fn process(&mut self, delta: f64) {
@@ -172,7 +177,7 @@ fn init_game() {
     println!("Init game start");
     init_game_database(|| {
         let db = Arc::new(
-            DataLoader::new("../assets/data")
+            DataLoader::new_with_fallback("data", "../assets/data")
                 .unwrap()
                 .load_all_data()
                 .unwrap(),
@@ -197,6 +202,9 @@ fn init_game() {
     {
         panic!("progress service already initialized");
     }
+
+    dishrupt_l10n_godot::init();
+
     /* setup_preference(); */
 }
 
