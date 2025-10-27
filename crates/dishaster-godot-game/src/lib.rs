@@ -72,6 +72,7 @@ pub struct Game {
     phase: DayPhase,
     telemetry: DayTelemetry,
     debug_enabled: bool,
+    suspended_sim_speed: Option<f64>,
 }
 
 #[derive(Default)]
@@ -144,6 +145,7 @@ impl Game {
             phase: DayPhase::Preparation,
             telemetry,
             debug_enabled: false,
+            suspended_sim_speed: None,
         }
     }
 

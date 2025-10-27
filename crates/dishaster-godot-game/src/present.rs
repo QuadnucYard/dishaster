@@ -6,6 +6,8 @@ use godot::global::godot_print;
 
 use super::{Game, ctrl::*};
 
+const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
+
 impl Game {
     pub(crate) fn process_events(
         &mut self,
@@ -61,6 +63,11 @@ impl Game {
                 PresentationEvent::TrialIntro(intro) => {
                     godot_print!("Received trial intro: {:?}", intro);
 
+                    // Force simulation speed to 3x relative to reality during trial
+                    self.suspended_sim_speed = Some(self.sim_runner.tps());
+                    self.sim_runner.set_tps(TRIAL_FIXED_SIM_TPS);
+
+                    // Show trial GUI
                     let trial_gui = ctx.gui.get_mut::<TrialGui>();
                     trial_gui.intro(intro);
                     trial_gui.show();
@@ -82,6 +89,11 @@ impl Game {
 
                     let trial_gui = ctx.gui.get_mut::<TrialGui>();
                     trial_gui.hide();
+
+                    // Restore simulation speed
+                    if let Some(speed) = self.suspended_sim_speed.take() {
+                        self.sim_runner.set_tps(speed);
+                    }
                 }
             }
         }
