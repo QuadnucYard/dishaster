@@ -1,7 +1,10 @@
 use dishaster_models::{TrialIntro, TrialParticipantAppearance, TrialSpeech};
+use dishrupt_core::prelude::EcoString;
 use godot::{builtin::GString, classes::RegEx, obj::NewGd};
 
 use crate::{prelude::*, req::GameRequest};
+
+const COUNTDOWN_TIME: f32 = 3.0;
 
 #[derive(UITree)]
 #[ui_tree]
@@ -20,8 +23,8 @@ pub struct TrialGui {
 impl TrialGui {
     pub fn intro(&mut self, e: TrialIntro) {
         self.state = Some(State {
-            time: 0.0,
             phase: Phase::Intro,
+            ..Default::default()
         });
 
         self.left.set_appearance(&e.left);
@@ -36,23 +39,30 @@ impl TrialGui {
     }
 
     pub fn left_speak(&mut self, speech: TrialSpeech) {
-        if let Some(s) = self.state.as_mut() {
-            s.phase = Phase::LeftSpeaking;
-            s.time = 0.0;
-        }
-        self.left.set_speech(speech);
-        self.left.set_visible(true);
+        let inner_text = speech_to_bbcode(&speech.text);
         self.right.set_visible(false);
+        self.left.set_speech(&speech.appearance, &inner_text);
+        self.left.set_visible(true);
+        self.state = Some(State {
+            phase: Phase::LeftSpeaking,
+            time: 0.0,
+            inner_speech_text: Some(inner_text),
+            fade_time: estimate_fade_time(&speech.text),
+        });
     }
 
     pub fn right_speak(&mut self, speech: TrialSpeech) {
-        if let Some(s) = self.state.as_mut() {
-            s.phase = Phase::RightSpeaking;
-            s.time = 0.0;
-        }
-        self.right.set_speech(speech);
-        self.right.set_visible(true);
+        let inner_text = speech_to_bbcode(&speech.text);
         self.left.set_visible(false);
+        self.right.set_speech(&speech.appearance, &inner_text);
+        self.right.set_visible(true);
+        self.state = Some(State {
+            phase: Phase::RightSpeaking,
+            time: 0.0,
+            inner_speech_text: Some(inner_text),
+            fade_time: estimate_fade_time(&speech.text),
+        });
+        self.time_progress.set_visible(false);
     }
 }
 
@@ -93,8 +103,26 @@ impl Gui for TrialGui {
                     cmd.push_req(GameRequest::TrialIntroDone);
                 }
             }
+            Phase::LeftSpeaking => {
+                self.left.content.set_text(&faded(
+                    state.inner_speech_text.as_ref().unwrap(),
+                    state.time,
+                ));
+                if state.time > state.fade_time {
+                    self.time_progress.set_visible(true);
+                    self.time_progress
+                        .set_value((state.time - state.fade_time) / COUNTDOWN_TIME);
+                    if state.time > state.fade_time + COUNTDOWN_TIME {
+                        cmd.push_req(GameRequest::TrialTimeout);
+                    }
+                }
+            }
             Phase::RightSpeaking => {
-                if state.time > 3.0 {
+                self.right.content.set_text(&faded(
+                    state.inner_speech_text.as_ref().unwrap(),
+                    state.time,
+                ));
+                if state.time > state.fade_time + 1.0 {
                     state.phase = Phase::Idle;
                     cmd.push_req(GameRequest::TrialResponseDone);
                 }
@@ -120,14 +148,14 @@ pub struct TrialSpeechGui {
 }
 
 impl TrialSpeechGui {
-    pub fn set_speech(&mut self, speech: TrialSpeech) {
-        self.set_appearance(&speech.appearance);
-        self.content.set_text(&speech_to_bbcode(&speech.text));
+    pub(self) fn set_speech(&mut self, appearance: &TrialParticipantAppearance, text: &str) {
+        self.set_appearance(appearance);
+        self.content.set_text(&faded(text, 0.0));
         self.content.set_visible(true);
         self.set_visible(true);
     }
 
-    pub fn set_appearance(&mut self, appearance: &TrialParticipantAppearance) {
+    pub(self) fn set_appearance(&mut self, appearance: &TrialParticipantAppearance) {
         self.face_alt.set_text(&appearance.emotion.to_string());
         if let Some(gesture) = appearance.gesture {
             self.gesture_alt.set_text(&gesture.to_string());
@@ -145,6 +173,8 @@ impl UITree for TrialSpeechGui {}
 struct State {
     pub time: f32,
     pub phase: Phase,
+    pub inner_speech_text: Option<EcoString>,
+    pub fade_time: f32,
 }
 
 #[derive(Debug, Default)]
@@ -156,16 +186,34 @@ enum Phase {
     RightSpeaking,
 }
 
-fn speech_to_bbcode(text: &str) -> String {
+fn speech_to_bbcode(text: &str) -> EcoString {
     let mut pattern = RegEx::new_gd();
     pattern.compile(r"\[(.+?)\]");
     let res = pattern
         .sub_ex(
             text,
-            "[url=\"$1\"][b][color=dark_orchid]$1[/color][/b][/url]",
+            "[url=\"$1\"][b][color=dark_orchid][font_size=90]$1[/font_size][/color][/b][/url]",
         )
         .all(true)
         .done();
     let res = res.replacen("\\", "[br]");
-    res.to_string()
+    res.to_string().into()
+}
+
+const FADE_SPEED: f32 = 20.0;
+const FADE_LEN: i32 = 10;
+const FADE_PRE_TIME: f32 = FADE_LEN as f32 / FADE_SPEED;
+
+fn estimate_fade_time(text: &str) -> f32 {
+    let char_count = text.chars().count();
+    FADE_PRE_TIME + char_count as f32 / FADE_SPEED
+}
+
+fn faded(text: &str, time: f32) -> String {
+    let (start, length) = if time < FADE_PRE_TIME {
+        (0.0, time * FADE_SPEED)
+    } else {
+        ((time - FADE_PRE_TIME) * FADE_SPEED, FADE_LEN as f32)
+    };
+    format!("[fade start={start} length={length}]{text}[/fade]")
 }

@@ -44,6 +44,10 @@ impl Game {
                 godot_print!("Trial response done");
                 self.send_sim_command(SimCommand::TrialProceed);
             }
+            GameRequest::TrialTimeout => {
+                godot_print!("Trial timeout");
+                self.send_sim_command(SimCommand::TrialTimeout);
+            }
         }
     }
 

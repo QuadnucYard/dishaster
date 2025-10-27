@@ -42,6 +42,7 @@ pub enum GameRequest {
     TrialIntroDone,
     TrialChooseKeyword(EcoString),
     TrialResponseDone,
+    TrialTimeout,
 }
 
 impl GuiRequest for GameRequest {}

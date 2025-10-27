@@ -95,7 +95,11 @@ impl Simulation {
                 let mut events = self.world.resource_mut::<EventLog>();
                 events.emit(PresentationEvent::TrialRightSpeak(speech));
             }
-            SimCommand::TrialTimeout => todo!(),
+            SimCommand::TrialTimeout => {
+                // TODO: Simply end the trial on timeout for now.
+                let mut events = self.world.resource_mut::<EventLog>();
+                events.emit(PresentationEvent::TrialEnd);
+            }
             SimCommand::TrialProceed => {
                 let should_continue = {
                     let mut rng = self.world.resource_mut::<GameRng>();

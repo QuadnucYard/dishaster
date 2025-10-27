@@ -34,7 +34,8 @@ anchor_bottom = 1.0
 offset_top = -24.0
 grow_horizontal = 2
 grow_vertical = 0
-value = 50.0
+max_value = 1.0
+value = 0.5
 show_percentage = false
 
 [node name="Left" type="Control" parent="."]
@@ -111,13 +112,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -39.99994
-offset_top = -350.37482
-offset_right = 976.0
-offset_bottom = 225.62518
+offset_left = -144.0
+offset_top = -308.0
+offset_right = 953.7235
+offset_bottom = 268.0
 grow_horizontal = 2
 grow_vertical = 2
-rotation = 0.1308997
+rotation = 0.13561165
+theme_override_colors/font_outline_color = Color(0.14971137, 0.00819313, 0.18271104, 1)
 theme_override_constants/outline_size = 24
 theme_override_fonts/normal_font = SubResource("FontVariation_barv7")
 theme_override_fonts/bold_font = SubResource("FontVariation_3lw0w")
@@ -127,10 +129,13 @@ theme_override_font_sizes/bold_italics_font_size = 80
 theme_override_font_sizes/italics_font_size = 80
 theme_override_font_sizes/mono_font_size = 80
 bbcode_enabled = true
-text = "啊对对对"
+text = "你们的[url]泔水炖菜[/url][br]简直像[url][b][color=dark_orchid][font_size=100]工业废料[/font_size][/color][/b][/url]一样[br][url]差劲[/url]！"
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
+vertical_alignment = 1
+meta_underlined = false
+hint_underlined = false
 
 [node name="Right" type="Control" parent="."]
 unique_name_in_owner = true
@@ -202,13 +207,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -888.0
-offset_top = -188.0
-offset_right = 128.0
-offset_bottom = 388.0
+offset_left = -941.45123
+offset_top = -188.07626
+offset_right = 144.4505
+offset_bottom = 387.92374
 grow_horizontal = 2
 grow_vertical = 2
-rotation = -0.1308997
+rotation = -0.11359927
+theme_override_colors/font_outline_color = Color(0.14901961, 0.007843138, 0.18431373, 1)
 theme_override_constants/outline_size = 24
 theme_override_fonts/normal_font = SubResource("FontVariation_barv7")
 theme_override_fonts/bold_font = SubResource("FontVariation_3lw0w")
@@ -218,8 +224,9 @@ theme_override_font_sizes/bold_italics_font_size = 80
 theme_override_font_sizes/italics_font_size = 80
 theme_override_font_sizes/mono_font_size = 80
 bbcode_enabled = true
-text = "你们的[url]泔水炖菜[/url][br]简直像[url][b][color=dark_orchid]工业废料[/color][/b][/url]一样[br][url]差劲[/url]！"
+text = "[fade start=1.5 length=3]啊对对对[/fade]"
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
 horizontal_alignment = 2
+vertical_alignment = 1
