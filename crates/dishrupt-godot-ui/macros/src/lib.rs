@@ -58,6 +58,14 @@ pub fn ui_tree_api(attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 /// Build UI trees quickly.
+///
+/// The fields support the following initializations:
+/// - `#[init(expr)]` - initializes the field with the given expression
+/// - `#[new(args...)]` - initializes the field by calling `Type::new(args...)`
+/// - `#[node("NodePath")]` - gets a node (`Gd<Node>`) at the given path
+/// - `#[child("NodePath")]` - gets a child UI elem at the given path
+/// - `#[child_ui("NodePath")]` - gets a child node as UINode at the given path
+/// - `#[subtree("NodePath")]` - gets a subtree UI element at the given path
 #[proc_macro_derive(UITree, attributes(node, child, child_ui, subtree, init, new))]
 pub fn derive_ui_tree(item: TokenStream) -> TokenStream {
     let item = parse_macro_input!(item as syn::ItemStruct);

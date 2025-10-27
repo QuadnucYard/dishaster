@@ -1,9 +1,13 @@
 use dishaster_models::{TrialIntro, TrialParticipantAppearance, TrialSpeech};
 use dishrupt_core::prelude::EcoString;
-use godot::{builtin::GString, classes::RegEx, obj::NewGd};
+use godot::{
+    classes::{AnimationPlayer, RegEx},
+    prelude::*,
+};
 
 use crate::{prelude::*, req::GameRequest};
 
+const INTRO_TIME: f32 = 2.0;
 const COUNTDOWN_TIME: f32 = 3.0;
 
 #[derive(UITree)]
@@ -16,6 +20,9 @@ pub struct TrialGui {
 
     #[child("%TimeProgress")]
     time_progress: ProgressBarA,
+
+    #[node("%AnimationPlayer")]
+    anim_player: Gd<AnimationPlayer>,
 
     state: Option<State>,
 }
@@ -33,9 +40,9 @@ impl TrialGui {
         self.right.content.set_visible(false);
         self.time_progress.set_visible(false);
 
-        // todo: use animation
-        self.left.set_visible(true);
-        self.right.set_visible(false);
+        // Play intro animation
+        self.anim_player.play_ex().name("intro").done();
+        self.anim_player.seek(0.0);
     }
 
     pub fn left_speak(&mut self, speech: TrialSpeech) {
@@ -46,7 +53,7 @@ impl TrialGui {
         self.state = Some(State {
             phase: Phase::LeftSpeaking,
             time: 0.0,
-            inner_speech_text: Some(inner_text),
+            inner_speech_text: inner_text,
             fade_time: estimate_fade_time(&speech.text),
         });
     }
@@ -59,7 +66,7 @@ impl TrialGui {
         self.state = Some(State {
             phase: Phase::RightSpeaking,
             time: 0.0,
-            inner_speech_text: Some(inner_text),
+            inner_speech_text: inner_text,
             fade_time: estimate_fade_time(&speech.text),
         });
         self.time_progress.set_visible(false);
@@ -88,14 +95,7 @@ impl Gui for TrialGui {
 
         match state.phase {
             Phase::Intro => {
-                if state.time < 1.0 {
-                    self.left.set_visible(true);
-                    self.right.set_visible(false);
-                } else if state.time < 2.0 {
-                    // switch to right
-                    self.left.set_visible(false);
-                    self.right.set_visible(true);
-                } else {
+                if state.time > INTRO_TIME {
                     state.phase = Phase::Idle;
                     self.left.set_visible(false);
                     self.right.set_visible(false);
@@ -104,10 +104,9 @@ impl Gui for TrialGui {
                 }
             }
             Phase::LeftSpeaking => {
-                self.left.content.set_text(&faded(
-                    state.inner_speech_text.as_ref().unwrap(),
-                    state.time,
-                ));
+                self.left
+                    .content
+                    .set_text(&faded(&state.inner_speech_text, state.time));
                 if state.time > state.fade_time {
                     self.time_progress.set_visible(true);
                     self.time_progress
@@ -118,10 +117,9 @@ impl Gui for TrialGui {
                 }
             }
             Phase::RightSpeaking => {
-                self.right.content.set_text(&faded(
-                    state.inner_speech_text.as_ref().unwrap(),
-                    state.time,
-                ));
+                self.right
+                    .content
+                    .set_text(&faded(&state.inner_speech_text, state.time));
                 if state.time > state.fade_time + 1.0 {
                     state.phase = Phase::Idle;
                     cmd.push_req(GameRequest::TrialResponseDone);
@@ -173,7 +171,7 @@ impl UITree for TrialSpeechGui {}
 struct State {
     pub time: f32,
     pub phase: Phase,
-    pub inner_speech_text: Option<EcoString>,
+    pub inner_speech_text: EcoString,
     pub fade_time: f32,
 }
 
