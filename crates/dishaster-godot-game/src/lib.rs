@@ -7,6 +7,7 @@ mod input;
 pub mod perf;
 mod present;
 pub mod runner;
+pub mod user_store;
 
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
@@ -27,14 +28,14 @@ use rustc_hash::FxHashMap;
 use self::{ctrl::*, perf::PerfTracker};
 use crate::{
     dbgviz::*,
-    // game_main::{GAME_DATA, progress_service},
     runner::{SnapshotFrame, SyncSimulationRunner},
+    user_store::GodotUserStorage,
 };
 
 pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
-pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService>> = OnceLock::new();
+pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService<GodotUserStorage>>> = OnceLock::new();
 
-pub fn progress_service() -> MutexGuard<'static, ProgressService> {
+pub fn progress_service() -> MutexGuard<'static, ProgressService<GodotUserStorage>> {
     PROGRESS_SERVICE
         .get()
         .expect("progress service not initialized")

@@ -1,0 +1,16 @@
+[package]
+name = "dishrupt-persistence"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+
+[features]
+default = []
+fs = []
+
+[lints]
+workspace = true

@@ -11,6 +11,7 @@ edition = "2024"
 
 [workspace.dependencies]
 dishrupt-core = { path = "crates/dishrupt-core" }
+dishrupt-persistence = { path = "crates/dishrupt-persistence" }
 dishrupt-l10n = { path = "crates/dishrupt-l10n" }
 dishrupt-l10n-godot = { path = "crates/dishrupt-l10n-godot" }
 dishrupt-godot = { path = "crates/dishrupt-godot" }

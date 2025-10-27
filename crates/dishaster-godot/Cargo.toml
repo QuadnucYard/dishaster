@@ -20,7 +20,6 @@ as-any.workspace = true
 env_logger.workspace = true
 godot.workspace = true
 log.workspace = true
-rand.workspace = true
 
 [lints]
 # workspace = true

@@ -6,13 +6,16 @@ rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
+dishrupt-persistence.workspace = true
+dishaster-models.workspace = true
+
 anyhow.workspace = true
 ron.workspace = true
 serde.workspace = true
-dishaster-models.workspace = true
 
 [dev-dependencies]
 dishrupt-core.workspace = true
+dishrupt-persistence = { workspace = true, features = ["fs"] }
 tempfile.workspace = true
 
 [lints]

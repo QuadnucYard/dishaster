@@ -479,7 +479,6 @@ dependencies = [
  "env_logger",
  "godot",
  "log",
- "rand",
 ]
 
 [[package]]
@@ -494,6 +493,7 @@ dependencies = [
 name = "dishaster-godot-game"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "dishaster-channel",
  "dishaster-godot-ui",
  "dishaster-models",
@@ -503,6 +503,7 @@ dependencies = [
  "dishrupt-godot-scene",
  "dishrupt-godot-ui",
  "dishrupt-l10n",
+ "dishrupt-persistence",
  "fibre",
  "godot",
  "rustc-hash",
@@ -547,6 +548,7 @@ dependencies = [
  "anyhow",
  "dishaster-models",
  "dishrupt-core",
+ "dishrupt-persistence",
  "ron",
  "serde",
  "tempfile",
@@ -620,6 +622,13 @@ version = "0.1.0"
 dependencies = [
  "dishrupt-l10n",
  "godot",
+]
+
+[[package]]
+name = "dishrupt-persistence"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
 ]
 
 [[package]]

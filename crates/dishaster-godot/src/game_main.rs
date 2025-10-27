@@ -1,23 +1,18 @@
 use std::{
     cell::OnceCell,
-    path::PathBuf,
     sync::{Arc, Mutex},
 };
 
 use dishaster_core::models::GameModelRegistry;
 use dishaster_data::DataLoader;
-use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE};
+use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE, user_store::GodotUserStorage};
 use dishaster_godot_ui::register_guis;
 use dishaster_persistence::ProgressService;
 use dishrupt_godot::{audio::AudioManager, ext::NodeExt, input::listener::InputListener};
 use dishrupt_godot_scene::{SceneContext, SceneManager};
 use dishrupt_godot_ui::GuiManager;
 use dishrupt_l10n_godot::LocalizationManager;
-use godot::{
-    classes::{CanvasLayer, ProjectSettings},
-    prelude::*,
-};
-use rand::random;
+use godot::{classes::CanvasLayer, prelude::*};
 
 use crate::scenes::{DefaultSceneLoader, proc::*};
 
@@ -49,17 +44,18 @@ impl INode for GameMain {
             .filter_level(log::LevelFilter::Debug)
             .init();
 
-        godot_print!("Main loop initialize");
+        log::info!("Main loop initialize");
 
         match std::panic::catch_unwind(init_game) {
             Ok(_) => {
-                godot_print!("Init load complete!");
+                log::info!("Init game completed successfully");
 
                 let mut inner = Inner::new(self.base().clone().upcast());
                 inner.ready();
                 let _ = self.inner.set(inner);
             }
             Err(e) => {
+                log::error!("Panic during init_game: {:?}", e);
                 godot_error!("Panic during init_game: {:?}", e);
             }
         }
@@ -167,43 +163,43 @@ impl Inner {
     }
 }
 
-fn init_game_database(loader: impl FnOnce() -> Arc<GameModelRegistry>) {
-    GAME_DATA
-        .set(loader())
-        .unwrap_or_else(|_| panic!("init game database error"));
+fn init_game_database(
+    loader: impl FnOnce() -> Arc<GameModelRegistry>,
+) -> &'static Arc<GameModelRegistry> {
+    GAME_DATA.get_or_init(loader)
 }
 
 fn init_game() {
-    println!("Init game start");
-    init_game_database(|| {
+    log::info!("Init game start");
+    let registry = init_game_database(|| {
         let db = Arc::new(
             DataLoader::new_with_fallback("data", "../assets/data")
                 .unwrap()
                 .load_all_data()
                 .unwrap(),
         );
-        godot_print!("Loaded {} canteens", db.canteens.len());
+        log::info!("Loaded {} canteens", db.canteens.len());
         db
     });
 
-    let save_dir = {
-        let settings = ProjectSettings::singleton();
-        let path: GString = settings.globalize_path("user://");
-        PathBuf::from(path.to_string())
-    };
-
-    let registry = Arc::clone(GAME_DATA.get().expect("game data not initialized"));
     if PROGRESS_SERVICE
         .set(Mutex::new(
-            ProgressService::load_or_create(save_dir, registry, None, random())
-                .expect("failed to initialize progress service"),
+            ProgressService::load_or_create(
+                GodotUserStorage,
+                registry.clone(),
+                None,
+                godot::global::randi() as u64,
+            )
+            .expect("failed to initialize progress service"),
         ))
         .is_err()
     {
         panic!("progress service already initialized");
     }
+    log::info!("Progress service initialized");
 
     dishrupt_l10n_godot::init();
+    log::info!("Localization initialized");
 
     /* setup_preference(); */
 }

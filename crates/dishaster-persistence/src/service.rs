@@ -1,95 +1,53 @@
-use std::{fs, io::ErrorKind, path::PathBuf, sync::Arc};
+use std::sync::Arc;
 
 use anyhow::{Context, Result, bail};
 use dishaster_models::{GameModelRegistry, LevelConfig, ModelId};
-use ron::ser::PrettyConfig;
+use dishrupt_persistence::PersistentStorage;
 
 use crate::data::*;
 
-/// Handles low-level persistence concerns such as reading and writing save files.
-#[derive(Debug, Clone)]
-pub struct PersistenceService {
-    dir: PathBuf,
-    file: String,
+/// Low-level persistence service for user progress.
+struct PersistenceService<Store: PersistentStorage> {
+    store: Store,
 }
 
-impl PersistenceService {
-    /// Create a new persistence service targeting the provided directory.
-    pub fn new(dir: PathBuf) -> Self {
-        Self {
-            dir,
-            file: "save_default.ron".into(),
-        }
+impl<Store: PersistentStorage> PersistenceService<Store> {
+    const SAVE_FILE: &str = "save_default.ron";
+
+    pub fn new(store: Store) -> Self {
+        Self { store }
     }
 
-    /// Load an existing progress file or initialize a fresh record if none exists.
-    pub fn load_or_create(&self, seed: u64) -> Result<UserProgress> {
-        fs::create_dir_all(&self.dir)
-            .with_context(|| format!("failed to create persistence dir {:?}", self.dir))?;
-        let path = self.dir.join(&self.file);
-        if !path.exists() {
-            let progress = UserProgress::new(seed);
-            self.save(&progress)?;
-            return Ok(progress);
-        }
-        let txt = fs::read_to_string(&path)
-            .with_context(|| format!("failed to read save file {:?}", path))?;
-        let mut progress: UserProgress = ron::from_str(&txt).context("parse user progress RON")?;
-        if progress.meta.version != USER_PROGRESS_VERSION {
-            self.migrate(&mut progress)?;
-        }
-        Ok(progress)
+    pub fn load_progress(&mut self, seed: u64) -> Result<UserProgress> {
+        self.store
+            .load_or_create(Self::SAVE_FILE, || UserProgress::new(seed))
     }
 
-    /// Persist the supplied progress snapshot to disk.
-    pub fn save(&self, progress: &UserProgress) -> Result<()> {
-        fs::create_dir_all(&self.dir)
-            .with_context(|| format!("failed to create persistence dir {:?}", self.dir))?;
-        let path = self.dir.join(&self.file);
-        let tmp = path.with_extension("tmp");
-        let ron = ron::ser::to_string_pretty(progress, PrettyConfig::default())?;
-        fs::write(&tmp, ron).with_context(|| format!("failed to write temp save {:?}", tmp))?;
-        match fs::rename(&tmp, &path) {
-            Ok(_) => Ok(()),
-            Err(err) if err.kind() == ErrorKind::PermissionDenied => {
-                if path.exists() {
-                    fs::remove_file(&path).with_context(|| {
-                        format!("failed to remove old save before replacing {:?}", path)
-                    })?;
-                }
-                fs::rename(&tmp, &path)
-                    .with_context(|| format!("failed to replace save file {:?}", path))?;
-                Ok(())
-            }
-            Err(err) => Err(err)
-                .with_context(|| format!("failed to move temp save {:?} -> {:?}", tmp, path)),
-        }
-    }
-
-    fn migrate(&self, _progress: &mut UserProgress) -> Result<()> {
-        // Placeholder for future schema upgrades.
-        Ok(())
+    pub fn save_progress(&mut self, progress: &UserProgress) -> Result<()> {
+        self.store.save(Self::SAVE_FILE, progress)
     }
 }
 
 /// High-level facade that ties the persistence layer to model data.
-pub struct ProgressService {
-    store: PersistenceService,
+pub struct ProgressService<Store: PersistentStorage> {
+    inner: PersistenceService<Store>,
+
     registry: Arc<GameModelRegistry>,
     base_level_id: ModelId,
     progress: UserProgress,
 }
 
-impl ProgressService {
+impl<Store: PersistentStorage> ProgressService<Store> {
     /// Load (or create) progress and prepare a service ready to dispense levels.
     pub fn load_or_create(
-        dir: PathBuf,
+        store: Store,
         registry: Arc<GameModelRegistry>,
         default_level_id: Option<ModelId>,
         seed: u64,
     ) -> Result<Self> {
-        let store = PersistenceService::new(dir);
-        let progress = store.load_or_create(seed)?;
+        let mut inner = PersistenceService::new(store);
+
+        let progress = inner.load_progress(seed)?;
         let base_level_id = match default_level_id {
             Some(id) => id,
             None => registry
@@ -105,7 +63,7 @@ impl ProgressService {
             );
         }
         Ok(Self {
-            store,
+            inner,
             registry,
             base_level_id,
             progress,
@@ -143,7 +101,7 @@ impl ProgressService {
         self.progress.player.current_day = self.progress.player.current_day.saturating_add(1);
         self.progress.player.rng_seed = advance_seed(self.progress.player.rng_seed);
         self.progress.meta.updated_at_utc = now_unix();
-        self.store.save(&self.progress)?;
+        self.inner.save_progress(&self.progress)?;
         Ok(())
     }
 }
@@ -168,6 +126,7 @@ mod tests {
         MovementRanges,
     };
     use dishrupt_core::asset::PrefabReference;
+    use dishrupt_persistence::FsStorage;
     use tempfile::tempdir;
 
     use super::*;
@@ -225,7 +184,7 @@ mod tests {
         let registry = Arc::new(sample_registry());
         let dir = tempdir()?;
         let service = ProgressService::load_or_create(
-            dir.path().to_path_buf(),
+            FsStorage::new(dir.path().to_path_buf()).unwrap(),
             Arc::clone(&registry),
             None,
             12345,
@@ -241,7 +200,7 @@ mod tests {
         let registry = Arc::new(sample_registry());
         let dir = tempdir()?;
         let mut service = ProgressService::load_or_create(
-            dir.path().to_path_buf(),
+            FsStorage::new(dir.path().to_path_buf()).unwrap(),
             Arc::clone(&registry),
             None,
             999,
@@ -255,7 +214,12 @@ mod tests {
             super::seed_for_day(super::advance_seed(999), 2)
         );
         drop(service);
-        let service = ProgressService::load_or_create(dir.path().to_path_buf(), registry, None, 0)?;
+        let service = ProgressService::load_or_create(
+            FsStorage::new(dir.path().to_path_buf()).unwrap(),
+            registry,
+            None,
+            0,
+        )?;
         let level = service.level_for_current_day()?;
         assert_eq!(level.day, 2);
         assert_eq!(level.seed, super::seed_for_day(super::advance_seed(999), 2));

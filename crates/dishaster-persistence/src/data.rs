@@ -1,5 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use anyhow::{Context, Result};
+use dishrupt_persistence::Persistable;
 use serde::{Deserialize, Serialize};
 
 /// Current version of the progress schema stored on disk.
@@ -129,4 +131,18 @@ pub(crate) fn now_unix() -> u64 {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs()
+}
+
+impl Persistable for UserProgress {
+    fn from_bytes(data: Vec<u8>) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        ron::de::from_bytes(&data).context("parse user progress RON")
+    }
+
+    fn to_bytes(&self) -> Result<Vec<u8>> {
+        let ron_str = ron::ser::to_string_pretty(self, Default::default())?;
+        Ok(ron_str.into_bytes())
+    }
 }

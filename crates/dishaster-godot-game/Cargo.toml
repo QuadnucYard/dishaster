@@ -7,6 +7,7 @@ edition.workspace = true
 
 [dependencies]
 dishrupt-core.workspace = true
+dishrupt-persistence.workspace = true
 dishrupt-godot.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true
@@ -16,6 +17,7 @@ dishaster-channel.workspace = true
 dishaster-persistence.workspace = true
 dishaster-godot-ui.workspace = true
 
+anyhow.workspace = true
 fibre.workspace = true
 rustc-hash.workspace = true
 godot.workspace = true
