@@ -16,9 +16,23 @@ pub struct TrialCorpus {
 pub struct TrialSpeech {
     /// The text of the statement.
     pub text: EcoString,
+    /// The breakdown of the statement into items.
+    #[serde(skip)]
+    pub items: Vec<TrialSpeechItem>,
     /// The appearance associated with the statement.
     #[serde(flatten)]
     pub appearance: TrialParticipantAppearance,
+}
+
+/// An item within a trial speech.
+#[derive(Debug, Clone, PartialEq)]
+pub enum TrialSpeechItem {
+    /// Plain text.
+    Text(EcoString),
+    /// A keyword emphasized in the speech.
+    Keyword(EcoString),
+    /// A line break in the speech.
+    LineBreak,
 }
 
 /// The appearance of a trial participant.

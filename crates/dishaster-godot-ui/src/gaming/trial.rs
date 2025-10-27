@@ -1,9 +1,6 @@
-use dishaster_models::{TrialIntro, TrialParticipantAppearance, TrialSpeech};
+use dishaster_models::{TrialIntro, TrialParticipantAppearance, TrialSpeech, TrialSpeechItem};
 use dishrupt_core::prelude::EcoString;
-use godot::{
-    classes::{AnimationPlayer, RegEx},
-    prelude::*,
-};
+use godot::{classes::AnimationPlayer, prelude::*};
 
 use crate::{prelude::*, req::GameRequest};
 
@@ -46,7 +43,8 @@ impl TrialGui {
     }
 
     pub fn left_speak(&mut self, speech: TrialSpeech) {
-        let inner_text = speech_to_bbcode(&speech.text);
+        // The speech may contain keywords for the left side.
+        let inner_text = speech_to_bbcode(&speech);
         self.right.set_visible(false);
         self.left.set_speech(&speech.appearance, &inner_text);
         self.left.set_visible(true);
@@ -59,7 +57,7 @@ impl TrialGui {
     }
 
     pub fn right_speak(&mut self, speech: TrialSpeech) {
-        let inner_text = speech_to_bbcode(&speech.text);
+        let inner_text = speech_to_bbcode(&speech);
         self.left.set_visible(false);
         self.right.set_speech(&speech.appearance, &inner_text);
         self.right.set_visible(true);
@@ -184,18 +182,22 @@ enum Phase {
     RightSpeaking,
 }
 
-fn speech_to_bbcode(text: &str) -> EcoString {
-    let mut pattern = RegEx::new_gd();
-    pattern.compile(r"\[(.+?)\]");
-    let res = pattern
-        .sub_ex(
-            text,
-            "[url=\"$1\"][b][color=dark_orchid][font_size=90]$1[/font_size][/color][/b][/url]",
-        )
-        .all(true)
-        .done();
-    let res = res.replacen("\\", "[br]");
-    res.to_string().into()
+fn speech_to_bbcode(speech: &TrialSpeech) -> EcoString {
+    let mut buffer = EcoString::with_capacity(speech.text.len());
+    for item in &speech.items {
+        match item {
+            TrialSpeechItem::Text(t) => {
+                buffer.push_str(t);
+            }
+            TrialSpeechItem::Keyword(k) => {
+                buffer.push_str(&format!("[url=\"{k}\"][b][color=dark_orchid][font_size=90]{k}[/font_size][/color][/b][/url]"));
+            }
+            TrialSpeechItem::LineBreak => {
+                buffer.push_str("[br]");
+            }
+        }
+    }
+    buffer
 }
 
 const FADE_SPEED: f32 = 20.0;

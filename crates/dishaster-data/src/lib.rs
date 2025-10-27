@@ -1,5 +1,7 @@
 //! Data loading and management for Dishaster simulation
 
+mod trial_speech;
+
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, bail};
@@ -87,8 +89,16 @@ impl DataLoader {
         self.load_to_registry(&mut registry.dispensers, "dispensers.ron")?;
         self.load_to_registry(&mut registry.collectors, "collectors.ron")?;
 
-        registry.trial.diner_speeches = self.load_corpus("trial/corpus.toml")?;
-        registry.trial.responses = self.load_corpus("trial/corpus_r.toml")?;
+        registry.trial.diner_speeches = {
+            let mut diner_speeches = self.load_corpus("trial/corpus.toml")?;
+            trial_speech::populate_trial_speech_items(&mut diner_speeches)?;
+            diner_speeches
+        };
+        registry.trial.responses = {
+            let mut responses = self.load_corpus("trial/corpus_r.toml")?;
+            trial_speech::populate_trial_response_items(&mut responses)?;
+            responses
+        };
 
         Ok(registry)
     }
