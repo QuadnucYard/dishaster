@@ -21,6 +21,21 @@ fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
         registry.trial.diner_speeches.len(),
         registry.trial.responses.len()
     );
+    println!(
+        "✓ Loaded {} QA ranks and {} AQ ranks",
+        registry.trial.qa_ranks.len(),
+        registry.trial.aq_ranks.len()
+    );
+    assert_eq!(
+        registry.trial.diner_speeches.len(),
+        registry.trial.qa_ranks.len(),
+        "Mismatched number of diner speeches and QA ranks"
+    );
+    assert_eq!(
+        registry.trial.responses.len(),
+        registry.trial.aq_ranks.len(),
+        "Mismatched number of responses and AQ ranks"
+    );
 
     Ok(())
 }

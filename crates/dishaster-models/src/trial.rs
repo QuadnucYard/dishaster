@@ -9,6 +9,11 @@ pub struct TrialCorpus {
     pub diner_speeches: Vec<TrialSpeech>,
     /// Possible responses made by the player (right participant).
     pub responses: Vec<TrialResponse>,
+
+    /// Question->Answer ranks for trial speeches.
+    pub qa_ranks: Vec<Vec<Vec<TrialQARank>>>,
+    /// Answer->Question ranks for trial speeches.
+    pub aq_ranks: Vec<Vec<TrialQARank>>,
 }
 
 /// A single speech made by a trial participant.
@@ -66,6 +71,17 @@ pub enum TrialResponseKind {
     Perjury,
     Question,
 }
+
+/// A single QA rank entry.
+#[derive(Debug)]
+pub struct TrialQARank {
+    /// Index of the answer in the corpus.
+    pub answer_index: usize,
+    /// The score of the answer.
+    pub score: f32,
+}
+
+// === Payloads ===
 
 /// Introduction data for a trial.
 #[derive(Debug)]

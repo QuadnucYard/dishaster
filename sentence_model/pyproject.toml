@@ -1,0 +1,21 @@
+[project]
+name = "sentence-model"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "markupsafe<3",
+    "sentence-transformers>=5.1.2",
+    "tqdm>=4.66.5",
+]
+
+[tool.uv.sources]
+torch.index = "pytorch"
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://mirrors.nju.edu.cn/pytorch/whl/cu130"
+
+[tool.ruff]
+line-length = 100

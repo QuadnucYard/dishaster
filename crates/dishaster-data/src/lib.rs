@@ -1,11 +1,12 @@
 //! Data loading and management for Dishaster simulation
 
+mod trial_rank;
 mod trial_speech;
 
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, bail};
-use dishaster_models::GameModelRegistry;
+use dishaster_models::{GameModelRegistry, TrialCorpus};
 use dishrupt_core::model_registry::*;
 use serde::Deserialize;
 use thiserror::Error;
@@ -89,15 +90,19 @@ impl DataLoader {
         self.load_to_registry(&mut registry.dispensers, "dispensers.ron")?;
         self.load_to_registry(&mut registry.collectors, "collectors.ron")?;
 
-        registry.trial.diner_speeches = {
-            let mut diner_speeches = self.load_corpus("trial/corpus.toml")?;
-            trial_speech::populate_trial_speech_items(&mut diner_speeches)?;
-            diner_speeches
-        };
-        registry.trial.responses = {
-            let mut responses = self.load_corpus("trial/corpus_r.toml")?;
-            trial_speech::populate_trial_response_items(&mut responses)?;
-            responses
+        registry.trial = TrialCorpus {
+            diner_speeches: {
+                let mut diner_speeches = self.load_corpus("trial/corpus.toml")?;
+                trial_speech::populate_trial_speech_items(&mut diner_speeches)?;
+                diner_speeches
+            },
+            responses: {
+                let mut responses = self.load_corpus("trial/corpus_r.toml")?;
+                trial_speech::populate_trial_response_items(&mut responses)?;
+                responses
+            },
+            qa_ranks: trial_rank::parse_qa_ranks(&self.load_string("trial/ranks_qa.txt")?)?,
+            aq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_aq.txt")?)?,
         };
 
         Ok(registry)
@@ -144,9 +149,16 @@ impl DataLoader {
         }
 
         let path: PathBuf = self.assets_path.join(filename);
-        let content = std::fs::read_to_string(path)?;
+        let content = std::fs::read_to_string(&path)?;
         let data = toml::from_str::<Items<T>>(&content)
-            .with_context(|| format!("Loading corpus {filename}"))?;
+            .with_context(|| format!("Loading corpus {path:?}"))?;
         Ok(data.item)
+    }
+
+    fn load_string(&self, filename: &str) -> anyhow::Result<String> {
+        let path: PathBuf = self.assets_path.join(filename);
+        let content = std::fs::read_to_string(&path)
+            .with_context(|| format!("Loading text file {path:?}"))?;
+        Ok(content)
     }
 }
