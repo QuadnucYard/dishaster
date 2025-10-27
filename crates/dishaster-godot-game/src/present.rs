@@ -72,11 +72,11 @@ impl Game {
                     trial_gui.intro(intro);
                     trial_gui.show();
                 }
-                PresentationEvent::TrialLeftSpeak(speech) => {
-                    godot_print!("Received trial speech (left): {:?}", speech);
+                PresentationEvent::TrialLeftSpeak(statement) => {
+                    godot_print!("Received trial speech (left): {:?}", statement);
 
                     let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                    trial_gui.left_speak(speech);
+                    trial_gui.left_speak(statement);
                 }
                 PresentationEvent::TrialRightSpeak(speech) => {
                     godot_print!("Received trial speech (right): {:?}", speech);

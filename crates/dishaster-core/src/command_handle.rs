@@ -1,6 +1,9 @@
 use bevy_ecs::system::RunSystemOnce;
 use dishaster_channel::{commands::SimCommand, events::*};
-use dishaster_models::{TrialIntro, TrialParticipantAppearance, TrialSpeech};
+use dishaster_models::{
+    TrialIntro, TrialParticipantAppearance, TrialResponseOption, TrialSpeech, TrialSpeechItem,
+    TrialStatement,
+};
 use dishaster_navigation::*;
 
 use crate::{components::*, prelude::*, resources::*, sim::Simulation};
@@ -83,12 +86,12 @@ impl Simulation {
                 events.emit(PresentationEvent::TrialIntro(intro));
             }
             SimCommand::TrialLaunch => {
-                let speech = self.launch_trial_speech(false);
+                let statement = self.create_diner_statement();
 
                 let mut events = self.world.resource_mut::<EventLog>();
-                events.emit(PresentationEvent::TrialLeftSpeak(speech));
+                events.emit(PresentationEvent::TrialLeftSpeak(statement));
             }
-            SimCommand::TrialChooseKeyword(_keyword) => {
+            SimCommand::TrialRespond(_resp_corpus_index) => {
                 // For now, just respond with a random speech for the right side.
                 let speech = self.launch_trial_speech(true);
 
@@ -108,10 +111,10 @@ impl Simulation {
 
                 if should_continue {
                     // here the logic is same as `TrialLaunch` for now
-                    let speech = self.launch_trial_speech(false);
+                    let statement = self.create_diner_statement();
 
                     let mut events = self.world.resource_mut::<EventLog>();
-                    events.emit(PresentationEvent::TrialLeftSpeak(speech));
+                    events.emit(PresentationEvent::TrialLeftSpeak(statement));
                 } else {
                     // End of trial
                     let mut events = self.world.resource_mut::<EventLog>();
@@ -119,6 +122,46 @@ impl Simulation {
                 }
             }
         }
+    }
+
+    fn create_diner_statement(&mut self) -> TrialStatement {
+        let speech = self.launch_trial_speech(false);
+        let options = self.prepare_trial_response_options(&speech);
+        TrialStatement { speech, options }
+    }
+
+    fn prepare_trial_response_options(
+        &mut self,
+        speech: &TrialSpeech,
+    ) -> Vec<Vec<TrialResponseOption>> {
+        (self.world).resource_scope(|world, registry: Mut<GameModelRegistryRes>| {
+            let mut options = Vec::new();
+
+            let mut rng = world.resource_mut::<GameRng>();
+            for item in &speech.items {
+                let TrialSpeechItem::Keyword(_keyword) = item else {
+                    continue;
+                };
+                // For simplicity, pick a random response for each keyword.
+                let options_count = rng.random_range(1..=3);
+                options.push(
+                    (0..registry.trial.responses.len())
+                        .choose_multiple(&mut rng, options_count)
+                        .iter()
+                        .map(|&idx| {
+                            let response = registry.trial.responses.get(idx).cloned().unwrap();
+                            TrialResponseOption {
+                                corpus_index: idx,
+                                kind: response.kind,
+                                summary: response.summary.clone(),
+                            }
+                        })
+                        .collect(),
+                );
+            }
+
+            options
+        })
     }
 
     fn launch_trial_speech(&mut self, is_player: bool) -> TrialSpeech {

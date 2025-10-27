@@ -1,6 +1,6 @@
 //! Presentation events emitted by the core simulation for client display.
 
-use dishaster_models::{ModelId, PricingMethod, TrialIntro, TrialSpeech};
+use dishaster_models::{ModelId, PricingMethod, TrialIntro, TrialSpeech, TrialStatement};
 use dishrupt_core::{EntityId, prelude::*};
 
 /// Presentation events emitted by the core simulation for client display.
@@ -24,7 +24,7 @@ pub enum PresentationEvent {
     /// Show trial intro.
     TrialIntro(TrialIntro),
     /// Trial diner speaks.
-    TrialLeftSpeak(TrialSpeech),
+    TrialLeftSpeak(TrialStatement),
     /// Trial player responds.
     TrialRightSpeak(TrialSpeech),
     /// Trial has ended.

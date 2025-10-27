@@ -67,13 +67,6 @@ pub enum TrialResponseKind {
     Question,
 }
 
-/*
-pub struct TrialOption {
-    pub kind: TrialResponseKind,
-    pub summary: EcoString,
-}
- */
-
 /// Introduction data for a trial.
 #[derive(Debug)]
 pub struct TrialIntro {
@@ -81,4 +74,24 @@ pub struct TrialIntro {
     pub left: TrialParticipantAppearance,
     /// Appearance of the right participant.
     pub right: TrialParticipantAppearance,
+}
+
+/// A statement made during a trial, along with possible response options.
+#[derive(Debug)]
+pub struct TrialStatement {
+    /// The speech made by the left participant.
+    pub speech: TrialSpeech,
+    /// Possible response options for each keyword.
+    pub options: Vec<Vec<TrialResponseOption>>,
+}
+
+/// A single response option during a trial.
+#[derive(Debug)]
+pub struct TrialResponseOption {
+    /// Index into the corpus responses.
+    pub corpus_index: usize,
+    /// The kind of trial response.
+    pub kind: TrialResponseKind,
+    /// A brief summary of the response, displayed in the options list.
+    pub summary: EcoString,
 }

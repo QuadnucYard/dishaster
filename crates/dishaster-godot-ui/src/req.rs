@@ -1,5 +1,5 @@
 use dishaster_models::PricingMethod;
-use dishrupt_core::{EntityId, prelude::EcoString};
+use dishrupt_core::EntityId;
 use dishrupt_godot_ui::GuiRequest;
 
 /// Requests that can be sent to the overall application.
@@ -40,7 +40,9 @@ pub enum GameRequest {
     /// Start a trial for the given diner entity.
     TrialStart(EntityId),
     TrialIntroDone,
-    TrialChooseKeyword(EcoString),
+    TrialCheckKeyword(usize),
+    TrialBackFromThought,
+    TrialRespond(usize),
     TrialResponseDone,
     TrialTimeout,
 }

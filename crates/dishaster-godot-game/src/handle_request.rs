@@ -36,9 +36,21 @@ impl Game {
                 godot_print!("Trial intro done");
                 self.send_sim_command(SimCommand::TrialLaunch);
             }
-            GameRequest::TrialChooseKeyword(ref keyword) => {
-                godot_print!("Trial choose keyword: {:?}", keyword);
-                self.send_sim_command(SimCommand::TrialChooseKeyword(keyword.clone()));
+            GameRequest::TrialCheckKeyword(keyword_index) => {
+                godot_print!("Trial check keyword: {:?}", keyword_index);
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.check_keyword(keyword_index);
+            }
+            GameRequest::TrialBackFromThought => {
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.back_from_thought();
+            }
+            GameRequest::TrialRespond(corpus_index) => {
+                godot_print!("Trial respond: {:?}", corpus_index);
+                self.send_sim_command(SimCommand::TrialRespond(corpus_index));
+
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.finish_thought();
             }
             GameRequest::TrialResponseDone => {
                 godot_print!("Trial response done");

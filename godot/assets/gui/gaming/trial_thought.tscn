@@ -1,0 +1,82 @@
+[gd_scene load_steps=5 format=3 uid="uid://scmpfafwfu2a"]
+
+[ext_resource type="Texture2D" uid="uid://ccxbmdwldmchs" path="res://assets/sprites/trial/player_thought_avatar.svg" id="1_vfbr7"]
+[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="2_nwvuc"]
+
+[sub_resource type="FontVariation" id="FontVariation_utn3p"]
+base_font = ExtResource("2_nwvuc")
+variation_opentype = {
+2003265652: 500
+}
+
+[sub_resource type="FontVariation" id="FontVariation_kbmlc"]
+base_font = ExtResource("2_nwvuc")
+variation_opentype = {
+2003265652: 600
+}
+
+[node name="Thought" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ThoughtAvatar" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 1368.0
+offset_top = 144.0
+offset_right = 2240.0
+offset_bottom = 1016.0
+texture = ExtResource("1_vfbr7")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 616.0
+offset_top = 144.0
+offset_right = 1448.0
+offset_bottom = 928.0
+theme_override_constants/separation = 100
+alignment = 1
+
+[node name="OptionButtons" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 100
+
+[node name="OptionButtonTemplate" type="Control" parent="VBoxContainer/OptionButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="OptionButton" type="Button" parent="VBoxContainer/OptionButtons/OptionButtonTemplate"]
+custom_minimum_size = Vector2(800, 120)
+layout_mode = 0
+offset_left = 32.0
+offset_right = 832.0
+offset_bottom = 120.0
+size_flags_horizontal = 8
+theme_override_fonts/font = SubResource("FontVariation_utn3p")
+theme_override_font_sizes/font_size = 40
+text = "立即处理"
+
+[node name="KindLabel" type="Label" parent="VBoxContainer/OptionButtons/OptionButtonTemplate"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = -30.0
+offset_right = 136.0
+offset_bottom = 58.0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_constants/shadow_outline_size = 4
+theme_override_fonts/font = SubResource("FontVariation_kbmlc")
+theme_override_font_sizes/font_size = 60
+text = "赞同"
+
+[node name="BackButton" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 120)
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_fonts/font = SubResource("FontVariation_utn3p")
+theme_override_font_sizes/font_size = 40
+text = "返回"

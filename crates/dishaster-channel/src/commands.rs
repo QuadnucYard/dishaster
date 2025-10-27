@@ -32,8 +32,8 @@ pub enum SimCommand {
     TrialStart(EntityId),
     /// Launch the trial after intro is complete.
     TrialLaunch,
-    /// Choose a keyword during the trial.
-    TrialChooseKeyword(EcoString),
+    /// Choose a response during the trial.
+    TrialRespond(usize),
     /// Timeout the current trial response.
     TrialTimeout,
     /// Proceed to the next dialogue of the trial.

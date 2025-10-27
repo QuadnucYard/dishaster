@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://ciy6eawkff740"]
+[gd_scene load_steps=10 format=3 uid="uid://ciy6eawkff740"]
 
 [ext_resource type="Texture2D" uid="uid://cyl7vn8jf8ug2" path="res://assets/sprites/emojis/sweat_smile.svg" id="1_pikr2"]
 [ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="2_nsilf"]
 [ext_resource type="Texture2D" uid="uid://b4neupvch3ad1" path="res://assets/sprites/emojis/1F91A.svg" id="3_barv7"]
+[ext_resource type="PackedScene" uid="uid://scmpfafwfu2a" path="res://assets/gui/gaming/trial_thought.tscn" id="4_3lw0w"]
 
 [sub_resource type="FontVariation" id="FontVariation_barv7"]
 base_font = ExtResource("2_nsilf")
@@ -13,7 +14,7 @@ variation_opentype = {
 [sub_resource type="FontVariation" id="FontVariation_3lw0w"]
 base_font = ExtResource("2_nsilf")
 variation_opentype = {
-2003265652: 800
+2003265652: 600
 }
 
 [sub_resource type="Animation" id="Animation_barv7"]
@@ -380,3 +381,7 @@ unique_name_in_owner = true
 libraries = {
 &"": SubResource("AnimationLibrary_utn3p")
 }
+
+[node name="Thought" parent="." instance=ExtResource("4_3lw0w")]
+unique_name_in_owner = true
+layout_mode = 1
