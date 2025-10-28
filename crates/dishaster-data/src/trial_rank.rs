@@ -50,15 +50,15 @@ fn parse_rank_line(line: &str) -> Result<Vec<TrialQARank>> {
             let entry = entry.trim();
             let (index_str, score_str) = entry
                 .split_once(':')
-                .ok_or_else(|| anyhow::anyhow!("Invalid rank entry format: {}", entry))?;
+                .ok_or_else(|| anyhow::anyhow!("Invalid rank entry format: {entry}"))?;
 
             let answer_index = index_str
                 .parse::<usize>()
-                .with_context(|| format!("Invalid index: {}", index_str))?;
+                .with_context(|| format!("Invalid index: {index_str}"))?;
 
             let score = score_str
                 .parse::<f32>()
-                .with_context(|| format!("Invalid score: {}", score_str))?;
+                .with_context(|| format!("Invalid score: {score_str}"))?;
 
             Ok(TrialQARank {
                 answer_index,

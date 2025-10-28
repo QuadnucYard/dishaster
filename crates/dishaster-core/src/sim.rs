@@ -108,6 +108,7 @@ impl ISimulation for Simulation {
         self.world.insert_resource(EventLog::default());
         self.world.insert_resource(ServingCommsQueue::default());
         self.world.insert_resource(DayStatus::default());
+        self.world.insert_resource(TrialSession::new());
         self.world.insert_resource(level.into_res());
 
         self.world

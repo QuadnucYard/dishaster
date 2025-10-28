@@ -73,12 +73,24 @@ pub enum TrialResponseKind {
 }
 
 /// A single QA rank entry.
-#[derive(Debug)]
+#[derive(Clone, Copy)]
 pub struct TrialQARank {
     /// Index of the answer in the corpus.
     pub answer_index: usize,
     /// The score of the answer.
     pub score: f32,
+}
+
+impl std::fmt::Display for TrialQARank {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}:{}", self.answer_index, self.score)
+    }
+}
+
+impl std::fmt::Debug for TrialQARank {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
+    }
 }
 
 // === Payloads ===

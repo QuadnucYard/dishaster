@@ -169,6 +169,7 @@ impl Gui for TrialGui {
                     self.time_progress
                         .set_value((state.time - state.fade_time) / COUNTDOWN_TIME);
                     if state.time > state.fade_time + COUNTDOWN_TIME {
+                        state.phase = Phase::Idle;
                         cmd.push_req(GameRequest::TrialTimeout);
                     }
                 }

@@ -156,3 +156,48 @@ impl EventLog {
         std::mem::take(&mut self.0)
     }
 }
+
+/// Trial session state tracking to avoid repetition and improve coherence
+#[derive(Resource, Default)]
+pub struct TrialSession {
+    /// Indices of questions already asked in this trial
+    asked_questions: Vec<usize>,
+    /// The most recent response corpus index selected by the player
+    pub last_response_index: Option<usize>,
+    /// Temperature parameter for sampling (higher = more random, lower = more deterministic)
+    pub temperature: f32,
+}
+
+impl TrialSession {
+    /// Create a new trial session with default temperature
+    pub fn new() -> Self {
+        Self {
+            asked_questions: Vec::new(),
+            last_response_index: None,
+            temperature: 0.8,
+        }
+    }
+
+    /// Reset the session for a new trial
+    pub fn reset(&mut self) {
+        self.asked_questions.clear();
+        self.last_response_index = None;
+    }
+
+    /// Check if a question has been asked
+    pub fn has_asked(&self, question_index: usize) -> bool {
+        self.asked_questions.contains(&question_index)
+    }
+
+    /// Mark a question as asked
+    pub fn mark_asked(&mut self, question_index: usize) {
+        if !self.has_asked(question_index) {
+            self.asked_questions.push(question_index);
+        }
+    }
+
+    /// Record the player's response choice
+    pub fn set_last_response(&mut self, response_index: usize) {
+        self.last_response_index = Some(response_index);
+    }
+}
