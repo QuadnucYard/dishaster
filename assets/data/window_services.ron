@@ -1,9 +1,56 @@
 [
+    // 套餐窗口 (Combo Windows) - 1 queue each
     (
-        id: "main_food_window",
+        id: "combo_window_1",
         window_type: General,
-        name: "大伙",
-        compatible_dishes: ["rice"],
+        name: "套餐一",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [1.0],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "combo_window_2",
+        window_type: General,
+        name: "套餐二",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [1.0],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "combo_window_3",
+        window_type: General,
+        name: "快餐套餐",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [1.0],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+
+    // 大伙窗口 (General Food Windows) - 2 queues each
+    (
+        id: "general_window_1",
+        window_type: General,
+        name: "大伙一",
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [0.5, 1.5],
@@ -17,14 +64,129 @@
         display: (res: "windows/sample_window"),
     ),
     (
-        id: "soup_window",
-        window_type: Soup,
-        name: "Soup and Beverages",
-        compatible_dishes: ["tomato_egg_soup"],
+        id: "general_window_2",
+        window_type: General,
+        name: "大伙二",
         layout: (
-            size: (width: 2.0, height: 1.0),
-            queue_x: [1.0],
-            dish_slots: [],
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "general_window_3",
+        window_type: General,
+        name: "大伙三",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+
+    // 特色菜窗口 (Specialty Windows) - 2 queues each
+    (
+        id: "specialty_window_1",
+        window_type: Specialty,
+        name: "特色一",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "specialty_window_2",
+        window_type: Specialty,
+        name: "特色二",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "specialty_window_3",
+        window_type: Specialty,
+        name: "特色三",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+
+    // 面点/小吃窗口 (Noodle/Snack Windows) - 2 queues each
+    (
+        id: "noodle_window_1",
+        window_type: General,
+        name: "面点一",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "noodle_window_2",
+        window_type: General,
+        name: "面点二",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "snack_window",
+        window_type: General,
+        name: "小吃",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
         ),
         display: (res: "windows/sample_window"),
     ),

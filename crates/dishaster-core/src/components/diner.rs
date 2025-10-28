@@ -1,3 +1,4 @@
+use dishaster_models::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{components::Movement, prelude::*};
@@ -10,6 +11,10 @@ pub struct DinerBundle {
     pub goal: DinerGoalState,
     pub targets: DinerTargets,
     pub movement: Movement,
+    pub personality: DinerPersonality,
+    pub psych_state: DinerPsychState,
+    pub ltm: DinerLongTermMemory,
+    pub stm: DinerShortTermMemory,
 }
 
 /// Core diner identity
@@ -28,6 +33,8 @@ pub struct DinerState {
     pub has_chopsticks: bool,
     /// Whether the diner has been served
     pub is_served: bool,
+    /// What was served (if any) - stored for memory updates after eating
+    pub served_dish: Option<ServedDish>,
 }
 
 /// Current goal state of the diner
@@ -142,3 +149,15 @@ pub struct DinerMemory {
     /// Learned preferences and adaptations
     pub learned_preferences: Vec<EcoString>,
 }
+
+/// Wrapper component for Personality
+pub type DinerPersonality = CompWrapper<Personality>;
+
+/// Wrapper component for PsychState
+pub type DinerPsychState = CompWrapper<PsychState>;
+
+/// Wrapper component for LongTermMemory
+pub type DinerLongTermMemory = CompWrapper<LongTermMemory>;
+
+/// Short-term memory for current meal (not serialized, session only)
+pub type DinerShortTermMemory = CompWrapper<ShortTermMemory>;

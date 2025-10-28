@@ -6,8 +6,8 @@ colors = PackedColorArray(0.75739485, 0.8286915, 0.9685703, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_swfgw"]
 gradient = SubResource("Gradient_h745r")
-width = 1500
-height = 750
+width = 1800
+height = 1000
 
 [sub_resource type="Gradient" id="Gradient_swfgw"]
 offsets = PackedFloat32Array(0)
@@ -21,17 +21,19 @@ height = 20
 [node name="MainCanteen" type="Node2D"]
 
 [node name="Floor" type="Sprite2D" parent="."]
-position = Vector2(973, 461)
+position = Vector2(60, 6)
 texture = SubResource("GradientTexture2D_swfgw")
+centered = false
 
 [node name="Entrance1" type="Sprite2D" parent="Floor"]
-position = Vector2(-390, -375)
+position = Vector2(480, -10)
 texture = SubResource("GradientTexture2D_m0x1g")
+centered = false
 
 [node name="Entrance2" type="Sprite2D" parent="Floor"]
-position = Vector2(390, -375)
+position = Vector2(1200, -10)
 texture = SubResource("GradientTexture2D_m0x1g")
+centered = false
 
 [node name="Origin" type="Marker2D" parent="Floor"]
 unique_name_in_owner = true
-position = Vector2(-748, -373)

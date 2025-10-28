@@ -15,7 +15,7 @@ const PRICE_LABEL_PREFAB: &str = "dishes/price_label";
 pub fn spawn_static_objects(
     mut commands: Commands,
     canteen: Res<Canteen>,
-    level: Res<LevelConfigRes>,
+    level: Res<ResWrapper<LevelConfig>>,
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
     mut events: ResMut<EventLog>,
@@ -36,8 +36,8 @@ pub fn spawn_static_objects(
 fn spawn_windows(
     commands: &mut Commands,
     canteen: &Res<Canteen>,
-    level: &Res<LevelConfigRes>,
-    registry: &Res<GameModelRegistryRes>,
+    level: &LevelConfig,
+    registry: &GameModelRegistry,
     display_root: &DisplayRoot,
     events: &mut ResMut<EventLog>,
 ) {
@@ -148,7 +148,7 @@ fn spawn_dish_presentations(
     window_entity: Entity,
     dishes: &[ActiveDish],
     service_template: &WindowServiceModel,
-    registry: &Res<GameModelRegistryRes>,
+    registry: &GameModelRegistry,
     events: &mut ResMut<EventLog>,
 ) {
     if dishes.is_empty() {
@@ -223,8 +223,8 @@ fn spawn_dish_presentations(
 
 fn spawn_tables(
     commands: &mut Commands,
-    level: &Res<LevelConfigRes>,
-    registry: &Res<GameModelRegistryRes>,
+    level: &LevelConfig,
+    registry: &GameModelRegistry,
     display_root: &DisplayRoot,
 ) {
     for placement in &level.table_placements {
@@ -263,8 +263,8 @@ fn spawn_tables(
 
 fn spawn_dispensers(
     commands: &mut Commands,
-    level: &Res<LevelConfigRes>,
-    registry: &Res<GameModelRegistryRes>,
+    level: &LevelConfig,
+    registry: &GameModelRegistry,
     display_root: &DisplayRoot,
 ) {
     for (placements, ty) in [
@@ -319,7 +319,7 @@ fn spawn_dispenser(
 
 fn spawn_collectors(
     commands: &mut Commands,
-    level: &Res<LevelConfigRes>,
+    level: &LevelConfig,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
 ) {

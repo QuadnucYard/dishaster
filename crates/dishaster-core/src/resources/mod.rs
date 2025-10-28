@@ -140,9 +140,6 @@ pub struct DayStatus {
 /// Resource wrapper for Arc<GameModelRegistry>
 pub type GameModelRegistryRes = ResWrapper<Arc<GameModelRegistry>>;
 
-/// Resource wrapper for LevelConfig
-pub type LevelConfigRes = ResWrapper<LevelConfig>;
-
 /// Log of presentation events to be processed by the display system
 #[derive(Resource, Default)]
 pub struct EventLog(pub(crate) Vec<PresentationEvent>);

@@ -2,9 +2,10 @@ mod layout;
 mod queues;
 mod staffs;
 
-use std::sync::LazyLock;
+use std::{collections::HashMap, sync::LazyLock};
 
 use bevy_ecs::schedule::ScheduleConfigs;
+use dishaster_models::{LongTermMemory, Personality, PsychState};
 use dishrupt_core::{
     asset::PrefabReference,
     display::{DisplayModel, DisplayState, Transform},
@@ -151,6 +152,12 @@ fn spawn_diner(
 
     let diner_id = spawner.next_diner_id;
     let display_res = model.display.res.clone();
+
+    // Initialize personality and psychological state
+    let personality = generate_personality(&model, &mut spawner.rng);
+    let psych_state = initialize_psych_state(&model, &personality);
+    let ltm = initialize_ltm(&mut spawner.rng);
+
     let wrapper = commands.spawn((
         AgentTag,
         DinerBundle {
@@ -165,6 +172,10 @@ fn spawn_diner(
                 avoidance_responsibility: spawner.rng.random_range(1.0..3.0),
                 ..Default::default()
             },
+            personality: personality.into_comp(),
+            psych_state: psych_state.into_comp(),
+            ltm: ltm.into_comp(),
+            stm: DinerShortTermMemory::default(),
         },
         model.into_comp(),
         DisplayState {
@@ -225,4 +236,57 @@ fn spawn_diner(
         },
         ChildOf(wrapper_entity),
     ));
+}
+
+/// Generate personality traits for a diner based on the model
+fn generate_personality(model: &DinerModel, rng: &mut impl Rng) -> Personality {
+    Personality {
+        frugality: model.attributes.price_sensitivity,
+        adventurous: rng.random_range(0.2..0.8),
+        confrontational: rng.random_range(0.1..0.6),
+        patience_base: model.attributes.patience,
+    }
+}
+
+/// Initialize psychological state based on attributes and personality
+fn initialize_psych_state(model: &DinerModel, personality: &Personality) -> PsychState {
+    PsychState {
+        hunger: model.attributes.hunger,
+        mood: 0.0,                                             // Start with neutral mood
+        patience_now: personality.patience_base * (1.0 + 0.3), // Slightly optimistic at start
+        trust: 0.7,                                            // Default trust level
+    }
+}
+
+/// Initialize long-term memory with some random preferences
+fn initialize_ltm(rng: &mut impl Rng) -> LongTermMemory {
+    // Generate some initial tag preferences (simulating past experiences)
+    let mut like_tags = HashMap::new();
+
+    // Common food tags with random preferences
+    const POSSIBLE_TAGS: &[&str] = &[
+        "meat",
+        "vegetable",
+        "spicy",
+        "mild",
+        "soup",
+        "rice",
+        "noodle",
+        "fried",
+        "steamed",
+        "cold",
+        "hot",
+    ];
+
+    // Give random initial preferences to some tags
+    for tag in POSSIBLE_TAGS.iter().take(rng.random_range(3..6)) {
+        let preference = rng.random_range(-0.5..0.8); // Slight positive bias
+        like_tags.insert(EcoString::from(*tag), preference);
+    }
+
+    LongTermMemory {
+        like_tags,
+        dish_experience: HashMap::new(),
+        overall_like: 0.5, // Start with neutral satisfaction
+    }
 }

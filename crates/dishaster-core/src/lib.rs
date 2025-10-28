@@ -3,12 +3,12 @@
 mod command_handle;
 pub mod components;
 pub(crate) mod constants;
-pub mod resources;
+pub(crate) mod resources;
 pub mod rng;
 pub mod sim;
 mod snapshot;
-pub mod systems;
-pub mod trial;
+pub(crate) mod systems;
+pub(crate) mod trial;
 
 /// Re-export of dishaster_models
 pub mod models {

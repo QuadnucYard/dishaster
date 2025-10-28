@@ -4,18 +4,20 @@ use bevy_ecs::schedule::ScheduleConfigs;
 use dishaster_navigation::NavigationGrid;
 use ordered_float::NotNan;
 
-use super::{feedback::*, prelude::*};
+use super::{decision::*, feedback::*, prelude::*};
 
 /// Collection of schedules dining systems
 pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + 'static>> {
     (
         update_diner_goals,
+        update_diner_psychology,
         (
             handle_enter_goal,
             handle_observe_goal,
             handle_decide_goal,
             handle_pick_tray_goal,
             handle_pick_chopsticks_goal,
+            check_queue_patience,
             handle_queue_for_window_goal,
             handle_get_served_goal,
             handle_find_seat_goal,
@@ -30,8 +32,27 @@ pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + '
 }
 
 fn update_diner_goals(diner_query: Query<(&mut DinerGoalState,)>, time: Res<Time>) {
+    let dt = time.tick_duration as f32;
     for (mut goal,) in diner_query {
-        goal.step(time.tick_duration as f32);
+        goal.step(dt);
+    }
+}
+
+/// Update psychological states (mood decay, patience adjustment)
+fn update_diner_psychology(
+    mut diner_query: Query<(&DinerPersonality, &mut DinerPsychState)>,
+    time: Res<Time>,
+) {
+    const TAU_MOOD: f32 = 600.0; // Mood decays with 600 second time constant
+
+    let dt = time.tick_duration as f32;
+
+    for (personality, mut psych_state) in diner_query.iter_mut() {
+        // Apply mood decay toward baseline
+        apply_mood_decay(&mut psych_state, dt, TAU_MOOD);
+
+        // Update patience based on current mood and trust
+        update_patience(personality, &mut psych_state);
     }
 }
 
@@ -134,12 +155,22 @@ fn handle_decide_goal(
         &mut DinerGoalState,
         &mut DinerTargets,
         &CompWrapper<DinerModel>,
+        &DinerPersonality,
+        &mut DinerPsychState,
+        &DinerLongTermMemory,
         &mut EntityRng,
     )>,
+    window_query: Query<(Entity, &Window, &WindowDishes)>,
+    lane_query: Query<(&QueueLane, &QueueLaneMembers)>,
+    registry: Res<GameModelRegistryRes>,
     time: Res<Time>,
     mut events: ResMut<EventLog>,
 ) {
-    for (entity, mut goal, mut targets, diner_model, mut rng) in diner_query {
+    let config = DecisionConfig::default();
+
+    for (entity, mut goal, mut targets, diner_model, personality, mut psych_state, ltm, mut rng) in
+        diner_query
+    {
         if !goal.is(DinerGoal::DecideWindow) {
             continue;
         }
@@ -148,18 +179,51 @@ fn handle_decide_goal(
             continue;
         }
 
-        // Simplified decision: random chance to like the window.
-        // In a real scenario, this would use diner preferences, queue length, etc.
-        // 70% chance to choose the observed window
-        let Some(window_entity) = targets.observing_window else {
-            // If not chosen, clear observation target and go back to observing.
+        // Update patience based on current psychological state
+        update_patience(personality, &mut psych_state);
+
+        // Gather all visible windows and evaluate them
+        let mut candidates = Vec::new();
+
+        for (window_entity, window, window_dishes) in window_query.iter() {
+            if !window.enabled {
+                continue;
+            }
+
+            // Get queue length for this window by finding its lane
+            let queue_length = lane_query
+                .iter()
+                .find(|(lane, _)| lane.owner == window_entity)
+                .map(|(_, members)| members.members.len())
+                .unwrap_or(0);
+
+            // Estimate service time (placeholder - should come from window model)
+            let avg_service_time = 10.0; // seconds per person
+
+            if let Some(candidate) = evaluate_window(
+                window_entity,
+                &window_dishes.dishes,
+                queue_length,
+                avg_service_time,
+                personality,
+                &psych_state,
+                ltm,
+                &registry,
+                &config,
+            ) {
+                candidates.push(candidate);
+            }
+        }
+
+        // Select window using softmax sampling
+        let chosen = select_window_from_candidates(&candidates, &config, &mut rng);
+
+        let Some(window_entity) = chosen else {
+            // No suitable window found, go back to observing
+            log::debug!(target: "diner", "no suitable window found, continue observing");
             goal.update(DinerGoal::Observe);
             continue;
         };
-
-        if !rng.random_bool(0.7) {
-            continue;
-        }
 
         log::info!(target: "diner", "decision: choose_window entity={window_entity:?}");
 
@@ -285,6 +349,60 @@ fn handle_pick_chopsticks_goal(
                 DinerGoal::QueueForWindow
             });
             continue;
+        }
+    }
+}
+
+/// Check if diners in queue have run out of patience and should abandon
+fn check_queue_patience(
+    mut commands: Commands,
+    mut diner_query: Query<(
+        Entity,
+        &mut DinerGoalState,
+        &mut DinerPsychState,
+        &mut DinerLongTermMemory,
+        &QueueMember,
+    )>,
+    lane_query: Query<&QueueLaneMembers>,
+) {
+    let config = DecisionConfig::default();
+
+    for (entity, mut goal, mut psych_state, mut ltm, queue_member) in diner_query.iter_mut() {
+        if !goal.is(DinerGoal::QueueForWindow) {
+            continue;
+        }
+
+        // Estimate wait time based on queue position
+        let queue_length = lane_query
+            .get(queue_member.lane)
+            .map(|members| members.members.len())
+            .unwrap_or(1);
+
+        let estimated_wait = queue_length as f32 * 10.0; // Rough estimate: 10s per person
+        let patience_now = psych_state.patience_now;
+
+        // Check if patience exceeded
+        if estimated_wait > patience_now {
+            log::info!(
+                target: "diner",
+                "diner {:?} abandoning queue due to patience (wait={:.1}s, patience={:.1}s)",
+                entity,
+                estimated_wait,
+                patience_now
+            );
+
+            // Apply abandonment penalty
+            handle_abandon_penalty(
+                &mut psych_state,
+                &mut ltm,
+                estimated_wait,
+                patience_now,
+                &config,
+            );
+
+            // Leave queue and exit canteen
+            commands.entity(entity).remove::<QueueMember>();
+            goal.update(DinerGoal::Leave);
         }
     }
 }
@@ -541,15 +659,24 @@ fn handle_move_to_seat_goal(
 }
 
 fn handle_eat_goal(
-    diner_query: Query<(
+    mut diner_query: Query<(
         &mut DinerGoalState,
+        &mut DinerState,
         &mut DinerTargets,
         &CompWrapper<DinerModel>,
+        &mut DinerPsychState,
+        &mut DinerLongTermMemory,
         &mut EntityRng,
     )>,
     mut table_query: Query<(Entity, &mut DiningTable)>,
+    registry: Res<GameModelRegistryRes>,
+    time: Res<Time>,
 ) {
-    for (mut goal, mut targets, diner_model, mut rng) in diner_query {
+    let satisfaction_weights = SatisfactionWeights::default();
+
+    for (mut goal, state, mut targets, diner_model, mut psych_state, mut ltm, mut rng) in
+        diner_query.iter_mut()
+    {
         if !goal.is(DinerGoal::Eat) {
             continue;
         }
@@ -558,13 +685,49 @@ fn handle_eat_goal(
             continue;
         }
 
-        // Finished eating
+        // Finished eating - update memory and psychological state
+        if let Some(ref served_dish) = state.served_dish {
+            // Get dish model for tags and base price
+            let dish_tags = registry
+                .dishes
+                .get_by_id(&served_dish.dish_id)
+                .map(|m| m.characteristics.tags.as_slice())
+                .unwrap_or(&[]);
+
+            // Use base price from model if available
+            let base_price = registry
+                .dishes
+                .get_by_id(&served_dish.dish_id)
+                .and_then(|m| {
+                    if m.characteristics.base_price > 0.0 {
+                        Some(m.characteristics.base_price)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or(served_dish.price_paid * 0.9);
+
+            update_after_eating(
+                dish_tags,
+                &served_dish.dish_id,
+                served_dish.price_paid,
+                base_price,
+                served_dish.served_quality,
+                served_dish.contamination_level,
+                time.current_time as f32,
+                &mut psych_state,
+                &mut ltm,
+                &satisfaction_weights,
+            );
+        }
+
+        // Free the table seat
         let (table_entity, seat_index) = targets.chosen_seat.expect("should have chosen seat");
         let mut table = table_query
             .get_mut(table_entity)
             .expect("table should exist")
             .1;
-        table.dirtiness += rng.random_range(0.01..0.2); // increase dirtiness
+        table.dirtiness += rng.random_range(0.01..0.2); // increase dirtiness. todo: this should be decided by dish and diner
         table.occupants[seat_index] = None; // Free the seat
         targets.chosen_seat = None;
 

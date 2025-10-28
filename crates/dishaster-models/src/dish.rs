@@ -31,6 +31,12 @@ pub struct DishCharacteristics {
     pub risk_level: f32,
     /// Base serving time
     pub serving_time: Seconds,
+    /// Tags for categorization and preference matching (e.g., "meat", "spicy", "soup")
+    #[serde(default)]
+    pub tags: Vec<EcoString>,
+    /// Reference price for value comparison (used in diner decision-making)
+    #[serde(default)]
+    pub base_price: f32,
 }
 
 /// Different pricing strategies for dishes
@@ -64,8 +70,6 @@ pub struct WindowServiceModel {
     pub window_type: WindowType,
     /// Display name for this service window
     pub name: EcoString,
-    /// Dishes this window type can serve
-    pub compatible_dishes: Vec<ModelId>,
     /// Physical layout
     pub layout: WindowLayout,
     /// Display model
