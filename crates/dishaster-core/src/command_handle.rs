@@ -99,8 +99,8 @@ impl Simulation {
             }
             SimCommand::TrialProceed => {
                 let should_continue = {
-                    let mut rng = self.world.resource_mut::<GameRng>();
-                    rng.random_bool(0.5)
+                    let mut session = self.world.resource_mut::<TrialSession>();
+                    session.rng.random_bool(0.5)
                 };
 
                 if should_continue {

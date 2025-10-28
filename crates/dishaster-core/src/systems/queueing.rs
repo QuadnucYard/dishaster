@@ -6,11 +6,10 @@ use super::prelude::*;
 /// System that updates entities with QueueIntent to move them to the end of the specified queue lane.
 pub fn update_queue_intents(
     mut commands: Commands,
-    preparer_query: Query<(Entity, &mut Movement, &QueueIntent)>,
+    preparer_query: Query<(Entity, &mut Movement, &QueueIntent, &mut EntityRng)>,
     lane_query: Query<&QueueLaneMembers>,
-    mut rng: ResMut<GameRng>,
 ) {
-    for (entity, mut movement, intent) in preparer_query {
+    for (entity, mut movement, intent, mut rng) in preparer_query {
         if movement.has_path() {
             continue;
         }
@@ -60,7 +59,7 @@ pub fn update_queue_members(
     mut commands: Commands,
     mut member_query: Query<(Entity, &mut Movement, &mut QueueMember)>,
     mut lane_query: Query<(Entity, &QueueLane, &mut QueueLaneMembers)>,
-    mut rng: ResMut<GameRng>,
+    mut rng: ResMut<QueueingRng>,
 ) {
     // Collect members by lane
     let mut lane_to_members: FxHashMap<Entity, Vec<(Entity, Vec2, f32)>> = FxHashMap::default();

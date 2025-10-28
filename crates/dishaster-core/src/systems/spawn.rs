@@ -34,7 +34,6 @@ pub fn update_diner_spawner(
     provider: Res<DinerProvider>,
     canteen: Res<Canteen>,
     display_root: Res<DisplayRoot>,
-    mut rng: ResMut<GameRng>,
 ) {
     if !day_status.started {
         // Wait for the service phase to begin before spawning diners.
@@ -54,7 +53,7 @@ pub fn update_diner_spawner(
     spawner.next_spawn_timer -= time.tick_duration;
 
     while spawner.next_spawn_timer <= 0.0 {
-        let diner_model = generate_diner_model(&provider.model, &mut rng);
+        let diner_model = generate_diner_model(&provider.model, &mut spawner.rng);
 
         spawn_diner(
             diner_model,
@@ -62,11 +61,10 @@ pub fn update_diner_spawner(
             &canteen,
             &mut spawner,
             &display_root,
-            &mut rng,
         );
 
         // Schedule next spawn using exponential sampling around current time
-        let interval = spawner.sample_next_interval(&mut rng, time.current_time);
+        let interval = spawner.sample_next_interval(time.current_time);
         spawner.next_spawn_timer += interval;
 
         if spawner.is_spawning_complete(time.current_time) {
@@ -76,7 +74,7 @@ pub fn update_diner_spawner(
 }
 
 /// Generate a randomized diner model based on provider configuration ranges
-fn generate_diner_model(provider: &DinerProviderModel, rng: &mut GameRng) -> DinerModel {
+fn generate_diner_model(provider: &DinerProviderModel, rng: &mut impl Rng) -> DinerModel {
     DinerModel {
         attributes: DinerAttributes {
             hunger: rng
@@ -133,13 +131,12 @@ fn spawn_diner(
     canteen: &Canteen,
     spawner: &mut ResMut<DinerSpawner>,
     display_root: &DisplayRoot,
-    rng: &mut GameRng,
 ) {
     // Sample a spawn X uniformly from the configured entrance X ranges.
     // Y coordinate is fixed at entrances_y. All in meters.
     let pos = {
-        let x_range = canteen.model.entrances.choose(rng).unwrap();
-        let x = rng.random_range(x_range.x_min..x_range.x_max);
+        let x_range = canteen.model.entrances.choose(&mut spawner.rng).unwrap();
+        let x = spawner.rng.random_range(x_range.x_min..x_range.x_max);
         Vec2::new(x, canteen.model.entrances_y + 0.5)
     };
 
@@ -163,9 +160,9 @@ fn spawn_diner(
             targets: DinerTargets::default(),
             movement: Movement {
                 pos,
-                radius: rng.random_range(0.1..0.2),
-                impatience: rng.random_range(0.5..1.0), // TODO: base on model
-                avoidance_responsibility: rng.random_range(1.0..3.0),
+                radius: spawner.rng.random_range(0.1..0.2),
+                impatience: spawner.rng.random_range(0.5..1.0), // TODO: base on model
+                avoidance_responsibility: spawner.rng.random_range(1.0..3.0),
                 ..Default::default()
             },
         },
@@ -179,6 +176,7 @@ fn spawn_diner(
             parent: Some(display_root.0),
             ..Default::default()
         },
+        EntityRng::new(spawner.rng.random()),
     ));
     let wrapper_entity = wrapper.id();
 

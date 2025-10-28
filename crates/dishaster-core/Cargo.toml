@@ -16,7 +16,7 @@ derive_more.workspace = true
 log.workspace = true
 ordered-float.workspace = true
 rand.workspace = true
-rand_chacha.workspace = true
+rand_xoshiro.workspace = true
 rustc-hash.workspace = true
 serde.workspace = true
 

@@ -4,6 +4,7 @@ mod command_handle;
 pub mod components;
 pub(crate) mod constants;
 pub mod resources;
+pub mod rng;
 pub mod sim;
 mod snapshot;
 pub mod systems;
@@ -19,6 +20,7 @@ mod prelude {
     pub use dishrupt_core::{model_registry::*, prelude::*};
     pub use rand::prelude::*;
 
+    pub use super::rng::*;
     pub use crate::Tick;
 }
 

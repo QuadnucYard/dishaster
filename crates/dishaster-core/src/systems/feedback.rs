@@ -8,7 +8,7 @@ pub const OBSERVING_FEEDBACKS: &[&str] = &["👀", "🤔", "📝"];
 pub const DECIDING_FEEDBACKS: &[&str] = &["😋", "😕", "💡"];
 pub const SERVING_FEEDBACKS: &[&str] = &["🍚", "🍲", "👍", "❓"];
 
-pub fn choose_feedback<'a>(rng: &mut GameRng, pool: &'a [&str]) -> &'a str {
+pub fn choose_feedback<'a>(rng: &mut impl Rng, pool: &'a [&str]) -> &'a str {
     pool.choose(rng).expect("pool is non-empty")
 }
 

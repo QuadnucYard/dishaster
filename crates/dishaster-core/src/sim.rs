@@ -87,8 +87,10 @@ impl ISimulation for Simulation {
     /// the first tick() to properly initialize the simulation state.
     fn start(&mut self, level: LevelConfig) {
         const DEFAULT_TIMESTEP_S: f64 = 0.1;
+
         self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
-        self.world.insert_resource(GameRng::new(level.seed));
+
+        let mut world_rng = WorldRng::new(level.seed);
 
         let db = Arc::clone(self.world.resource::<GameModelRegistryRes>());
         let canteen = db.canteens.get_by_id(&level.canteen).unwrap();
@@ -103,14 +105,24 @@ impl ISimulation for Simulation {
         self.world.insert_resource(DinerProvider {
             model: level.diner_provider.clone(),
         });
-        let spawner = Self::make_diner_spawner(&level.diner_spawner);
+        let spawner = Self::make_diner_spawner(&level.diner_spawner, world_rng.derive_seed());
         self.world.insert_resource(spawner);
         self.world.insert_resource(EventLog::default());
         self.world.insert_resource(ServingCommsQueue::default());
         self.world.insert_resource(DayStatus::default());
-        self.world.insert_resource(TrialSession::new());
+        self.world
+            .insert_resource(TrialSession::new(world_rng.derive_seed()));
         self.world.insert_resource(level.into_res());
+        // Derived RNGs
+        self.world
+            .insert_resource(NavigationRng::new(world_rng.derive_seed()));
+        self.world
+            .insert_resource(QueueingRng::new(world_rng.derive_seed()));
+        self.world
+            .insert_resource(ServingRng::new(world_rng.derive_seed()));
+        self.world.insert_resource(world_rng);
 
+        // Add observers for agent spawn/despawn events to log presentation events
         self.world
             .add_observer(|event: On<Add, AgentTag>, mut elog: ResMut<EventLog>| {
                 elog.emit(PresentationEvent::AgentSpawned(event.entity.into()));
@@ -195,7 +207,7 @@ impl Simulation {
         day_status.current_diner_count == 0 && spawner.spawning_finished
     }
 
-    fn make_diner_spawner(model: &DinerSpawnerModel) -> DinerSpawner {
+    fn make_diner_spawner(model: &DinerSpawnerModel, seed: u64) -> DinerSpawner {
         let mut curve = model.spawn_curve.clone();
         curve.sort_by_key(|k| OrderedFloat(k.time));
         curve.dedup_by(|a, b| (a.time - b.time).abs() <= f32::EPSILON);
@@ -221,6 +233,7 @@ impl Simulation {
             next_spawn_timer: 0.0,
             next_diner_id: 0,
             spawning_finished: false,
+            rng: Prng::new(seed),
         }
     }
 }

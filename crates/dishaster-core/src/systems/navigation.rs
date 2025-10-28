@@ -155,7 +155,7 @@ pub fn update_agent_movement(
     mut query: Query<&mut Movement>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
     time: Res<Time>,
-    mut rng: ResMut<GameRng>,
+    mut rng: ResMut<NavigationRng>,
 ) {
     let dt = time.tick_duration as f32;
     let waypoint_eps = PATH_WAYPOINT_EPS;

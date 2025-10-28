@@ -36,11 +36,10 @@ fn update_diner_goals(diner_query: Query<(&mut DinerGoalState,)>, time: Res<Time
 }
 
 fn handle_enter_goal(
-    diner_query: Query<(&mut DinerGoalState, &mut Movement)>,
-    mut rng: ResMut<GameRng>,
+    diner_query: Query<(&mut DinerGoalState, &mut Movement, &mut EntityRng)>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
-    for (mut goal, mut movement) in diner_query {
+    for (mut goal, mut movement, mut rng) in diner_query {
         if !goal.is(DinerGoal::Enter) {
             continue;
         }
@@ -73,14 +72,14 @@ fn handle_observe_goal(
         &mut DinerTargets,
         &mut Movement,
         &CompWrapper<DinerModel>,
+        &mut EntityRng,
     )>,
     window_query: Query<(Entity, &Window)>,
     time: Res<Time>,
-    mut rng: ResMut<GameRng>,
     mut events: ResMut<EventLog>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
-    for (entity, mut goal, mut targets, mut movement, diner_model) in diner_query {
+    for (entity, mut goal, mut targets, mut movement, diner_model, mut rng) in diner_query {
         if !goal.is(DinerGoal::Observe) {
             continue;
         }
@@ -135,12 +134,12 @@ fn handle_decide_goal(
         &mut DinerGoalState,
         &mut DinerTargets,
         &CompWrapper<DinerModel>,
+        &mut EntityRng,
     )>,
     time: Res<Time>,
-    mut rng: ResMut<GameRng>,
     mut events: ResMut<EventLog>,
 ) {
-    for (entity, mut goal, mut targets, diner_model) in diner_query {
+    for (entity, mut goal, mut targets, diner_model, mut rng) in diner_query {
         if !goal.is(DinerGoal::DecideWindow) {
             continue;
         }
@@ -186,11 +185,11 @@ fn handle_pick_tray_goal(
         &mut DinerGoalState,
         &mut DinerTargets,
         &mut Movement,
+        &mut EntityRng,
     )>,
     dispenser_query: Query<(Entity, &Dispenser)>,
-    mut rng: ResMut<GameRng>,
 ) {
-    for (entity, mut state, mut goal, mut targets, mut movement) in diner_query {
+    for (entity, mut state, mut goal, mut targets, mut movement, mut rng) in diner_query {
         if !goal.is(DinerGoal::PickTray) {
             continue;
         }
@@ -389,12 +388,16 @@ fn handle_get_served_goal(
 }
 
 fn handle_find_seat_goal(
-    diner_query: Query<(&mut DinerGoalState, &mut DinerTargets, &mut Movement)>,
+    diner_query: Query<(
+        &mut DinerGoalState,
+        &mut DinerTargets,
+        &mut Movement,
+        &mut EntityRng,
+    )>,
     table_query: Query<(Entity, &mut DiningTable)>,
-    mut rng: ResMut<GameRng>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
-    for (mut goal, mut targets, mut movement) in diner_query {
+    for (mut goal, mut targets, mut movement, mut rng) in diner_query {
         if !goal.is(DinerGoal::FindSeat) {
             continue;
         }
@@ -437,7 +440,7 @@ fn handle_find_seat_goal(
 fn find_seat(
     pos: Vec2,
     table_query: &Query<(Entity, &mut DiningTable)>,
-    rng: &mut GameRng,
+    rng: &mut EntityRng,
 ) -> Option<(Entity, usize)> {
     // scoring factors (lower is better):
     // - distance
@@ -542,11 +545,11 @@ fn handle_eat_goal(
         &mut DinerGoalState,
         &mut DinerTargets,
         &CompWrapper<DinerModel>,
+        &mut EntityRng,
     )>,
     mut table_query: Query<(Entity, &mut DiningTable)>,
-    mut rng: ResMut<GameRng>,
 ) {
-    for (mut goal, mut targets, diner_model) in diner_query {
+    for (mut goal, mut targets, diner_model, mut rng) in diner_query {
         if !goal.is(DinerGoal::Eat) {
             continue;
         }
@@ -691,7 +694,7 @@ fn find_valid_spot_near(
     center: Vec2,
     radius: Meters,
     nav_grid: &NavigationGrid,
-    rng: &mut GameRng,
+    rng: &mut impl Rng,
 ) -> Vec2 {
     try_find_valid_spot_near(center, radius, nav_grid, rng).unwrap_or(center)
 }
@@ -700,7 +703,7 @@ fn try_find_valid_spot_near(
     center: Vec2,
     radius: Meters,
     nav_grid: &NavigationGrid,
-    rng: &mut GameRng,
+    rng: &mut impl Rng,
 ) -> Option<Vec2> {
     /// Attempts when searching for a valid (non-colliding) random spot
     pub const FIND_SPOT_ATTEMPTS: usize = 32;

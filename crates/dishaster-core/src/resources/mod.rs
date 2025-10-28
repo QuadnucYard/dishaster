@@ -5,7 +5,6 @@ mod time;
 use std::sync::Arc;
 
 use dishaster_channel::events::PresentationEvent;
-use rand_chacha::ChaCha8Rng;
 pub use time::Time;
 
 use crate::{models::*, prelude::*};
@@ -14,22 +13,20 @@ use crate::{models::*, prelude::*};
 #[derive(Resource)]
 pub struct DisplayRoot(pub Entity);
 
-/// Cryptographically secure random number generator for deterministic simulation
-///
-/// Uses ChaCha8 algorithm to ensure reproducible randomness across simulation runs
-/// when initialized with the same seed. Essential for deterministic gameplay
-/// and testing scenarios.
-#[derive(Resource, Deref, DerefMut)]
-pub struct GameRng(ChaCha8Rng);
+#[allow(missing_docs)]
+pub struct NavigationRngTag;
+/// SystemRng specialized for navigation systems
+pub type NavigationRng = SystemRng<NavigationRngTag>;
 
-impl GameRng {
-    /// Create a new deterministic RNG from a 64-bit seed
-    pub fn new(seed: u64) -> Self {
-        let mut seed_bytes = [0u8; 32];
-        seed_bytes[..8].copy_from_slice(&seed.to_le_bytes());
-        Self(ChaCha8Rng::from_seed(seed_bytes))
-    }
-}
+#[allow(missing_docs)]
+pub struct QueueingRngTag;
+/// SystemRng specialized for queueing systems
+pub type QueueingRng = SystemRng<QueueingRngTag>;
+
+#[allow(missing_docs)]
+pub struct ServingRngTag;
+/// SystemRng specialized for serving systems
+pub type ServingRng = SystemRng<ServingRngTag>;
 
 /// Global canteen configuration and layout information
 ///
@@ -70,6 +67,8 @@ pub struct DinerSpawner {
     pub next_diner_id: u32,
     /// Whether the spawning period has ended for the current day
     pub spawning_finished: bool,
+    /// Pseudorandom number generator for spawning
+    pub rng: Prng,
 }
 
 impl DinerSpawner {
@@ -79,9 +78,12 @@ impl DinerSpawner {
     }
 
     /// Sample the next inter-arrival interval (seconds) using a time-varying Poisson rate.
-    pub fn sample_next_interval(&self, rng: &mut GameRng, current_time: f64) -> f64 {
+    pub fn sample_next_interval(&mut self, current_time: f64) -> f64 {
         let lambda = self.arrival_rate_per_sec(current_time).max(1.0e-6);
-        let u = rng.random::<f64>().clamp(f64::EPSILON, 1.0 - f64::EPSILON);
+        let u = self
+            .rng
+            .random::<f64>()
+            .clamp(f64::EPSILON, 1.0 - f64::EPSILON);
         -u.ln() / lambda
     }
 
@@ -158,8 +160,10 @@ impl EventLog {
 }
 
 /// Trial session state tracking to avoid repetition and improve coherence
-#[derive(Resource, Default)]
+#[derive(Resource)]
 pub struct TrialSession {
+    /// Pseudorandom number generator for trial session
+    pub rng: Prng,
     /// Indices of questions already asked in this trial
     asked_questions: Vec<usize>,
     /// The most recent response corpus index selected by the player
@@ -170,8 +174,9 @@ pub struct TrialSession {
 
 impl TrialSession {
     /// Create a new trial session with default temperature
-    pub fn new() -> Self {
+    pub fn new(seed: u64) -> Self {
         Self {
+            rng: Prng::new(seed),
             asked_questions: Vec::new(),
             last_response_index: None,
             temperature: 0.8,

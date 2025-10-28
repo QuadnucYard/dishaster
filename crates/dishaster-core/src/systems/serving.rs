@@ -49,7 +49,7 @@ pub fn process_serving_messages(
     mut queue: ResMut<ServingCommsQueue>,
     mut events: ResMut<EventLog>,
     time: Res<Time>,
-    mut rng: ResMut<GameRng>,
+    mut rng: ResMut<ServingRng>,
 ) {
     let now = time.current_time;
     // Deliver any elapsed step so the diner and staff state machines stay in sync.
@@ -224,20 +224,19 @@ fn release_staff(staff_state: &mut ServingStaffState, now: f64) {
 
 /// Progress service sessions by allocating staff and queuing conversation beats.
 pub fn drive_serving_sessions(
-    mut sessions: Query<(Entity, &mut ServiceSession, &Movement), With<Diner>>,
+    mut diner_query: Query<(Entity, &mut ServiceSession, &Movement, &mut EntityRng), With<Diner>>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement), Without<Diner>>,
     window_query: Query<&WindowDishes>,
     lane_query: Query<(&StaffForLane,)>,
     windows: Query<&Window>,
     registry: Res<GameModelRegistryRes>,
     mut comms: ResMut<ServingCommsQueue>,
-    mut rng: ResMut<GameRng>,
     time: Res<Time>,
     mut events: ResMut<EventLog>,
 ) {
     let now = time.current_time;
 
-    for (diner, mut session, diner_movement) in sessions.iter_mut() {
+    for (diner, mut session, diner_movement, mut rng) in diner_query.iter_mut() {
         // Each phase of the service state machine either allocates resources,
         // waits on delayed conversation steps, or concludes the interaction.
         match session.stage {
@@ -344,7 +343,7 @@ pub fn drive_serving_sessions(
 fn choose_service_request(
     dishes: &WindowDishes,
     registry: &GameModelRegistry,
-    rng: &mut GameRng,
+    rng: &mut impl Rng,
 ) -> Option<ServiceRequest> {
     if dishes.dishes.is_empty() {
         return None;
