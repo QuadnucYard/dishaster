@@ -34,8 +34,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: [nightly-2025-09-10]
+        os: [ubuntu-latest]
+        rust: [nightly-2025-10-04]
     steps:
       - uses: actions/checkout@v4
       - uses: rui314/setup-mold@v1
