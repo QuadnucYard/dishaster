@@ -5,7 +5,6 @@ use std::sync::Arc;
 use dishaster_channel::{ISimulation, commands::SimCommand, events::*, snapshots::*};
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
-use ordered_float::OrderedFloat;
 
 use crate::{components::*, models::*, prelude::*, resources::*, systems::*};
 
@@ -77,6 +76,32 @@ impl Simulation {
     pub fn debug_flags(&self) -> DebugFlags {
         self.debug_flags
     }
+
+    /// Perform initial setup tasks at simulation startup
+    pub fn startup(&mut self) {
+        // Add observers for agent spawn/despawn events to log presentation events
+        self.world
+            .add_observer(|event: On<Add, AgentTag>, mut elog: ResMut<EventLog>| {
+                elog.emit(PresentationEvent::AgentSpawned(event.entity.into()));
+            });
+        self.world
+            .add_observer(|event: On<Remove, AgentTag>, mut elog: ResMut<EventLog>| {
+                elog.emit(PresentationEvent::AgentDespawned(event.entity.into()));
+            });
+
+        // Spawn static objects once at startup
+        let mut schedule = Schedule::default();
+        schedule.add_systems(
+            (
+                initial_spawning_systems(),
+                build_collision_grid,
+                populate_diner_pool,
+                set_daily_schedule,
+            )
+                .chain(),
+        );
+        schedule.run(&mut self.world);
+    }
 }
 
 impl ISimulation for Simulation {
@@ -102,11 +127,9 @@ impl ISimulation for Simulation {
         self.world.insert_resource(Canteen {
             model: canteen.clone(),
         });
-        self.world.insert_resource(DinerProvider {
-            model: level.diner_provider.clone(),
-        });
-        let spawner = Self::make_diner_spawner(&level.diner_spawner, world_rng.derive_seed());
-        self.world.insert_resource(spawner);
+        self.world
+            .insert_resource(level.diner_randomizer.clone().into_res());
+
         self.world.insert_resource(EventLog::default());
         self.world.insert_resource(ServingCommsQueue::default());
         self.world.insert_resource(DayStatus::default());
@@ -122,20 +145,7 @@ impl ISimulation for Simulation {
             .insert_resource(ServingRng::new(world_rng.derive_seed()));
         self.world.insert_resource(world_rng);
 
-        // Add observers for agent spawn/despawn events to log presentation events
-        self.world
-            .add_observer(|event: On<Add, AgentTag>, mut elog: ResMut<EventLog>| {
-                elog.emit(PresentationEvent::AgentSpawned(event.entity.into()));
-            });
-        self.world
-            .add_observer(|event: On<Remove, AgentTag>, mut elog: ResMut<EventLog>| {
-                elog.emit(PresentationEvent::AgentDespawned(event.entity.into()));
-            });
-
-        // Spawn static objects once at startup
-        let mut schedule = Schedule::default();
-        schedule.add_systems((initial_spawning_systems(), build_collision_grid).chain());
-        schedule.run(&mut self.world);
+        self.startup();
     }
 
     /// Advance the simulation by one time step
@@ -198,42 +208,24 @@ impl ISimulation for Simulation {
 }
 
 impl Simulation {
-    /// Check if the current day is complete (spawning finished and all diners left)
-    pub fn is_day_complete(&self) -> bool {
-        let (day_status, spawner) = (
-            self.world.resource::<DayStatus>(),
-            self.world.resource::<DinerSpawner>(),
-        );
-        day_status.current_diner_count == 0 && spawner.spawning_finished
+    /// Get the updated persistent diner pool after day ends
+    ///
+    /// This should be called at the end of the day to retrieve the pool
+    /// with all updates (new diners + memory updates).
+    /// The pool is then persisted by the godot-game layer.
+    pub fn get_updated_diner_pool(&self) -> Vec<DinerProfile> {
+        self.world
+            .get_resource::<ResWrapper<DinerPool>>()
+            .map(|pool| pool.profiles.clone())
+            .unwrap_or_default()
     }
 
-    fn make_diner_spawner(model: &DinerSpawnerModel, seed: u64) -> DinerSpawner {
-        let mut curve = model.spawn_curve.clone();
-        curve.sort_by_key(|k| OrderedFloat(k.time));
-        curve.dedup_by(|a, b| (a.time - b.time).abs() <= f32::EPSILON);
-        if curve.is_empty() {
-            curve.push(SpawnRateKey {
-                time: 0.0,
-                multiplier: 1.0,
-            });
-        } else if curve[0].time > 0.0 {
-            let initial_multiplier = curve[0].multiplier;
-            curve.insert(
-                0,
-                SpawnRateKey {
-                    time: 0.0,
-                    multiplier: initial_multiplier,
-                },
-            );
-        }
-
-        DinerSpawner {
-            model: model.clone(),
-            curve,
-            next_spawn_timer: 0.0,
-            next_diner_id: 0,
-            spawning_finished: false,
-            rng: Prng::new(seed),
-        }
+    /// Check if the current day is complete (spawning finished and all diners left)
+    pub fn is_day_complete(&self) -> bool {
+        let (day_status, schedule) = (
+            self.world.resource::<DayStatus>(),
+            self.world.resource::<DailyDinerSchedule>(),
+        );
+        day_status.current_diner_count == 0 && !schedule.has_pending_spawns()
     }
 }

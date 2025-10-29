@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::{models::ModelId, prelude::*};
 
 /// Runtime service session data while the diner is at the counter.

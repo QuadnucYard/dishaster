@@ -527,6 +527,7 @@ name = "dishaster-models"
 version = "0.1.0"
 dependencies = [
  "dishrupt-core",
+ "rustc-hash",
  "serde",
 ]
 
@@ -550,6 +551,7 @@ dependencies = [
  "dishrupt-core",
  "dishrupt-persistence",
  "ron",
+ "rustc-hash",
  "serde",
  "tempfile",
 ]

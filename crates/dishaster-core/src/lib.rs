@@ -1,7 +1,9 @@
 //! Dishaster core logic and data structures
 
+#![feature(vec_deque_pop_if)]
+
 mod command_handle;
-pub mod components;
+pub(crate) mod components;
 pub(crate) mod constants;
 pub(crate) mod resources;
 pub mod rng;

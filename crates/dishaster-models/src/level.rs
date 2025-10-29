@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::{DinerProviderModel, ServedDish, WindowConfiguration};
+use crate::{DinerProfile, DinerRandomizerModel, ServedDish, WindowConfiguration};
 
 /// Complete level configuration defining the game scenario
 #[derive(Debug, Clone, Deserialize)]
@@ -9,6 +9,12 @@ pub struct LevelConfig {
     /// Which day/level this represents
     #[serde(default)]
     pub day: u32,
+    /// Total duration of the simulation run
+    pub run_length: Seconds,
+    /// Random seed for reproducible gameplay
+    pub seed: u64,
+    /// Diner generation parameters
+    pub diner_randomizer: DinerRandomizerModel,
 
     /// Reference to the canteen model
     pub canteen: ModelId,
@@ -23,12 +29,10 @@ pub struct LevelConfig {
     /// Placement of dish collectors
     pub collector_placements: Vec<CollectorPlacement>,
 
-    /// Diner generation parameters
-    pub diner_provider: DinerProviderModel,
-    /// Diner spawning timing configuration
-    pub diner_spawner: DinerSpawnerModel,
-    /// Random seed for reproducible gameplay
-    pub seed: u64,
+    /// Persistent diner pool (accumulated across days, not serialized in config)
+    /// This field is populated at runtime from persistence layer
+    #[serde(skip)]
+    pub persistent_diner_pool: Vec<DinerProfile>,
 }
 
 impl HasId for LevelConfig {
@@ -75,32 +79,4 @@ pub struct CollectorPlacement {
     pub model: ModelId,
     /// Center position in the canteen
     pub center_pos: Vec2,
-}
-
-/// Configuration model for diner spawning parameters
-#[derive(Debug, Clone, Deserialize)]
-pub struct DinerSpawnerModel {
-    /// Total duration of the simulation run
-    pub run_length: Seconds,
-    /// Baseline arrival rate in diners per minute
-    pub base_rate_per_min: f32,
-    /// Piecewise multipliers applied to the baseline rate over the day
-    #[serde(default = "default_spawn_curve")]
-    pub spawn_curve: Vec<SpawnRateKey>,
-}
-
-/// Keyframe describing spawn rate multiplier changes over time
-#[derive(Debug, Clone, Deserialize)]
-pub struct SpawnRateKey {
-    /// Timestamp (seconds since day start)
-    pub time: Seconds,
-    /// Multiplier applied to the base spawn rate at and after this time
-    pub multiplier: f32,
-}
-
-fn default_spawn_curve() -> Vec<SpawnRateKey> {
-    vec![SpawnRateKey {
-        time: 0.0,
-        multiplier: 1.0,
-    }]
 }

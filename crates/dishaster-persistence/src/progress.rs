@@ -1,6 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
+use dishaster_models::DinerPool;
 use dishrupt_persistence::Persistable;
 use serde::{Deserialize, Serialize};
 
@@ -11,7 +12,7 @@ pub const USER_PROGRESS_VERSION: u32 = 1;
 ///
 /// The structure only contains stable data that must survive across sessions.
 /// Transient entities live solely inside the simulation and never appear here.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct UserProgress {
     /// Metadata describing file format and timestamps.
     pub meta: ProgressMeta,
@@ -19,14 +20,15 @@ pub struct UserProgress {
     pub player: PlayerProgress,
     /// Customized canteen layout modifications.
     pub canteen_layout: CanteenLayoutState,
-    /// Aggregated memory about diners to drive future generation.
-    pub diner_memory_bank: DinerMemoryBank,
     /// Cumulative statistics for analytics and balancing.
     pub stats_aggregate: AggregateStats,
+    /// Aggregated memory about diners to drive future generation.
+    #[serde(default)]
+    pub diner_pool: DinerPool,
 }
 
 /// Metadata stored alongside the progress payload.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ProgressMeta {
     /// Format schema version to support migrations.
     pub version: u32,
@@ -37,7 +39,7 @@ pub struct ProgressMeta {
 }
 
 /// Player-centric state that drives level selection.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PlayerProgress {
     /// Day index starting from one.
     pub current_day: u32,
@@ -48,49 +50,11 @@ pub struct PlayerProgress {
 }
 
 /// Snapshot of user-authored canteen layout changes.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct CanteenLayoutState {
-    /// Every object placed by the player inside the dining hall.
-    pub placed_objects: Vec<PlacedObject>,
-}
-
-/// Persistent representation of a single placed object.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PlacedObject {
-    /// Stable identifier used for diffing between sessions.
-    pub id: String,
-    /// Prefab path used by the renderer.
-    pub prefab: String,
-    /// Simple semantic kind for quick filtering.
-    pub kind: String,
-    /// Local-space coordinates in meters.
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
-
-/// Aggregated diner knowledge to tweak future spawning.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct DinerMemoryBank {
-    /// Per-profile memories collected over many days.
-    pub entries: Vec<DinerMemoryEntry>,
-}
-
-/// Summary of a single diner profile over multiple visits.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct DinerMemoryEntry {
-    /// Key representing a diner persona bucket.
-    pub diner_key: String,
-    /// Total number of visits observed.
-    pub total_visits: u32,
-    /// Day index of the last encounter.
-    pub last_visit_day: u32,
-    /// Rolling average satisfaction used for balancing.
-    pub avg_satisfaction: f32,
-}
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct CanteenLayoutState {}
 
 /// Lifetime statistics collected for dashboards and analytics.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct AggregateStats {
     /// Accumulated profit across all completed days.
     pub lifetime_profit: f64,
@@ -118,9 +82,7 @@ impl UserProgress {
                 rng_seed: seed,
             },
             canteen_layout: Default::default(),
-            diner_memory_bank: DinerMemoryBank {
-                ..Default::default()
-            },
+            diner_pool: Default::default(),
             stats_aggregate: Default::default(),
         }
     }

@@ -43,7 +43,7 @@ fn compute_dish_score(
     // Apply wait time penalty
     let wait_mult = compute_wait_multiplier(
         estimated_wait,
-        psych_state.patience_now,
+        psych_state.patience,
         config.wait_penalty_gamma,
     );
 
@@ -139,7 +139,7 @@ fn compute_wait_multiplier(estimated_wait: f32, patience_now: f32, gamma: f32) -
 
 /// Update patience based on personality, mood, and trust
 pub fn update_patience(personality: &Personality, psych_state: &mut PsychState) {
-    psych_state.patience_now = personality.patience_base
+    psych_state.patience = personality.patience_base
         * (1.0 + 0.3 * psych_state.trust)
         * (1.0 + 0.25 * psych_state.mood);
 }

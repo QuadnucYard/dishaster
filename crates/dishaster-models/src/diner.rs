@@ -1,114 +1,6 @@
-use dishrupt_core::{asset::PrefabReference, display::DisplayModel};
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use super::prelude::*;
-
-/// Complete diner configuration model used both as component and model definition
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct DinerModel {
-    /// Core attributes
-    pub attributes: DinerAttributes,
-    /// Behavioral parameters
-    pub behavior: DinerBehavior,
-    /// Extensible properties for future features
-    pub properties: DinerProperties,
-    /// Display model
-    pub display: DisplayModel,
-}
-
-/// Core psychological and economic attributes of a diner
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct DinerAttributes {
-    /// Basic physiological state
-    pub hunger: f32,
-    /// How long the diner will wait before leaving
-    pub patience: f32,
-    /// Economic characteristics
-    pub economic_capacity: f32,
-    /// How much price affects purchase decisions
-    pub price_sensitivity: f32,
-}
-
-/// Behavioral patterns and timing parameters for diner decision-making
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct DinerBehavior {
-    /// Decision making
-    pub decisiveness: f32,
-    /// Ability to adapt to changing conditions
-    pub adaptiveness: f32,
-    /// Base probability of leaving without purchasing
-    pub leave_probability: f32,
-    /// Timing parameters
-    pub observation_time: Seconds,
-    /// Time spent deciding what to order
-    pub decision_time: Seconds,
-    /// Time spent eating the meal
-    pub eating_time: Seconds,
-}
-
-/// Extensible properties for future diner features and preferences
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct DinerProperties {
-    /// Base satisfaction level
-    pub base_satisfaction: f32,
-    /// Extensible preference system - start simple
-    pub preferences: Vec<EcoString>,
-}
-
-/// Configuration model for diner randomization parameters
-#[derive(Debug, Clone, Deserialize)]
-pub struct DinerProviderModel {
-    /// Attribute ranges
-    pub attributes: DinerAttributeRanges,
-    /// Behavior ranges
-    pub behavior: DinerBehaviorRanges,
-    /// Movement parameters
-    pub movement: MovementRanges,
-    /// List of display resources
-    pub display_res: Vec<PrefabReference>,
-}
-
-/// Range definitions for randomizing diner attributes
-#[derive(Debug, Clone, Deserialize)]
-pub struct DinerAttributeRanges {
-    /// Range for hunger levels
-    pub hunger: MinMax,
-    /// Range for patience levels
-    pub patience: MinMax,
-    /// Range for economic capacity
-    pub economic_capacity: MinMax,
-    /// Range for price sensitivity factors
-    pub price_sensitivity: MinMax<f32>,
-}
-
-/// Range definitions for randomizing diner behavioral parameters
-#[derive(Debug, Clone, Deserialize)]
-pub struct DinerBehaviorRanges {
-    /// Range for decisiveness levels
-    pub decisiveness: MinMax<f32>,
-    /// Range for adaptiveness levels
-    pub adaptiveness: MinMax<f32>,
-    /// Range for base leave probabilities
-    pub leave_probability: MinMax<f32>,
-    /// Range for observation time durations
-    pub observation_time: MinMax<Seconds>,
-    /// Range for decision-making time durations
-    pub decision_time: MinMax<Seconds>,
-    /// Range for eating time durations
-    pub eating_time: MinMax<Seconds>,
-}
-
-/// Range definitions for diner movement and physics parameters
-#[derive(Debug, Clone, Deserialize)]
-pub struct MovementRanges {
-    /// Range for normal movement speeds
-    pub movement_speed: MinMax<f32>,
-    /// Range for avoidance/evasion speeds
-    pub avoidance_speed: MinMax<f32>,
-    /// Range for arrival detection thresholds
-    pub arrival_threshold: MinMax<f32>,
-}
-
-// ===================== Enhanced Decision System =====================
 
 /// Fixed personality traits that shape diner behavior
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -121,9 +13,30 @@ pub struct Personality {
     pub confrontational: f32,
     /// Base patience in seconds
     pub patience_base: f32,
+    /// Decision-making speed (0..1, higher = faster decisions)
+    pub decisiveness: f32,
+    /// Adaptability to changes (0..1, higher = more flexible)
+    pub adaptiveness: f32,
+}
+
+/// Dining-specific behavioral profile
+///
+/// These parameters affect dining experience but are separate from core personality.
+/// They represent learned or physiological characteristics related to eating.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DiningProfile {
+    /// Economic capacity (how much they can/will spend)
+    pub economic_capacity: f32,
+    /// Eating speed multiplier (0.5 = slow, 1.0 = normal, 1.5 = fast)
+    /// Actual eating time = dish_base_time / eating_speed
+    pub eating_speed: f32,
+    /// Preferred arrival time range (seconds from day start)
+    pub preferred_arrival_time: (f32, f32),
 }
 
 /// Current psychological state affecting decision-making
+///
+/// This represents runtime state that changes during a dining session.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PsychState {
     /// Current hunger level (0..1, higher = more hungry)
@@ -131,9 +44,21 @@ pub struct PsychState {
     /// Current mood (-1..1, negative = bad mood, positive = good mood)
     pub mood: f32,
     /// Current patience threshold in seconds (dynamically adjusted)
-    pub patience_now: f32,
+    pub patience: f32,
     /// Trust in the canteen (0..1, affects tolerance to issues)
     pub trust: f32,
+}
+
+/// Long-term memory persisted across multiple visits
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+pub struct LongTermMemory {
+    /// Preference weights for dish tags (-1..1 per tag)
+    /// Positive values indicate preference, negative indicate dislike
+    pub like_tags: FxHashMap<EcoString, f32>,
+    /// Experience with specific dishes
+    pub dish_experience: FxHashMap<ModelId, DishMemory>,
+    /// Overall satisfaction with this canteen (0..1)
+    pub overall_like: f32,
 }
 
 /// Memory of a specific dish from previous experiences
@@ -147,25 +72,13 @@ pub struct DishMemory {
     pub last_eaten: Option<f32>,
 }
 
-/// Long-term memory persisted across multiple visits
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
-pub struct LongTermMemory {
-    /// Preference weights for dish tags (-1..1 per tag)
-    /// Positive values indicate preference, negative indicate dislike
-    pub like_tags: std::collections::HashMap<EcoString, f32>,
-    /// Experience with specific dishes
-    pub dish_experience: std::collections::HashMap<ModelId, DishMemory>,
-    /// Overall satisfaction with this canteen (0..1)
-    pub overall_like: f32,
-}
-
 /// Short-term memory for current meal session
 #[derive(Debug, Clone, Default)]
 pub struct ShortTermMemory {
     /// Windows that have been observed this session
-    pub seen_windows: std::collections::HashSet<ModelId>,
+    pub seen_windows: FxHashSet<ModelId>,
     /// Dishes tried in current meal
     pub tried_dishes: Vec<ModelId>,
     /// Perceived price references updated by seeing prices
-    pub expected_prices: std::collections::HashMap<ModelId, f32>,
+    pub expected_prices: FxHashMap<ModelId, f32>,
 }

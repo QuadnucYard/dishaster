@@ -1,5 +1,4 @@
 use dishaster_models::*;
-use serde::{Deserialize, Serialize};
 
 use crate::{components::Movement, prelude::*};
 
@@ -7,20 +6,25 @@ use crate::{components::Movement, prelude::*};
 #[derive(Bundle)]
 pub struct DinerBundle {
     pub diner: Diner,
+
     pub state: DinerState,
     pub goal: DinerGoalState,
     pub targets: DinerTargets,
-    pub movement: Movement,
+
     pub personality: DinerPersonality,
+    pub dining_profile: DinerDiningProfile,
     pub psych_state: DinerPsychState,
     pub ltm: DinerLongTermMemory,
     pub stm: DinerShortTermMemory,
+
+    pub movement: Movement,
 }
 
 /// Core diner identity
 #[derive(Component)]
 pub struct Diner {
     /// Unique identifier for this diner instance. Useless yet.
+    #[allow(dead_code)]
     pub id: u32,
 }
 
@@ -137,21 +141,11 @@ pub struct DinerTargets {
     pub exit_target: Option<()>,
 }
 
-/// Persistent memory component for diner data across days
-#[derive(Component, Debug, Clone, Serialize, Deserialize)]
-pub struct DinerMemory {
-    /// Total number of visits to the canteen
-    pub total_visits: u32,
-    /// Last day this diner visited
-    pub last_visit_day: u32,
-    /// Average satisfaction from previous visits
-    pub average_satisfaction: f32,
-    /// Learned preferences and adaptations
-    pub learned_preferences: Vec<EcoString>,
-}
-
 /// Wrapper component for Personality
 pub type DinerPersonality = CompWrapper<Personality>;
+
+/// Wrapper component for DiningProfile
+pub type DinerDiningProfile = CompWrapper<DiningProfile>;
 
 /// Wrapper component for PsychState
 pub type DinerPsychState = CompWrapper<PsychState>;

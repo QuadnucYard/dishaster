@@ -14,7 +14,7 @@ pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + '
         (
             handle_enter_goal,
             handle_observe_goal,
-            handle_decide_goal,
+            handle_decide_window_goal,
             handle_pick_tray_goal,
             handle_pick_chopsticks_goal,
             check_queue_patience,
@@ -92,7 +92,7 @@ fn handle_observe_goal(
         &mut DinerGoalState,
         &mut DinerTargets,
         &mut Movement,
-        &CompWrapper<DinerModel>,
+        &DinerPersonality,
         &mut EntityRng,
     )>,
     window_query: Query<(Entity, &Window)>,
@@ -100,14 +100,14 @@ fn handle_observe_goal(
     mut events: ResMut<EventLog>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
-    for (entity, mut goal, mut targets, mut movement, diner_model, mut rng) in diner_query {
+    for (entity, mut goal, mut targets, mut movement, personality, mut rng) in diner_query {
         if !goal.is(DinerGoal::Observe) {
             continue;
         }
 
         // If no window is being observed, or if we've been observing for too long, pick a new one.
         if targets.observing_window.is_none()
-            || goal.timer > diner_model.behavior.observation_time && !movement.has_path()
+            || !movement.has_path() && goal.timer > 5.0 / personality.decisiveness.max(0.1)
         {
             // Simple logic: pick a random available window to observe.
             let available_windows = window_query.iter().filter(|(_, w)| w.enabled);
@@ -149,12 +149,11 @@ fn handle_observe_goal(
     }
 }
 
-fn handle_decide_goal(
+fn handle_decide_window_goal(
     diner_query: Query<(
         Entity,
         &mut DinerGoalState,
         &mut DinerTargets,
-        &CompWrapper<DinerModel>,
         &DinerPersonality,
         &mut DinerPsychState,
         &DinerLongTermMemory,
@@ -168,14 +167,14 @@ fn handle_decide_goal(
 ) {
     let config = DecisionConfig::default();
 
-    for (entity, mut goal, mut targets, diner_model, personality, mut psych_state, ltm, mut rng) in
-        diner_query
-    {
+    for (entity, mut goal, mut targets, personality, mut psych_state, ltm, mut rng) in diner_query {
         if !goal.is(DinerGoal::DecideWindow) {
             continue;
         }
 
-        if goal.timer < diner_model.behavior.decision_time {
+        // Check decision_time
+        // todo: this should be probabilistic
+        if goal.timer < 3.0 / personality.decisiveness.max(0.1) {
             continue;
         }
 
@@ -379,7 +378,7 @@ fn check_queue_patience(
             .unwrap_or(1);
 
         let estimated_wait = queue_length as f32 * 10.0; // Rough estimate: 10s per person
-        let patience_now = psych_state.patience_now;
+        let patience_now = psych_state.patience;
 
         // Check if patience exceeded
         if estimated_wait > patience_now {
@@ -663,7 +662,7 @@ fn handle_eat_goal(
         &mut DinerGoalState,
         &mut DinerState,
         &mut DinerTargets,
-        &CompWrapper<DinerModel>,
+        &DinerDiningProfile,
         &mut DinerPsychState,
         &mut DinerLongTermMemory,
         &mut EntityRng,
@@ -674,14 +673,19 @@ fn handle_eat_goal(
 ) {
     let satisfaction_weights = SatisfactionWeights::default();
 
-    for (mut goal, state, mut targets, diner_model, mut psych_state, mut ltm, mut rng) in
+    for (mut goal, state, mut targets, dining_profile, mut psych_state, mut ltm, mut rng) in
         diner_query.iter_mut()
     {
         if !goal.is(DinerGoal::Eat) {
             continue;
         }
 
-        if goal.timer < diner_model.behavior.eating_time {
+        // Calculate eating time based on diner's eating speed
+        // Default base eating time is 30 seconds, modified by eating speed
+        const DEFAULT_EATING_TIME: f32 = 30.0;
+        let eating_time = DEFAULT_EATING_TIME / dining_profile.eating_speed;
+
+        if goal.timer < eating_time {
             continue;
         }
 
@@ -882,4 +886,19 @@ fn try_find_valid_spot_near(
         }
     }
     None
+}
+
+#[allow(unused)]
+fn calculate_leave_probability(personality: &Personality) -> f32 {
+    let patience_factor = 1.0 - (personality.patience_base / 120.0).min(1.0); // Normalize patience
+    let adaptiveness_factor = 1.0 - personality.adaptiveness;
+    let confrontational_factor = personality.confrontational;
+
+    // Weighted average
+    let base_prob =
+        (patience_factor * 0.4 + adaptiveness_factor * 0.4 + confrontational_factor * 0.2)
+            .clamp(0.0, 1.0);
+
+    // Scale to reasonable range (0.05 - 0.4)
+    0.05 + base_prob * 0.35
 }

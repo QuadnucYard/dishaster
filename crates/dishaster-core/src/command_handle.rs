@@ -21,8 +21,8 @@ impl Simulation {
             }
             SimCommand::EndRun => {
                 // stop spawning
-                let mut spawner = self.world.resource_mut::<DinerSpawner>();
-                spawner.spawning_finished = true;
+                let mut schedule = self.world.resource_mut::<DailyDinerSchedule>();
+                schedule.finish_spawning();
 
                 // clear diners
                 let _ = self.world.run_system_once(

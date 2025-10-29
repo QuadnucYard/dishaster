@@ -1,6 +1,28 @@
 [
     (
         id: "sample_level",
+        run_length: 3600.0,
+        seed: 42,
+        diner_randomizer: (
+            personality: (
+                frugality: (0.1, 0.5),       // Price sensitivity
+                adventurous: (0.2, 0.8),     // Willingness to try new dishes
+                confrontational: (0.1, 0.6), // Tendency to complain
+                patience_base: (60.0, 300.0), // Base patience in seconds
+                decisiveness: (0.2, 0.8),    // Decision-making speed
+                adaptiveness: (0.1, 0.6),    // Flexibility to changes
+            ),
+            dining: (
+                economic_capacity: (10.0, 50.0), // Budget range
+                eating_speed: (0.5, 1.5),        // Eating speed multiplier
+            ),
+            movement: (
+                movement_speed: (1.0, 3.0),
+                avoidance_speed: (0.5, 2.0),
+                arrival_threshold: (0.1, 0.5),
+            ),
+        ),
+
         canteen: "main_canteen",
         window_configurations: [
             // 套餐窗口 (Combo Windows) - slots 0-2
@@ -193,41 +215,5 @@
         collector_placements: [
             (center_pos: (22.0, 2.0), model: "main_dish_return"),
         ],
-        diner_provider: (
-            attributes:  (
-                hunger: (0.3, 0.8),
-                patience: (60.0, 300.0), // Base patience in seconds (60s-300s)
-                economic_capacity: (10.0, 50.0),
-                price_sensitivity: (0.1, 0.5),
-            ),
-            behavior: (
-                decisiveness: (0.2, 0.8),
-                adaptiveness: (0.1, 0.6),
-                leave_probability: (0.05, 0.3),
-                observation_time: (15.0, 30.0),
-                decision_time: (3.0, 8.0),
-                eating_time: (30.0, 90.0),
-            ),
-            movement: (
-                movement_speed: (1.0, 3.0),
-                avoidance_speed: (0.5, 2.0),
-                arrival_threshold: (0.1, 0.5),
-            ),
-            display_res: [
-                "diners/sample_diner",
-            ],
-        ),
-        diner_spawner: (
-            run_length: 3600.0,
-            base_rate_per_min: 15.0,
-            spawn_curve: [
-                (time: 0.0, multiplier: 0.6),
-                (time: 600.0, multiplier: 1.0),
-                (time: 1200.0, multiplier: 1.4),
-                (time: 2100.0, multiplier: 1.6),
-                (time: 3000.0, multiplier: 0.8),
-            ],
-        ),
-        seed: 42,
     )
 ]

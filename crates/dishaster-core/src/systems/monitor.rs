@@ -4,7 +4,7 @@ use super::prelude::*;
 pub fn check_day_completion(
     mut day_status: ResMut<DayStatus>,
     diner_query: Query<&Diner>,
-    spawner: Res<DinerSpawner>,
+    schedule: Res<DailyDinerSchedule>,
     mut events: ResMut<EventLog>,
 ) {
     if day_status.completion_emitted {
@@ -15,8 +15,9 @@ pub fn check_day_completion(
     // Update current diner count
     day_status.current_diner_count = diner_query.iter().count();
 
-    // Check if day is complete: no active diners and spawning finished
-    day_status.completed = day_status.current_diner_count == 0 && spawner.spawning_finished;
+    // Check if day is complete: no active diners and no more scheduled arrivals
+    let spawning_finished = !schedule.has_pending_spawns();
+    day_status.completed = day_status.current_diner_count == 0 && spawning_finished;
     if day_status.completed {
         events.emit(PresentationEvent::DayCompleted);
         day_status.completion_emitted = true;

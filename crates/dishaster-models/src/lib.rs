@@ -3,6 +3,8 @@
 mod canteen;
 mod decision;
 mod diner;
+mod diner_pool;
+mod diner_rand;
 mod dish;
 mod level;
 mod misc;
@@ -11,6 +13,8 @@ mod trial;
 pub use canteen::*;
 pub use decision::*;
 pub use diner::*;
+pub use diner_pool::*;
+pub use diner_rand::*;
 pub use dish::*;
 pub use level::*;
 pub use misc::*;

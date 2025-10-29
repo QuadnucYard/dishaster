@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::{models::*, prelude::*};
 
 /// Food service window component containing static configuration and player settings

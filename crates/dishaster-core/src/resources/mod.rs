@@ -2,7 +2,7 @@
 
 mod time;
 
-use std::sync::Arc;
+use std::{collections::VecDeque, sync::Arc};
 
 use dishaster_channel::events::PresentationEvent;
 pub use time::Time;
@@ -39,87 +39,6 @@ pub struct Canteen {
     pub model: CanteenModel,
 }
 
-/// Diner generation template and behavioral parameter provider
-///
-/// Defines the statistical ranges and probability distributions used
-/// to generate diverse diner personalities, attributes, and behaviors.
-/// Each generated diner derives their characteristics from these templates.
-#[derive(Resource)]
-pub struct DinerProvider {
-    /// Configuration model containing generation parameters and ranges
-    pub model: DinerProviderModel,
-}
-
-/// Diner spawning controller managing timing and flow control
-///
-/// Handles when and how frequently new diners enter the canteen.
-/// Tracks spawn timing, completion status, and coordinates with
-/// the day completion logic.
-#[derive(Resource)]
-pub struct DinerSpawner {
-    /// Configuration model defining spawn timing and flow parameters
-    pub model: DinerSpawnerModel,
-    /// Sorted spawn rate curve for quick lookup
-    pub curve: Vec<SpawnRateKey>,
-    /// Countdown timer until next diner spawn (in seconds)
-    pub next_spawn_timer: f64,
-    /// Unique ID for the next diner to be spawned
-    pub next_diner_id: u32,
-    /// Whether the spawning period has ended for the current day
-    pub spawning_finished: bool,
-    /// Pseudorandom number generator for spawning
-    pub rng: Prng,
-}
-
-impl DinerSpawner {
-    /// Check if the spawning period has completed based on simulation time
-    pub fn is_spawning_complete(&self, current_time: f64) -> bool {
-        current_time >= self.model.run_length as f64
-    }
-
-    /// Sample the next inter-arrival interval (seconds) using a time-varying Poisson rate.
-    pub fn sample_next_interval(&mut self, current_time: f64) -> f64 {
-        let lambda = self.arrival_rate_per_sec(current_time).max(1.0e-6);
-        let u = self
-            .rng
-            .random::<f64>()
-            .clamp(f64::EPSILON, 1.0 - f64::EPSILON);
-        -u.ln() / lambda
-    }
-
-    fn arrival_rate_per_sec(&self, time: f64) -> f64 {
-        let base = (self.model.base_rate_per_min.max(0.0) as f64) / 60.0;
-        base * self.rate_multiplier(time)
-    }
-
-    fn rate_multiplier(&self, time: f64) -> f64 {
-        if self.curve.is_empty() {
-            return 1.0;
-        }
-
-        let mut prev = &self.curve[0];
-        if time <= prev.time as f64 {
-            return prev.multiplier.max(0.0) as f64;
-        }
-
-        for point in self.curve.iter().skip(1) {
-            if time <= point.time as f64 {
-                let duration = (point.time - prev.time).max(f32::EPSILON);
-                let t = ((time as f32 - prev.time).max(0.0) / duration).clamp(0.0, 1.0);
-                let start = prev.multiplier.max(0.0) as f64;
-                let end = point.multiplier.max(0.0) as f64;
-                return start + (end - start) * f64::from(t);
-            }
-            prev = point;
-        }
-
-        self.curve
-            .last()
-            .map(|point| point.multiplier.max(0.0) as f64)
-            .unwrap_or(1.0)
-    }
-}
-
 /// Day progression and completion tracking system
 ///
 /// Monitors the state of the current simulation day, tracking active
@@ -153,6 +72,46 @@ impl EventLog {
     /// Retrieve and clear all logged events
     pub fn drain(&mut self) -> Vec<PresentationEvent> {
         std::mem::take(&mut self.0)
+    }
+}
+
+/// Daily scheduling state (generated each day from PersistentDinerPool)
+///
+/// Manages today's scheduled arrivals and active diners.
+#[derive(Resource, Default)]
+pub struct DailyDinerSchedule {
+    /// List of diners scheduled to arrive today with their arrival times
+    scheduled_diners: VecDeque<ScheduledDiner>,
+}
+
+impl DailyDinerSchedule {
+    pub fn new(mut scheduled: Vec<ScheduledDiner>) -> Self {
+        // Sort by arrival time
+        scheduled.sort_by(|a, b| {
+            a.arrival_time
+                .partial_cmp(&b.arrival_time)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        Self {
+            scheduled_diners: scheduled.into(),
+        }
+    }
+
+    /// Check if there are more diners to spawn
+    pub fn has_pending_spawns(&self) -> bool {
+        !self.scheduled_diners.is_empty()
+    }
+
+    /// Mark all remaining diners as spawned
+    pub fn finish_spawning(&mut self) {
+        self.scheduled_diners.clear();
+    }
+
+    /// Get the next diner to spawn if arrival time has passed
+    pub fn next_diner_if_ready(&mut self, current_time: f32) -> Option<ScheduledDiner> {
+        self.scheduled_diners
+            .pop_front_if(|next| current_time >= next.arrival_time)
     }
 }
 

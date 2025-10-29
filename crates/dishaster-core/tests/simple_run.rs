@@ -4,52 +4,7 @@ use std::sync::Arc;
 
 use dishaster_channel::ISimulation;
 use dishaster_core::{models::*, sim::*};
-use dishrupt_core::{asset::PrefabReference, display::DisplayModel};
-
-/// Create a minimal test level configuration
-fn create_test_level() -> LevelConfig {
-    LevelConfig {
-        id: ModelId::new("test_level"),
-        canteen: ModelId::new("test_canteen"),
-        day: 1,
-        window_configurations: vec![],
-        table_placements: vec![],
-        tray_dispenser_placements: vec![],
-        chopstick_dispenser_placements: vec![],
-        collector_placements: vec![],
-        diner_provider: DinerProviderModel {
-            attributes: DinerAttributeRanges {
-                hunger: MinMax::new(0.3, 0.8),
-                patience: MinMax::new(0.2, 0.7),
-                economic_capacity: MinMax::new(10.0, 50.0),
-                price_sensitivity: MinMax::new(0.1, 0.5),
-            },
-            behavior: DinerBehaviorRanges {
-                decisiveness: MinMax::new(0.2, 0.8),
-                adaptiveness: MinMax::new(0.1, 0.6),
-                leave_probability: MinMax::new(0.05, 0.3),
-                observation_time: MinMax::new(5.0, 15.0),
-                decision_time: MinMax::new(2.0, 8.0),
-                eating_time: MinMax::new(300.0, 900.0),
-            },
-            movement: MovementRanges {
-                movement_speed: MinMax::new(1.0, 3.0),
-                avoidance_speed: MinMax::new(0.5, 2.0),
-                arrival_threshold: MinMax::new(0.1, 0.5),
-            },
-            display_res: vec![PrefabReference::default()],
-        },
-        diner_spawner: DinerSpawnerModel {
-            run_length: 600.0,
-            base_rate_per_min: 15.0,
-            spawn_curve: vec![SpawnRateKey {
-                time: 0.0,
-                multiplier: 1.0,
-            }],
-        },
-        seed: 12345,
-    }
-}
+use dishrupt_core::display::DisplayModel;
 
 /// Create a minimal game model registry for testing
 fn create_test_registry() -> GameModelRegistry {
@@ -71,6 +26,37 @@ fn create_test_registry() -> GameModelRegistry {
         .intern(canteen_model.id.clone(), canteen_model);
 
     registry
+}
+
+/// Create a minimal test level configuration
+fn create_test_level() -> LevelConfig {
+    LevelConfig {
+        id: ModelId::new("test_level"),
+        canteen: ModelId::new("test_canteen"),
+        day: 1,
+        run_length: 600.0,
+        window_configurations: vec![],
+        table_placements: vec![],
+        tray_dispenser_placements: vec![],
+        chopstick_dispenser_placements: vec![],
+        collector_placements: vec![],
+        diner_randomizer: DinerRandomizerModel {
+            personality: PersonalityRanges {
+                frugality: MinMax::new(0.1, 0.5),
+                adventurous: MinMax::new(0.2, 0.8),
+                confrontational: MinMax::new(0.1, 0.6),
+                patience_base: MinMax::new(60.0, 300.0),
+                decisiveness: MinMax::new(0.2, 0.8),
+                adaptiveness: MinMax::new(0.1, 0.6),
+            },
+            dining: DiningRanges {
+                economic_capacity: MinMax::new(10.0, 50.0),
+                eating_speed: MinMax::new(0.5, 1.5),
+            },
+        },
+        seed: 12345,
+        persistent_diner_pool: vec![],
+    }
 }
 
 #[test]
