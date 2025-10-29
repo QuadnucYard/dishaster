@@ -1,5 +1,5 @@
 [package]
-name = "dishaster-channel"
+name = "dishaster-interface"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true

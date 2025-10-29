@@ -1,11 +1,11 @@
 //! Simulation commands and control interfaces.
 
 use dishaster_models::PricingMethod;
-use dishrupt_core::{EntityId, prelude::*};
+use dishrupt_core::EntityId;
 
 use crate::snapshots::DebugFlags;
 
-/// Commands that can be sent to the simulation from external sources.
+/// Commands that can be sent to the simulation from the client that may mutate the state.
 pub enum SimCommand {
     /// Set debug flags.
     SetDebugFlags(DebugFlags),
@@ -22,11 +22,6 @@ pub enum SimCommand {
         /// Updated pricing configuration selected by the player.
         pricing: PricingMethod,
     },
-
-    /// Request distance to a target point from the navigation grid.
-    QueryDistance(Vec2),
-    /// Request distance field data from the navigation grid.
-    QueryDistances,
 
     /// Start a trial for the given diner entity.
     TrialStart(EntityId),

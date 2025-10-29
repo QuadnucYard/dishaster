@@ -1,5 +1,5 @@
-use dishaster_channel::{events::PresentationEvent, snapshots::DebugSnapshots};
 use dishaster_godot_ui::TrialGui;
+use dishaster_interface::{snapshots::DebugSnapshots, *};
 use dishrupt_godot_scene::SceneContext;
 use dishrupt_godot_ui::UITree;
 use godot::global::godot_print;
@@ -9,17 +9,13 @@ use super::{Game, ctrl::*};
 const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
 
 impl Game {
-    pub(crate) fn process_events(
-        &mut self,
-        ctx: &mut SceneContext,
-        events: Vec<PresentationEvent>,
-    ) {
+    pub(crate) fn process_events(&mut self, ctx: &mut SceneContext, events: Vec<SimEvent>) {
         for event in events {
             match event {
-                PresentationEvent::DayCompleted => {
+                SimEvent::DayCompleted => {
                     self.finish_day(ctx, false);
                 }
-                PresentationEvent::AgentSpawned(entity) => {
+                SimEvent::AgentSpawned(entity) => {
                     let mut controller = AgentController::new(
                         entity,
                         self.stage
@@ -30,10 +26,10 @@ impl Game {
                     controller.set_debug_enabled(self.debug_enabled);
                     self.dc.agents.insert(entity, controller);
                 }
-                PresentationEvent::AgentDespawned(entity) => {
+                SimEvent::AgentDespawned(entity) => {
                     self.dc.agents.remove(&entity);
                 }
-                PresentationEvent::DishSpawned(vm) => {
+                SimEvent::DishSpawned(vm) => {
                     let entity = vm.entity;
                     let mut controller = DishController::new(
                         entity,
@@ -45,22 +41,13 @@ impl Game {
                     controller.set_view_model(vm);
                     self.dc.dishes.insert(entity, controller);
                 }
-                PresentationEvent::Feedback(feedback) => {
+                SimEvent::Feedback(feedback) => {
                     if let Some(agent) = self.dc.agents.get_mut(&feedback.entity) {
                         agent.feedback.show(&feedback.content);
                     }
                 }
 
-                PresentationEvent::QueryDistanceResponse(resp) => {
-                    godot::global::godot_print!("Distance query response: {:?}", resp);
-                }
-                PresentationEvent::QueryDistancesResponse(resp) => {
-                    self.dbgviz
-                        .distance_overlay
-                        .present(&resp, self.stage.display_context());
-                }
-
-                PresentationEvent::TrialIntro(intro) => {
+                SimEvent::TrialIntro(intro) => {
                     godot_print!("Received trial intro: {:?}", intro);
 
                     // Force simulation speed to 3x relative to reality during trial
@@ -72,19 +59,19 @@ impl Game {
                     trial_gui.intro(intro);
                     trial_gui.show();
                 }
-                PresentationEvent::TrialLeftSpeak(statement) => {
+                SimEvent::TrialLeftSpeak(statement) => {
                     godot_print!("Received trial speech (left): {:?}", statement);
 
                     let trial_gui = ctx.gui.get_mut::<TrialGui>();
                     trial_gui.left_speak(statement);
                 }
-                PresentationEvent::TrialRightSpeak(speech) => {
+                SimEvent::TrialRightSpeak(speech) => {
                     godot_print!("Received trial speech (right): {:?}", speech);
 
                     let trial_gui = ctx.gui.get_mut::<TrialGui>();
                     trial_gui.right_speak(speech);
                 }
-                PresentationEvent::TrialEnd => {
+                SimEvent::TrialEnd => {
                     godot_print!("Received trial end");
 
                     let trial_gui = ctx.gui.get_mut::<TrialGui>();
@@ -110,6 +97,25 @@ impl Game {
             for diner_debug in diner_debugs {
                 if let Some(agent) = self.dc.agents.get_mut(&diner_debug.core_id) {
                     agent.update_debug(&diner_debug.goal_str);
+                }
+            }
+        }
+    }
+
+    pub(crate) fn process_query_responses(
+        &mut self,
+        _ctx: &mut SceneContext,
+        responses: Vec<SimResponse>,
+    ) {
+        for response in responses {
+            match response {
+                SimResponse::Distance(resp) => {
+                    godot::global::godot_print!("Distance query response: {:?}", resp);
+                }
+                SimResponse::Distances(resp) => {
+                    self.dbgviz
+                        .distance_overlay
+                        .present(&resp, self.stage.display_context());
                 }
             }
         }

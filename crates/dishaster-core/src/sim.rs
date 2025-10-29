@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use dishaster_channel::{ISimulation, commands::SimCommand, events::*, snapshots::*};
+use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
 use dishrupt_core::{EntityId, display::*};
 
@@ -81,13 +81,14 @@ impl Simulation {
     pub fn startup(&mut self) {
         // Add observers for agent spawn/despawn events to log presentation events
         self.world
-            .add_observer(|event: On<Add, AgentTag>, mut elog: ResMut<EventLog>| {
-                elog.emit(PresentationEvent::AgentSpawned(event.entity.into()));
+            .add_observer(|event: On<Add, AgentTag>, mut events: ResMut<EventQueue>| {
+                events.push(SimEvent::AgentSpawned(event.entity.into()));
             });
-        self.world
-            .add_observer(|event: On<Remove, AgentTag>, mut elog: ResMut<EventLog>| {
-                elog.emit(PresentationEvent::AgentDespawned(event.entity.into()));
-            });
+        self.world.add_observer(
+            |event: On<Remove, AgentTag>, mut events: ResMut<EventQueue>| {
+                events.push(SimEvent::AgentDespawned(event.entity.into()));
+            },
+        );
 
         // Spawn static objects once at startup
         let mut schedule = Schedule::default();
@@ -130,7 +131,9 @@ impl ISimulation for Simulation {
         self.world
             .insert_resource(level.diner_randomizer.clone().into_res());
 
-        self.world.insert_resource(EventLog::default());
+        self.world.insert_resource(EventQueue::default());
+        self.world.insert_resource(ResponseQueue::default());
+
         self.world.insert_resource(ServingCommsQueue::default());
         self.world.insert_resource(DayStatus::default());
         self.world
@@ -191,19 +194,24 @@ impl ISimulation for Simulation {
         }
     }
 
-    /// Retrieve all events that occurred after the last poll
-    fn poll_events(&mut self) -> Vec<PresentationEvent> {
-        let mut event_log = self.world.resource_mut::<EventLog>();
-        event_log.drain()
+    fn poll_events(&mut self) -> Vec<SimEvent> {
+        self.world.resource_mut::<EventQueue>().drain()
     }
 
-    /// Get the root entity of the display hierarchy
+    fn poll_responses(&mut self) -> Vec<SimResponse> {
+        self.world.resource_mut::<ResponseQueue>().drain()
+    }
+
     fn root_entity(&self) -> EntityId {
         self.world.resource::<DisplayRoot>().0.into()
     }
 
-    fn handle_command(&mut self, command: SimCommand) {
-        self.handle_command_impl(command);
+    fn command(&mut self, command: SimCommand) {
+        self.handle_command(command);
+    }
+
+    fn query(&mut self, command: SimQuery) {
+        self.handle_query(command);
     }
 }
 

@@ -5,7 +5,7 @@ pub fn check_day_completion(
     mut day_status: ResMut<DayStatus>,
     diner_query: Query<&Diner>,
     schedule: Res<DailyDinerSchedule>,
-    mut events: ResMut<EventLog>,
+    mut events: ResMut<EventQueue>,
 ) {
     if day_status.completion_emitted {
         // Day completion already emitted, no further checks needed
@@ -19,7 +19,7 @@ pub fn check_day_completion(
     let spawning_finished = !schedule.has_pending_spawns();
     day_status.completed = day_status.current_diner_count == 0 && spawning_finished;
     if day_status.completed {
-        events.emit(PresentationEvent::DayCompleted);
+        events.push(SimEvent::DayCompleted);
         day_status.completion_emitted = true;
     }
 }

@@ -424,20 +424,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "dishaster-channel"
-version = "0.1.0"
-dependencies = [
- "dishaster-models",
- "dishrupt-core",
-]
-
-[[package]]
 name = "dishaster-core"
 version = "0.1.0"
 dependencies = [
  "bevy_ecs",
  "derive_more",
- "dishaster-channel",
+ "dishaster-interface",
  "dishaster-models",
  "dishaster-navigation",
  "dishrupt-core",
@@ -494,8 +486,8 @@ name = "dishaster-godot-game"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "dishaster-channel",
  "dishaster-godot-ui",
+ "dishaster-interface",
  "dishaster-models",
  "dishaster-persistence",
  "dishrupt-core",
@@ -520,6 +512,14 @@ dependencies = [
  "dishrupt-l10n-godot",
  "godot",
  "signals2",
+]
+
+[[package]]
+name = "dishaster-interface"
+version = "0.1.0"
+dependencies = [
+ "dishaster-models",
+ "dishrupt-core",
 ]
 
 [[package]]

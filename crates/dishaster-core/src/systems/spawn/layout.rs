@@ -18,7 +18,7 @@ pub fn spawn_static_objects(
     level: Res<ResWrapper<LevelConfig>>,
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
-    mut events: ResMut<EventLog>,
+    mut events: ResMut<EventQueue>,
 ) {
     spawn_windows(
         &mut commands,
@@ -39,7 +39,7 @@ fn spawn_windows(
     level: &LevelConfig,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
-    events: &mut ResMut<EventLog>,
+    events: &mut ResMut<EventQueue>,
 ) {
     let mut last_window_x = 0.0;
 
@@ -149,7 +149,7 @@ fn spawn_dish_presentations(
     dishes: &[ActiveDish],
     service_template: &WindowServiceModel,
     registry: &GameModelRegistry,
-    events: &mut ResMut<EventLog>,
+    events: &mut ResMut<EventQueue>,
 ) {
     if dishes.is_empty() {
         return;
@@ -213,7 +213,7 @@ fn spawn_dish_presentations(
             ChildOf(wrapper_entity),
         ));
 
-        events.emit(PresentationEvent::DishSpawned(DishViewModel {
+        events.push(SimEvent::DishSpawned(DishViewModel {
             entity: wrapper_entity.into(),
             dish_id: active.assignment.dish_id.clone(),
             pricing: active.assignment.pricing.method,

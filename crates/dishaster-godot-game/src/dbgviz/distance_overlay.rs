@@ -1,6 +1,6 @@
 use std::iter::FromIterator;
 
-use dishaster_channel::events::QueryDistancesResponse;
+use dishaster_interface::response::DistancesResponse;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
 use godot::{
@@ -45,7 +45,7 @@ impl DistanceDebugOverlay {
         self.sprite.set_visible(visible);
     }
 
-    pub fn present(&mut self, snapshot: &QueryDistancesResponse, ctx: &DisplayContext2D) {
+    pub fn present(&mut self, snapshot: &DistancesResponse, ctx: &DisplayContext2D) {
         if snapshot.data.is_empty() {
             self.sprite.set_visible(false);
             return;
@@ -88,7 +88,7 @@ impl DistanceDebugOverlay {
     }
 }
 
-fn update_buffer(pixel_buffer: &mut Vec<u8>, snapshot: &QueryDistancesResponse) {
+fn update_buffer(pixel_buffer: &mut Vec<u8>, snapshot: &DistancesResponse) {
     let required_len = snapshot.width * snapshot.height * 4;
     if pixel_buffer.len() != required_len {
         pixel_buffer.resize(required_len, 0);

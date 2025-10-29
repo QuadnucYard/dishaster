@@ -1,4 +1,4 @@
-use dishaster_channel::snapshots::*;
+use dishaster_interface::snapshots::*;
 use dishaster_navigation::NavigationGrid;
 use rustc_hash::FxHashMap;
 

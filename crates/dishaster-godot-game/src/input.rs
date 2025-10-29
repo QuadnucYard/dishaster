@@ -1,5 +1,5 @@
-use dishaster_channel::commands::SimCommand;
 use dishaster_godot_ui::req::GameRequest;
+use dishaster_interface::*;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::input::{event::MouseButtonEvent, listener::GodotInputEvent};
 use dishrupt_godot_scene::SceneContext;
@@ -23,8 +23,7 @@ impl Game {
                     let canvas_pos = screen_to_canvas(&self.root, e.position);
                     let sim_pos = self.to_map_pos(canvas_pos);
                     godot_print!("click map： {canvas_pos} {sim_pos}");
-                    self.sim_runner
-                        .send_command(SimCommand::QueryDistance(sim_pos));
+                    self.sim_runner.send_query(SimQuery::Distance(sim_pos));
                 }
             }
             GodotInputEvent::Key(key) => {

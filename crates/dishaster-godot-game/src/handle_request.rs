@@ -1,5 +1,5 @@
-use dishaster_channel::{commands::SimCommand, snapshots::DebugFlags};
 use dishaster_godot_ui::{req::GameRequest, *};
+use dishaster_interface::{snapshots::DebugFlags, *};
 use dishaster_models::PricingMethod;
 use dishrupt_core::EntityId;
 use dishrupt_godot_scene::SceneContext;

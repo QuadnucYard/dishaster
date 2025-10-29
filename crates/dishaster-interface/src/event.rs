@@ -4,7 +4,7 @@ use dishaster_models::{ModelId, PricingMethod, TrialIntro, TrialSpeech, TrialSta
 use dishrupt_core::{EntityId, prelude::*};
 
 /// Presentation events emitted by the core simulation for client display.
-pub enum PresentationEvent {
+pub enum SimEvent {
     /// The current day has completed (all diners have exited and time limit reached).
     DayCompleted,
     /// An agent has spawned in the simulation.
@@ -15,11 +15,6 @@ pub enum PresentationEvent {
     DishSpawned(DishViewModel),
     /// Agent feedback.
     Feedback(FeedbackEvent),
-
-    /// Response to a distance query.
-    QueryDistanceResponse(Option<f32>),
-    /// Response to a distance field query.
-    QueryDistancesResponse(QueryDistancesResponse),
 
     /// Show trial intro.
     TrialIntro(TrialIntro),
@@ -60,17 +55,4 @@ pub enum Feedback {
     Thought(EcoString),
     /// Spoken feedback with implicit content.
     Speech,
-}
-
-/// Response to a distance field query.
-#[derive(Debug, Clone)]
-pub struct QueryDistancesResponse {
-    /// Width of the grid in cells.
-    pub width: usize,
-    /// Height of the grid in cells.
-    pub height: usize,
-    /// Size of each cell in world units.
-    pub cell_size: f32,
-    /// Flattened col-major grid of distances.
-    pub data: Vec<f32>,
 }

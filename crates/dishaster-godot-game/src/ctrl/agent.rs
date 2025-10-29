@@ -1,5 +1,5 @@
-use dishaster_channel::events::Feedback;
 use dishaster_godot_ui::req::GameRequest;
+use dishaster_interface::event::Feedback;
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, input::event::MouseButtonEvent};
 use dishrupt_godot_scene::SceneContext;

@@ -11,8 +11,8 @@ pub mod user_store;
 
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
-use dishaster_channel::{ISimulation, commands::SimCommand};
 use dishaster_godot_ui::*;
+use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelConfig};
 use dishaster_persistence::ProgressService;
 use dishrupt_core::{EntityId, prelude::*};
@@ -157,6 +157,7 @@ impl Game {
             ticks,
             snapshot,
             events,
+            responses,
         }) = self.sim_runner.tick(delta)
         {
             self.perf_tracker.tick_updates(ticks);
@@ -167,6 +168,8 @@ impl Game {
             self.update_other_debug(&snapshot.debug);
 
             self.process_events(ctx, events);
+            self.process_query_responses(ctx, responses);
+
             self.telemetry.tick = snapshot.sim_tick;
             self.telemetry.seconds = snapshot.sim_time_seconds;
         }
@@ -178,6 +181,10 @@ impl Game {
 
     pub fn send_sim_command(&mut self, command: SimCommand) {
         self.sim_runner.send_command(command);
+    }
+
+    pub fn send_sim_query(&mut self, query: SimQuery) {
+        self.sim_runner.send_query(query);
     }
 
     /// Called just after construction
@@ -198,7 +205,7 @@ impl Game {
 
         ctx.gui.get_mut::<DishPricePopup>().enabled = true;
 
-        self.send_sim_command(SimCommand::QueryDistances);
+        self.send_sim_query(SimQuery::Distances);
     }
 
     pub fn begin_run(&mut self, ctx: &mut SceneContext) {

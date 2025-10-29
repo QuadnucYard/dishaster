@@ -1,6 +1,6 @@
 use std::iter::FromIterator;
 
-use dishaster_channel::snapshots::CrowdFieldDebugSnapshot;
+use dishaster_interface::snapshots::CrowdFieldDebugSnapshot;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
 use godot::{

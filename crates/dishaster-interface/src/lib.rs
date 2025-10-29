@@ -1,13 +1,18 @@
 //! Channel definitions for communicating with the Dishaster simulation.
 
-pub mod commands;
-pub mod events;
+pub mod command;
+pub mod event;
+pub mod query;
+pub mod response;
 pub mod snapshots;
 
 use dishaster_models::LevelConfig;
 use dishrupt_core::EntityId;
 
-use crate::{commands::SimCommand, events::PresentationEvent, snapshots::Snapshot};
+pub use crate::{
+    command::SimCommand, event::SimEvent, query::SimQuery, response::SimResponse,
+    snapshots::Snapshot,
+};
 
 /// Type alias for simulation tick count
 pub type Tick = u32;
@@ -27,8 +32,14 @@ pub trait ISimulation {
     fn snapshot(&mut self) -> Snapshot;
 
     /// Retrieve all events that occurred after the last poll
-    fn poll_events(&mut self) -> Vec<PresentationEvent>;
+    fn poll_events(&mut self) -> Vec<SimEvent>;
+
+    /// Retrieve all query responses that occurred after the last poll
+    fn poll_responses(&mut self) -> Vec<SimResponse>;
 
     /// Apply a high-level control command from the client runtime.
-    fn handle_command(&mut self, command: SimCommand);
+    fn command(&mut self, command: SimCommand);
+
+    /// Apply a high-level query from the client runtime.
+    fn query(&mut self, query: SimQuery);
 }

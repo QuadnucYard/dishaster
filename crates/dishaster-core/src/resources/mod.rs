@@ -1,10 +1,11 @@
 //! Simulation resources and global state management
 
+mod buffers;
 mod time;
 
 use std::{collections::VecDeque, sync::Arc};
 
-use dishaster_channel::events::PresentationEvent;
+pub use buffers::*;
 pub use time::Time;
 
 use crate::{models::*, prelude::*};
@@ -58,22 +59,6 @@ pub struct DayStatus {
 
 /// Resource wrapper for Arc<GameModelRegistry>
 pub type GameModelRegistryRes = ResWrapper<Arc<GameModelRegistry>>;
-
-/// Log of presentation events to be processed by the display system
-#[derive(Resource, Default)]
-pub struct EventLog(pub(crate) Vec<PresentationEvent>);
-
-impl EventLog {
-    /// Record a new presentation event
-    pub fn emit(&mut self, event: PresentationEvent) {
-        self.0.push(event);
-    }
-
-    /// Retrieve and clear all logged events
-    pub fn drain(&mut self) -> Vec<PresentationEvent> {
-        std::mem::take(&mut self.0)
-    }
-}
 
 /// Daily scheduling state (generated each day from PersistentDinerPool)
 ///

@@ -97,7 +97,7 @@ fn handle_observe_goal(
     )>,
     window_query: Query<(Entity, &Window)>,
     time: Res<Time>,
-    mut events: ResMut<EventLog>,
+    mut events: ResMut<EventQueue>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
     for (entity, mut goal, mut targets, mut movement, personality, mut rng) in diner_query {
@@ -163,7 +163,7 @@ fn handle_decide_window_goal(
     lane_query: Query<(&QueueLane, &QueueLaneMembers)>,
     registry: Res<GameModelRegistryRes>,
     time: Res<Time>,
-    mut events: ResMut<EventLog>,
+    mut events: ResMut<EventQueue>,
 ) {
     let config = DecisionConfig::default();
 

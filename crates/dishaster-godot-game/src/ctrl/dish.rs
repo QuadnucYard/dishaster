@@ -1,5 +1,5 @@
-use dishaster_channel::events::DishViewModel;
 use dishaster_godot_ui::{DishPricePopup, DishPriceView};
+use dishaster_interface::event::DishViewModel;
 use dishaster_models::PricingMethod;
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, ext::NodeExt, input::event::MouseButtonEvent};

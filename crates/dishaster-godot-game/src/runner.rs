@@ -7,8 +7,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-use dishaster_channel::{
-    ISimulation, Tick, commands::SimCommand, events::PresentationEvent, snapshots::Snapshot,
+use dishaster_interface::{
+    ISimulation, Tick, command::SimCommand, event::SimEvent, query::SimQuery,
+    response::SimResponse, snapshots::Snapshot,
 };
 use fibre::spsc;
 
@@ -17,7 +18,8 @@ use fibre::spsc;
 pub struct SnapshotFrame {
     pub ticks: Tick,
     pub snapshot: Snapshot,
-    pub events: Vec<PresentationEvent>,
+    pub events: Vec<SimEvent>,
+    pub responses: Vec<SimResponse>,
 }
 
 impl SnapshotFrame {
@@ -127,6 +129,7 @@ impl SimulationRunner {
                         ticks: 1, // to be updated by receiver
                         snapshot: sim.snapshot(),
                         events: sim.poll_events(),
+                        responses: sim.poll_responses(),
                     });
                 }
                 thread::sleep(Duration::from_millis(1));
@@ -223,6 +226,7 @@ impl SyncSimulationRunner {
                     ticks,
                     snapshot: self.sim.snapshot(),
                     events: self.sim.poll_events(),
+                    responses: self.sim.poll_responses(),
                 },
             );
         }
@@ -247,7 +251,12 @@ impl SyncSimulationRunner {
     /// Forward a simulation command to the underlying simulation immediately.
     pub fn send_command(&mut self, command: SimCommand) {
         // todo: commands may be queued and handled in batch
-        self.sim.handle_command(command);
+        self.sim.command(command);
+    }
+
+    /// Forward a simulation query to the underlying simulation immediately.
+    pub fn send_query(&mut self, query: SimQuery) {
+        self.sim.query(query);
     }
 
     /// Update the target ticks-per-second rate used for fixed-step advancement.

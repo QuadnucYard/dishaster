@@ -47,7 +47,7 @@ pub fn process_serving_messages(
     mut sessions: Query<(Entity, &mut ServiceSession)>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement)>,
     mut queue: ResMut<ServingCommsQueue>,
-    mut events: ResMut<EventLog>,
+    mut events: ResMut<EventQueue>,
     time: Res<Time>,
     mut rng: ResMut<ServingRng>,
 ) {
@@ -232,7 +232,7 @@ pub fn drive_serving_sessions(
     registry: Res<GameModelRegistryRes>,
     mut comms: ResMut<ServingCommsQueue>,
     time: Res<Time>,
-    mut events: ResMut<EventLog>,
+    mut events: ResMut<EventQueue>,
 ) {
     let now = time.current_time;
 

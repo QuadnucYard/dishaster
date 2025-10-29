@@ -12,8 +12,8 @@ pub fn choose_feedback<'a>(rng: &mut impl Rng, pool: &'a [&str]) -> &'a str {
     pool.choose(rng).expect("pool is non-empty")
 }
 
-impl EventLog {
+impl EventQueue {
     pub fn emit_feedback(&mut self, event: FeedbackEvent) {
-        self.0.push(PresentationEvent::Feedback(event));
+        self.push(SimEvent::Feedback(event));
     }
 }

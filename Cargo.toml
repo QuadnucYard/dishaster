@@ -20,7 +20,7 @@ dishrupt-godot-scene = { path = "crates/dishrupt-godot-scene" }
 
 dishaster-navigation = { path = "crates/dishaster-navigation" }
 dishaster-models = { path = "crates/dishaster-models" }
-dishaster-channel = { path = "crates/dishaster-channel" }
+dishaster-interface = { path = "crates/dishaster-interface" }
 dishaster-core = { path = "crates/dishaster-core" }
 dishaster-data = { path = "crates/dishaster-data" }
 dishaster-persistence = { path = "crates/dishaster-persistence" }
