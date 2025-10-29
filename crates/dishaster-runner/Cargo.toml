@@ -1,0 +1,18 @@
+[package]
+name = "dishaster-runner"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishaster-interface.workspace = true
+
+fibre = { workspace = true, optional = true }
+
+[features]
+default = []
+threaded = ["fibre"]
+
+[lints]
+workspace = true

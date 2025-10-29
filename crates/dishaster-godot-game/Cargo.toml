@@ -15,10 +15,10 @@ dishrupt-l10n.workspace = true
 dishaster-models.workspace = true
 dishaster-interface.workspace = true
 dishaster-persistence.workspace = true
+dishaster-runner.workspace = true
 dishaster-godot-ui.workspace = true
 
 anyhow.workspace = true
-fibre.workspace = true
 rustc-hash.workspace = true
 godot.workspace = true
 

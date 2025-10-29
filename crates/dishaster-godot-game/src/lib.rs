@@ -6,7 +6,6 @@ mod handle_request;
 mod input;
 pub mod perf;
 mod present;
-pub mod runner;
 pub mod user_store;
 
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
@@ -15,6 +14,7 @@ use dishaster_godot_ui::*;
 use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelConfig};
 use dishaster_persistence::ProgressService;
+use dishaster_runner::{SimulationRunner, SnapshotFrame, SyncSimulationRunner};
 use dishrupt_core::{EntityId, prelude::*};
 use dishrupt_godot::display::*;
 use dishrupt_godot_scene::SceneContext;
@@ -26,11 +26,7 @@ use godot::{
 use rustc_hash::FxHashMap;
 
 use self::{ctrl::*, perf::PerfTracker};
-use crate::{
-    dbgviz::*,
-    runner::{SnapshotFrame, SyncSimulationRunner},
-    user_store::GodotUserStorage,
-};
+use crate::{dbgviz::*, user_store::GodotUserStorage};
 
 pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
 pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService<GodotUserStorage>>> = OnceLock::new();
@@ -62,7 +58,7 @@ struct DayTelemetry {
 pub struct Game {
     root: Gd<Node>,
 
-    sim_runner: SyncSimulationRunner,
+    sim_runner: Box<dyn SimulationRunner>,
     stage: Stage,
     stage_origin: Vector2,
     dbgviz: DbgViz,
@@ -137,7 +133,7 @@ impl Game {
 
         Self {
             root: gd,
-            sim_runner,
+            sim_runner: Box::new(sim_runner),
             stage,
             stage_origin: origin,
             dbgviz,

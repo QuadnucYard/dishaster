@@ -438,7 +438,6 @@ dependencies = [
  "rand",
  "rand_xoshiro",
  "rustc-hash",
- "serde",
 ]
 
 [[package]]
@@ -490,13 +489,13 @@ dependencies = [
  "dishaster-interface",
  "dishaster-models",
  "dishaster-persistence",
+ "dishaster-runner",
  "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-godot-scene",
  "dishrupt-godot-ui",
  "dishrupt-l10n",
  "dishrupt-persistence",
- "fibre",
  "godot",
  "rustc-hash",
 ]
@@ -551,9 +550,16 @@ dependencies = [
  "dishrupt-core",
  "dishrupt-persistence",
  "ron",
- "rustc-hash",
  "serde",
  "tempfile",
+]
+
+[[package]]
+name = "dishaster-runner"
+version = "0.1.0"
+dependencies = [
+ "dishaster-interface",
+ "fibre",
 ]
 
 [[package]]

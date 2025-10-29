@@ -7,37 +7,13 @@ use std::{
     time::{Duration, Instant},
 };
 
-use dishaster_interface::{
-    ISimulation, Tick, command::SimCommand, event::SimEvent, query::SimQuery,
-    response::SimResponse, snapshots::Snapshot,
-};
+use dishaster_interface::*;
 use fibre::spsc;
 
-/// A snapshot frame paired with the number of simulation ticks it represents.
-/// This is the unit sent over the channel from the sim thread to the main thread.
-pub struct SnapshotFrame {
-    pub ticks: Tick,
-    pub snapshot: Snapshot,
-    pub events: Vec<SimEvent>,
-    pub responses: Vec<SimResponse>,
-}
+use crate::{SimulationRunner, SnapshotFrame, extend_frame};
 
-impl SnapshotFrame {
-    fn extend(&mut self, other: SnapshotFrame) {
-        self.ticks = other.ticks;
-        self.snapshot = other.snapshot;
-        self.events.extend(other.events);
-    }
-}
-
-fn extend_frame(current: &mut Option<SnapshotFrame>, other: SnapshotFrame) {
-    match current {
-        Some(snap) => snap.extend(other),
-        None => *current = Some(other),
-    }
-}
-
-pub struct SimulationRunner {
+/// Asynchronous simulation runner that runs the simulation in a background thread.
+pub struct AsyncSimulationRunner {
     snapshot_receiver: SnapshotReceiver,
     #[allow(unused)]
     sim_ctrl: SimController,
@@ -91,7 +67,8 @@ impl Drop for SimController {
 
 pub struct SnapshotReceiver(spsc::BoundedSyncReceiver<SnapshotFrame>);
 
-impl SimulationRunner {
+impl AsyncSimulationRunner {
+    /// Create a new asynchronous simulation runner.
     pub fn new(mut sim: Box<dyn ISimulation + Send>, tps: f64) -> Self {
         // create channel
         let (tx, rx) = spsc::bounded_sync::<SnapshotFrame>(3);
@@ -148,6 +125,7 @@ impl SimulationRunner {
         }
     }
 
+    /// Poll for the latest snapshot frame from the simulation thread.
     pub fn poll_snapshot(&mut self) -> Option<SnapshotFrame> {
         let mut last_snap: Option<SnapshotFrame> = None;
         while let Ok(snap) = self.snapshot_receiver.0.try_recv() {
@@ -172,102 +150,29 @@ impl SimulationRunner {
     }
 }
 
-/// Synchronous simulation runner that advances on demand.
-/// Useful for testing, debugging, or when you need precise control over simulation timing.
-///
-/// Unlike `SimulationRunner` which runs asynchronously in a background thread,
-/// this runner gives you direct control over when and how much the simulation advances.
-pub struct SyncSimulationRunner {
-    sim: Box<dyn ISimulation>,
-    accumulator: f64,
-    tps: f64,
-}
-
-impl SyncSimulationRunner {
-    /// Create a new synchronous simulation runner.
-    pub fn new(sim: Box<dyn ISimulation>, tps: f64) -> Self {
-        Self {
-            sim,
-            accumulator: 0.0,
-            tps,
-        }
+#[allow(unused)]
+impl SimulationRunner for AsyncSimulationRunner {
+    fn tick(&mut self, dt: f64) -> Option<SnapshotFrame> {
+        self.poll_snapshot()
     }
 
-    /// Advance the simulation by the given delta time.
-    /// Returns the snapshot if the simulation was advanced (i.e., accumulator reached the tick threshold).
-    ///
-    /// # Arguments
-    /// * `dt` - Delta time in seconds to advance the simulation
-    ///
-    /// # Returns
-    /// * `Some(Snapshot)` if the simulation ticked and produced a new snapshot
-    /// * `None` if the accumulator hasn't reached the tick threshold yet
-    pub fn tick(&mut self, dt: f64) -> Option<SnapshotFrame> {
-        self.accumulator += dt;
-
-        let mut result: Option<SnapshotFrame> = None;
-        let mut ticks = 0;
-
-        loop {
-            let fixed_dt = 1.0 / self.tps.max(1.0);
-            if self.accumulator < fixed_dt {
-                break;
-            }
-            // Advance simulation by one fixed timestep
-            self.sim.tick();
-            ticks += 1;
-
-            // Subtract fixed dt, keeping any remainder for next frame
-            self.accumulator -= fixed_dt;
-
-            extend_frame(
-                &mut result,
-                SnapshotFrame {
-                    ticks,
-                    snapshot: self.sim.snapshot(),
-                    events: self.sim.poll_events(),
-                    responses: self.sim.poll_responses(),
-                },
-            );
-        }
-
-        result
+    fn force_tick(&mut self) -> Snapshot {
+        todo!()
     }
 
-    /// Force advance the simulation by one tick, regardless of accumulator.
-    /// This is useful for testing or when you need immediate advancement.
-    ///
-    /// # Returns
-    /// The new snapshot after the forced tick
-    pub fn force_tick(&mut self) -> Snapshot {
-        self.sim.tick();
-
-        // Reset accumulator since we forced a tick
-        self.accumulator = 0.0;
-
-        self.sim.snapshot()
+    fn send_command(&mut self, command: SimCommand) {
+        todo!()
     }
 
-    /// Forward a simulation command to the underlying simulation immediately.
-    pub fn send_command(&mut self, command: SimCommand) {
-        // todo: commands may be queued and handled in batch
-        self.sim.command(command);
+    fn send_query(&mut self, query: SimQuery) {
+        todo!()
     }
 
-    /// Forward a simulation query to the underlying simulation immediately.
-    pub fn send_query(&mut self, query: SimQuery) {
-        self.sim.query(query);
+    fn tps(&self) -> f64 {
+        todo!()
     }
 
-    /// Update the target ticks-per-second rate used for fixed-step advancement.
-    pub fn set_tps(&mut self, tps: f64) {
-        if (self.tps - tps).abs() > f64::EPSILON {
-            self.tps = tps;
-        }
-    }
-
-    /// Retrieve the current ticks-per-second target.
-    pub fn tps(&self) -> f64 {
-        self.tps
+    fn set_tps(&mut self, tps: f64) {
+        todo!()
     }
 }

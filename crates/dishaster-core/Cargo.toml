@@ -18,7 +18,6 @@ ordered-float.workspace = true
 rand.workspace = true
 rand_xoshiro.workspace = true
 rustc-hash.workspace = true
-serde.workspace = true
 
 [lints]
 workspace = true
