@@ -53,6 +53,7 @@ fn create_test_level() -> LevelConfig {
                 economic_capacity: MinMax::new(10.0, 50.0),
                 eating_speed: MinMax::new(0.5, 1.5),
             },
+            appearance: Default::default(),
         },
         seed: 12345,
         persistent_diner_pool: vec![],

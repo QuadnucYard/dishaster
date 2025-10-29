@@ -42,6 +42,7 @@ fn sample_diner_provider() -> DinerRandomizerModel {
             economic_capacity: MinMax::new(10.0, 30.0),
             eating_speed: MinMax::new(0.5, 1.5),
         },
+        appearance: Default::default(),
     }
 }
 

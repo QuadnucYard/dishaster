@@ -3,7 +3,8 @@
 //! These types are shared between simulation (core) and persistence layers
 //! to coordinate diner scheduling and memory tracking across days.
 
-use super::{DiningProfile, LongTermMemory, Personality, prelude::*};
+use super::{Appearance, DiningProfile, LongTermMemory, Personality, prelude::*};
+use crate::PsychState;
 
 /// Persistent pool of all diner profiles across days
 ///
@@ -58,6 +59,8 @@ pub struct DinerProfile {
     pub dining_profile: DiningProfile,
     /// Long-term memory of dining experiences
     pub long_term_memory: LongTermMemory,
+    /// Visual appearance (cosmetics)
+    pub appearance: Appearance,
     /// Day of last visit (0-indexed)
     pub last_visit_day: u32,
     /// Total number of visits
@@ -77,12 +80,14 @@ pub struct ScheduledDiner {
     pub personality: Personality,
     /// Dining-specific behavioral profile
     pub dining_profile: DiningProfile,
+    /// Current psychological state affecting decision-making
+    pub psych_state: PsychState,
     /// The diner's accumulated memory of past dining experiences
     pub long_term_memory: LongTermMemory,
+    /// Visual appearance (cosmetics)
+    pub appearance: Appearance,
 
     // Session-specific attributes (generated per visit)
     /// The simulation time when this diner should be spawned (seconds from day start)
     pub arrival_time: Seconds,
-    /// Initial hunger level for this visit (randomized)
-    pub hunger: f32,
 }

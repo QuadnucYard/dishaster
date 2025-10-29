@@ -15,7 +15,7 @@ impl Game {
                 SimEvent::DayCompleted => {
                     self.finish_day(ctx, false);
                 }
-                SimEvent::AgentSpawned(entity) => {
+                SimEvent::AgentSpawned { entity, appearance } => {
                     let mut controller = AgentController::new(
                         entity,
                         self.stage
@@ -24,6 +24,9 @@ impl Game {
                             .expect("missing godot node for agent"),
                     );
                     controller.set_debug_enabled(self.debug_enabled);
+                    if let Some(appearance) = appearance {
+                        controller.set_appearance(&appearance);
+                    }
                     self.dc.agents.insert(entity, controller);
                 }
                 SimEvent::AgentDespawned(entity) => {

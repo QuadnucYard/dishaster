@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://cdqarojyu2dm0"]
+
+[ext_resource type="Shader" uid="uid://cvm60alh8hdto" path="res://assets/prefabs/diners/cosmetic_recolor.gdshader" id="1_cg13l"]
+
+[resource]
+shader = ExtResource("1_cg13l")
+shader_parameter/hue_shift = 0.0
+shader_parameter/saturation = 1.0
+shader_parameter/value = 1.0
+shader_parameter/alpha = 1.0

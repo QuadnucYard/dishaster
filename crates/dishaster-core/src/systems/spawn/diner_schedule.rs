@@ -47,9 +47,15 @@ fn generate_daily_schedule(
             id: profile.id,
             personality: profile.personality.clone(),
             dining_profile: profile.dining_profile.clone(),
+            psych_state: PsychState {
+                hunger,
+                mood: 0.0,
+                patience: profile.personality.patience_base * 1.3,
+                trust: 0.7,
+            },
             long_term_memory: profile.long_term_memory.clone(),
+            appearance: profile.appearance.clone(),
             arrival_time,
-            hunger, // Per-visit randomized
         });
 
         profile.last_visit_day = current_day;

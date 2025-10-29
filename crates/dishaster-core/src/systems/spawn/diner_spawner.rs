@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use dishaster_models::{PsychState, *};
+use dishaster_models::*;
 use dishrupt_core::{
     asset::PrefabReference,
     display::{DisplayState, Transform},
@@ -59,14 +59,6 @@ fn spawn_scheduled_diner(
 
     let display_res = PrefabReference::new("diners/sample_diner");
 
-    // Initialize psychological state from scheduled diner
-    let psych_state = PsychState {
-        hunger: scheduled.hunger,
-        mood: 0.0,
-        patience: scheduled.personality.patience_base * 1.3,
-        trust: 0.7,
-    };
-
     let wrapper = commands.spawn((
         AgentTag,
         DinerBundle {
@@ -78,9 +70,10 @@ fn spawn_scheduled_diner(
 
             personality: scheduled.personality.into_comp(),
             dining_profile: scheduled.dining_profile.into_comp(),
-            psych_state: psych_state.into_comp(),
+            psych_state: scheduled.psych_state.into_comp(),
             ltm: scheduled.long_term_memory.into_comp(),
             stm: DinerShortTermMemory::default(),
+            appearance: scheduled.appearance.into_comp(),
 
             movement: Movement {
                 pos,
@@ -106,6 +99,7 @@ fn spawn_scheduled_diner(
     let _body = commands.spawn((
         DisplayState {
             proto: display_res,
+            name: Some("Body".into()),
             ..Default::default()
         },
         Transform {

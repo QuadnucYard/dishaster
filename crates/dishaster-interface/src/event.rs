@@ -1,6 +1,8 @@
 //! Presentation events emitted by the core simulation for client display.
 
-use dishaster_models::{ModelId, PricingMethod, TrialIntro, TrialSpeech, TrialStatement};
+use dishaster_models::{
+    Appearance, ModelId, PricingMethod, TrialIntro, TrialSpeech, TrialStatement,
+};
 use dishrupt_core::{EntityId, prelude::*};
 
 /// Presentation events emitted by the core simulation for client display.
@@ -8,7 +10,12 @@ pub enum SimEvent {
     /// The current day has completed (all diners have exited and time limit reached).
     DayCompleted,
     /// An agent has spawned in the simulation.
-    AgentSpawned(EntityId),
+    AgentSpawned {
+        /// Spawned agent entity ID.
+        entity: EntityId,
+        /// Optional appearance customization data.
+        appearance: Option<Appearance>,
+    },
     /// An agent has despawned from the simulation.
     AgentDespawned(EntityId),
     /// A dish has spawned in the simulation with its pricing snapshot.

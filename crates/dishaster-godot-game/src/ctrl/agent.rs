@@ -1,10 +1,11 @@
 use dishaster_godot_ui::req::GameRequest;
 use dishaster_interface::event::Feedback;
+use dishaster_models::{Appearance, BodyPart};
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, input::event::MouseButtonEvent};
 use dishrupt_godot_scene::SceneContext;
 use godot::{
-    classes::{Label, Node2D},
+    classes::{CanvasItem, Label, Node2D},
     prelude::*,
 };
 
@@ -15,6 +16,7 @@ pub struct AgentController {
     entity: EntityId,
 
     root: GdNode2D,
+    body: Option<GdNode2D>,
     pub feedback: FeedbackController,
     debug: Option<AgentDebugController>,
 }
@@ -25,10 +27,11 @@ impl AgentController {
         feedback.root.set_visible(false);
 
         let debug = node.try_get_node_as("Debug").map(AgentDebugController::new);
+        let body = node.try_get_node_as::<Node2D>("Body").map(GdNode2D::new);
 
         Self {
             entity,
-
+            body,
             feedback,
             root: node,
             debug,
@@ -49,6 +52,57 @@ impl AgentController {
         if let Some(debug) = &mut self.debug {
             debug.goal_label.set_text(goal_str);
         }
+    }
+
+    /// Apply cosmetic appearance to agent sprites
+    pub fn set_appearance(&mut self, appearance: &Appearance) {
+        let Some(body) = &self.body else {
+            godot_warn!(
+                "Agent entity {:?} is missing Body node for appearance application",
+                self.entity
+            );
+            return;
+        };
+
+        // Apply to each body part sprite if it exists
+        Self::apply_to_sprite(body, "Head", &appearance.head);
+        Self::apply_to_sprite(body, "UpperGarment", &appearance.upper_garment);
+        Self::apply_to_sprite(body, "LowerGarment", &appearance.lower_garment);
+        Self::apply_to_sprite(body, "LeftHand", &appearance.hands);
+        Self::apply_to_sprite(body, "RightHand", &appearance.hands);
+        Self::apply_to_sprite(body, "LeftShoe", &appearance.shoes);
+        Self::apply_to_sprite(body, "RightShoe", &appearance.shoes);
+    }
+
+    fn apply_to_sprite(body: &GdNode2D, sprite_name: &str, body_part: &BodyPart) {
+        let Some(mut sprite) = body.try_get_node_as::<CanvasItem>(sprite_name) else {
+            return;
+        };
+
+        // Load texture based on body part and variant
+        // Expected file structure: res://assets/sprites/agents/head_00.tres, head_01.tres, etc.
+        // let texture_path = format!(
+        //     "res://assets/sprites/agents/{}_{:02}.tres",
+        //     sprite_name.to_lowercase(),
+        //     body_part.variant.index()
+        // );
+
+        // if let Ok(texture) = try_load::<Texture2D>(&texture_path) {
+        //     sprite.set_texture(&texture);
+        // } else {
+        //     godot_warn!(
+        //         "Failed to load texture variant {} for {}",
+        //         body_part.variant.index(),
+        //         sprite_name
+        //     );
+        // }
+
+        // Set shader parameters from ColorTransform (now per-part)
+        let ct = &body_part.color_transform;
+        sprite.set_instance_shader_parameter("hue_shift", &ct.hue_shift.to_variant());
+        sprite.set_instance_shader_parameter("saturation", &ct.saturation.to_variant());
+        sprite.set_instance_shader_parameter("value", &ct.value.to_variant());
+        sprite.set_instance_shader_parameter("alpha", &ct.alpha.to_variant());
     }
 }
 

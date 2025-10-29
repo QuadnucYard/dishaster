@@ -16,6 +16,7 @@ pub struct DinerBundle {
     pub psych_state: DinerPsychState,
     pub ltm: DinerLongTermMemory,
     pub stm: DinerShortTermMemory,
+    pub appearance: DinerAppearance,
 
     pub movement: Movement,
 }
@@ -155,3 +156,6 @@ pub type DinerLongTermMemory = CompWrapper<LongTermMemory>;
 
 /// Short-term memory for current meal (not serialized, session only)
 pub type DinerShortTermMemory = CompWrapper<ShortTermMemory>;
+
+/// Wrapper component for Appearance (cosmetic customization)
+pub type DinerAppearance = CompWrapper<Appearance>;

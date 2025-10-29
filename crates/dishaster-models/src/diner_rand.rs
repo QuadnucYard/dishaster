@@ -1,6 +1,6 @@
 //! Diner randomization configurations
 
-use super::prelude::*;
+use super::{AppearanceRanges, prelude::*};
 
 /// Configuration for randomizing diner traits during pool initialization
 #[derive(Debug, Clone, Deserialize)]
@@ -9,6 +9,9 @@ pub struct DinerRandomizerModel {
     pub personality: PersonalityRanges,
     /// Dining profile ranges
     pub dining: DiningRanges,
+    /// Appearance cosmetic ranges
+    #[serde(default)]
+    pub appearance: AppearanceRanges,
 }
 
 /// Range definitions for randomizing personality traits

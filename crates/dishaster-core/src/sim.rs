@@ -80,10 +80,16 @@ impl Simulation {
     /// Perform initial setup tasks at simulation startup
     pub fn startup(&mut self) {
         // Add observers for agent spawn/despawn events to log presentation events
-        self.world
-            .add_observer(|event: On<Add, AgentTag>, mut events: ResMut<EventQueue>| {
-                events.push(SimEvent::AgentSpawned(event.entity.into()));
-            });
+        self.world.add_observer(
+            |event: On<Add, AgentTag>,
+             query: Query<&DinerAppearance>,
+             mut events: ResMut<EventQueue>| {
+                events.push(SimEvent::AgentSpawned {
+                    entity: event.entity.into(),
+                    appearance: query.get(event.entity).ok().map(|a| (**a).clone()),
+                });
+            },
+        );
         self.world.add_observer(
             |event: On<Remove, AgentTag>, mut events: ResMut<EventQueue>| {
                 events.push(SimEvent::AgentDespawned(event.entity.into()));
