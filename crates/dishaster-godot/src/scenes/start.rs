@@ -1,4 +1,5 @@
-use as_any::Downcast;
+use std::any::Any;
+
 use dishaster_godot_ui::StartMenuGui;
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_godot::bind::BindGodot;
@@ -39,19 +40,25 @@ impl Scene for StartScene {
         ctx.gui_cmds.run_cmds(ctx.gui);
 
         for req in ctx.gui_cmds.take_reqs() {
-            let req = &*req;
-            let req = req.downcast_ref::<AppRequest>().expect("app request");
+            let req: Box<dyn Any> = req;
+            let req = req.downcast::<AppRequest>().expect("app request");
 
-            match *req {
-                AppRequest::Quit => {
-                    godot_print!("Quit requested");
-                    self.gd.get_tree().unwrap().quit();
-                }
-                AppRequest::EnterLevel => {
-                    ctx.schedule(EnterLevelProcedure);
-                }
-                AppRequest::ExitLevel => panic!("should not happen in start menu"),
+            self.handle_app_request(ctx, *req);
+        }
+    }
+}
+
+impl StartScene {
+    fn handle_app_request(&mut self, ctx: &mut SceneContext, req: AppRequest) {
+        match req {
+            AppRequest::Quit => {
+                godot_print!("Quit requested");
+                self.gd.get_tree().unwrap().quit();
             }
+            AppRequest::EnterLevel => {
+                ctx.schedule(EnterLevelProcedure);
+            }
+            AppRequest::ExitLevel => panic!("should not happen in start menu"),
         }
     }
 }

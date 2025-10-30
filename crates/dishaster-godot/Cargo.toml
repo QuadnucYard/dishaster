@@ -18,7 +18,6 @@ dishaster-ui-protocol.workspace = true
 dishaster-godot-game.workspace = true
 dishaster-godot-ui.workspace = true
 
-as-any.workspace = true
 env_logger.workspace = true
 godot.workspace = true
 log.workspace = true

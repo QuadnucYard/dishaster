@@ -1,4 +1,5 @@
-use as_any::Downcast;
+use std::any::Any;
+
 use dishaster_core::{models::LevelConfig, sim::Simulation};
 use dishaster_godot_game::Game;
 use dishaster_godot_ui::*;
@@ -56,29 +57,16 @@ impl Scene for GameScene {
         ctx.gui_cmds.run_cmds(ctx.gui);
 
         for req in ctx.gui_cmds.take_reqs() {
-            let req = &*req;
-
-            if let Some(req) = req.downcast_ref::<GameRequest>() {
-                if let Some(game) = self.game.as_mut() {
-                    match req {
-                        GameRequest::NextDay => {
-                            // This is handled specially to allow for scheduling
-                            ctx.schedule(AdvanceLevelProcedure)
-                        }
-                        _ => Self::handle_game_request(ctx, req, game),
+            let req: Box<dyn Any> = req;
+            match req.downcast::<GameRequest>() {
+                Ok(req) => {
+                    if let Some(game) = self.game.as_mut() {
+                        Self::handle_game_request(ctx, *req, game);
                     }
                 }
-                continue;
-            }
-
-            let req = req.downcast_ref::<AppRequest>().expect("app request");
-
-            match *req {
-                AppRequest::Quit | AppRequest::EnterLevel => {
-                    panic!("should be handled in main menu")
-                }
-                AppRequest::ExitLevel => {
-                    ctx.schedule(ExitLevelProcedure);
+                Err(req) => {
+                    let req = req.downcast::<AppRequest>().expect("app request");
+                    Self::handle_app_request(ctx, *req);
                 }
             }
         }
@@ -113,9 +101,20 @@ impl GameScene {
         ctx.gui.get_mut::<DishPricePopup>().enabled = true;
     }
 
+    fn handle_app_request(ctx: &mut SceneContext, req: AppRequest) {
+        match req {
+            AppRequest::Quit | AppRequest::EnterLevel => {
+                panic!("should be handled in main menu")
+            }
+            AppRequest::ExitLevel => {
+                ctx.schedule(ExitLevelProcedure);
+            }
+        }
+    }
+
     /// Handle a in-game ui request
-    fn handle_game_request(ctx: &mut SceneContext, req: &GameRequest, game: &mut Game) {
-        match *req {
+    fn handle_game_request(ctx: &mut SceneContext, req: GameRequest, game: &mut Game) {
+        match req {
             GameRequest::StartRun => {
                 game.begin_run();
                 ctx.gui.get_mut::<DishPricePopup>().enabled = false;
@@ -123,7 +122,9 @@ impl GameScene {
             GameRequest::EndRun => {
                 game.force_finish_day();
             }
-            GameRequest::NextDay => unreachable!("handled specially in game scene"),
+            GameRequest::NextDay => {
+                ctx.schedule(AdvanceLevelProcedure);
+            }
             GameRequest::SetTps(tps) => {
                 game.set_tps(tps);
                 ctx.gui.get_mut::<TimeStatsGui>().set_tps_display(tps);

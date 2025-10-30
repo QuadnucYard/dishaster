@@ -83,12 +83,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
-name = "as-any"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0f477b951e452a0b6b4a10b53ccd569042d1d01729b519e02074a9c0958a063"
-
-[[package]]
 name = "assert_type_match"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -459,7 +453,6 @@ dependencies = [
 name = "dishaster-godot"
 version = "0.1.0"
 dependencies = [
- "as-any",
  "dishaster-core",
  "dishaster-data",
  "dishaster-godot-game",
@@ -587,7 +580,6 @@ dependencies = [
 name = "dishrupt-core"
 version = "0.1.0"
 dependencies = [
- "as-any",
  "bevy_math",
  "ecow",
  "rustc-hash",
@@ -618,7 +610,6 @@ dependencies = [
 name = "dishrupt-godot-scene"
 version = "0.1.0"
 dependencies = [
- "as-any",
  "dishrupt-godot",
  "dishrupt-godot-ui",
  "godot",

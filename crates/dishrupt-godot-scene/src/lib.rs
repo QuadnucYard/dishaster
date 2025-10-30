@@ -1,9 +1,11 @@
 mod manager;
 mod proc;
 
-use std::ops::{Deref, DerefMut};
+use std::{
+    any::Any,
+    ops::{Deref, DerefMut},
+};
 
-use as_any::AsAny;
 use dishrupt_godot::{audio::AudioManager, input::listener::GodotInputEvent};
 use dishrupt_godot_ui::{GuiCommands, GuiRegistry};
 use godot::{classes::Node, obj::Gd};
@@ -51,7 +53,7 @@ pub enum SceneTransition {
 }
 
 #[allow(unused)]
-pub trait Scene: AsAny {
+pub trait Scene: Any {
     fn id(&self) -> SceneId;
 
     fn gd(&self) -> Gd<Node>;

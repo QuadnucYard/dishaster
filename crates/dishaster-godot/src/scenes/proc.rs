@@ -1,4 +1,5 @@
-use as_any::Downcast;
+use std::any::Any;
+
 use dishaster_godot_game::progress_service;
 use dishrupt_godot_scene::*;
 
@@ -31,6 +32,7 @@ impl SceneProcedure for EnterLevelProcedure {
         ctx.scene_stack.change_push_scene(ctx.base, GameScene::ID);
 
         ctx.scene_stack.inspect_active_scene_mut(|scene| {
+            let scene: &mut dyn Any = scene;
             let game_scene = scene.downcast_mut::<GameScene>().expect("game scene");
 
             game_scene.start_game(ctx.base, level);

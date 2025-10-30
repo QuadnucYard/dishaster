@@ -1,4 +1,4 @@
-use as_any::AsAny;
+use std::any::Any;
 
 /// Type-erased request to the GUI system.
-pub trait UiRequest: Send + AsAny {}
+pub trait UiRequest: Send + Any {}
