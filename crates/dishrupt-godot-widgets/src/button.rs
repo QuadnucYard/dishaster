@@ -67,7 +67,7 @@ impl TextButtonA {
         let on_click: Signal<()> = Signal::new();
 
         let on_click_handle = on_click.get_emit_handle();
-        (gd.clone().upcast::<BaseButton>().signals().pressed()).connect(move || {
+        gd.signals().pressed().connect(move || {
             on_click_handle.emit();
         });
 
@@ -125,7 +125,7 @@ impl TextureButtonA {
         let on_click: Signal<()> = Signal::new();
 
         let on_click_handle = on_click.get_emit_handle();
-        (gd.clone().upcast::<BaseButton>().signals().pressed()).connect(move || {
+        gd.signals().pressed().connect(move || {
             on_click_handle.emit();
         });
 

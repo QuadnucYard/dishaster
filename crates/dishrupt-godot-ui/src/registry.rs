@@ -3,14 +3,15 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use dishrupt_core::prelude::UiRequest;
+use dishrupt_core::ui::UiRequest;
 
 use crate::UITree;
 
+#[allow(unused)]
 pub trait Gui: UITree {
-    fn start(&mut self, _commands: GuiCommands) {}
+    fn start(&mut self, commands: GuiCommands) {}
 
-    fn process(&mut self, _commands: GuiCommands, _delta: f64) {}
+    fn process(&mut self, commands: GuiCommands, delta: f64) {}
 }
 
 #[derive(Default)]

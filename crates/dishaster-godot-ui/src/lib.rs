@@ -8,6 +8,8 @@ pub use start::*;
 
 mod prelude {
     pub use dishaster_ui_protocol::*;
-    pub use dishrupt_godot_ui::{elem::*, *};
+    pub use dishrupt_godot_ui::*;
+    pub use dishrupt_godot_ui_macros::*;
+    pub use dishrupt_godot_widgets::*;
     pub use signals2::*;
 }

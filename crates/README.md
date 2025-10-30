@@ -96,6 +96,15 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Signal integration
 - **Dependencies**: godot, `signals2`
 
+### dishrupt-godot-widgets
+
+- **Purpose**: Signal-reactive wrappers for Godot UI controls
+- **Contains**:
+  - Type-safe adapters for Godot Control nodes
+  - Reactive signal integration for user interactions
+- **Dependencies**: `dishrupt-godot-ui-macros`, godot, `signals2`
+- **Note**: Provides higher-level abstractions over raw Godot nodes with Rust-friendly signal handling
+
 ### dishrupt-godot-scene
 
 - **Purpose**: Scene management framework
@@ -280,6 +289,7 @@ graph TB
     %% Framework - Godot
     d-godot[dishrupt-godot<br/>Godot Bridge]
     d-godot-ui[dishrupt-godot-ui<br/>UI Framework]
+    d-godot-widgets[dishrupt-godot-widgets<br/>Reactive Widgets]
     d-godot-scene[dishrupt-godot-scene<br/>Scene Stack]
     d-l10n-godot[dishrupt-l10n-godot<br/>Godot i18n]
 
@@ -325,8 +335,11 @@ graph TB
     godot-ui --> ui-protocol
     godot-ui --> d-godot
     godot-ui --> d-godot-ui
+    godot-ui --> d-godot-widgets
     godot-ui --> d-l10n-godot
     godot-ui --> d-core
+
+    d-godot-widgets --> d-godot-ui
 
     %% Core simulation deps
     core --> models
@@ -374,7 +387,7 @@ graph TB
     class godot,godot-game,godot-ui,ui-protocol game
     class core,interface,runner,nav sim
     class models,views,data,persist data
-    class d-core,d-ecs,d-godot,d-godot-ui,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
+    class d-core,d-ecs,d-godot,d-godot-ui,d-godot-widgets,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
 ```
 
 ## Architecture Layers
@@ -430,6 +443,7 @@ Reusable utilities that could be extracted into separate libraries:
 - ECS integration (`dishrupt-ecs`) - Bevy ECS wrappers and conversions (only framework crate with ECS dependency)
 - Display bridge (`dishrupt-godot`) - Godot node management (ECS-agnostic)
 - UI framework (`dishrupt-godot-ui`) - Generic UI utilities for Godot
+- Reactive widgets (`dishrupt-godot-widgets`) - Signal-reactive wrappers for Godot controls
 - Scene management (`dishrupt-godot-scene`) - Scene stack and transitions
 - Localization (`dishrupt-l10n*`) - i18n with Fluent
 - Persistence trait (`dishrupt-persistence`) - Generic save/load abstraction

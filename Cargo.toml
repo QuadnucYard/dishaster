@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "crates/dishrupt-godot-ui/macros"]
+members = ["crates/*"]
 default-members = ["crates/dishaster-core", "crates/dishaster-godot-ext"]
 
 [workspace.package]
@@ -17,6 +17,8 @@ dishrupt-l10n = { path = "crates/dishrupt-l10n" }
 dishrupt-l10n-godot = { path = "crates/dishrupt-l10n-godot" }
 dishrupt-godot = { path = "crates/dishrupt-godot" }
 dishrupt-godot-ui = { path = "crates/dishrupt-godot-ui" }
+dishrupt-godot-ui-macros = { path = "crates/dishrupt-godot-ui-macros" }
+dishrupt-godot-widgets = { path = "crates/dishrupt-godot-widgets" }
 dishrupt-godot-scene = { path = "crates/dishrupt-godot-scene" }
 
 dishaster-navigation = { path = "crates/dishaster-navigation" }

@@ -1,4 +1,4 @@
-use godot::classes::{Range, Slider};
+use godot::classes::Slider;
 
 use super::{ControlA, prelude::*};
 
@@ -12,7 +12,7 @@ impl SliderA {
     pub fn new(gd: Gd<Slider>) -> Self {
         let on_value_change: Signal<(f32,)> = Signal::new();
         let on_value_change_weak = on_value_change.get_emit_handle();
-        (gd.clone().upcast::<Range>().signals().value_changed()).connect(move |value| {
+        gd.signals().value_changed().connect(move |value| {
             on_value_change_weak.emit(value as f32);
         });
 

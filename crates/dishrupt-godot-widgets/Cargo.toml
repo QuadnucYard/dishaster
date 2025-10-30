@@ -1,14 +1,15 @@
 [package]
-name = "dishrupt-godot-ui"
+name = "dishrupt-godot-widgets"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
-dishrupt-core.workspace = true
+dishrupt-godot-ui-macros.workspace = true
 
 godot.workspace = true
+signals2.workspace = true
 
 [lints]
 # workspace = true
