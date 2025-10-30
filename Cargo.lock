@@ -434,6 +434,7 @@ dependencies = [
  "dishaster-navigation",
  "dishaster-views",
  "dishrupt-core",
+ "dishrupt-ecs",
  "log",
  "ordered-float",
  "rand",
@@ -575,23 +576,30 @@ dependencies = [
 name = "dishrupt-core"
 version = "0.1.0"
 dependencies = [
- "bevy_ecs",
  "bevy_math",
- "derive_more",
  "ecow",
  "rustc-hash",
  "serde",
 ]
 
 [[package]]
-name = "dishrupt-godot"
+name = "dishrupt-ecs"
 version = "0.1.0"
 dependencies = [
  "bevy_ecs",
  "derive_more",
  "dishrupt-core",
+]
+
+[[package]]
+name = "dishrupt-godot"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "dishrupt-core",
  "godot",
  "rustc-hash",
+ "slab",
 ]
 
 [[package]]

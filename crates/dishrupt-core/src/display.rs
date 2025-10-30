@@ -1,7 +1,6 @@
-// use bevy_color::Color;
 use serde::{Deserialize, Serialize};
 
-use crate::{EntityId, asset::PrefabReference, prelude::*, utils::Modified};
+use crate::prelude::*;
 
 // ===
 
@@ -36,71 +35,6 @@ impl DisplayModel {
 }
 
 // ===
-
-#[derive(Component)]
-pub struct CoreId(pub EntityId);
-
-// ===
-
-#[derive(Component)]
-pub struct DisplayState {
-    /// Reference to the prefab resource
-    pub proto: PrefabReference,
-    /// Optional name override for the node.
-    pub name: Option<EcoString>,
-
-    // pub color: Modified<Color>,
-    pub visible: Modified<bool>,
-}
-
-impl Default for DisplayState {
-    fn default() -> Self {
-        Self {
-            proto: PrefabReference::default(),
-            name: None,
-            // color: Color::WHITE.into(),
-            visible: true.into(),
-        }
-    }
-}
-
-// ===
-
-#[derive(Component)]
-pub struct Transform {
-    pub position: Vec3,
-    pub scale: Vec3,
-    /// In radians
-    pub rotation: f32,
-
-    pub parent: Option<Entity>,
-}
-
-impl Default for Transform {
-    fn default() -> Self {
-        Self {
-            position: Vec3::ZERO,
-            scale: Vec3::ONE,
-            rotation: 0.0,
-            parent: None,
-        }
-    }
-}
-
-impl Transform {
-    pub fn snapshot(&self) -> TransformSnapshot {
-        TransformSnapshot {
-            position: self.position,
-            scale: self.scale,
-            rotation: self.rotation,
-            parent: self.parent.map(Into::into),
-        }
-    }
-
-    pub fn detach(&mut self) {
-        self.parent = None;
-    }
-}
 
 #[derive(Debug)]
 pub struct TransformSnapshot {

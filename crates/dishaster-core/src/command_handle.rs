@@ -38,7 +38,7 @@ impl Simulation {
                 dish_entity,
                 pricing,
             } => {
-                if let Some(mut dish) = self.world.get_mut::<Dish>(dish_entity.into()) {
+                if let Some(mut dish) = self.world.get_mut::<Dish>(dish_entity.to_entity()) {
                     dish.pricing = pricing.to_model();
                 }
             }

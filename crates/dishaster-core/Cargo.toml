@@ -7,6 +7,7 @@ edition.workspace = true
 
 [dependencies]
 dishrupt-core.workspace = true
+dishrupt-ecs.workspace = true
 dishaster-models.workspace = true
 dishaster-views.workspace = true
 dishaster-interface.workspace = true

@@ -4,24 +4,57 @@
 
 Dishaster is a canteen dining simulation game built with Rust and Godot Engine. The architecture follows a clean separation of concerns with multiple layers:
 
-1. **Core Simulation Layer** - Engine-agnostic ECS-based simulation
+1. **Core Simulation Layer** - ECS-based simulation (ECS isolated to one crate)
 2. **Interface Layer** - Communication interface between simulation and presentation
 3. **Data Layer** - Asset loading and model registry
 4. **Persistence Layer** - Save/load game progress
 5. **Godot Integration Layer** - Game engine bindings and UI
 6. **Framework Libraries (dishrupt-\*)** - Reusable utilities
 
+### Key Architectural Decisions
+
+- **ECS Isolation**: Only `dishaster-core` depends on `bevy_ecs`. All framework crates (`dishrupt-*`) except `dishrupt-ecs` are ECS-agnostic. This enables:
+
+  - Framework reusability across different ECS implementations
+  - Cleaner dependency boundaries
+  - Easier testing of non-simulation code
+
+- **Model-View Separation**:
+
+  - `dishaster-models` - Simulation state and game logic
+  - `dishaster-views` - Presentation-friendly view models for UI
+  - UI layer (`dishaster-godot-ui`) only depends on `views`, not `models`
+  - Bridge layer (`dishaster-godot-game`) uses both for registry/persistence integration
+
+- **CQRS Pattern**: Interface layer separates:
+  - Commands (write operations)
+  - Queries (read operations)
+  - Events (push notifications)
+  - Responses (query results)
+
 ## Framework Libraries (dishrupt-\*)
 
 ### dishrupt-core
 
-- **Purpose**: Core utilities and abstractions
+- **Purpose**: Core engine-agnostic utilities
 - **Contains**:
-  - `EntityId` - cross-boundary entity reference
+  - `EntityId` - cross-boundary entity reference (ECS-agnostic)
   - Display traits and asset management
   - Model registry system (type-safe data storage)
-  - Bevy ECS utilities and component wrappers
-- **Dependencies**: `bevy_ecs`, `bevy_math`
+  - Math utilities and basic types
+- **Dependencies**: `bevy_math`, `ecow`, `rustc-hash`, `serde`
+- **Note**: No ECS dependencies - purely generic abstractions
+
+### dishrupt-ecs
+
+- **Purpose**: Bevy ECS integration utilities
+- **Contains**:
+  - `CompWrapper<T>` / `ResWrapper<T>` - wrap types as ECS components/resources
+  - `IntoComponent` / `IntoResource` traits
+  - Entity ↔ EntityId conversion traits
+  - ECS display system abstractions
+- **Dependencies**: `dishrupt-core`, `bevy_ecs`
+- **Note**: Only crate in dishrupt-\* family that depends on `bevy_ecs`
 
 ### dishrupt-persistence
 
@@ -45,12 +78,14 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 
 ### dishrupt-godot
 
-- **Purpose**: Godot-Bevy ECS bridge
+- **Purpose**: Godot display and input integration
 - **Contains**:
-  - Display system for syncing ECS transforms to Godot nodes
-  - Asset loading utilities
-  - Input handling
-- **Dependencies**: `dishrupt-core`, godot, `bevy_ecs`
+  - Display system for syncing transforms to Godot nodes
+  - Asset loading utilities (prefabs, textures, sprites)
+  - Input handling (mouse, keyboard events)
+  - Node pooling and factory system
+- **Dependencies**: `dishrupt-core`, godot
+- **Note**: ECS-agnostic - works with any system that provides `EntityId` and display snapshots
 
 ### dishrupt-godot-ui
 
@@ -74,13 +109,26 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 
 ### dishaster-models
 
-- **Purpose**: Core data structures and game models
+- **Purpose**: Core game simulation data structures
 - **Contains**:
   - Diner personality, behavior, and memory models
   - Canteen, dish, table, window configurations
   - Level definitions and randomization parameters
   - Diner pool management (persistent across days)
-- **Dependencies**: `dishrupt-core` (basic types)
+  - Cosmetic appearance data (variants and color transforms)
+- **Dependencies**: `dishrupt-core`
+- **Note**: Pure data - no presentation concerns
+
+### dishaster-views
+
+- **Purpose**: Presentation layer view models
+- **Contains**:
+  - `DishView` - dish display snapshot for UI
+  - `FeedbackView` - agent feedback presentation data
+  - `Appearance` / `BodyPart` - cosmetic appearance for agents
+  - `TrialView` structures - dialog UI data
+- **Dependencies**: `dishrupt-core`
+- **Note**: Structs designed for UI consumption without game logic dependencies
 
 ### dishaster-interface
 
@@ -91,13 +139,14 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - `SimQuery` - read-only queries (Distance, Distances)
   - `SimEvent` - push-style events from simulation (AgentSpawned, DayCompleted, Trial\*)
   - `SimResponse` - query responses (Distance, Distances)
-  - `Snapshot` - complete state snapshot for rendering
-- **Dependencies**: `dishrupt-core`, `dishaster-models`
+  - `Snapshot` - complete state snapshot with display data and view models
+- **Dependencies**: `dishrupt-core`, `dishaster-views`
 - **Architecture**: Separates commands (write), queries (read), events (push), and responses (pull)
+- **Note**: Uses `views` for presentation data, keeping interface layer decoupled from simulation models
 
 ### dishaster-core
 
-- **Purpose**: Main simulation engine (engine-agnostic)
+- **Purpose**: Main simulation engine (ECS-based)
 - **Contains**:
   - Bevy ECS-based simulation loop
   - Diner behavior systems (spawning, decision-making, movement, dining)
@@ -105,7 +154,9 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Pathfinding and navigation integration
   - Trial/conversation system
   - RNG management for deterministic simulation
-- **Dependencies**: `dishrupt-core`, `dishaster-models`, `dishaster-interface`, `dishaster-navigation`
+  - Snapshot generation (converts ECS state to view models)
+- **Dependencies**: `dishrupt-core`, `dishrupt-ecs`, `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-navigation`, `bevy_ecs`
+- **Note**: **Only game crate that depends on `bevy_ecs`** - all others are ECS-agnostic
 
 ### dishaster-navigation
 
@@ -122,10 +173,11 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 - **Purpose**: Asset loading from RON files
 - **Contains**:
   - Data loader for canteens, dishes, levels, tables, etc.
-  - GameModelRegistry builder
+  - `GameModelRegistry` builder
   - Trial corpus loading (questions, responses)
   - Validation and error handling
 - **Dependencies**: `dishrupt-core`, `dishaster-models`
+- **Note**: Bridges file system assets to runtime model registry
 
 ### dishaster-persistence
 
@@ -156,19 +208,21 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Start menu, settlement screen, time stats
   - Dish price editor, trial dialog UI
   - Layout management for in-game HUD
-  - Request types (GameRequest, AppRequest)
-- **Dependencies**: `dishrupt-core`, `dishrupt-godot`, `dishrupt-godot-ui`, `dishrupt-l10n-godot`, `dishaster-models`
+  - Request types (`GameRequest`, `AppRequest`)
+- **Dependencies**: `dishrupt-core`, `dishrupt-godot`, `dishrupt-godot-ui`, `dishrupt-l10n-godot`, `dishaster-views`
+- **Note**: Uses `views` for presentation data - no dependency on `models`
 
 ### dishaster-godot-game
 
 - **Purpose**: Bridge between simulation and Godot presentation
 - **Contains**:
-  - `Game` - manages simulation runner and display
-  - Display controllers for agents and dishes
-  - Event processing and presentation
-  - Performance tracking
-  - Debug visualization overlays
-- **Dependencies**: `dishrupt-*` (godot libs), `dishaster-models`, `dishaster-interface`, `dishaster-persistence`, `dishaster-runner`
+  - `Game` - manages simulation runner and display stage
+  - Display controllers for agents (cosmetics, feedback) and dishes
+  - Event processing and presentation updates
+  - Performance tracking (tick rate, frame times)
+  - Debug visualization overlays (pathfinding, queues, collision grids)
+- **Dependencies**: `dishrupt-*` (godot libs), `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-persistence`, `dishaster-runner`
+- **Note**: Depends on `models` for registry and persistence, but uses `views` for UI presentation
 
 ### dishaster-godot
 
@@ -219,8 +273,12 @@ graph TB
 
     %% Framework - Core
     d-core[dishrupt-core<br/>Core Utils]
+    d-ecs[dishrupt-ecs<br/>ECS Utils]
     d-persist[dishrupt-persistence<br/>Storage Trait]
     d-l10n[dishrupt-l10n<br/>Fluent i18n]
+
+    %% Presentation data
+    views[dishaster-views<br/>View Models]
 
     %% Entry point deps
     godot-ext --> godot
@@ -238,6 +296,7 @@ graph TB
     godot-game --> interface
     godot-game --> runner
     godot-game --> models
+    godot-game --> views
     godot-game --> persist
     godot-game --> d-godot
     godot-game --> d-godot-ui
@@ -246,7 +305,7 @@ graph TB
     godot-game --> d-core
     godot-game --> d-persist
 
-    godot-ui --> models
+    godot-ui --> views
     godot-ui --> d-godot
     godot-ui --> d-godot-ui
     godot-ui --> d-l10n-godot
@@ -254,14 +313,18 @@ graph TB
 
     %% Core simulation deps
     core --> models
+    core --> views
     core --> interface
     core --> nav
     core --> d-core
+    core --> d-ecs
 
-    interface --> models
+    interface --> views
     interface --> d-core
 
     runner --> interface
+
+    views --> d-core
 
     %% Data deps
     data --> models
@@ -279,6 +342,8 @@ graph TB
 
     d-godot --> d-core
 
+    d-ecs --> d-core
+
     d-l10n-godot --> d-l10n
 
     %% Styling
@@ -291,21 +356,27 @@ graph TB
     class godot-ext entry
     class godot,godot-game,godot-ui game
     class core,interface,runner,nav sim
-    class models,data,persist data
-    class d-core,d-godot,d-godot-ui,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
+    class models,views,data,persist data
+    class d-core,d-ecs,d-godot,d-godot-ui,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
 ```
 
 ## Architecture Layers
 
-### **Layer 1: Core Simulation (Engine-Agnostic)**
+### **Layer 1: Core Simulation**
 
-- `dishaster-core` - Main ECS simulation
-- `dishaster-models` - Pure data structures
-- `dishaster-navigation` - Pathfinding algorithms
+- `dishaster-core` - Main ECS simulation (only crate depending on `bevy_ecs`)
+- `dishaster-models` - Pure simulation data structures
+- `dishaster-views` - Presentation view models (UI-friendly snapshots)
+- `dishaster-navigation` - Pathfinding algorithms (engine-agnostic)
 - `dishaster-interface` - Communication interface (CQRS)
-- `dishaster-runner` - Execution strategies (sync/async)
+- `dishaster-runner` - Execution strategies (sync/async, engine-agnostic)
 
-**Philosophy**: Core simulation can run headless, deterministic, and testable without any Godot dependency. The interface layer enforces clear separation between commands (write), queries (read), events (push), and responses (pull). The runner layer provides flexible execution modes for different use cases (testing, production, debugging).
+**Philosophy**:
+
+- **ECS isolation**: Only `dishaster-core` depends on `bevy_ecs`. All other crates are ECS-agnostic.
+- **Model-View separation**: `models` contains simulation state, `views` contains presentation-friendly snapshots
+- **CQRS**: Interface layer enforces clear separation between commands (write), queries (read), events (push), and responses (pull)
+- **Testability**: Core simulation can run headless, deterministic, and testable without any Godot dependency
 
 ### **Layer 2: Data & Persistence**
 
@@ -316,21 +387,28 @@ graph TB
 
 ### **Layer 3: Presentation (Godot Integration)**
 
-- `dishaster-godot-game` - Wraps simulation, handles display updates
-- `dishaster-godot-ui` - Game-specific UI components
+- `dishaster-godot-game` - Wraps simulation, handles display updates, uses `models` for registry/persistence
+- `dishaster-godot-ui` - Game-specific UI components, consumes `views` only
 - `dishaster-godot` - Scene management and app lifecycle
 
-**Philosophy**: Presentation layer consumes snapshots from simulation and sends commands back. One-way data flow.
+**Philosophy**:
+
+- Presentation layer consumes `views` (snapshots) from simulation and sends commands back
+- One-way data flow: UI → Commands → Simulation → Views → UI
+- `godot-ui` is decoupled from `models` (only depends on `views`)
+- `godot-game` needs `models` for registry and persistence integration
 
 ### **Layer 4: Framework (dishrupt-\*)**
 
 Reusable utilities that could be extracted into separate libraries:
 
-- ECS-Display bridge (`dishrupt-godot`)
-- UI framework (`dishrupt-godot-ui`)
-- Scene management (`dishrupt-godot-scene`)
-- Localization (`dishrupt-l10n*`)
-- Persistence trait (`dishrupt-persistence`)
+- Core utilities (`dishrupt-core`) - ECS-agnostic, provides `EntityId`, model registry, display traits
+- ECS integration (`dishrupt-ecs`) - Bevy ECS wrappers and conversions (only framework crate with ECS dependency)
+- Display bridge (`dishrupt-godot`) - Godot node management (ECS-agnostic)
+- UI framework (`dishrupt-godot-ui`) - Generic UI utilities for Godot
+- Scene management (`dishrupt-godot-scene`) - Scene stack and transitions
+- Localization (`dishrupt-l10n*`) - i18n with Fluent
+- Persistence trait (`dishrupt-persistence`) - Generic save/load abstraction
 
 ## Data Flow
 

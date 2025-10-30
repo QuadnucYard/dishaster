@@ -11,6 +11,7 @@ edition = "2024"
 
 [workspace.dependencies]
 dishrupt-core = { path = "crates/dishrupt-core" }
+dishrupt-ecs = { path = "crates/dishrupt-ecs" }
 dishrupt-persistence = { path = "crates/dishrupt-persistence" }
 dishrupt-l10n = { path = "crates/dishrupt-l10n" }
 dishrupt-l10n-godot = { path = "crates/dishrupt-l10n-godot" }
@@ -38,7 +39,7 @@ godot = "0.4.1"
 
 anyhow = "1.0"
 as-any = "0.3"
-derive_more = "2"
+derive_more = { version = "2", features = ["deref", "deref_mut"] }
 dodgy = "0.3"
 ecow = { version = "0.2", features = ["serde"] }
 edt = "0.2"
@@ -57,6 +58,7 @@ ron = "0.11"
 rustc-hash = "2"
 serde = { version = "1.0", features = ["derive"] }
 signals2 = "0.3"
+slab = "0.4"
 thiserror = "2.0"
 tempfile = "3.10"
 toml = "0.9"

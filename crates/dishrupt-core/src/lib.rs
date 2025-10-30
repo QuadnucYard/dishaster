@@ -1,6 +1,5 @@
 pub mod asset;
 pub mod display;
-mod ecs;
 mod ext;
 pub mod model_registry;
 pub mod prelude;
@@ -8,7 +7,6 @@ pub mod utils;
 
 use std::num::NonZeroU64;
 
-use bevy_ecs::entity::Entity;
 pub use model_registry::ModelId;
 
 /// Reference to an entity in the core ECS world
@@ -16,20 +14,13 @@ pub use model_registry::ModelId;
 pub struct EntityId(NonZeroU64);
 
 impl EntityId {
+    /// Create a new EntityId from a raw integer ID
+    pub fn new(id: u64) -> Option<Self> {
+        NonZeroU64::new(id).map(EntityId)
+    }
+
     /// Get the underlying raw integer ID
     pub fn to_bits(self) -> u64 {
         self.0.get()
-    }
-}
-
-impl From<Entity> for EntityId {
-    fn from(entity: Entity) -> Self {
-        EntityId(NonZeroU64::new(entity.to_bits()).expect("Entity should never be zero"))
-    }
-}
-
-impl From<EntityId> for Entity {
-    fn from(value: EntityId) -> Self {
-        Entity::from_bits(value.0.get())
     }
 }

@@ -1,6 +1,6 @@
 //! Simulation state snapshots for rendering and debugging.
 
-use dishrupt_core::{EntityId, display::DisplaySnapshot, prelude::*};
+use dishrupt_core::prelude::*;
 
 use crate::Tick;
 

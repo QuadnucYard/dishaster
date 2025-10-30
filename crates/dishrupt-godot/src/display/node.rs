@@ -1,5 +1,5 @@
-use derive_more::*;
-use dishrupt_core::{EntityId, display::DisplaySnapshot, prelude::*};
+use derive_more::{Deref, DerefMut};
+use dishrupt_core::prelude::*;
 use godot::prelude::*;
 
 use super::context::DisplayContext2D;
@@ -23,7 +23,6 @@ unsafe impl Send for GdNode2D {}
 unsafe impl Sync for GdNode2D {}
 
 /// Pooled handler of Godot Node2D
-#[derive(Component)]
 pub struct GodotDisplayNode2D {
     pub bind: Option<EntityId>,
 

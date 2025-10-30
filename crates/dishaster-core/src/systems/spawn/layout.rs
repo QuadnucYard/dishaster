@@ -2,10 +2,6 @@
 
 use dishaster_navigation::BoxCollider;
 use dishaster_views::DishView;
-use dishrupt_core::{
-    asset::PrefabReference,
-    display::{DisplayState, Transform},
-};
 
 use crate::systems::prelude::*;
 
@@ -85,7 +81,6 @@ fn spawn_windows(
                 DisplayState {
                     proto: service_template.display.res.clone(),
                     name: Some(eco_format!("Window_{}", i)),
-                    ..Default::default()
                 },
                 Transform {
                     position: window_location.center().extend(0.0), // align by top-center
@@ -204,7 +199,6 @@ fn spawn_dish_presentations(
             DisplayState {
                 proto: PrefabReference::new(PRICE_LABEL_PREFAB),
                 name: Some("Price".into()), // required for referencing in scripts
-                ..Default::default()
             },
             Transform {
                 position: PRICE_LABEL_OFFSET,
@@ -215,7 +209,7 @@ fn spawn_dish_presentations(
         ));
 
         events.push(SimEvent::DishSpawned(DishView {
-            entity: wrapper_entity.into(),
+            entity: wrapper_entity.to_entity_id(),
             dish_id: active.assignment.dish_id.clone(),
             pricing: active.assignment.pricing.method.to_view(),
         }));

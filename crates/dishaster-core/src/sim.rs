@@ -4,7 +4,6 @@ use std::sync::Arc;
 
 use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
-use dishrupt_core::{EntityId, display::*};
 
 use crate::{components::*, models::*, prelude::*, resources::*, systems::*};
 
@@ -130,14 +129,14 @@ impl Simulation {
              query: Query<&DinerAppearance>,
              mut events: ResMut<EventQueue>| {
                 events.push(SimEvent::AgentSpawned {
-                    entity: event.entity.into(),
+                    entity: event.entity.to_entity_id(),
                     appearance: query.get(event.entity).ok().map(|a| a.to_view()),
                 });
             },
         );
         self.world.add_observer(
             |event: On<Remove, AgentTag>, mut events: ResMut<EventQueue>| {
-                events.push(SimEvent::AgentDespawned(event.entity.into()));
+                events.push(SimEvent::AgentDespawned(event.entity.to_entity_id()));
             },
         );
 
@@ -181,7 +180,7 @@ impl ISimulation for Simulation {
         let display = query
             .iter_mut(&mut self.world)
             .map(|(e, d, t)| DisplaySnapshot {
-                core_id: e.into(),
+                core_id: e.to_entity_id(),
                 proto: d.proto.clone(),
                 name: d.name.clone(),
                 transform: t.snapshot(),
@@ -209,7 +208,7 @@ impl ISimulation for Simulation {
     }
 
     fn root_entity(&self) -> EntityId {
-        self.world.resource::<DisplayRoot>().0.into()
+        self.world.resource::<DisplayRoot>().0.to_entity_id()
     }
 
     fn command(&mut self, command: SimCommand) {

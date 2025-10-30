@@ -142,7 +142,7 @@ fn handle_observe_goal(
 
         if rng.random_bool(0.01) {
             events.emit_feedback(FeedbackView {
-                entity: entity.into(),
+                entity: entity.to_entity_id(),
                 content: Feedback::Thought(choose_feedback(&mut rng, OBSERVING_FEEDBACKS).into()),
                 timestamp: time.current_time,
             })
@@ -230,7 +230,7 @@ fn handle_decide_window_goal(
         // Give feedback
         if rng.random_bool(0.5) {
             events.emit_feedback(FeedbackView {
-                entity: entity.into(),
+                entity: entity.to_entity_id(),
                 content: Feedback::Thought(choose_feedback(&mut rng, DECIDING_FEEDBACKS).into()),
                 timestamp: time.current_time,
             });

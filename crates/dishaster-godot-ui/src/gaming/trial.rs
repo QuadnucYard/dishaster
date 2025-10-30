@@ -2,7 +2,7 @@ use dishaster_views::{
     TrialIntro, TrialParticipantAppearance, TrialResponseKind, TrialResponseOption, TrialSpeech,
     TrialSpeechItem, TrialStatement,
 };
-use dishrupt_core::prelude::EcoString;
+use dishrupt_core::prelude::*;
 use godot::{classes::AnimationPlayer, prelude::*};
 
 use crate::{prelude::*, req::GameRequest};

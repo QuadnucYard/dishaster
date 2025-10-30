@@ -1,8 +1,3 @@
-use dishrupt_core::{
-    asset::PrefabReference,
-    display::{DisplayState, Transform},
-};
-
 use crate::systems::prelude::*;
 
 /// System that spawns all serving staff at level start, associated with their respective windows
@@ -67,7 +62,6 @@ pub fn spawn_serving_staffs(
                 DisplayState {
                     proto: PrefabReference::new("feedback_balloon"),
                     name: Some("Feedback".into()),
-                    ..Default::default()
                 },
                 Transform {
                     position: vec3(0.0, 0.0, 1.8),

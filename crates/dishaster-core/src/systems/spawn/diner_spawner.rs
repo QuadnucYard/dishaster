@@ -1,10 +1,6 @@
 use std::sync::LazyLock;
 
 use dishaster_models::*;
-use dishrupt_core::{
-    asset::PrefabReference,
-    display::{DisplayState, Transform},
-};
 
 use super::super::prelude::*;
 
@@ -100,7 +96,6 @@ fn spawn_scheduled_diner(
         DisplayState {
             proto: display_res,
             name: Some("Body".into()),
-            ..Default::default()
         },
         Transform {
             position: Vec3::ZERO,
@@ -119,7 +114,6 @@ fn spawn_scheduled_diner(
         DisplayState {
             proto: FEEDBACK_PROTO.clone(),
             name: Some("Feedback".into()),
-            ..Default::default()
         },
         Transform {
             position: vec3(0.0, 0.0, 1.7),
@@ -133,7 +127,6 @@ fn spawn_scheduled_diner(
         DisplayState {
             proto: DEBUG_PROTO.clone(),
             name: Some("Debug".into()),
-            ..Default::default()
         },
         Transform {
             position: vec3(0.0, 0.0, 1.8),

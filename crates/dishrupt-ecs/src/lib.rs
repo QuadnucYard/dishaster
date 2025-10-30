@@ -1,8 +1,11 @@
 //! Bevy ECS utilities.
 
-use derive_more::derive::{Deref, DerefMut};
+pub mod display;
+pub mod prelude;
 
-use crate::prelude::*;
+use derive_more::derive::{Deref, DerefMut};
+use dishrupt_core::EntityId;
+use prelude::*;
 
 /// Turn a type into a Bevy component
 #[derive(Component, Default, Deref, DerefMut)]
@@ -49,3 +52,29 @@ pub trait IntoResource {
 }
 
 impl<T> IntoResource for T {}
+
+// === Entity ↔ EntityId conversions ===
+
+/// Extension trait to convert ECS Entity to EntityId
+pub trait ToEntityId {
+    /// Convert to EntityId
+    fn to_entity_id(self) -> EntityId;
+}
+
+impl ToEntityId for Entity {
+    fn to_entity_id(self) -> EntityId {
+        EntityId::new(self.to_bits()).expect("Entity should never be zero")
+    }
+}
+
+/// Extension trait to convert EntityId to ECS Entity
+pub trait ToEntity {
+    /// Convert to Entity
+    fn to_entity(self) -> Entity;
+}
+
+impl ToEntity for EntityId {
+    fn to_entity(self) -> Entity {
+        Entity::from_bits(self.to_bits())
+    }
+}

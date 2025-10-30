@@ -1,18 +1,21 @@
 use std::cell::OnceCell;
 
-use dishrupt_core::{EntityId, display::*, prelude::*};
+use dishrupt_core::prelude::*;
 use rustc_hash::{FxHashMap, FxHashSet};
+use slab::Slab;
 
 use super::{DisplayFactory, GodotDisplayNode2D, context::DisplayContext2D};
 use crate::display::node::{GdNode2D, update_godot_display_node2d};
+
+type NodeHandle = usize;
 
 pub struct Stage {
     factory: DisplayFactory,
 
     display_ctx: DisplayContext2D,
-    display_world: World,
+    display_world: Slab<GodotDisplayNode2D>,
     /// Map from display entity to Godot node
-    core_to_view: FxHashMap<EntityId, Entity>,
+    core_to_view: FxHashMap<EntityId, NodeHandle>,
     // persistent_nodes: FxHashMap<EntityId, GdNode2D>,
     display_root: OnceCell<EntityId>,
 
@@ -39,8 +42,7 @@ impl Stage {
         godot::global::godot_print!("Stage display root mounted at {}", gd_node.get_path());
         let root_entity = self
             .display_world
-            .spawn(GodotDisplayNode2D::new_bind(gd_node, display_id))
-            .id();
+            .insert(GodotDisplayNode2D::new_bind(gd_node, display_id));
         self.display_root
             .set(display_id)
             .expect("set display root node");
@@ -51,7 +53,7 @@ impl Stage {
 
     pub fn get_godot_node(&self, entity: EntityId) -> Option<&GdNode2D> {
         let e = *self.core_to_view.get(&entity)?;
-        let gd_node = self.display_world.get::<GodotDisplayNode2D>(e)?;
+        let gd_node = self.display_world.get(e)?;
         Some(&gd_node.node)
     }
 
@@ -62,9 +64,9 @@ impl Stage {
         self.factory.tidy((elapsed_time * 60.0) as u32);
     }
 
-    pub fn present_direct(&mut self, display: &DisplaySnapshot, gd_node: GdNode2D) -> Entity {
+    pub fn present_direct(&mut self, display: &DisplaySnapshot, gd_node: GdNode2D) -> NodeHandle {
         let node = GodotDisplayNode2D::new_bind(gd_node, display.core_id);
-        let e = self.display_world.spawn(node).id();
+        let e = self.display_world.insert(node);
         self.core_to_view.insert(display.core_id, e);
         // no update performed
         e
@@ -85,9 +87,8 @@ impl Stage {
 
             if let Some(e) = self.core_to_view.get(&display.core_id) {
                 // update existing node
-                let mut entity_ref = self.display_world.entity_mut(*e);
-                let mut node = entity_ref.get_mut::<GodotDisplayNode2D>().unwrap();
-                update_godot_display_node2d(&mut node, display, ctx);
+                let node = self.display_world.get_mut(*e).unwrap();
+                update_godot_display_node2d(node, display, ctx);
             } else {
                 // create new node
                 let mut gd_node = self.factory.create(&display.proto);
@@ -96,7 +97,7 @@ impl Stage {
                 }
                 let mut node = GodotDisplayNode2D::new_bind(gd_node, display.core_id);
                 update_godot_display_node2d(&mut node, display, ctx);
-                let e = self.display_world.spawn(node).id();
+                let e = self.display_world.insert(node);
                 self.core_to_view.insert(display.core_id, e);
 
                 // currently do not support reparenting.
@@ -105,24 +106,20 @@ impl Stage {
         }
 
         // Remove invalid nodes
-        self.core_to_view.retain(|core_id, e| {
+        self.core_to_view.retain(|core_id, &mut e| {
             if seen.contains(core_id) {
                 return true;
             }
-            if let Some(mut node) = self
-                .display_world
-                .entity_mut(*e)
-                .get_mut::<GodotDisplayNode2D>()
-            {
+            if let Some(node) = self.display_world.get_mut(e) {
                 node.destroy();
             }
-            self.display_world.despawn(*e);
+            self.display_world.remove(e);
             false
         });
 
         // process parent-setting
         for (child, parent) in reparents {
-            let (Some(child_entity), Some(parent_entity)) = (
+            let (Some(&child_entity), Some(&parent_entity)) = (
                 self.core_to_view.get(&child),
                 self.core_to_view.get(&parent),
             ) else {
@@ -131,13 +128,13 @@ impl Stage {
 
             let mut child_node = self
                 .display_world
-                .get_mut::<GodotDisplayNode2D>(*child_entity)
+                .get_mut(child_entity)
                 .unwrap()
                 .node
                 .clone();
             let mut parent_node = self
                 .display_world
-                .get_mut::<GodotDisplayNode2D>(*parent_entity)
+                .get_mut(parent_entity)
                 .unwrap()
                 .node
                 .clone();

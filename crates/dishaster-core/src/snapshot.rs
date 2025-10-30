@@ -25,7 +25,7 @@ impl Simulation {
             movement_query
                 .iter(&self.world)
                 .map(|(entity, movement)| MovementDebugSnapshot {
-                    core_id: entity.into(),
+                    core_id: entity.to_entity_id(),
                     position: movement.pos,
                     velocity: movement.velocity,
                     path: movement.path.waypoints.clone(),
@@ -46,7 +46,7 @@ impl Simulation {
                 .entry(intent.lane)
                 .or_default()
                 .push(QueueIntentDebugSnapshot {
-                    core_id: entity.into(),
+                    core_id: entity.to_entity_id(),
                     position: movement.pos,
                 });
         }
@@ -63,13 +63,13 @@ impl Simulation {
                         continue;
                     };
                     member_snapshots.push(QueueMemberDebugSnapshot {
-                        core_id: member_entity.into(),
+                        core_id: member_entity.to_entity_id(),
                         position: movement.pos,
                     });
                 }
 
                 QueueLaneDebugSnapshot {
-                    lane_id: lane_entity.into(),
+                    lane_id: lane_entity.to_entity_id(),
                     anchor: lane.anchor,
                     direction: lane.direction,
                     rear_pos: members.rear_pos,
@@ -141,7 +141,7 @@ impl Simulation {
             diner_query
                 .iter(&self.world)
                 .map(|(entity, goals)| DinerDebugSnapshot {
-                    core_id: entity.into(),
+                    core_id: entity.to_entity_id(),
                     goal_str: eco_format!("{:?}", goals.current()),
                 })
                 .collect(),

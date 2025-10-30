@@ -63,7 +63,7 @@ impl<T: Clone> Copy for ModelHandle<T> {}
 /// Provides string-based lookup and type-safe handle-based access to
 /// model definitions. Supports both unique naming and efficient runtime
 /// access patterns required for simulation performance.
-#[derive(Resource, Debug)]
+#[derive(Debug)]
 pub struct ModelRegistry<T> {
     /// Dense array of model instances for efficient iteration and access
     models: Vec<T>,

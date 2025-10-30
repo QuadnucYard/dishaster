@@ -2,7 +2,7 @@
 
 mod trial;
 
-use dishrupt_core::{EntityId, ModelId, asset::SpriteVariant, display::ColorTransform, prelude::*};
+use dishrupt_core::prelude::*;
 pub use trial::*;
 
 /// Snapshot of a dish display instance for presentation systems.

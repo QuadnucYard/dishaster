@@ -1,5 +1,5 @@
 [package]
-name = "dishrupt-godot"
+name = "dishrupt-ecs"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
@@ -8,13 +8,8 @@ edition.workspace = true
 [dependencies]
 dishrupt-core.workspace = true
 
+bevy_ecs.workspace = true
 derive_more.workspace = true
-godot.workspace = true
-rustc-hash.workspace = true
-slab.workspace = true
 
 [lints]
-# workspace = true
-
-[package.metadata.cargo-machete]
-ignored = ["bevy_ecs"] # For `Component` derive
+workspace = true

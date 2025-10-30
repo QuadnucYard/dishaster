@@ -15,7 +15,7 @@ use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelConfig};
 use dishaster_persistence::ProgressService;
 use dishaster_runner::{SimulationRunner, SnapshotFrame, SyncSimulationRunner};
-use dishrupt_core::{EntityId, prelude::*};
+use dishrupt_core::prelude::*;
 use dishrupt_godot::display::*;
 use dishrupt_godot_scene::SceneContext;
 use dishrupt_l10n::tr;

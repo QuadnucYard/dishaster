@@ -25,7 +25,8 @@ pub mod views {
 
 mod prelude {
     pub use derive_more::derive::{Deref, DerefMut};
-    pub use dishrupt_core::{model_registry::*, prelude::*};
+    pub use dishrupt_core::prelude::*;
+    pub use dishrupt_ecs::prelude::*;
     pub use rand::prelude::*;
 
     pub use crate::{Tick, adapter::*, rng::*};
