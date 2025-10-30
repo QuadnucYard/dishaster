@@ -7,6 +7,8 @@ pub struct TimeStatsGui {
     pub perf_label: LabelA,
     #[child("%TimeLabel")]
     pub time_label: LabelA,
+    #[child("%DinerStatsLabel")]
+    pub diner_stats_label: LabelA,
     #[child("%TpsSlider")]
     pub tps_slider: SliderA,
     #[child("%TpsValueLabel")]
@@ -31,6 +33,12 @@ impl TimeStatsGui {
         let text = format!("FPS: {fps:>5.1}  UPS: {ups:>5.1}");
 
         self.perf_label.set_text(&text);
+    }
+
+    pub fn update_diner_stats(&mut self, current_diners: usize, total_visits: usize) {
+        let text = format!("Diners: {current_diners} / {total_visits}");
+
+        self.diner_stats_label.set_text(&text);
     }
 
     /// Update the displayed ticks-per-second value and keep the slider in sync.

@@ -19,7 +19,7 @@ pub struct TrialStatement {
 }
 
 /// A single speech made by a trial participant.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TrialSpeech {
     /// The text of the statement.
     pub text: EcoString,
@@ -52,7 +52,7 @@ pub struct TrialResponseOption {
 }
 
 /// A possible response during a trial.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TrialResponse {
     /// The kind of trial response.
     pub kind: TrialResponseKind,
@@ -73,7 +73,7 @@ pub enum TrialResponseKind {
 }
 
 /// The appearance of a trial participant.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TrialParticipantAppearance {
     /// The emoji of the statement.
     pub emotion: char,

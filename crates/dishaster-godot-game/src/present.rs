@@ -24,8 +24,8 @@ impl Game {
                             .expect("missing godot node for agent"),
                     );
                     controller.set_debug_enabled(self.debug_enabled);
-                    if let Some(appearance) = appearance {
-                        controller.set_appearance(&appearance);
+                    if let Some(appearance) = &appearance {
+                        controller.set_appearance(appearance);
                     }
                     self.dc.agents.insert(entity, controller);
                 }

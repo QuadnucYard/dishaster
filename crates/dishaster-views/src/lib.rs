@@ -6,7 +6,7 @@ use dishrupt_core::prelude::*;
 pub use trial::*;
 
 /// Snapshot of a dish display instance for presentation systems.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct DishView {
     /// Display entity backing this dish presentation.
     pub entity: EntityId,
@@ -26,7 +26,7 @@ pub enum PricingMethod {
 }
 
 /// Feedback emitted by core simulation systems for client presentation.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct FeedbackView {
     /// Entity currently expressing the feedback.
     pub entity: EntityId,
@@ -46,7 +46,7 @@ pub enum Feedback {
 }
 
 /// Complete appearance configuration for an agent
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Appearance {
     /// Head/face sprite variant and color
     pub head: BodyPart,
@@ -61,7 +61,7 @@ pub struct Appearance {
 }
 
 /// A single body part with its sprite variant and color transformation
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct BodyPart {
     /// Sprite variant index
     pub variant: SpriteVariant,

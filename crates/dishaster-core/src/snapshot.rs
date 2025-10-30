@@ -2,9 +2,36 @@ use dishaster_interface::snapshots::*;
 use dishaster_navigation::NavigationGrid;
 use rustc_hash::FxHashMap;
 
-use crate::{components::*, prelude::*, sim::Simulation};
+use crate::{components::*, prelude::*, resources::*, sim::Simulation};
 
 impl Simulation {
+    pub(crate) fn snapshot_stats(&mut self) -> DayStats {
+        let time = self.world.resource::<Time>();
+        let day_status = self.world.resource::<DayStatus>();
+
+        DayStats {
+            time_seconds: time.current_time,
+            tick: time.total_ticks,
+            live_diners: day_status.live_diner_count,
+            total_visits: day_status.total_visits,
+        }
+    }
+
+    pub(crate) fn snapshot_display(&mut self) -> Vec<DisplaySnapshot> {
+        let mut query = self
+            .world
+            .query::<(Entity, &DisplayState, &mut Transform)>();
+        query
+            .iter_mut(&mut self.world)
+            .map(|(e, d, t)| DisplaySnapshot {
+                core_id: e.to_entity_id(),
+                proto: d.proto.clone(),
+                name: d.name.clone(),
+                transform: t.snapshot(),
+            })
+            .collect()
+    }
+
     pub(crate) fn snapshot_debug(&mut self) -> DebugSnapshots {
         DebugSnapshots {
             movement: self.snapshot_movement(),

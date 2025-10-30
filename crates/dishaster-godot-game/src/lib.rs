@@ -53,6 +53,10 @@ struct DayTelemetry {
     day: u32,
     tick: u32,
     seconds: f64,
+    /// Current number of live diners in the canteen
+    live_diners: usize,
+    /// Total number of diners that have visited this day
+    total_visits: usize,
 }
 
 pub struct Game {
@@ -116,8 +120,7 @@ impl Game {
         let telemetry = DayTelemetry {
             seed: level.seed,
             day: level.day,
-            tick: 0,
-            seconds: 0.0,
+            ..Default::default()
         };
 
         // Initialize simulation
@@ -168,8 +171,10 @@ impl Game {
             self.process_events(ctx, events);
             self.process_query_responses(ctx, responses);
 
-            self.telemetry.tick = snapshot.sim_tick;
-            self.telemetry.seconds = snapshot.sim_time_seconds;
+            self.telemetry.tick = snapshot.stats.tick;
+            self.telemetry.seconds = snapshot.stats.time_seconds;
+            self.telemetry.live_diners = snapshot.stats.live_diners;
+            self.telemetry.total_visits = snapshot.stats.total_visits;
         }
 
         self.process_display(delta);
@@ -261,6 +266,7 @@ impl Game {
             let stats = ctx.gui.get_mut::<TimeStatsGui>();
             stats.update_time(self.telemetry.tick, self.telemetry.seconds);
             stats.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
+            stats.update_diner_stats(self.telemetry.live_diners, self.telemetry.total_visits);
         }
     }
 }

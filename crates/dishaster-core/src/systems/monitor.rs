@@ -13,11 +13,11 @@ pub fn check_day_completion(
     }
 
     // Update current diner count
-    day_status.current_diner_count = diner_query.iter().count();
+    day_status.live_diner_count = diner_query.iter().count();
 
     // Check if day is complete: no active diners and no more scheduled arrivals
     let spawning_finished = !schedule.has_pending_spawns();
-    day_status.completed = day_status.current_diner_count == 0 && spawning_finished;
+    day_status.completed = day_status.live_diner_count == 0 && spawning_finished;
     if day_status.completed {
         events.push(SimEvent::DayCompleted);
         day_status.completion_emitted = true;

@@ -6,14 +6,25 @@ use crate::Tick;
 
 /// Simulation state snapshot for rendering
 pub struct Snapshot {
-    /// Simulation timestamp in seconds.
-    pub sim_time_seconds: f64,
-    /// Total simulation ticks since start.
-    pub sim_tick: Tick,
+    /// Statistics and metrics for the current simulation state.
+    pub stats: DayStats,
     /// Display graph data for rendering the current frame.
     pub display: Vec<DisplaySnapshot>,
     /// Debug visualization snapshots.
     pub debug: DebugSnapshots,
+}
+
+/// Statistics and metrics for the current simulation state.
+pub struct DayStats {
+    /// Simulation timestamp in seconds.
+    pub time_seconds: f64,
+    /// Total simulation ticks since start.
+    pub tick: Tick,
+
+    /// Current number of live diners in the simulation.
+    pub live_diners: usize,
+    /// Total diner visits since start of day.
+    pub total_visits: usize,
 }
 
 /// Feature gates controlling which debug payloads are exported.

@@ -48,7 +48,9 @@ pub struct Canteen {
 #[derive(Resource, Default)]
 pub struct DayStatus {
     /// Number of diners currently active in the canteen
-    pub current_diner_count: usize,
+    pub live_diner_count: usize,
+    /// Total number of diner visits since the start of the day
+    pub total_visits: usize,
     /// Whether the spawning period has begun for the current day
     pub started: bool,
     /// Whether the current day has reached completion criteria

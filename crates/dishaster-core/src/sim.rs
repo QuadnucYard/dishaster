@@ -128,12 +128,20 @@ impl Simulation {
             |event: On<Add, AgentTag>,
              query: Query<&DinerAppearance>,
              mut events: ResMut<EventQueue>| {
+                let appearance = query.get(event.entity).ok().map(|a| a.to_view());
+
                 events.push(SimEvent::AgentSpawned {
                     entity: event.entity.to_entity_id(),
-                    appearance: query.get(event.entity).ok().map(|a| a.to_view()),
+                    appearance,
                 });
             },
         );
+        self.world.add_observer(
+            |_event: On<Add, Diner>, mut day_status: ResMut<DayStatus>| {
+                day_status.total_visits += 1; // Increment total visits on diner spawn
+            },
+        );
+
         self.world.add_observer(
             |event: On<Remove, AgentTag>, mut events: ResMut<EventQueue>| {
                 events.push(SimEvent::AgentDespawned(event.entity.to_entity_id()));
@@ -174,26 +182,12 @@ impl ISimulation for Simulation {
     /// This function is expected to be idempotent: multiple calls between ticks
     /// should yield identical results.
     fn snapshot(&mut self) -> Snapshot {
-        let mut query = self
-            .world
-            .query::<(Entity, &DisplayState, &mut Transform)>();
-        let display = query
-            .iter_mut(&mut self.world)
-            .map(|(e, d, t)| DisplaySnapshot {
-                core_id: e.to_entity_id(),
-                proto: d.proto.clone(),
-                name: d.name.clone(),
-                transform: t.snapshot(),
-            })
-            .collect();
-
+        let stats = self.snapshot_stats();
+        let display = self.snapshot_display();
         let debug = self.snapshot_debug();
 
-        let time = self.world.resource::<Time>();
-
         Snapshot {
-            sim_time_seconds: time.current_time,
-            sim_tick: time.total_ticks,
+            stats,
             display,
             debug,
         }
@@ -239,6 +233,6 @@ impl Simulation {
             self.world.resource::<DayStatus>(),
             self.world.resource::<DailyDinerSchedule>(),
         );
-        day_status.current_diner_count == 0 && !schedule.has_pending_spawns()
+        day_status.live_diner_count == 0 && !schedule.has_pending_spawns()
     }
 }
