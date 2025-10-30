@@ -5,6 +5,25 @@ mod trial;
 use dishrupt_core::prelude::*;
 pub use trial::*;
 
+/// Describes the information to display in the in-game day loop overlay during
+/// active play (preparation or service phases).
+pub struct DayHudState {
+    /// Textual label showing which day is active.
+    pub day_label: String,
+    /// Description of the current phase (preparation or running).
+    pub phase_label: String,
+    /// Rich-text friendly body summarizing guidance or results.
+    pub details: String,
+    /// Whether the start/resume button should be shown.
+    pub show_start: bool,
+    /// Whether the start button is interactable.
+    pub enable_start: bool,
+    /// Whether the developer end-day button should be visible.
+    pub show_dev: bool,
+    /// Whether the developer end-day button is interactable.
+    pub enable_dev: bool,
+}
+
 /// Snapshot of a dish display instance for presentation systems.
 #[derive(Debug)]
 pub struct DishView {
@@ -23,6 +42,19 @@ pub enum PricingMethod {
     PerPortion(f32),
     /// Price calculated by weight (per kg)
     ByWeight(f32),
+}
+
+/// Captures the information needed to populate the dish price editor popup.
+#[derive(Clone)]
+pub struct DishPriceView {
+    /// Entity ID of the dish being edited.
+    pub entity: EntityId,
+    /// Name of the dish.
+    pub dish_name: String,
+    /// Original pricing method before editing.
+    pub original_price: PricingMethod,
+    /// Current pricing method being edited.
+    pub current_price: PricingMethod,
 }
 
 /// Feedback emitted by core simulation systems for client presentation.

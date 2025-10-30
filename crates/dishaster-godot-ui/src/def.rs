@@ -20,7 +20,7 @@ macro_rules! register_gui {
 pub fn register_guis(registry: &mut GuiRegistry) {
     // NOTE: the following are registered by declaration order.
     register_gui!(registry,
-        StartMenuUI => "start/start_menu",
+        StartMenuGui => "start/start_menu",
         GamingLayout => "gaming/layout",
         DishPricePopup => "gaming/price_editor",
         SettlementGui => "gaming/settlement",

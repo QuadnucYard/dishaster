@@ -6,6 +6,7 @@ rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
+as-any.workspace = true
 bevy_math.workspace = true
 ecow.workspace = true
 rustc-hash.workspace = true

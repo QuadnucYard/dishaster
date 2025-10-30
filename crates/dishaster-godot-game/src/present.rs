@@ -1,7 +1,5 @@
-use dishaster_godot_ui::TrialGui;
 use dishaster_interface::{snapshots::DebugSnapshots, *};
-use dishrupt_godot_scene::SceneContext;
-use dishrupt_godot_ui::UITree;
+use dishaster_ui_protocol::UiCommand;
 use godot::global::godot_print;
 
 use super::{Game, ctrl::*};
@@ -9,11 +7,11 @@ use super::{Game, ctrl::*};
 const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
 
 impl Game {
-    pub(crate) fn process_events(&mut self, ctx: &mut SceneContext, events: Vec<SimEvent>) {
+    pub(crate) fn process_events(&mut self, events: Vec<SimEvent>) {
         for event in events {
             match event {
                 SimEvent::DayCompleted => {
-                    self.finish_day(ctx, false);
+                    self.finish_day(false);
                 }
                 SimEvent::AgentSpawned { entity, appearance } => {
                     let mut controller = AgentController::new(
@@ -57,33 +55,27 @@ impl Game {
                     self.suspended_sim_speed = Some(self.sim_runner.tps());
                     self.sim_runner.set_tps(TRIAL_FIXED_SIM_TPS);
 
-                    // Show trial GUI
-                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                    trial_gui.intro(intro);
-                    trial_gui.show();
+                    self.ui_commands.push(UiCommand::TrialIntro(intro));
                 }
                 SimEvent::TrialLeftSpeak(statement) => {
                     godot_print!("Received trial speech (left): {:?}", statement);
 
-                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                    trial_gui.left_speak(statement);
+                    self.ui_commands.push(UiCommand::TrialLeftSpeak(statement));
                 }
                 SimEvent::TrialRightSpeak(speech) => {
                     godot_print!("Received trial speech (right): {:?}", speech);
 
-                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                    trial_gui.right_speak(speech);
+                    self.ui_commands.push(UiCommand::TrialRightSpeak(speech));
                 }
                 SimEvent::TrialEnd => {
                     godot_print!("Received trial end");
-
-                    let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                    trial_gui.hide();
 
                     // Restore simulation speed
                     if let Some(speed) = self.suspended_sim_speed.take() {
                         self.sim_runner.set_tps(speed);
                     }
+
+                    self.ui_commands.push(UiCommand::TrialEnd);
                 }
             }
         }
@@ -105,11 +97,7 @@ impl Game {
         }
     }
 
-    pub(crate) fn process_query_responses(
-        &mut self,
-        _ctx: &mut SceneContext,
-        responses: Vec<SimResponse>,
-    ) {
+    pub(crate) fn process_query_responses(&mut self, responses: Vec<SimResponse>) {
         for response in responses {
             match response {
                 SimResponse::Distance(resp) => {

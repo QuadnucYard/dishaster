@@ -5,7 +5,7 @@ use dishaster_views::{
 use dishrupt_core::prelude::*;
 use godot::{classes::AnimationPlayer, prelude::*};
 
-use crate::{prelude::*, req::GameRequest};
+use crate::prelude::*;
 
 const INTRO_TIME: f32 = 2.0;
 const COUNTDOWN_TIME: f32 = 3.0;

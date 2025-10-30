@@ -9,15 +9,13 @@ edition.workspace = true
 dishrupt-core.workspace = true
 dishrupt-persistence.workspace = true
 dishrupt-godot.workspace = true
-dishrupt-godot-ui.workspace = true
-dishrupt-godot-scene.workspace = true
 dishrupt-l10n.workspace = true
 dishaster-models.workspace = true
 dishaster-views.workspace = true
 dishaster-interface.workspace = true
 dishaster-persistence.workspace = true
 dishaster-runner.workspace = true
-dishaster-godot-ui.workspace = true
+dishaster-ui-protocol.workspace = true
 
 anyhow.workspace = true
 rustc-hash.workspace = true

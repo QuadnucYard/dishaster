@@ -1,9 +1,12 @@
 use as_any::Downcast;
 use dishaster_core::{models::LevelConfig, sim::Simulation};
 use dishaster_godot_game::Game;
-use dishaster_godot_ui::{req::*, *};
+use dishaster_godot_ui::*;
+use dishaster_interface::SimCommand;
+use dishaster_ui_protocol::{AppRequest, GameRequest, UiCommand};
 use dishrupt_godot::{bind::BindGodot, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::*;
+use dishrupt_godot_ui::UITree;
 use godot::{classes::Node, prelude::*};
 
 use crate::scenes::proc::*;
@@ -47,7 +50,7 @@ impl Scene for GameScene {
 
     fn process(&mut self, ctx: &mut SceneContext, delta: f64) {
         if let Some(game) = self.game.as_mut() {
-            game.process(delta, ctx);
+            game.process(delta);
         };
 
         ctx.gui_cmds.run_cmds(ctx.gui);
@@ -62,7 +65,7 @@ impl Scene for GameScene {
                             // This is handled specially to allow for scheduling
                             ctx.schedule(AdvanceLevelProcedure)
                         }
-                        _ => game.handle_request(ctx, req),
+                        _ => Self::handle_game_request(ctx, req, game),
                     }
                 }
                 continue;
@@ -79,14 +82,21 @@ impl Scene for GameScene {
                 }
             }
         }
+
+        // Process UI commands emitted by game logic
+        if let Some(game) = self.game.as_mut() {
+            for cmd in game.poll_ui_commands() {
+                Self::handle_ui_command(ctx, cmd, game);
+            }
+        }
     }
 
-    fn input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
+    fn input(&mut self, _ctx: &mut SceneContext, event: GodotInputEvent) {
         let Some(game) = self.game.as_mut() else {
             return;
         };
 
-        game.process_input(ctx, event);
+        game.process_input(event);
     }
 }
 
@@ -97,7 +107,117 @@ impl GameScene {
             sim.start(level);
             sim
         });
-        game.start_day(ctx);
+        game.start_day();
         self.game = Some(game);
+
+        ctx.gui.get_mut::<DishPricePopup>().enabled = true;
+    }
+
+    /// Handle a in-game ui request
+    fn handle_game_request(ctx: &mut SceneContext, req: &GameRequest, game: &mut Game) {
+        match *req {
+            GameRequest::StartRun => {
+                game.begin_run();
+                ctx.gui.get_mut::<DishPricePopup>().enabled = false;
+            }
+            GameRequest::EndRun => {
+                game.force_finish_day();
+            }
+            GameRequest::NextDay => unreachable!("handled specially in game scene"),
+            GameRequest::SetTps(tps) => {
+                game.set_tps(tps);
+                ctx.gui.get_mut::<TimeStatsGui>().set_tps_display(tps);
+            }
+            GameRequest::SetDebugMode(mode) => {
+                game.set_debug_mode(mode);
+            }
+
+            GameRequest::ApplyDishPrice { dish, method } => {
+                game.set_dish_price(dish, method);
+            }
+
+            GameRequest::TrialIntroDone => {
+                godot_print!("Trial intro done");
+                game.send_sim_command(SimCommand::TrialLaunch);
+            }
+            GameRequest::TrialCheckKeyword(keyword_index) => {
+                godot_print!("Trial check keyword: {:?}", keyword_index);
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.check_keyword(keyword_index);
+            }
+            GameRequest::TrialBackFromThought => {
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.back_from_thought();
+            }
+            GameRequest::TrialRespond(corpus_index) => {
+                godot_print!("Trial respond: {:?}", corpus_index);
+                game.send_sim_command(SimCommand::TrialRespond(corpus_index));
+
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.finish_thought();
+            }
+            GameRequest::TrialResponseDone => {
+                godot_print!("Trial response done");
+                game.send_sim_command(SimCommand::TrialProceed);
+            }
+            GameRequest::TrialTimeout => {
+                godot_print!("Trial timeout");
+                game.send_sim_command(SimCommand::TrialTimeout);
+            }
+        }
+    }
+
+    /// Handle UI commands emitted by game logic.
+    fn handle_ui_command(ctx: &mut SceneContext, cmd: UiCommand, game: &mut Game) {
+        match cmd {
+            UiCommand::FinishDay => {
+                ctx.gui.hide::<GamingLayout>();
+                ctx.gui.show::<SettlementGui>();
+            }
+
+            UiCommand::UpdateTpsDisplay(tps) => {
+                ctx.gui.get_mut::<TimeStatsGui>().set_tps_display(tps);
+            }
+            UiCommand::UpdateDayHud(state) => {
+                ctx.gui.get_mut::<GamingLayout>().apply_state(&state);
+            }
+            UiCommand::UpdateStats(view) => {
+                let stats_gui = ctx.gui.get_mut::<TimeStatsGui>();
+                stats_gui.update_time(view.sim_tick, view.sim_time);
+                stats_gui.update_perf(view.fps, view.ups);
+                stats_gui.update_diner_stats(view.current_diners, view.total_visits);
+            }
+
+            UiCommand::OpenDishPriceEditor(ref view) => {
+                let popup = ctx.gui.get_mut::<DishPricePopup>();
+                if popup.enabled {
+                    popup.set_view(view);
+                    popup.show();
+                }
+            }
+
+            UiCommand::TrialStart(entity) => {
+                godot_print!("Starting trial for entity {:?}", entity);
+                game.send_sim_command(SimCommand::TrialStart(entity));
+            }
+            UiCommand::TrialIntro(intro) => {
+                // Show trial GUI
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.intro(intro);
+                trial_gui.show();
+            }
+            UiCommand::TrialLeftSpeak(statement) => {
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.left_speak(statement);
+            }
+            UiCommand::TrialRightSpeak(speech) => {
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.right_speak(speech);
+            }
+            UiCommand::TrialEnd => {
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.hide();
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 use as_any::Downcast;
-use dishaster_godot_ui::{StartMenuUI, req::*};
+use dishaster_godot_ui::StartMenuGui;
+use dishaster_ui_protocol::AppRequest;
 use dishrupt_godot::bind::BindGodot;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use godot::{classes::Node, global::godot_print, obj::Gd};
@@ -31,7 +32,7 @@ impl Scene for StartScene {
     }
 
     fn enter(&mut self, ctx: &mut SceneContext) {
-        ctx.gui.show::<StartMenuUI>();
+        ctx.gui.show::<StartMenuGui>();
     }
 
     fn process(&mut self, ctx: &mut SceneContext, _delta: f64) {

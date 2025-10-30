@@ -464,7 +464,9 @@ dependencies = [
  "dishaster-data",
  "dishaster-godot-game",
  "dishaster-godot-ui",
+ "dishaster-interface",
  "dishaster-persistence",
+ "dishaster-ui-protocol",
  "dishrupt-godot",
  "dishrupt-godot-scene",
  "dishrupt-godot-ui",
@@ -487,16 +489,14 @@ name = "dishaster-godot-game"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "dishaster-godot-ui",
  "dishaster-interface",
  "dishaster-models",
  "dishaster-persistence",
  "dishaster-runner",
+ "dishaster-ui-protocol",
  "dishaster-views",
  "dishrupt-core",
  "dishrupt-godot",
- "dishrupt-godot-scene",
- "dishrupt-godot-ui",
  "dishrupt-l10n",
  "dishrupt-persistence",
  "godot",
@@ -507,6 +507,7 @@ dependencies = [
 name = "dishaster-godot-ui"
 version = "0.1.0"
 dependencies = [
+ "dishaster-ui-protocol",
  "dishaster-views",
  "dishrupt-core",
  "dishrupt-godot",
@@ -566,6 +567,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "dishaster-ui-protocol"
+version = "0.1.0"
+dependencies = [
+ "dishaster-views",
+ "dishrupt-core",
+]
+
+[[package]]
 name = "dishaster-views"
 version = "0.1.0"
 dependencies = [
@@ -576,6 +585,7 @@ dependencies = [
 name = "dishrupt-core"
 version = "0.1.0"
 dependencies = [
+ "as-any",
  "bevy_math",
  "ecow",
  "rustc-hash",
@@ -617,7 +627,7 @@ dependencies = [
 name = "dishrupt-godot-ui"
 version = "0.1.0"
 dependencies = [
- "as-any",
+ "dishrupt-core",
  "dishrupt-godot-ui-macros",
  "godot",
  "signals2",

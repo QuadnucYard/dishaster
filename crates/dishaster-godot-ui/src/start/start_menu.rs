@@ -1,8 +1,8 @@
-use crate::{prelude::*, req::AppRequest};
+use crate::prelude::*;
 
 #[derive(UITree)]
 #[ui_tree]
-pub struct StartMenuUI {
+pub struct StartMenuGui {
     #[child("%Start")]
     start_btn: ButtonA,
     #[child("%Quit")]
@@ -10,9 +10,9 @@ pub struct StartMenuUI {
 }
 
 #[ui_tree_api]
-impl UITree for StartMenuUI {}
+impl UITree for StartMenuGui {}
 
-impl Gui for StartMenuUI {
+impl Gui for StartMenuGui {
     fn start(&mut self, commands: GuiCommands) {
         let cmd = commands.clone();
         self.start_btn.on_click.connect(move || {

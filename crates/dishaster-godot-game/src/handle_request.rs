@@ -1,82 +1,16 @@
-use dishaster_godot_ui::{req::GameRequest, *};
 use dishaster_interface::{snapshots::DebugFlags, *};
 use dishaster_views::PricingMethod;
 use dishrupt_core::EntityId;
-use dishrupt_godot_scene::SceneContext;
-use godot::global::godot_print;
 
 use crate::Game;
 
 impl Game {
-    pub fn handle_request(&mut self, ctx: &mut SceneContext, req: &GameRequest) {
-        match *req {
-            GameRequest::StartRun => {
-                self.begin_run(ctx);
-            }
-            GameRequest::EndRun => {
-                self.force_finish_day(ctx);
-            }
-            GameRequest::NextDay => unreachable!("handled specially in game scene"),
-            GameRequest::SetTps(tps) => {
-                self.set_tps(ctx, tps);
-            }
-            GameRequest::SetDebugMode(mode) => {
-                self.set_debug_mode(mode);
-            }
-
-            GameRequest::ApplyDishPrice { dish, method } => {
-                self.set_dish_price(dish, method);
-            }
-
-            GameRequest::TrialStart(entity) => {
-                godot_print!("Starting trial for entity {:?}", entity);
-                self.send_sim_command(SimCommand::TrialStart(entity));
-            }
-            GameRequest::TrialIntroDone => {
-                godot_print!("Trial intro done");
-                self.send_sim_command(SimCommand::TrialLaunch);
-            }
-            GameRequest::TrialCheckKeyword(keyword_index) => {
-                godot_print!("Trial check keyword: {:?}", keyword_index);
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.check_keyword(keyword_index);
-            }
-            GameRequest::TrialBackFromThought => {
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.back_from_thought();
-            }
-            GameRequest::TrialRespond(corpus_index) => {
-                godot_print!("Trial respond: {:?}", corpus_index);
-                self.send_sim_command(SimCommand::TrialRespond(corpus_index));
-
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.finish_thought();
-            }
-            GameRequest::TrialResponseDone => {
-                godot_print!("Trial response done");
-                self.send_sim_command(SimCommand::TrialProceed);
-            }
-            GameRequest::TrialTimeout => {
-                godot_print!("Trial timeout");
-                self.send_sim_command(SimCommand::TrialTimeout);
-            }
-        }
-    }
-
     /// Update the simulation tick rate and refresh related UI state.
-    fn set_tps(&mut self, ctx: &mut SceneContext, requested_tps: f32) {
-        if (self.sim_runner.tps() - requested_tps as f64).abs() <= f64::EPSILON {
-            return;
-        }
-
+    pub fn set_tps(&mut self, requested_tps: f32) {
         self.sim_runner.set_tps(requested_tps as f64);
-
-        ctx.gui
-            .get_mut::<TimeStatsGui>()
-            .set_tps_display(requested_tps);
     }
 
-    fn set_debug_mode(&mut self, debug_mode: bool) {
+    pub fn set_debug_mode(&mut self, debug_mode: bool) {
         self.debug_enabled = debug_mode;
 
         self.send_sim_command(SimCommand::SetDebugFlags(if debug_mode {
@@ -93,7 +27,7 @@ impl Game {
         }
     }
 
-    fn set_dish_price(&mut self, dish: EntityId, pricing: PricingMethod) {
+    pub fn set_dish_price(&mut self, dish: EntityId, pricing: PricingMethod) {
         self.send_sim_command(SimCommand::UpdateDishPricing {
             dish_entity: dish,
             pricing,

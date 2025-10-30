@@ -3,6 +3,7 @@ pub mod display;
 mod ext;
 pub mod model_registry;
 pub mod prelude;
+mod ui;
 pub mod utils;
 
 use std::num::NonZeroU64;

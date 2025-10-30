@@ -1,21 +1,11 @@
 use std::cell::OnceCell;
 
-use dishaster_views::PricingMethod;
+use dishaster_views::{DishPriceView, PricingMethod};
 use dishrupt_core::EntityId;
 use dishrupt_l10n_godot::tr;
 
-use crate::{prelude::*, req::GameRequest};
+use crate::prelude::*;
 
-/// Captures the information needed to populate the dish price editor popup.
-#[derive(Clone)]
-pub struct DishPriceView {
-    pub entity: EntityId,
-    pub dish_name: String,
-    pub original_price: PricingMethod,
-    pub current_price: PricingMethod,
-}
-
-#[derive(Clone)]
 struct PopupState {
     entity: EntityId,
     dish_name: String,
@@ -107,7 +97,7 @@ impl Gui for DishPricePopup {
 
 impl DishPricePopup {
     /// Populate the popup with the supplied pricing snapshot.
-    pub fn set_view(&mut self, view: DishPriceView) {
+    pub fn set_view(&mut self, view: &DishPriceView) {
         let (original_mode, original_value) = match view.original_price {
             PricingMethod::PerPortion(v) => (PricingMode::PerPortion, v),
             PricingMethod::ByWeight(v) => (PricingMode::ByWeight, v),
@@ -119,7 +109,7 @@ impl DishPricePopup {
 
         let state = PopupState {
             entity: view.entity,
-            dish_name: view.dish_name,
+            dish_name: view.dish_name.clone(),
             original_mode,
             original_value,
             current_mode,

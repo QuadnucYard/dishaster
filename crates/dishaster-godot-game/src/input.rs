@@ -1,8 +1,7 @@
-use dishaster_godot_ui::req::GameRequest;
 use dishaster_interface::*;
+use dishaster_ui_protocol::UiCommand;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::input::{event::MouseButtonEvent, listener::GodotInputEvent};
-use dishrupt_godot_scene::SceneContext;
 use godot::{
     classes::{Area2D, Node, Node2D, PhysicsPointQueryParameters2D},
     global::{Key, MouseButton},
@@ -12,11 +11,11 @@ use godot::{
 use crate::Game;
 
 impl Game {
-    pub fn process_input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
+    pub fn process_input(&mut self, event: GodotInputEvent) {
         match event {
             GodotInputEvent::Button(e) => {
                 if e.button == MouseButton::LEFT && !e.pressed {
-                    if self.try_process_picking(ctx, &e).is_some() {
+                    if self.try_process_picking(&e).is_some() {
                         return;
                     }
 
@@ -29,22 +28,26 @@ impl Game {
             GodotInputEvent::Key(key) => {
                 if key.pressed
                     && key.keycode == Key::Q
-                    && let Some(diner) = self.dc.agents.keys().next()
+                    && let Some(&diner) = self.dc.agents.keys().next()
                 {
                     godot_print!("DEV: Starting trial for diner {:?}", diner);
-                    ctx.gui_cmds.push_req(GameRequest::TrialStart(*diner));
+                    self.ui_commands.push(UiCommand::TrialStart(diner));
                 }
             }
             _ => {}
         }
     }
 
-    fn try_process_picking(&mut self, ctx: &mut SceneContext, e: &MouseButtonEvent) -> Option<()> {
+    fn try_process_picking(&mut self, e: &MouseButtonEvent) -> Option<()> {
         let pickable = self.pick(e.position)?;
 
         #[allow(mutable_transmutes)]
         let pickable: &mut dyn Pickable = unsafe { std::mem::transmute(pickable) };
+        let ctx = &mut PickingContext {
+            cmds: &mut self.ui_commands,
+        };
         pickable.on_click(ctx, e);
+
         Some(())
     }
 
@@ -103,6 +106,10 @@ fn screen_to_canvas(root: &Gd<Node>, screen_pos: Vector2) -> Vector2 {
         * screen_pos
 }
 
+pub struct PickingContext<'a> {
+    pub cmds: &'a mut Vec<UiCommand>,
+}
+
 #[allow(unused_variables)]
 pub trait Pickable {
     fn collider_instance_id(&self) -> InstanceId;
@@ -112,5 +119,5 @@ pub trait Pickable {
         0
     }
 
-    fn on_click(&mut self, ctx: &mut SceneContext, event: &MouseButtonEvent) {}
+    fn on_click(&mut self, ctx: &mut PickingContext, event: &MouseButtonEvent) {}
 }

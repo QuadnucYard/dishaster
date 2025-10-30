@@ -1,26 +1,6 @@
-use crate::{
-    prelude::*,
-    req::{AppRequest, GameRequest},
-};
+use dishaster_views::DayHudState;
 
-/// Describes the information to display in the in-game day loop overlay during
-/// active play (preparation or service phases).
-pub struct DayHudState {
-    /// Textual label showing which day is active.
-    pub day_label: String,
-    /// Description of the current phase (preparation or running).
-    pub phase_label: String,
-    /// Rich-text friendly body summarizing guidance or results.
-    pub details: String,
-    /// Whether the start/resume button should be shown.
-    pub show_start: bool,
-    /// Whether the start button is interactable.
-    pub enable_start: bool,
-    /// Whether the developer end-day button should be visible.
-    pub show_dev: bool,
-    /// Whether the developer end-day button is interactable.
-    pub enable_dev: bool,
-}
+use crate::prelude::*;
 
 #[derive(UITree)]
 #[ui_tree]

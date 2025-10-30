@@ -1,14 +1,13 @@
-use dishaster_godot_ui::req::GameRequest;
+use dishaster_ui_protocol::UiCommand;
 use dishaster_views::{Appearance, BodyPart, Feedback};
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, input::event::MouseButtonEvent};
-use dishrupt_godot_scene::SceneContext;
 use godot::{
     classes::{CanvasItem, Label, Node2D},
     prelude::*,
 };
 
-use crate::input::Pickable;
+use crate::input::{Pickable, PickingContext};
 
 #[allow(unused)]
 pub struct AgentController {
@@ -167,8 +166,8 @@ impl Pickable for FeedbackController {
         self.root.instance_id_unchecked()
     }
 
-    fn on_click(&mut self, ctx: &mut SceneContext, _event: &MouseButtonEvent) {
-        ctx.gui_cmds.push_req(GameRequest::TrialStart(self.entity));
+    fn on_click(&mut self, ctx: &mut PickingContext, _event: &MouseButtonEvent) {
+        ctx.cmds.push(UiCommand::TrialStart(self.entity));
     }
 }
 

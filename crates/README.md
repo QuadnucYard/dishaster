@@ -201,28 +201,39 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 - **Dependencies**: `dishaster-interface`, `fibre` (optional, for async)
 - **Features**: `threaded` - enables async runner with background thread execution
 
+### dishaster-ui-protocol
+
+- **Purpose**: Communication interface between UI and game logic (UI-layer CQRS)
+- **Contains**:
+  - `GameRequest` - Input commands from UI to game logic
+  - `AppRequest` - Application lifecycle commands
+  - `UiCommand` - Output commands from game logic to UI
+- **Dependencies**: `dishrupt-core`, `dishaster-views`
+- **Architecture**: Unidirectional data flow matching simulation's CQRS pattern:
+  - `GameRequest` (UI → Game) - write commands
+  - `UiCommand` (Game → UI) - presentation updates
+- **Note**: Breaks circular dependency between `dishaster-godot-game` ↔ `dishaster-godot-ui`
+
 ### dishaster-godot-ui
 
 - **Purpose**: Game-specific UI components for Godot
 - **Contains**:
-  - Start menu, settlement screen, time stats
-  - Dish price editor, trial dialog UI
-  - Layout management for in-game HUD
-  - Request types (`GameRequest`, `AppRequest`)
-- **Dependencies**: `dishrupt-core`, `dishrupt-godot`, `dishrupt-godot-ui`, `dishrupt-l10n-godot`, `dishaster-views`
-- **Note**: Uses `views` for presentation data - no dependency on `models`
+  - Emits `GameRequest` / `AppRequest` to game layer
+- **Dependencies**: `dishrupt-core`, `dishrupt-godot`, `dishrupt-godot-ui`, `dishrupt-l10n-godot`, `dishaster-views`, `dishaster-ui-protocol`
+- **Note**: Uses `views` for presentation data - no dependency on `models` or game logic
 
 ### dishaster-godot-game
 
 - **Purpose**: Bridge between simulation and Godot presentation
 - **Contains**:
-  - `Game` - manages simulation runner and display stage
+  - `Game` - manages simulation runner, display stage, and UI command queue
   - Display controllers for agents (cosmetics, feedback) and dishes
-  - Event processing and presentation updates
+  - Event processing and presentation updates (emits `UiCommand` instead of mutating UI)
   - Performance tracking (tick rate, frame times)
   - Debug visualization overlays (pathfinding, queues, collision grids)
-- **Dependencies**: `dishrupt-*` (godot libs), `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-persistence`, `dishaster-runner`
-- **Note**: Depends on `models` for registry and persistence, but uses `views` for UI presentation
+  - Input handling with `PickingContext` for controllers to emit commands
+- **Dependencies**: `dishrupt-*` (godot libs), `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-ui-protocol`, `dishaster-persistence`, `dishaster-runner`
+- **Note**: Depends on `models` for registry and persistence. Emits `UiCommand` to scene layer - **no direct UI dependencies**
 
 ### dishaster-godot
 
@@ -253,6 +264,7 @@ graph TB
     %% Presentation layer
     godot-game[dishaster-godot-game<br/>Simulation Runner]
     godot-ui[dishaster-godot-ui<br/>Game UI]
+    ui-protocol[dishaster-ui-protocol<br/>UI Interface]
 
     %% Core simulation
     core[dishaster-core<br/>ECS Simulation]
@@ -297,6 +309,7 @@ graph TB
     godot-game --> runner
     godot-game --> models
     godot-game --> views
+    godot-game --> ui-protocol
     godot-game --> persist
     godot-game --> d-godot
     godot-game --> d-godot-ui
@@ -305,7 +318,11 @@ graph TB
     godot-game --> d-core
     godot-game --> d-persist
 
+    ui-protocol --> views
+    ui-protocol --> d-core
+
     godot-ui --> views
+    godot-ui --> ui-protocol
     godot-ui --> d-godot
     godot-ui --> d-godot-ui
     godot-ui --> d-l10n-godot
@@ -354,7 +371,7 @@ graph TB
     classDef framework fill:#a8dadc,stroke:#457b9d,stroke-width:2px,color:#000
 
     class godot-ext entry
-    class godot,godot-game,godot-ui game
+    class godot,godot-game,godot-ui,ui-protocol game
     class core,interface,runner,nav sim
     class models,views,data,persist data
     class d-core,d-ecs,d-godot,d-godot-ui,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
@@ -362,7 +379,7 @@ graph TB
 
 ## Architecture Layers
 
-### **Layer 1: Core Simulation**
+### Layer 1: Core Simulation
 
 - `dishaster-core` - Main ECS simulation (only crate depending on `bevy_ecs`)
 - `dishaster-models` - Pure simulation data structures
@@ -378,27 +395,34 @@ graph TB
 - **CQRS**: Interface layer enforces clear separation between commands (write), queries (read), events (push), and responses (pull)
 - **Testability**: Core simulation can run headless, deterministic, and testable without any Godot dependency
 
-### **Layer 2: Data & Persistence**
+### Layer 2: Data & Persistence
 
 - `dishaster-data` - Load game assets from files
 - `dishaster-persistence` - Save/load player progress
 
 **Philosophy**: Separate data loading from runtime simulation for hot-reloading and modding support.
 
-### **Layer 3: Presentation (Godot Integration)**
+### Layer 3: Presentation (Godot Integration)
 
-- `dishaster-godot-game` - Wraps simulation, handles display updates, uses `models` for registry/persistence
-- `dishaster-godot-ui` - Game-specific UI components, consumes `views` only
-- `dishaster-godot` - Scene management and app lifecycle
+- `dishaster-ui-protocol` - UI communication interface (CQRS for presentation layer)
+- `dishaster-godot-game` - Wraps simulation, handles display updates, emits UI commands
+- `dishaster-godot-ui` - Game-specific UI components, consumes `views` and emits requests
+- `dishaster-godot` - Scene management and app lifecycle, orchestrates UI updates
 
 **Philosophy**:
 
-- Presentation layer consumes `views` (snapshots) from simulation and sends commands back
-- One-way data flow: UI → Commands → Simulation → Views → UI
-- `godot-ui` is decoupled from `models` (only depends on `views`)
-- `godot-game` needs `models` for registry and persistence integration
+- **UI-layer CQRS**: Mirrors simulation pattern at presentation boundary
+  - `GameRequest` / `AppRequest`: UI → Game (write commands)
+  - `UiCommand`: Game → UI (presentation updates)
+- **Unidirectional flow**: `UI → GameRequest → Game Logic → UiCommand → Scene → UI Mutation`
+- **Clean separation**:
+  - `godot-ui` emits requests, never accesses game logic directly
+  - `godot-game` emits commands, never mutates UI directly
+  - `dishaster-godot` (scene layer) orchestrates both via `handle_game_request()` and `handle_ui_command()`
+- **No circular deps**: `ui-protocol` breaks potential `godot-game` ↔ `godot-ui` cycle
+- **Input handling**: Controllers use `PickingContext { cmds: &mut Vec<UiCommand> }` to emit commands on user interaction
 
-### **Layer 4: Framework (dishrupt-\*)**
+### Layer 4: Framework (dishrupt-\*)
 
 Reusable utilities that could be extracted into separate libraries:
 
@@ -412,7 +436,59 @@ Reusable utilities that could be extracted into separate libraries:
 
 ## Data Flow
 
-### Command-Query Responsibility Segregation (CQRS)
+### UI Command Flow (Presentation Layer)
+
+The presentation layer uses a **unidirectional command pattern** inspired by CQRS:
+
+```text
+┌───────────────────────────────────────────────────────────┐
+│                        UI LAYER                            │
+│  User Input → UI Components → GameRequest/AppRequest      │
+└─────────────────────────┬─────────────────────────────────┘
+                          │
+                          ↓
+┌───────────────────────────────────────────────────────────┐
+│                     SCENE LAYER                            │
+│  handle_game_request() → dispatch to Game logic           │
+└─────────────────────────┬─────────────────────────────────┘
+                          │
+                          ↓
+┌───────────────────────────────────────────────────────────┐
+│                    GAME LOGIC LAYER                        │
+│  Game methods → emit UiCommand → queue in ui_commands     │
+│  Controllers → PickingContext → emit UiCommand            │
+└─────────────────────────┬─────────────────────────────────┘
+                          │
+                          ↓
+┌───────────────────────────────────────────────────────────┐
+│                     SCENE LAYER                            │
+│  poll_ui_commands() → handle_ui_command() → mutate UI     │
+└─────────────────────────┬─────────────────────────────────┘
+                          │
+                          ↓
+┌───────────────────────────────────────────────────────────┐
+│                        UI LAYER                            │
+│  UI Components updated (display state, open dialogs, etc) │
+└───────────────────────────────────────────────────────────┘
+```
+
+**Key Components**:
+
+1. **GameRequest**: User commands to game logic
+   - Emitted by UI components when user clicks buttons or changes settings
+
+2. **AppRequest**: Application lifecycle commands
+   - Handled by top-level scene management
+
+3. **UiCommand** Presentation updates from game to UI
+   - Emitted by game logic when state changes need UI reflection
+
+4. **Command Queue**: `Game.ui_commands: Vec<UiCommand>`
+   - Game logic pushes commands during execution
+   - Scene layer polls via `game.poll_ui_commands()` each frame
+   - Commands processed via `handle_ui_command()` which mutates UI
+
+### Simulation Command-Query Responsibility Segregation (CQRS)
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐

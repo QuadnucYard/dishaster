@@ -10,14 +10,14 @@ pub mod user_store;
 
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
-use dishaster_godot_ui::*;
 use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelConfig};
 use dishaster_persistence::ProgressService;
 use dishaster_runner::{SimulationRunner, SnapshotFrame, SyncSimulationRunner};
+use dishaster_ui_protocol::{StatsView, UiCommand};
+use dishaster_views::DayHudState;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::display::*;
-use dishrupt_godot_scene::SceneContext;
 use dishrupt_l10n::tr;
 use godot::{
     classes::{Node, Node2D},
@@ -74,6 +74,9 @@ pub struct Game {
     telemetry: DayTelemetry,
     debug_enabled: bool,
     suspended_sim_speed: Option<f64>,
+
+    /// Queue of UI commands to be processed by the scene layer.
+    ui_commands: Vec<UiCommand>,
 }
 
 #[derive(Default)]
@@ -148,10 +151,11 @@ impl Game {
             telemetry,
             debug_enabled: false,
             suspended_sim_speed: None,
+            ui_commands: Vec::new(),
         }
     }
 
-    pub fn process(&mut self, delta: f64, ctx: &mut SceneContext) {
+    pub fn process(&mut self, delta: f64) {
         self.perf_tracker.tick_frame();
 
         if let Some(SnapshotFrame {
@@ -168,8 +172,8 @@ impl Game {
                 .update(&snapshot.debug, self.stage.display_context());
             self.update_other_debug(&snapshot.debug);
 
-            self.process_events(ctx, events);
-            self.process_query_responses(ctx, responses);
+            self.process_events(events);
+            self.process_query_responses(responses);
 
             self.telemetry.tick = snapshot.stats.tick;
             self.telemetry.seconds = snapshot.stats.time_seconds;
@@ -179,7 +183,12 @@ impl Game {
 
         self.process_display(delta);
         self.perf_tracker.sample(delta);
-        self.update_hud(ctx);
+        self.update_hud();
+    }
+
+    /// Poll and drain UI commands that need to be processed by the scene layer.
+    pub fn poll_ui_commands(&mut self) -> Vec<UiCommand> {
+        std::mem::take(&mut self.ui_commands)
     }
 
     pub fn send_sim_command(&mut self, command: SimCommand) {
@@ -191,8 +200,8 @@ impl Game {
     }
 
     /// Called just after construction
-    pub fn start_day(&mut self, ctx: &mut SceneContext) {
-        ctx.gui.get_mut::<GamingLayout>().apply_state(&DayHudState {
+    pub fn start_day(&mut self) {
+        self.ui_commands.push(UiCommand::UpdateDayHud(DayHudState {
             day_label: tr!("day-display.label", "day" = self.telemetry.day),
             phase_label: tr!("phase-preparation.label"),
             details: "Review canteen status then press Start Day to begin.".into(),
@@ -200,35 +209,29 @@ impl Game {
             enable_start: true,
             show_dev: true,
             enable_dev: false,
-        });
-
-        ctx.gui
-            .get_mut::<TimeStatsGui>()
-            .set_tps_display(self.sim_runner.tps() as f32);
-
-        ctx.gui.get_mut::<DishPricePopup>().enabled = true;
+        }));
+        self.ui_commands
+            .push(UiCommand::UpdateTpsDisplay(self.sim_runner.tps() as f32));
 
         self.send_sim_query(SimQuery::Distances);
     }
 
-    pub fn begin_run(&mut self, ctx: &mut SceneContext) {
+    pub fn begin_run(&mut self) {
         if self.phase != DayPhase::Preparation {
             return;
         }
         self.phase = DayPhase::Running;
 
-        ctx.gui.get_mut::<DishPricePopup>().enabled = false;
-
         self.send_sim_command(SimCommand::StartRun);
     }
 
-    pub fn force_finish_day(&mut self, ctx: &mut SceneContext) {
+    pub fn force_finish_day(&mut self) {
         if self.phase == DayPhase::Running {
-            self.finish_day(ctx, true);
+            self.finish_day(true);
         }
     }
 
-    pub fn finish_day(&mut self, ctx: &mut SceneContext, forced: bool) {
+    pub fn finish_day(&mut self, forced: bool) {
         if self.phase != DayPhase::Running {
             return;
         }
@@ -243,14 +246,12 @@ impl Game {
             .complete_day()
             .expect("failed to complete day");
 
-        ctx.gui.hide::<GamingLayout>();
-        ctx.gui.show::<SettlementGui>();
+        self.ui_commands.push(UiCommand::FinishDay);
     }
 
-    fn update_hud(&mut self, ctx: &mut SceneContext) {
+    fn update_hud(&mut self) {
         if self.phase == DayPhase::Running {
-            let layout = ctx.gui.get_mut::<GamingLayout>();
-            let state = DayHudState {
+            self.ui_commands.push(UiCommand::UpdateDayHud(DayHudState {
                 day_label: tr!("day-display.label", "day" = self.telemetry.day),
                 phase_label: tr!("phase-running.label"),
                 details: "Service running.".to_string(),
@@ -258,15 +259,16 @@ impl Game {
                 enable_start: false,
                 show_dev: true,
                 enable_dev: true,
-            };
-            layout.apply_state(&state);
+            }));
         }
 
-        {
-            let stats = ctx.gui.get_mut::<TimeStatsGui>();
-            stats.update_time(self.telemetry.tick, self.telemetry.seconds);
-            stats.update_perf(self.perf_tracker.last_fps, self.perf_tracker.last_ups);
-            stats.update_diner_stats(self.telemetry.live_diners, self.telemetry.total_visits);
-        }
+        self.ui_commands.push(UiCommand::UpdateStats(StatsView {
+            sim_tick: self.telemetry.tick,
+            sim_time: self.telemetry.seconds,
+            fps: self.perf_tracker.last_fps,
+            ups: self.perf_tracker.last_ups,
+            current_diners: self.telemetry.live_diners,
+            total_visits: self.telemetry.total_visits,
+        }));
     }
 }

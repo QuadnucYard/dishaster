@@ -1,16 +1,14 @@
-use dishaster_godot_ui::{DishPricePopup, DishPriceView};
-use dishaster_views::{DishView, PricingMethod};
+use dishaster_ui_protocol::UiCommand;
+use dishaster_views::{DishPriceView, DishView, PricingMethod};
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, ext::NodeExt, input::event::MouseButtonEvent};
-use dishrupt_godot_scene::SceneContext;
-use dishrupt_godot_ui::*;
 use dishrupt_l10n::tr;
 use godot::{
     classes::{Area2D, Label},
     prelude::*,
 };
 
-use crate::input::Pickable;
+use crate::input::{Pickable, PickingContext};
 
 #[allow(unused)]
 pub struct DishController {
@@ -60,19 +58,16 @@ impl Pickable for DishController {
         self.area.instance_id_unchecked()
     }
 
-    fn on_click(&mut self, ctx: &mut SceneContext, event: &MouseButtonEvent) {
+    fn on_click(&mut self, ctx: &mut PickingContext, event: &MouseButtonEvent) {
         if !event.pressed
-            && let popup = ctx.gui.get_mut::<DishPricePopup>()
-            && popup.enabled
             && let (Some(vm), Some(orig_price)) = (&self.view_model, &self.original_price)
         {
-            popup.set_view(DishPriceView {
+            ctx.cmds.push(UiCommand::OpenDishPriceEditor(DishPriceView {
                 entity: vm.entity,
                 dish_name: tr!("dish-{}.name", vm.dish_id),
                 original_price: *orig_price,
                 current_price: vm.pricing,
-            });
-            popup.show();
+            }));
         }
     }
 }

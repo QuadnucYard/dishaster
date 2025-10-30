@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use as_any::AsAny;
+use dishrupt_core::prelude::UiRequest;
 
 use crate::UITree;
 
@@ -77,7 +77,7 @@ pub struct GuiCommands(Arc<Mutex<GuiCommandsRepr>>);
 #[derive(Default)]
 struct GuiCommandsRepr {
     pub cmds: Vec<GuiCmd>,
-    pub reqs: Vec<Box<dyn GuiRequest>>,
+    pub reqs: Vec<Box<dyn UiRequest>>,
 }
 
 impl GuiCommands {
@@ -94,7 +94,7 @@ impl GuiCommands {
 
     pub fn push_req<R>(&self, req: R)
     where
-        R: GuiRequest + 'static,
+        R: UiRequest + 'static,
     {
         self.0.lock().unwrap().reqs.push(Box::new(req));
     }
@@ -107,14 +107,11 @@ impl GuiCommands {
         }
     }
 
-    pub fn run_reqs(&mut self, f: impl FnMut(Box<dyn GuiRequest>)) {
+    pub fn run_reqs(&mut self, f: impl FnMut(Box<dyn UiRequest>)) {
         self.take_reqs().into_iter().for_each(f);
     }
 
-    pub fn take_reqs(&mut self) -> Vec<Box<dyn GuiRequest>> {
+    pub fn take_reqs(&mut self) -> Vec<Box<dyn UiRequest>> {
         self.0.lock().unwrap().reqs.drain(..).collect::<Vec<_>>()
     }
 }
-
-/// Type-erased request to the GUI system.
-pub trait GuiRequest: Send + AsAny {}

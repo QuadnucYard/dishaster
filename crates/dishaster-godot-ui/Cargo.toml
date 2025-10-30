@@ -11,6 +11,7 @@ dishrupt-godot.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-l10n-godot.workspace = true
 dishaster-views.workspace = true
+dishaster-ui-protocol.workspace = true
 
 godot.workspace = true
 signals2.workspace = true

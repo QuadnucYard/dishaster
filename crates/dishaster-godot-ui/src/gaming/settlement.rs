@@ -1,7 +1,4 @@
-use crate::{
-    prelude::*,
-    req::{AppRequest, GameRequest},
-};
+use crate::prelude::*;
 
 #[derive(UITree)]
 #[ui_tree]
