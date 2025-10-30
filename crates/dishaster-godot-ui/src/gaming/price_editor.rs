@@ -1,6 +1,6 @@
 use std::cell::OnceCell;
 
-use dishaster_models::PricingMethod;
+use dishaster_views::PricingMethod;
 use dishrupt_core::EntityId;
 use dishrupt_l10n_godot::tr;
 

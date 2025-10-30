@@ -77,47 +77,12 @@ impl Simulation {
         self.debug_flags
     }
 
-    /// Perform initial setup tasks at simulation startup
-    pub fn startup(&mut self) {
-        // Add observers for agent spawn/despawn events to log presentation events
-        self.world.add_observer(
-            |event: On<Add, AgentTag>,
-             query: Query<&DinerAppearance>,
-             mut events: ResMut<EventQueue>| {
-                events.push(SimEvent::AgentSpawned {
-                    entity: event.entity.into(),
-                    appearance: query.get(event.entity).ok().map(|a| (**a).clone()),
-                });
-            },
-        );
-        self.world.add_observer(
-            |event: On<Remove, AgentTag>, mut events: ResMut<EventQueue>| {
-                events.push(SimEvent::AgentDespawned(event.entity.into()));
-            },
-        );
-
-        // Spawn static objects once at startup
-        let mut schedule = Schedule::default();
-        schedule.add_systems(
-            (
-                initial_spawning_systems(),
-                build_collision_grid,
-                populate_diner_pool,
-                set_daily_schedule,
-            )
-                .chain(),
-        );
-        schedule.run(&mut self.world);
-    }
-}
-
-impl ISimulation for Simulation {
     /// Initialize and start a simulation level with the given configuration
     ///
     /// Sets up all level-specific resources including RNG seed, diner providers,
     /// spawning parameters, and static world objects. Must be called before
     /// the first tick() to properly initialize the simulation state.
-    fn start(&mut self, level: LevelConfig) {
+    pub fn start(&mut self, level: LevelConfig) {
         const DEFAULT_TIMESTEP_S: f64 = 0.1;
 
         self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
@@ -157,6 +122,41 @@ impl ISimulation for Simulation {
         self.startup();
     }
 
+    /// Perform initial setup tasks at simulation startup
+    fn startup(&mut self) {
+        // Add observers for agent spawn/despawn events to log presentation events
+        self.world.add_observer(
+            |event: On<Add, AgentTag>,
+             query: Query<&DinerAppearance>,
+             mut events: ResMut<EventQueue>| {
+                events.push(SimEvent::AgentSpawned {
+                    entity: event.entity.into(),
+                    appearance: query.get(event.entity).ok().map(|a| a.to_view()),
+                });
+            },
+        );
+        self.world.add_observer(
+            |event: On<Remove, AgentTag>, mut events: ResMut<EventQueue>| {
+                events.push(SimEvent::AgentDespawned(event.entity.into()));
+            },
+        );
+
+        // Spawn static objects once at startup
+        let mut schedule = Schedule::default();
+        schedule.add_systems(
+            (
+                initial_spawning_systems(),
+                build_collision_grid,
+                populate_diner_pool,
+                set_daily_schedule,
+            )
+                .chain(),
+        );
+        schedule.run(&mut self.world);
+    }
+}
+
+impl ISimulation for Simulation {
     /// Advance the simulation by one time step
     ///
     /// Executes all registered systems in the proper order to update

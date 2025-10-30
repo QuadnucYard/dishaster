@@ -76,3 +76,22 @@ impl fmt::Display for SoundReference {
         self.0.fmt(f)
     }
 }
+
+/// Sprite variant index
+///
+/// Each part type has multiple sprite options (e.g., head_01, head_02, etc.)
+/// This stores which variant to use.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SpriteVariant(u8);
+
+impl SpriteVariant {
+    /// Create a new sprite variant
+    pub fn new(index: u8) -> Self {
+        Self(index)
+    }
+
+    /// Get the variant index
+    pub fn index(self) -> u8 {
+        self.0
+    }
+}

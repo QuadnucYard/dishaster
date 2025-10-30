@@ -1,6 +1,7 @@
 //! Static canteen layout spawning systems
 
 use dishaster_navigation::BoxCollider;
+use dishaster_views::DishView;
 use dishrupt_core::{
     asset::PrefabReference,
     display::{DisplayState, Transform},
@@ -213,10 +214,10 @@ fn spawn_dish_presentations(
             ChildOf(wrapper_entity),
         ));
 
-        events.push(SimEvent::DishSpawned(DishViewModel {
+        events.push(SimEvent::DishSpawned(DishView {
             entity: wrapper_entity.into(),
             dish_id: active.assignment.dish_id.clone(),
-            pricing: active.assignment.pricing.method,
+            pricing: active.assignment.pricing.method.to_view(),
         }));
     }
 }

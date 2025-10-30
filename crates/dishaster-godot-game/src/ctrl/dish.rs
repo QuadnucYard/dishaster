@@ -1,6 +1,5 @@
 use dishaster_godot_ui::{DishPricePopup, DishPriceView};
-use dishaster_interface::event::DishViewModel;
-use dishaster_models::PricingMethod;
+use dishaster_views::{DishView, PricingMethod};
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, ext::NodeExt, input::event::MouseButtonEvent};
 use dishrupt_godot_scene::SceneContext;
@@ -21,7 +20,7 @@ pub struct DishController {
     area: Gd<Area2D>,
     price_label: Gd<Label>,
 
-    view_model: Option<DishViewModel>,
+    view_model: Option<DishView>,
     original_price: Option<PricingMethod>,
 }
 
@@ -42,7 +41,7 @@ impl DishController {
         }
     }
 
-    pub fn set_view_model(&mut self, vm: DishViewModel) {
+    pub fn set_view(&mut self, vm: DishView) {
         self.set_price(vm.pricing);
         self.original_price = Some(vm.pricing);
         self.view_model = Some(vm);

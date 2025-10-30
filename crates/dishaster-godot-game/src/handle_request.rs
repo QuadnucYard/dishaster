@@ -1,6 +1,6 @@
 use dishaster_godot_ui::{req::GameRequest, *};
 use dishaster_interface::{snapshots::DebugFlags, *};
-use dishaster_models::PricingMethod;
+use dishaster_views::PricingMethod;
 use dishrupt_core::EntityId;
 use dishrupt_godot_scene::SceneContext;
 use godot::global::godot_print;

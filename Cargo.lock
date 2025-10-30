@@ -432,6 +432,7 @@ dependencies = [
  "dishaster-interface",
  "dishaster-models",
  "dishaster-navigation",
+ "dishaster-views",
  "dishrupt-core",
  "log",
  "ordered-float",
@@ -490,6 +491,7 @@ dependencies = [
  "dishaster-models",
  "dishaster-persistence",
  "dishaster-runner",
+ "dishaster-views",
  "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-godot-scene",
@@ -504,7 +506,7 @@ dependencies = [
 name = "dishaster-godot-ui"
 version = "0.1.0"
 dependencies = [
- "dishaster-models",
+ "dishaster-views",
  "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-godot-ui",
@@ -517,7 +519,7 @@ dependencies = [
 name = "dishaster-interface"
 version = "0.1.0"
 dependencies = [
- "dishaster-models",
+ "dishaster-views",
  "dishrupt-core",
 ]
 
@@ -560,6 +562,13 @@ version = "0.1.0"
 dependencies = [
  "dishaster-interface",
  "fibre",
+]
+
+[[package]]
+name = "dishaster-views"
+version = "0.1.0"
+dependencies = [
+ "dishrupt-core",
 ]
 
 [[package]]

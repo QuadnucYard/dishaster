@@ -92,7 +92,11 @@ impl Scene for GameScene {
 
 impl GameScene {
     pub fn start_game(&mut self, ctx: &mut SceneContext, level: LevelConfig) {
-        let mut game = Game::new(self.gd(), level, |db| Box::new(Simulation::new(db)));
+        let mut game = Game::new(self.gd(), level, |db, level| {
+            let mut sim = Box::new(Simulation::new(db));
+            sim.start(level);
+            sim
+        });
         game.start_day(ctx);
         self.game = Some(game);
     }

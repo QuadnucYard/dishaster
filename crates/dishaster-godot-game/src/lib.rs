@@ -79,10 +79,13 @@ struct DisplayControllers {
 }
 
 impl Game {
+    /// Create a new game instance with the given root node and level configuration.
+    ///
+    /// NOTE: the creator should START the simulation after construction
     pub fn new(
         gd: Gd<Node>,
         level: LevelConfig,
-        sim_creator: impl FnOnce(Arc<GameModelRegistry>) -> Box<dyn ISimulation>,
+        sim_creator: impl FnOnce(Arc<GameModelRegistry>, LevelConfig) -> Box<dyn ISimulation>,
     ) -> Self {
         let db = GAME_DATA.get().expect("game data not initialized");
 
@@ -118,8 +121,7 @@ impl Game {
         };
 
         // Initialize simulation
-        let mut sim = sim_creator(db.clone());
-        sim.start(level);
+        let sim = sim_creator(db.clone(), level);
         let root_entity = sim.root_entity();
         let default_tps = 60.0;
         let sim_runner = SyncSimulationRunner::new(sim, default_tps);

@@ -1,4 +1,4 @@
-use dishrupt_core::prelude::EcoString;
+use dishrupt_core::prelude::*;
 
 use super::prelude::*;
 
@@ -91,35 +91,4 @@ impl std::fmt::Debug for TrialQARank {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self, f)
     }
-}
-
-// === Payloads ===
-
-/// Introduction data for a trial.
-#[derive(Debug)]
-pub struct TrialIntro {
-    /// Appearance of the left participant.
-    pub left: TrialParticipantAppearance,
-    /// Appearance of the right participant.
-    pub right: TrialParticipantAppearance,
-}
-
-/// A statement made during a trial, along with possible response options.
-#[derive(Debug)]
-pub struct TrialStatement {
-    /// The speech made by the left participant.
-    pub speech: TrialSpeech,
-    /// Possible response options for each keyword.
-    pub options: Vec<Vec<TrialResponseOption>>,
-}
-
-/// A single response option during a trial.
-#[derive(Debug)]
-pub struct TrialResponseOption {
-    /// Index into the corpus responses.
-    pub corpus_index: usize,
-    /// The kind of trial response.
-    pub kind: TrialResponseKind,
-    /// A brief summary of the response, displayed in the options list.
-    pub summary: EcoString,
 }

@@ -41,7 +41,7 @@ impl Game {
                             .cloned()
                             .expect("missing godot node for dish"),
                     );
-                    controller.set_view_model(vm);
+                    controller.set_view(vm);
                     self.dc.dishes.insert(entity, controller);
                 }
                 SimEvent::Feedback(feedback) => {

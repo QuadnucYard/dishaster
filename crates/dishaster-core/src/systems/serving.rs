@@ -1,3 +1,5 @@
+use dishaster_views::{Feedback, FeedbackView};
+
 use super::{feedback::*, prelude::*};
 
 /// Queue of delayed serving communication messages to simulate human interaction latency.
@@ -97,7 +99,7 @@ pub fn process_serving_messages(
                 );
                 staff_state.last_update_time = now;
                 let feedback = Feedback::Thought(eco_format!("{}?", request.dish_name));
-                events.emit_feedback(FeedbackEvent {
+                events.emit_feedback(FeedbackView {
                     entity: staff.into(),
                     content: feedback,
                     timestamp: now,
@@ -124,14 +126,14 @@ pub fn process_serving_messages(
                 // The staff member accepted the task, so we wait for food prep.
                 staff_state.last_update_time = now;
                 let confirm_feedback = Feedback::Thought(eco_format!("{}", request.dish_name));
-                events.emit_feedback(FeedbackEvent {
+                events.emit_feedback(FeedbackView {
                     entity: staff.into(),
                     content: confirm_feedback.clone(),
                     timestamp: now,
                 });
                 let diner_feedback =
                     Feedback::Thought(choose_feedback(&mut rng, DECIDING_FEEDBACKS).into());
-                events.emit_feedback(FeedbackEvent {
+                events.emit_feedback(FeedbackView {
                     entity: diner.into(),
                     content: diner_feedback,
                     timestamp: now,
@@ -188,14 +190,14 @@ pub fn process_serving_messages(
                 };
 
                 let staff_feedback = Feedback::Thought(eco_format!("{} ✅", request.dish_name));
-                events.emit_feedback(FeedbackEvent {
+                events.emit_feedback(FeedbackView {
                     entity: staff.into(),
                     content: staff_feedback,
                     timestamp: now,
                 });
                 let diner_feedback =
                     Feedback::Thought(choose_feedback(&mut rng, SERVING_FEEDBACKS).into());
-                events.emit_feedback(FeedbackEvent {
+                events.emit_feedback(FeedbackView {
                     entity: diner.into(),
                     content: diner_feedback,
                     timestamp: now,
@@ -299,7 +301,7 @@ pub fn drive_serving_sessions(
 
                 // Give the diner immediate feedback that their order was heard so they
                 // perceive progress while we wait for the delayed response.
-                events.emit_feedback(FeedbackEvent {
+                events.emit_feedback(FeedbackView {
                     entity: diner.into(),
                     content: Feedback::Thought(eco_format!("{}?", dish_name)),
                     timestamp: now,

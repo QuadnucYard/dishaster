@@ -1,5 +1,5 @@
 [package]
-name = "dishaster-interface"
+name = "dishaster-views"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
@@ -7,7 +7,6 @@ edition.workspace = true
 
 [dependencies]
 dishrupt-core.workspace = true
-dishaster-views.workspace = true
 
 [lints]
 workspace = true

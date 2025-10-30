@@ -6,7 +6,6 @@ pub mod query;
 pub mod response;
 pub mod snapshots;
 
-use dishaster_models::LevelConfig;
 use dishrupt_core::EntityId;
 
 pub use crate::{
@@ -21,9 +20,6 @@ pub type Tick = u32;
 pub trait ISimulation {
     /// Get the root entity of the display hierarchy
     fn root_entity(&self) -> EntityId;
-
-    /// Initialize and start a simulation level with the given configuration
-    fn start(&mut self, level: LevelConfig);
 
     /// Advance the simulation by one time step
     fn tick(&mut self);

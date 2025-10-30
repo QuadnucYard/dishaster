@@ -9,6 +9,7 @@ pub mod utils;
 use std::num::NonZeroU64;
 
 use bevy_ecs::entity::Entity;
+pub use model_registry::ModelId;
 
 /// Reference to an entity in the core ECS world
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

@@ -1,12 +1,14 @@
 //! The trial system. It works outside the ECS loop.
 
 use bevy_ecs::system::SystemState;
-use dishaster_models::{
-    TrialCorpus, TrialIntro, TrialParticipantAppearance, TrialQARank, TrialResponseOption,
-    TrialSpeech, TrialSpeechItem, TrialStatement,
-};
 
-use crate::{prelude::*, resources::*, sim::Simulation};
+use crate::{
+    models::{TrialCorpus, TrialQARank},
+    prelude::*,
+    resources::*,
+    sim::Simulation,
+    views::{self, TrialIntro, TrialResponseOption, TrialSpeechItem, TrialStatement},
+};
 
 impl Simulation {
     pub(super) fn create_trial_intro(&mut self) -> TrialIntro {
@@ -28,19 +30,21 @@ impl Simulation {
         create_diner_statement_with_speech(speech_index, &registry.trial, &mut trial_session)
     }
 
-    pub(super) fn trial_respond(&mut self, resp_corpus_index: usize) -> TrialSpeech {
+    pub(super) fn trial_respond(&mut self, resp_corpus_index: usize) -> views::TrialSpeech {
         // Record the player's response choice
         let mut trial_session = self.world.resource_mut::<TrialSession>();
         trial_session.set_last_response(resp_corpus_index);
 
         // Respond with the selected speech
         let registry = self.world.resource::<GameModelRegistryRes>();
-        registry.trial.responses[resp_corpus_index].content.clone()
+        registry.trial.responses[resp_corpus_index]
+            .content
+            .to_view()
     }
 }
 
-fn random_appearance(rng: &mut impl Rng) -> TrialParticipantAppearance {
-    TrialParticipantAppearance {
+fn random_appearance(rng: &mut impl Rng) -> views::TrialParticipantAppearance {
+    views::TrialParticipantAppearance {
         emotion: [
             '😅', '😡', '😠', '😤', '😞', '😢', '😭', '😰', '😨', '😱', '😠',
         ]
@@ -113,7 +117,7 @@ fn create_diner_statement_with_speech(
     trial_registry: &TrialCorpus,
     trial_session: &mut TrialSession,
 ) -> TrialStatement {
-    let speech = trial_registry.diner_speeches[speech_index].clone();
+    let speech = trial_registry.diner_speeches[speech_index].to_view();
     let temperature = trial_session.temperature;
 
     let mut options: Vec<Vec<TrialResponseOption>> = Vec::new();
@@ -149,7 +153,7 @@ fn create_diner_statement_with_speech(
                     let response = &trial_registry.responses[idx];
                     TrialResponseOption {
                         corpus_index: idx,
-                        kind: response.kind,
+                        kind: response.kind.to_view(),
                         summary: response.summary.clone(),
                     }
                 })

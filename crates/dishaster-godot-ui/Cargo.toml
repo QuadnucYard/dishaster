@@ -10,7 +10,7 @@ dishrupt-core.workspace = true
 dishrupt-godot.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-l10n-godot.workspace = true
-dishaster-models.workspace = true
+dishaster-views.workspace = true
 
 godot.workspace = true
 signals2.workspace = true

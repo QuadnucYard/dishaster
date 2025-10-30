@@ -13,6 +13,7 @@ dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true
 dishrupt-l10n.workspace = true
 dishaster-models.workspace = true
+dishaster-views.workspace = true
 dishaster-interface.workspace = true
 dishaster-persistence.workspace = true
 dishaster-runner.workspace = true

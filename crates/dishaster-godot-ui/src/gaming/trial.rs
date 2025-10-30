@@ -1,4 +1,4 @@
-use dishaster_models::{
+use dishaster_views::{
     TrialIntro, TrialParticipantAppearance, TrialResponseKind, TrialResponseOption, TrialSpeech,
     TrialSpeechItem, TrialStatement,
 };

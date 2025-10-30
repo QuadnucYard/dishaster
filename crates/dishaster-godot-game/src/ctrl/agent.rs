@@ -1,6 +1,5 @@
 use dishaster_godot_ui::req::GameRequest;
-use dishaster_interface::event::Feedback;
-use dishaster_models::{Appearance, BodyPart};
+use dishaster_views::{Appearance, BodyPart, Feedback};
 use dishrupt_core::EntityId;
 use dishrupt_godot::{display::*, input::event::MouseButtonEvent};
 use dishrupt_godot_scene::SceneContext;

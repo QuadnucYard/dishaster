@@ -1,5 +1,7 @@
 #![allow(missing_docs)]
 
+use dishaster_views::FeedbackView;
+
 use super::prelude::*;
 
 // For now, we ue simple emoji strings as feedback indicators.
@@ -13,7 +15,7 @@ pub fn choose_feedback<'a>(rng: &mut impl Rng, pool: &'a [&str]) -> &'a str {
 }
 
 impl EventQueue {
-    pub fn emit_feedback(&mut self, event: FeedbackEvent) {
+    pub fn emit_feedback(&mut self, event: FeedbackView) {
         self.push(SimEvent::Feedback(event));
     }
 }

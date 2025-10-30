@@ -1,6 +1,6 @@
 //! Simulation commands and control interfaces.
 
-use dishaster_models::PricingMethod;
+use dishaster_views::PricingMethod;
 use dishrupt_core::EntityId;
 
 use crate::snapshots::DebugFlags;

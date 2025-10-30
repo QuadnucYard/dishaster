@@ -1,4 +1,4 @@
-use dishaster_models::PricingMethod;
+use dishaster_views::PricingMethod;
 use dishrupt_core::EntityId;
 use dishrupt_godot_ui::GuiRequest;
 
