@@ -1,6 +1,5 @@
 //! Dishaster Godot Game Module
 
-mod ctrl;
 mod dbgviz;
 mod handle_request;
 mod input;
@@ -25,7 +24,7 @@ use godot::{
 };
 use rustc_hash::FxHashMap;
 
-use self::{ctrl::*, perf::PerfTracker};
+use self::{perf::PerfTracker, present::*};
 use crate::{dbgviz::*, user_store::GodotUserStorage};
 
 pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
@@ -81,8 +80,8 @@ pub struct Game {
 
 #[derive(Default)]
 struct DisplayControllers {
-    agents: FxHashMap<EntityId, AgentController>,
-    dishes: FxHashMap<EntityId, DishController>,
+    agents: FxHashMap<EntityId, AgentPresenter>,
+    dishes: FxHashMap<EntityId, DishPresenter>,
 }
 
 impl Game {

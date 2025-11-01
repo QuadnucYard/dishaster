@@ -11,7 +11,7 @@ use godot::{
 use crate::input::{Pickable, PickingContext};
 
 #[allow(unused)]
-pub struct DishController {
+pub struct DishPresenter {
     entity: EntityId,
 
     root: GdNode2D,
@@ -22,7 +22,7 @@ pub struct DishController {
     original_price: Option<PricingMethod>,
 }
 
-impl DishController {
+impl DishPresenter {
     pub fn new(entity: EntityId, node: GdNode2D) -> Self {
         let area = node.get_child_of_type().unwrap();
         let price_label = node.get_node_as("Price/Label");
@@ -53,7 +53,7 @@ impl DishController {
     }
 }
 
-impl Pickable for DishController {
+impl Pickable for DishPresenter {
     fn collider_instance_id(&self) -> InstanceId {
         self.area.instance_id_unchecked()
     }

@@ -33,8 +33,8 @@ impl Game {
             pricing,
         });
 
-        if let Some(controller) = self.dc.dishes.get_mut(&dish) {
-            controller.set_price(pricing);
+        if let Some(presenter) = self.dc.dishes.get_mut(&dish) {
+            presenter.set_price(pricing);
         }
     }
 }

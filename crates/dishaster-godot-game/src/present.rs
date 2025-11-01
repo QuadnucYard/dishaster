@@ -1,8 +1,13 @@
+mod agent;
+mod dish;
+mod feedback;
+
 use dishaster_interface::{snapshots::DebugSnapshots, *};
 use dishaster_ui_protocol::UiCommand;
 use godot::global::godot_print;
 
-use super::{Game, ctrl::*};
+pub use self::{agent::AgentPresenter, dish::DishPresenter};
+use super::Game;
 
 const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
 
@@ -14,33 +19,33 @@ impl Game {
                     self.finish_day(false);
                 }
                 SimEvent::AgentSpawned { entity, appearance } => {
-                    let mut controller = AgentController::new(
+                    let mut presenter = AgentPresenter::new(
                         entity,
                         self.stage
                             .get_godot_node(entity)
                             .cloned()
                             .expect("missing godot node for agent"),
                     );
-                    controller.set_debug_enabled(self.debug_enabled);
+                    presenter.set_debug_enabled(self.debug_enabled);
                     if let Some(appearance) = &appearance {
-                        controller.set_appearance(appearance);
+                        presenter.set_appearance(appearance);
                     }
-                    self.dc.agents.insert(entity, controller);
+                    self.dc.agents.insert(entity, presenter);
                 }
                 SimEvent::AgentDespawned(entity) => {
                     self.dc.agents.remove(&entity);
                 }
                 SimEvent::DishSpawned(vm) => {
                     let entity = vm.entity;
-                    let mut controller = DishController::new(
+                    let mut presenter = DishPresenter::new(
                         entity,
                         self.stage
                             .get_godot_node(entity)
                             .cloned()
                             .expect("missing godot node for dish"),
                     );
-                    controller.set_view(vm);
-                    self.dc.dishes.insert(entity, controller);
+                    presenter.set_view(vm);
+                    self.dc.dishes.insert(entity, presenter);
                 }
                 SimEvent::Feedback(feedback) => {
                     if let Some(agent) = self.dc.agents.get_mut(&feedback.entity) {
