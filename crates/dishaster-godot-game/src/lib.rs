@@ -16,7 +16,7 @@ use dishaster_runner::{SimulationRunner, SnapshotFrame, SyncSimulationRunner};
 use dishaster_ui_protocol::{StatsView, UiCommand};
 use dishaster_views::DayHudState;
 use dishrupt_core::prelude::*;
-use dishrupt_godot::display::*;
+use dishrupt_godot::{NodeExt, display::*};
 use dishrupt_l10n::tr;
 use godot::{
     classes::{Node, Node2D},
@@ -136,7 +136,12 @@ impl Game {
         stage.set_root(root_entity, display_root.clone());
 
         // Set up debug visualization
-        let dbgviz = DbgViz::new(&stage_root, origin);
+
+        let dbgviz = {
+            let mut debug_root = stage_root.get_or_add_node_as::<Node2D>("Debug");
+            debug_root.set_position(origin);
+            DbgViz::new(debug_root)
+        };
 
         Self {
             root: gd,

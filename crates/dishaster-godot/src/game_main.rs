@@ -8,7 +8,7 @@ use dishaster_data::DataLoader;
 use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE, user_store::GodotUserStorage};
 use dishaster_godot_ui::register_guis;
 use dishaster_persistence::ProgressService;
-use dishrupt_godot::{audio::AudioManager, ext::NodeExt, input::listener::InputListener};
+use dishrupt_godot::{NodeExt, audio::AudioManager, input::listener::InputListener};
 use dishrupt_godot_scene::{SceneContext, SceneManager};
 use dishrupt_godot_ui::GuiManager;
 use dishrupt_l10n_godot::LocalizationManager;

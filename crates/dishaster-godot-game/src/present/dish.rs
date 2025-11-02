@@ -1,7 +1,7 @@
 use dishaster_ui_protocol::UiCommand;
 use dishaster_views::{DishPriceView, DishView, PricingMethod};
 use dishrupt_core::EntityId;
-use dishrupt_godot::{display::*, ext::NodeExt, input::event::MouseButtonEvent};
+use dishrupt_godot::{NodeExt, display::*, input::event::MouseButtonEvent};
 use dishrupt_l10n::tr;
 use godot::{
     classes::{Area2D, Label},

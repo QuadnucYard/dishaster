@@ -40,6 +40,10 @@ pub trait NodeExt {
     where
         T: GodotClass + Inherits<Node> + cap::GodotDefault + Bounds<Memory = bounds::MemManual>;
 
+    fn add_child_as<T>(&mut self, name: &str) -> Gd<T>
+    where
+        T: GodotClass + Inherits<Node> + cap::GodotDefault + Bounds<Memory = bounds::MemManual>;
+
     fn get_or_add_node_as<T>(&mut self, name: &str) -> Gd<T>
     where
         T: GodotClass + Inherits<Node> + cap::GodotDefault + Bounds<Memory = bounds::MemManual>;
@@ -105,6 +109,16 @@ impl NodeExt for Node {
             }
         }
         let child = T::new_alloc();
+        self.add_child(&child);
+        child
+    }
+
+    fn add_child_as<T>(&mut self, name: &str) -> Gd<T>
+    where
+        T: GodotClass + Inherits<Node> + cap::GodotDefault + Bounds<Memory = bounds::MemManual>,
+    {
+        let mut child = T::new_alloc();
+        child.upcast_mut::<Node>().set_name(name);
         self.add_child(&child);
         child
     }

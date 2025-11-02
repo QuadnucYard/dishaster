@@ -33,7 +33,8 @@ struct MovementDebugNodes {
 }
 
 impl MovementDebugOverlay {
-    pub fn new(root: Gd<Node2D>) -> Self {
+    pub fn new(mut root: Gd<Node2D>) -> Self {
+        root.set_z_index(100);
         Self {
             root,
             nodes: HashMap::new(),

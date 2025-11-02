@@ -44,7 +44,8 @@ struct QueueLaneDebugNodes {
 
 impl QueueDebugOverlay {
     /// Create the overlay attached to the provided Godot node.
-    pub fn new(root: Gd<Node2D>) -> Self {
+    pub fn new(mut root: Gd<Node2D>) -> Self {
+        root.set_z_index(101);
         Self {
             root,
             lanes: HashMap::new(),
