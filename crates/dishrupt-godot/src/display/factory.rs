@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use dishrupt_core::asset::{PrefabReference, SpriteReference};
 use godot::{
-    classes::{Node2D, PackedScene, ResourceLoader, Sprite2D, Texture2D},
+    classes::{Marker2D, Node2D, PackedScene, ResourceLoader, Sprite2D, Texture2D},
     prelude::*,
 };
 use rustc_hash::FxHashMap;
@@ -37,13 +37,27 @@ struct FactoryItem {
 }
 
 impl FactoryItem {
-    pub fn from_prefab(prefab: Gd<PackedScene>) -> FactoryItem {
+    pub fn from_prefab(prefab: Gd<PackedScene>) -> Self {
         Self {
             prefab,
             pool: Default::default(),
             count: 0,
             next_id: 0,
         }
+    }
+
+    pub fn from_empty<T>() -> Self
+    where
+        T: GodotClass
+            + Inherits<Node>
+            + godot::obj::cap::GodotDefault
+            + godot::obj::Bounds<Memory = godot::obj::bounds::MemManual>,
+    {
+        let mut scene = PackedScene::new_gd();
+        let node = T::new_alloc();
+        scene.pack(&node);
+        node.upcast().queue_free();
+        Self::from_prefab(scene)
     }
 
     pub fn create_instance(&mut self) -> Gd<Node2D> {
@@ -92,10 +106,25 @@ impl DisplayFactory {
     }
 
     pub fn init(&mut self) {
-        let dummy_prefab = PrefabReference::new("");
-        self.res_registry.insert(dummy_prefab.clone(), 0);
-        self.items
-            .push(FactoryItem::from_prefab(make_empty_prefab()));
+        self.prepare_dummy_prefab::<Node2D>("");
+        self.prepare_dummy_prefab::<Marker2D>("$Marker2D");
+    }
+
+    pub fn prepare_dummy_prefab<T>(&mut self, name: &str)
+    where
+        T: GodotClass
+            + Inherits<Node>
+            + godot::obj::cap::GodotDefault
+            + godot::obj::Bounds<Memory = godot::obj::bounds::MemManual>,
+    {
+        self.intern_dummy_prefab(name);
+        self.items.push(FactoryItem::from_empty::<T>());
+    }
+
+    fn intern_dummy_prefab(&mut self, name: &str) {
+        let dummy_prefab = PrefabReference::new(name);
+        let next_index = self.items.len() as PrefabIndex;
+        self.res_registry.insert(dummy_prefab.clone(), next_index);
     }
 
     pub fn create(&mut self, prefab: &PrefabReference) -> GdNode2D {
@@ -187,14 +216,6 @@ pub fn load_or_make_prefab_sync(prefab: &PrefabReference) -> Gd<PackedScene> {
         sprite.set_texture(&texture);
     }
     scene.pack(&sprite);
-    scene
-}
-
-pub fn make_empty_prefab() -> Gd<PackedScene> {
-    let mut scene = PackedScene::new_gd();
-    let mut node = Node2D::new_alloc();
-    scene.pack(&node);
-    node.queue_free();
     scene
 }
 
