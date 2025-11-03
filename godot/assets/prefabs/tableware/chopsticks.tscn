@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://33icn2c82ykl"]
+
+[ext_resource type="Texture2D" uid="uid://dbu1r5c2v842f" path="res://assets/sprites/emojis/1F962.svg" id="1_47bqs"]
+
+[node name="Chopsticks" type="Node2D"]
+
+[node name="1f962" type="Sprite2D" parent="."]
+texture = ExtResource("1_47bqs")

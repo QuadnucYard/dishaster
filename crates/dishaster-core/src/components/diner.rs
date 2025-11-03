@@ -32,13 +32,11 @@ pub struct Diner {
 /// Current state of the diner
 #[derive(Component, Default)]
 pub struct DinerState {
-    /// Whether the diner has a tray
-    pub has_tray: bool,
-    /// Whether the diner has chopsticks
-    pub has_chopsticks: bool,
-    /// Whether the diner has been served
-    pub is_served: bool,
-    /// What was served (if any) - stored for memory updates after eating
+    /// Entity of the tray held by the diner, if any
+    pub tray: Option<Entity>,
+    /// Entity of the chopsticks held by the diner, if any
+    pub chopsticks: Option<Entity>,
+    /// Served dish held by the diner, if any
     pub served_dish: Option<ServedDish>,
 }
 

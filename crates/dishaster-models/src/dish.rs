@@ -161,13 +161,11 @@ pub struct DishRuntimeState {
     pub service_count: u32,
 }
 
-/// What gets served to a diner - minimal and focused
+/// What gets served to a diner
 #[derive(Debug, Clone, Deserialize)]
 pub struct ServedDish {
     /// Original dish reference
     pub dish_id: ModelId,
-    /// Name for display
-    pub name: EcoString,
     /// Actual values at time of service
     pub served_quantity: f32,
     /// Quality level when served

@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://d4cukrqqihstn"]
+
+[ext_resource type="Texture2D" uid="uid://dou0d3lpl4pv1" path="res://assets/sprites/emojis/1F37D.svg" id="1_minml"]
+
+[node name="Tray" type="Node2D"]
+
+[node name="1f37d" type="Sprite2D" parent="."]
+texture = ExtResource("1_minml")

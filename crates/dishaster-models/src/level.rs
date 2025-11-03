@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::{DinerProfile, DinerRandomizerModel, ServedDish, WindowConfiguration};
+use crate::{DinerProfile, DinerRandomizerModel, WindowConfiguration};
 
 /// Complete level configuration defining the game scenario
 #[derive(Debug, Clone, Deserialize)]
@@ -39,19 +39,6 @@ impl HasId for LevelConfig {
     fn id(&self) -> &ModelId {
         &self.id
     }
-}
-
-/// Legacy support - can be removed once systems are updated
-#[derive(Debug, Clone, Deserialize)]
-pub struct ActiveWindowModel {
-    /// Reference to service template
-    pub service: ModelId,
-    /// Position of the window
-    pub pos: XRange,
-    /// Whether the window is currently open for service
-    pub is_open: bool,
-    /// Available dishes at this window
-    pub dishes: Vec<Option<ServedDish>>,
 }
 
 /// Physical placement configuration for dining tables

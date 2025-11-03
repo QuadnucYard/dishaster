@@ -7,6 +7,7 @@
         initial_stock: 120,
         processing_time: 3.0,
         display: (res: "dispensers/tray_dispenser"),
+        item_display: (res: "tableware/tray"),
     ),
     (
         id: "chopstick_dispenser",
@@ -16,5 +17,6 @@
         initial_stock: 250,
         processing_time: 2.0,
         display: (res: "dispensers/chopstick_dispenser"),
+        item_display: (res: "tableware/chopsticks"),
     ),
 ]

@@ -26,3 +26,9 @@ texture = SubResource("GradientTexture2D_lhhjm")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0, -12)
 texture = SubResource("GradientTexture2D_dae6u")
+
+[node name="Slot0" type="Marker2D" parent="."]
+position = Vector2(-15, -14)
+
+[node name="Slot1" type="Marker2D" parent="."]
+position = Vector2(15, -14)

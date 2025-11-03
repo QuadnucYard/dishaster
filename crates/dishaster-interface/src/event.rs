@@ -20,6 +20,8 @@ pub enum SimEvent {
     AgentDespawned(EntityId),
     /// A dish has spawned in the simulation with its pricing snapshot.
     DishSpawned(DishView),
+    /// Diner's held items have changed.
+    DinerItemsChanged(DinerItemsChanged),
     /// Agent feedback.
     Feedback(FeedbackView),
 
@@ -31,4 +33,16 @@ pub enum SimEvent {
     TrialRightSpeak(TrialSpeech),
     /// Trial has ended.
     TrialEnd,
+}
+
+/// Diner item state change event.
+pub struct DinerItemsChanged {
+    /// Diner entity ID.
+    pub entity: EntityId,
+    /// Whether the diner is currently eating.
+    pub is_eating: bool,
+    /// Tray entity ID, if any.
+    pub tray_entity: Option<EntityId>,
+    /// Chopsticks entity ID, if any.
+    pub chopsticks_entity: Option<EntityId>,
 }

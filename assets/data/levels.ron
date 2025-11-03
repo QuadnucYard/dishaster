@@ -207,10 +207,10 @@
             (center_pos: (22., 12.), model: "normal_table"),
         ],
         tray_dispenser_placements: [
-            (center_pos: (7.0, 14.0), model: "chopstick_dispenser"),
+            (center_pos: (7.0, 14.0), model: "tray_dispenser"),
         ],
         chopstick_dispenser_placements: [
-            (center_pos: (15.0, 14.0), model: "tray_dispenser"),
+            (center_pos: (15.0, 14.0), model: "chopstick_dispenser"),
         ],
         collector_placements: [
             (center_pos: (22.0, 2.0), model: "main_dish_return"),

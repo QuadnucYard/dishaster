@@ -168,7 +168,7 @@ impl Simulation {
             diner_query
                 .iter(&self.world)
                 .map(|(entity, goals)| DinerDebugSnapshot {
-                    core_id: entity.to_entity_id(),
+                    entity: entity.to_entity_id(),
                     goal_str: eco_format!("{:?}", goals.current()),
                 })
                 .collect(),

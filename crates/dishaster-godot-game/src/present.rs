@@ -2,7 +2,7 @@ mod agent;
 mod dish;
 mod feedback;
 
-use dishaster_interface::{snapshots::DebugSnapshots, *};
+use dishaster_interface::{snapshots::*, *};
 use dishaster_ui_protocol::UiCommand;
 use godot::global::godot_print;
 
@@ -46,6 +46,16 @@ impl Game {
                     );
                     presenter.set_view(vm);
                     self.dc.dishes.insert(entity, presenter);
+                }
+                SimEvent::DinerItemsChanged(e) => {
+                    if let Some(agent) = self.dc.agents.get_mut(&e.entity) {
+                        agent.update_items(
+                            e.is_eating,
+                            e.tray_entity,
+                            e.chopsticks_entity,
+                            &mut self.stage,
+                        );
+                    }
                 }
                 SimEvent::Feedback(feedback) => {
                     if let Some(agent) = self.dc.agents.get_mut(&feedback.entity) {
@@ -95,7 +105,7 @@ impl Game {
     pub(crate) fn update_other_debug(&mut self, snapshot: &DebugSnapshots) {
         if let Some(diner_debugs) = &snapshot.diners {
             for diner_debug in diner_debugs {
-                if let Some(agent) = self.dc.agents.get_mut(&diner_debug.core_id) {
+                if let Some(agent) = self.dc.agents.get_mut(&diner_debug.entity) {
                     agent.update_debug(&diner_debug.goal_str);
                 }
             }

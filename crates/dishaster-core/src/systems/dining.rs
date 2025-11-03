@@ -243,6 +243,7 @@ fn handle_decide_window_goal(
 }
 
 fn handle_pick_tray_goal(
+    mut commands: Commands,
     diner_query: Query<(
         Entity,
         &mut DinerState,
@@ -252,6 +253,8 @@ fn handle_pick_tray_goal(
         &mut EntityRng,
     )>,
     dispenser_query: Query<(Entity, &Dispenser)>,
+    registry: Res<GameModelRegistryRes>,
+    mut events: ResMut<EventQueue>,
 ) {
     for (entity, mut state, mut goal, mut targets, mut movement, mut rng) in diner_query {
         if !goal.is(DinerGoal::PickTray) {
@@ -286,7 +289,35 @@ fn handle_pick_tray_goal(
                 target: "diner",
                 "picked_tray: entity={entity:?}"
             );
-            state.has_tray = true;
+
+            // Get the dispenser model handle
+            if let Some(tray_dispenser_entity) = targets.tray_target
+                && let Ok((_, dispenser)) = dispenser_query.get(tray_dispenser_entity)
+            {
+                let dispenser_model = registry.dispensers.get(dispenser.model);
+                let tray_res = dispenser_model.item_display.res.clone();
+                let tray_entity = commands
+                    .spawn((
+                        DisplayState {
+                            proto: tray_res,
+                            ..Default::default()
+                        },
+                        Transform {
+                            ..Default::default()
+                        },
+                    ))
+                    .id();
+
+                state.tray = Some(tray_entity);
+
+                events.push(SimEvent::DinerItemsChanged(DinerItemsChanged {
+                    entity: entity.to_entity_id(),
+                    is_eating: false,
+                    tray_entity: Some(tray_entity.to_entity_id()),
+                    chopsticks_entity: state.chopsticks.to_entity_id(),
+                }));
+            }
+
             goal.update(if rng.random_bool(0.3) {
                 // 30% chance to pick chopsticks next
                 DinerGoal::PickChopsticks
@@ -299,6 +330,7 @@ fn handle_pick_tray_goal(
 }
 
 fn handle_pick_chopsticks_goal(
+    mut commands: Commands,
     diner_query: Query<(
         Entity,
         &mut DinerState,
@@ -307,6 +339,8 @@ fn handle_pick_chopsticks_goal(
         &mut Movement,
     )>,
     dispenser_query: Query<(Entity, &Dispenser)>,
+    registry: Res<GameModelRegistryRes>,
+    mut events: ResMut<EventQueue>,
 ) {
     for (entity, mut state, mut goal, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::PickChopsticks) {
@@ -341,8 +375,36 @@ fn handle_pick_chopsticks_goal(
                 target: "diner",
                 "picked_chopsticks: entity={entity:?}"
             );
-            state.has_chopsticks = true;
-            goal.update(if state.is_served {
+
+            // Get the dispenser model handle
+            if let Some(chopstick_dispenser_entity) = targets.chopstick_target
+                && let Ok((_, dispenser)) = dispenser_query.get(chopstick_dispenser_entity)
+            {
+                let dispenser_model = registry.dispensers.get(dispenser.model);
+                let chopsticks_res = dispenser_model.item_display.res.clone();
+                let chopsticks_entity = commands
+                    .spawn((
+                        DisplayState {
+                            proto: chopsticks_res,
+                            ..Default::default()
+                        },
+                        Transform {
+                            ..Default::default()
+                        },
+                    ))
+                    .id();
+
+                state.chopsticks = Some(chopsticks_entity);
+
+                events.push(SimEvent::DinerItemsChanged(DinerItemsChanged {
+                    entity: entity.to_entity_id(),
+                    is_eating: false,
+                    tray_entity: state.tray.to_entity_id(),
+                    chopsticks_entity: Some(chopsticks_entity.to_entity_id()),
+                }));
+            }
+
+            goal.update(if state.served_dish.is_some() {
                 DinerGoal::FindSeat
             } else {
                 println!("Chopsticks picked before being served!");
@@ -468,15 +530,9 @@ fn handle_queue_for_window_goal(
 
 fn handle_get_served_goal(
     mut commands: Commands,
-    diner_query: Query<(
-        Entity,
-        &mut DinerState,
-        &mut DinerGoalState,
-        &DinerTargets,
-        &ServiceSession,
-    )>,
+    diner_query: Query<(Entity, &mut DinerGoalState, &DinerTargets, &ServiceSession)>,
 ) {
-    for (entity, mut state, mut goal, targets, session) in diner_query {
+    for (entity, mut goal, targets, session) in diner_query {
         if !goal.is(DinerGoal::GetServed) {
             continue;
         }
@@ -496,7 +552,7 @@ fn handle_get_served_goal(
             .entity(entity)
             .remove::<QueueMember>()
             .remove::<ServiceSession>();
-        state.is_served = true;
+
         goal.update(if targets.chopstick_target.is_some() {
             DinerGoal::FindSeat
         } else {
@@ -593,12 +649,14 @@ fn handle_move_to_seat_goal(
     diner_query: Query<(
         Entity,
         &mut DinerGoalState,
+        &DinerState,
         &mut DinerTargets,
         &mut Movement,
     )>,
     mut table_query: Query<(Entity, &mut DiningTable)>,
+    mut events: ResMut<EventQueue>,
 ) {
-    for (entity, mut goal, mut targets, mut movement) in diner_query {
+    for (entity, mut goal, state, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::MoveToSeat) {
             continue;
         }
@@ -642,6 +700,14 @@ fn handle_move_to_seat_goal(
             movement.stop_as_reached();
             movement.pos = seat_pos; // snap to seat position
             table.occupants[seat_index] = Some(entity); // Mark the seat as occupied
+
+            events.push(SimEvent::DinerItemsChanged(DinerItemsChanged {
+                entity: entity.to_entity_id(),
+                is_eating: true,
+                tray_entity: state.tray.to_entity_id(),
+                chopsticks_entity: state.chopsticks.to_entity_id(),
+            }));
+
             goal.update(DinerGoal::Eat);
             continue;
         }
@@ -660,6 +726,7 @@ fn handle_move_to_seat_goal(
 
 fn handle_eat_goal(
     mut diner_query: Query<(
+        Entity,
         &mut DinerGoalState,
         &mut DinerState,
         &mut DinerTargets,
@@ -671,10 +738,11 @@ fn handle_eat_goal(
     mut table_query: Query<(Entity, &mut DiningTable)>,
     registry: Res<GameModelRegistryRes>,
     time: Res<Time>,
+    mut events: ResMut<EventQueue>,
 ) {
     let satisfaction_weights = SatisfactionWeights::default();
 
-    for (mut goal, state, mut targets, dining_profile, mut psych_state, mut ltm, mut rng) in
+    for (entity, mut goal, state, mut targets, dining_profile, mut psych_state, mut ltm, mut rng) in
         diner_query.iter_mut()
     {
         if !goal.is(DinerGoal::Eat) {
@@ -742,19 +810,34 @@ fn handle_eat_goal(
             table.seat_positions[seat_index]
         );
 
+        events.push(SimEvent::DinerItemsChanged(DinerItemsChanged {
+            entity: entity.to_entity_id(),
+            is_eating: false,
+            tray_entity: state.tray.to_entity_id(),
+            chopsticks_entity: state.chopsticks.to_entity_id(),
+        }));
+
         goal.update(DinerGoal::ReturnDishes);
     }
 }
 
 fn handle_return_dishes_goal(
-    diner_query: Query<(&mut DinerGoalState, &mut DinerTargets, &mut Movement)>,
+    mut commands: Commands,
+    diner_query: Query<(
+        Entity,
+        &mut DinerGoalState,
+        &mut DinerState,
+        &mut DinerTargets,
+        &mut Movement,
+    )>,
     collector_query: Query<(Entity, &DishCollector)>,
+    mut events: ResMut<EventQueue>,
 ) {
     if collector_query.is_empty() {
         return;
     }
 
-    for (mut goal, mut targets, mut movement) in diner_query {
+    for (entity, mut goal, mut state, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::ReturnDishes) {
             continue;
         }
@@ -782,6 +865,7 @@ fn handle_return_dishes_goal(
         }
 
         if movement.target_reached {
+            movement.stop_as_reached();
             if goal.timer < 2.0 {
                 // Simulate time taken to return dishes
                 continue;
@@ -791,7 +875,23 @@ fn handle_return_dishes_goal(
                 "dishes_returned: pos={:.2}",
                 movement.pos
             );
-            movement.stop_as_reached();
+
+            // Despawn tablewares
+            if let Some(chopsticks_entity) = state.chopsticks.take() {
+                commands.entity(chopsticks_entity).despawn();
+            }
+            if let Some(tray_entity) = state.tray.take() {
+                commands.entity(tray_entity).despawn();
+            }
+            state.served_dish = None;
+
+            events.push(SimEvent::DinerItemsChanged(DinerItemsChanged {
+                entity: entity.to_entity_id(),
+                is_eating: false,
+                tray_entity: None,
+                chopsticks_entity: None,
+            }));
+
             goal.update(DinerGoal::Leave);
         } else {
             goal.reset_timer();

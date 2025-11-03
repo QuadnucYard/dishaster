@@ -57,13 +57,26 @@ impl<T> IntoResource for T {}
 
 /// Extension trait to convert ECS Entity to EntityId
 pub trait ToEntityId {
+    /// The output type
+    type Output;
+
     /// Convert to EntityId
-    fn to_entity_id(self) -> EntityId;
+    fn to_entity_id(self) -> Self::Output;
 }
 
 impl ToEntityId for Entity {
-    fn to_entity_id(self) -> EntityId {
+    type Output = EntityId;
+
+    fn to_entity_id(self) -> Self::Output {
         EntityId::new(self.to_bits()).expect("Entity should never be zero")
+    }
+}
+
+impl ToEntityId for Option<Entity> {
+    type Output = Option<EntityId>;
+
+    fn to_entity_id(self) -> Self::Output {
+        self.map(|e| e.to_entity_id())
     }
 }
 

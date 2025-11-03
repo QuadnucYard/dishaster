@@ -67,7 +67,7 @@ pub struct Game {
     dbgviz: DbgViz,
 
     perf_tracker: PerfTracker,
-    dc: DisplayControllers,
+    dc: DisplayPresenters,
 
     phase: DayPhase,
     telemetry: DayTelemetry,
@@ -79,7 +79,7 @@ pub struct Game {
 }
 
 #[derive(Default)]
-struct DisplayControllers {
+struct DisplayPresenters {
     agents: FxHashMap<EntityId, AgentPresenter>,
     dishes: FxHashMap<EntityId, DishPresenter>,
 }

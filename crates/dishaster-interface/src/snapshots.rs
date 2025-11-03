@@ -159,7 +159,21 @@ pub struct CrowdFieldDebugSnapshot {
 /// Debug visualization payload for a diner entity.
 pub struct DinerDebugSnapshot {
     /// Identifier of the core entity this debug data describes.
-    pub core_id: EntityId,
+    pub entity: EntityId,
     /// Current goal state as a string.
     pub goal_str: EcoString,
+}
+
+/// Snapshot of items currently carried by a diner for visual display
+pub struct DinerItemsSnapshot {
+    /// Identifier of the diner entity.
+    pub entity: EntityId,
+    /// The entity ID of the tray carried by the diner, if any
+    pub tray: Option<EntityId>,
+    /// The entity ID of the chopsticks carried by the diner, if any
+    pub chopsticks: Option<EntityId>,
+    /// Optional dish model ID for visual representation
+    pub dish: Option<ModelId>,
+    /// Whether the diner is currently eating at a table (hide carried items, show on table)
+    pub is_eating: bool,
 }

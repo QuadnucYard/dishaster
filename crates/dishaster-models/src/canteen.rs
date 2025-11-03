@@ -77,6 +77,8 @@ pub struct DispenserModel {
     pub processing_time: Seconds,
     /// Display model
     pub display: DisplayModel,
+    /// Display model for the items dispensed
+    pub item_display: DisplayModel,
 }
 
 impl HasId for DispenserModel {
