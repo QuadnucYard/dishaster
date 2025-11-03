@@ -160,20 +160,3 @@ pub struct DishRuntimeState {
     /// Times served today
     pub service_count: u32,
 }
-
-/// What gets served to a diner
-#[derive(Debug, Clone, Deserialize)]
-pub struct ServedDish {
-    /// Original dish reference
-    pub dish_id: ModelId,
-    /// Actual values at time of service
-    pub served_quantity: f32,
-    /// Quality level when served
-    pub served_quality: f32,
-    /// Final price charged to customer
-    pub price_paid: f32,
-    /// Time taken to serve this dish
-    pub service_time: Seconds,
-    /// Any contamination
-    pub contamination_level: f32,
-}

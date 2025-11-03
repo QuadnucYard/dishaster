@@ -46,12 +46,15 @@ enum ServingMessageKind {
 
 /// Advance serving conversations using queued messages.
 pub fn process_serving_messages(
-    mut sessions: Query<(Entity, &mut ServiceSession)>,
+    mut commands: Commands,
+    mut sessions: Query<(Entity, &mut ServiceSession, &mut DinerState)>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement)>,
+    window_query: Query<&WindowDishes>,
     mut queue: ResMut<ServingCommsQueue>,
     mut events: ResMut<EventQueue>,
     time: Res<Time>,
     mut rng: ResMut<ServingRng>,
+    registry: Res<GameModelRegistryRes>,
 ) {
     let now = time.current_time;
     // Deliver any elapsed step so the diner and staff state machines stay in sync.
@@ -65,9 +68,9 @@ pub fn process_serving_messages(
             );
             continue;
         };
-        let Ok((_, mut session)) = sessions.get_mut(diner) else {
+        let Ok((_, mut session, mut diner_state)) = sessions.get_mut(diner) else {
             log::warn!(
-                target: "serving",
+                target: "diner",
                 "Diner session not found: {diner:?}"
             );
             // Diner is gone or session ended; free the staff slot.
@@ -188,6 +191,64 @@ pub fn process_serving_messages(
                 let Some(request) = session.request.as_ref() else {
                     continue;
                 };
+
+                // Generate the served dish from current window state
+                let service_time = (now - session.started_at) as f32;
+
+                // Query window dishes to get current state and pricing
+                if let Ok(window_dishes) = window_query.get(session.window)
+                    // Find the dish that was requested
+                    && let Some(active_dish) = window_dishes
+                        .dishes
+                        .iter()
+                        .find(|d| d.assignment.dish_id == request.dish_id)
+                {
+                    // Calculate price based on pricing config
+                    let price_paid = match active_dish.assignment.pricing.method {
+                        PricingMethod::PerPortion(price) => price,
+                        PricingMethod::ByWeight(price_per_kg) => {
+                            // For now, assume standard portion weight of 0.5 kg
+                            price_per_kg * 0.5
+                        }
+                    };
+
+                    let Some(dish_model) = registry.dishes.get_by_id(&request.dish_id) else {
+                        log::error!(
+                            target: "diner",
+                            "served dish id {:?} not found in registry!",
+                            request.dish_id
+                        );
+                        continue;
+                    };
+                    // Assign the served dish to the diner's state
+                    let dish_entity = commands
+                        .spawn((
+                            DisplayState {
+                                proto: dish_model.display.res.clone(),
+                                ..Default::default()
+                            },
+                            Transform {
+                                ..Default::default()
+                            },
+                        ))
+                        .id();
+                    diner_state.served_dish = Some(ServedDish {
+                        entity: dish_entity,
+                        dish_id: request.dish_id.clone(),
+                        served_quantity: active_dish.state.current_quantity.min(1.0),
+                        served_quality: active_dish.state.current_quality,
+                        price_paid,
+                        service_time,
+                        contamination_level: active_dish.state.contamination_level,
+                    });
+                } else {
+                    log::warn!(
+                        target: "serving",
+                        "Could not find active dish for request {:?} in window {:?}",
+                        request.dish_id,
+                        session.window,
+                    );
+                }
 
                 let staff_feedback = Feedback::Thought(eco_format!("{} ✅", request.dish_name));
                 events.emit_feedback(FeedbackView {

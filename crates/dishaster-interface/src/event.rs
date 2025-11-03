@@ -21,7 +21,12 @@ pub enum SimEvent {
     /// A dish has spawned in the simulation with its pricing snapshot.
     DishSpawned(DishView),
     /// Diner's held items have changed.
-    DinerItemsChanged(DinerItemsChanged),
+    DinerItemsChanged {
+        /// Diner entity ID.
+        entity: EntityId,
+        /// Type of change to the diner's items.
+        change: DinerItemsChange,
+    },
     /// Agent feedback.
     Feedback(FeedbackView),
 
@@ -35,14 +40,18 @@ pub enum SimEvent {
     TrialEnd,
 }
 
-/// Diner item state change event.
-pub struct DinerItemsChanged {
-    /// Diner entity ID.
-    pub entity: EntityId,
-    /// Whether the diner is currently eating.
-    pub is_eating: bool,
-    /// Tray entity ID, if any.
-    pub tray_entity: Option<EntityId>,
-    /// Chopsticks entity ID, if any.
-    pub chopsticks_entity: Option<EntityId>,
+/// Types of changes to a diner's held items.
+pub enum DinerItemsChange {
+    /// Diner picked up a tray.
+    PickTray(EntityId),
+    /// Diner picked up chopsticks.
+    PickChopsticks(EntityId),
+    /// Diner picked up a dish.
+    PickDish(EntityId),
+    /// Diner started eating at a table.
+    StartEating,
+    /// Diner finished eating.
+    FinishEating,
+    /// Diner dropped all items (when returning dishes).
+    DropAll,
 }

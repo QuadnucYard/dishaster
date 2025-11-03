@@ -1,4 +1,5 @@
 mod agent;
+mod diner_items;
 mod dish;
 mod feedback;
 
@@ -47,14 +48,9 @@ impl Game {
                     presenter.set_view(vm);
                     self.dc.dishes.insert(entity, presenter);
                 }
-                SimEvent::DinerItemsChanged(e) => {
-                    if let Some(agent) = self.dc.agents.get_mut(&e.entity) {
-                        agent.update_items(
-                            e.is_eating,
-                            e.tray_entity,
-                            e.chopsticks_entity,
-                            &mut self.stage,
-                        );
+                SimEvent::DinerItemsChanged { entity, change } => {
+                    if let Some(agent) = self.dc.agents.get_mut(&entity) {
+                        agent.handle_item_change(change, &mut self.stage);
                     }
                 }
                 SimEvent::Feedback(feedback) => {

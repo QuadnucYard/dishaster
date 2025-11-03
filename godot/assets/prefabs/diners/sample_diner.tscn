@@ -54,8 +54,10 @@ position = Vector2(0, -64)
 scale = Vector2(0.45833337, 0.45833337)
 texture = ExtResource("5_ywdyx")
 
-[node name="TraySlot" type="Marker2D" parent="."]
+[node name="ItemSlots" type="Node2D" parent="."]
+
+[node name="TraySlot" type="Marker2D" parent="ItemSlots"]
 position = Vector2(0, -32)
 
-[node name="ChopsticksSlot" type="Marker2D" parent="."]
+[node name="ChopsticksSlot" type="Marker2D" parent="ItemSlots"]
 position = Vector2(-8, -40)
