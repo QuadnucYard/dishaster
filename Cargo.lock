@@ -422,17 +422,15 @@ name = "dishaster-core"
 version = "0.1.0"
 dependencies = [
  "bevy_ecs",
- "derive_more",
  "dishaster-interface",
  "dishaster-models",
  "dishaster-navigation",
  "dishaster-views",
  "dishrupt-core",
  "dishrupt-ecs",
+ "dishrupt-rng",
  "log",
  "ordered-float",
- "rand",
- "rand_xoshiro",
  "rustc-hash",
 ]
 
@@ -664,6 +662,16 @@ name = "dishrupt-persistence"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+]
+
+[[package]]
+name = "dishrupt-rng"
+version = "0.1.0"
+dependencies = [
+ "bevy_ecs",
+ "derive_more",
+ "rand",
+ "rand_xoshiro",
 ]
 
 [[package]]

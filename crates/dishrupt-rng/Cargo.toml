@@ -1,0 +1,15 @@
+[package]
+name = "dishrupt-rng"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy_ecs.workspace = true
+derive_more.workspace = true
+rand.workspace = true
+rand_xoshiro.workspace = true
+
+[lints]
+workspace = true

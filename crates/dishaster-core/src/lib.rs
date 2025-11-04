@@ -7,7 +7,6 @@ mod command_handle;
 pub(crate) mod components;
 pub(crate) mod constants;
 pub(crate) mod resources;
-pub mod rng;
 pub mod sim;
 mod snapshot;
 pub(crate) mod systems;
@@ -24,12 +23,11 @@ pub mod views {
 }
 
 mod prelude {
-    pub use derive_more::derive::{Deref, DerefMut};
     pub use dishrupt_core::prelude::*;
     pub use dishrupt_ecs::prelude::*;
-    pub use rand::prelude::*;
+    pub use dishrupt_rng::prelude::*;
 
-    pub use crate::{Tick, adapter::*, rng::*};
+    pub use crate::{Tick, adapter::*};
 }
 
 /// Type alias for simulation tick count

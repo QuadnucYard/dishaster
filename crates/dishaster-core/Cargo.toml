@@ -8,17 +8,15 @@ edition.workspace = true
 [dependencies]
 dishrupt-core.workspace = true
 dishrupt-ecs.workspace = true
+dishrupt-rng.workspace = true
 dishaster-models.workspace = true
 dishaster-views.workspace = true
 dishaster-interface.workspace = true
 dishaster-navigation.workspace = true
 
 bevy_ecs.workspace = true
-derive_more.workspace = true
 log.workspace = true
 ordered-float.workspace = true
-rand.workspace = true
-rand_xoshiro.workspace = true
 rustc-hash.workspace = true
 
 [lints]
