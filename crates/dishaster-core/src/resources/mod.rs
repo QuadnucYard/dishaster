@@ -10,10 +10,6 @@ pub use time::Time;
 
 use crate::{models::*, prelude::*};
 
-/// Root entity for all display-related objects in the scene
-#[derive(Resource)]
-pub struct DisplayRoot(pub Entity);
-
 #[allow(missing_docs)]
 pub struct NavigationRngTag;
 /// SystemRng specialized for navigation systems

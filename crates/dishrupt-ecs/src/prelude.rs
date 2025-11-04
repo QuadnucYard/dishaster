@@ -4,5 +4,5 @@ pub use bevy_ecs::prelude::*;
 
 pub use crate::{
     CompWrapper, IntoComponent, IntoResource, ResWrapper, ToEntity, ToEntityId,
-    display::{DisplayState, Transform},
+    display::{DisplayRoot, DisplayState, Transform},
 };

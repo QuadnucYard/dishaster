@@ -4,6 +4,10 @@ use dishrupt_core::prelude::*;
 
 use crate::prelude::*;
 
+/// Root entity for all display-related objects in the scene
+#[derive(Resource)]
+pub struct DisplayRoot(pub Entity);
+
 /// Display state component for display entities
 #[derive(Component, Default)]
 pub struct DisplayState {
