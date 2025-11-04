@@ -12,12 +12,10 @@ test = false
 dishrupt-core.workspace = true
 dishrupt-runner.workspace = true
 dishrupt-godot.workspace = true
-dishrupt-godot-ui.workspace = true
-dishrupt-godot-scene.workspace = true
-
 dishaster-opening.workspace = true
 
 godot.workspace = true
+rustc-hash.workspace = true
 
 [lints]
 workspace = true

@@ -503,10 +503,9 @@ dependencies = [
  "dishaster-opening",
  "dishrupt-core",
  "dishrupt-godot",
- "dishrupt-godot-scene",
- "dishrupt-godot-ui",
  "dishrupt-runner",
  "godot",
+ "rustc-hash",
 ]
 
 [[package]]

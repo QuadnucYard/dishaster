@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dbqaxroeicgq1"]
-
-[ext_resource type="Texture2D" uid="uid://cyl7vn8jf8ug2" path="res://assets/sprites/emojis/sweat_smile.svg" id="1_fs305"]
-
-[node name="Emoji" type="Node2D"]
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_fs305")

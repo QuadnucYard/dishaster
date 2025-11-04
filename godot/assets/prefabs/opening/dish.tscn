@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://b2frv17uw6j4m"]
-
-[ext_resource type="Texture2D" uid="uid://tj2psheu4xjk" path="res://assets/sprites/emojis/rice.svg" id="1_kytly"]
-
-[node name="Dish" type="Node2D"]
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_kytly")

@@ -1,10 +1,12 @@
-//! Opening animation simulation with flying dishes, emojis, and review texts
+//! Opening animation simulation with flying foods, faces, and review texts
 
 pub mod components;
+pub mod protocol;
 pub mod resources;
-mod sim;
+pub mod sim;
 mod systems;
 
+pub use resources::{OpeningAssets, OpeningConfig};
 pub use sim::{OpeningSimulationFeat, Simulation};
 
 mod prelude {

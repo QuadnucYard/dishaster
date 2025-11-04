@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://dbqaxroeicgq1"]
+
+[ext_resource type="Texture2D" uid="uid://chssrg42hxx44" path="res://assets/sprites/atlas/faces.svg" id="1_2yria"]
+
+[node name="Face" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_2yria")
+hframes = 8
+vframes = 8

@@ -1,30 +1,66 @@
 //! Components for opening animation items
 
-use dishrupt_core::asset::PrefabReference;
-
 use crate::prelude::*;
 
-/// Component for dish icon entity. Holds the prefab reference for this dish.
+/// Component for food icon entity
 #[derive(Component)]
-pub struct DishIcon {
-    /// Prefab reference used by the presenter / stage
-    pub proto: PrefabReference,
+pub struct DishObject {
+    /// Visual variant index (which sprite to use)
+    pub variant: u8,
 }
 
-/// Component for emoji icon entity. Holds the prefab reference for this emoji.
+/// Component for face icon entity
 #[derive(Component)]
-pub struct EmojiIcon {
-    /// Prefab reference used by the presenter / stage
-    pub proto: PrefabReference,
+pub struct EmojiObject {
+    /// Visual variant index (which face sprite to use)
+    pub variant: u8,
 }
-
-// (DishIcon and EmojiIcon are defined above with prefab references)
 
 /// Component for review text entity
 #[derive(Component)]
-pub struct ReviewText {
+pub struct TextObject {
     /// The text content
     pub content: String,
+}
+
+/// Color modulation for tinting sprites
+#[derive(Component, Clone, Copy)]
+pub struct ColorTint {
+    /// Red channel (0.0 to 1.0)
+    pub r: f32,
+    /// Green channel (0.0 to 1.0)
+    pub g: f32,
+    /// Blue channel (0.0 to 1.0)
+    pub b: f32,
+}
+
+impl ColorTint {
+    /// Create white (no tint)
+    pub fn white() -> Self {
+        Self {
+            r: 1.0,
+            g: 1.0,
+            b: 1.0,
+        }
+    }
+
+    /// Create from RGB values (0-255)
+    pub fn from_rgb(r: u8, g: u8, b: u8) -> Self {
+        Self {
+            r: r as f32 / 255.0,
+            g: g as f32 / 255.0,
+            b: b as f32 / 255.0,
+        }
+    }
+
+    /// Create random bright color
+    pub fn random_bright(rng: &mut WorldRng) -> Self {
+        Self {
+            r: rng.random_range(0.7..1.0),
+            g: rng.random_range(0.7..1.0),
+            b: rng.random_range(0.7..1.0),
+        }
+    }
 }
 
 /// Position in simulation space (meters)

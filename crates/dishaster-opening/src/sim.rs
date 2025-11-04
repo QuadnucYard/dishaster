@@ -3,7 +3,7 @@
 use dishrupt_ecs::display::DisplayRoot;
 use dishrupt_simulation::{ISimulation, SimulationFeature};
 
-use crate::{prelude::*, resources::OpeningAssets};
+use crate::{prelude::*, protocol::*, resources::OpeningAssets};
 
 /// Opening animation simulation engine
 pub struct Simulation {
@@ -23,16 +23,17 @@ impl Simulation {
         world.insert_resource(DisplayRoot(root_entity));
 
         world.insert_resource(config);
-        // Insert configurable assets (dish/emoji prefabs and review texts)
+        // Insert configurable assets (food/face prefabs and review texts)
         world.insert_resource(OpeningAssets::default());
         world.insert_resource(SpawnTimers::default());
         world.insert_resource(WorldRng::new(seed));
         world.insert_resource(DeltaTime::default());
+        world.insert_resource(EventQueue::default());
 
         // Add systems
         schedule.add_systems(
             (
-                crate::systems::spawn_dishes,
+                crate::systems::spawn_foods,
                 crate::systems::spawn_emojis,
                 crate::systems::spawn_texts,
                 crate::systems::update_physics,
@@ -69,31 +70,37 @@ impl Simulation {
     /// Generate display snapshots for Stage to present
     pub fn snapshot(&mut self) -> Snapshot {
         let world = self.world_mut();
-        let mut snapshots = Vec::new();
+        let mut display_snapshots = Vec::new();
+        let mut presentation_snapshots = Vec::new();
 
         // Query all entities with Position component
         let mut query = world.query::<(
             Entity,
             &Position,
-            Option<&DishIcon>,
-            Option<&EmojiIcon>,
-            Option<&ReviewText>,
+            Option<&DishObject>,
+            Option<&EmojiObject>,
+            Option<&TextObject>,
             Option<&Rotation>,
             Option<&Scale>,
+            Option<&ColorTint>,
+            Option<&Alpha>,
+            Option<&WavePhase>,
         )>();
 
-        for (entity, pos, dish, emoji, text, rotation, scale) in query.iter(world) {
+        for (entity, pos, food, face, text, rotation, scale, color, alpha, wave) in
+            query.iter(world)
+        {
             let core_id = entity.to_entity_id();
 
             // Determine prefab based on entity type. Prefer component proto when present.
             let assets = world.resource::<OpeningAssets>();
-            let proto = if let Some(d) = dish {
-                d.proto.clone()
-            } else if let Some(e) = emoji {
-                e.proto.clone()
+            let (proto, item_type) = if food.is_some() {
+                (assets.food_prefab.clone(), ItemType::Food)
+            } else if face.is_some() {
+                (assets.face_prefab.clone(), ItemType::Face)
             } else if text.is_some() {
                 // Use configured text prefab
-                assets.text_prefab.clone()
+                (assets.text_prefab.clone(), ItemType::Text)
             } else {
                 continue;
             };
@@ -102,12 +109,10 @@ impl Simulation {
             let scale_val = scale.map(|s| s.0).unwrap_or(1.0);
             let rotation_val = rotation.map(|r| r.0).unwrap_or(0.0);
 
-            let name = text.map(|t| EcoString::from(t.content.as_str().to_string()));
-
-            let snapshot = DisplaySnapshot {
+            let display_snapshot = DisplaySnapshot {
                 core_id,
                 proto,
-                name,
+                name: None,
                 transform: TransformSnapshot {
                     position,
                     scale: Vec3::splat(scale_val),
@@ -116,15 +121,25 @@ impl Simulation {
                 },
             };
 
-            snapshots.push(snapshot);
+            display_snapshots.push(display_snapshot);
+
+            // Create presentation snapshot for dynamic visual updates
+            let presentation_snapshot = ObjectSnapshot {
+                entity: core_id,
+                item_type,
+                alpha: alpha.map(|a| a.0).unwrap_or(1.0),
+                wave_phase: wave.map(|w| w.0).unwrap_or(0.0),
+                color: color.map(|c| (c.r, c.g, c.b)),
+            };
+
+            presentation_snapshots.push(presentation_snapshot);
         }
 
-        Snapshot { display: snapshots }
+        Snapshot {
+            display: display_snapshots,
+            objects: presentation_snapshots,
+        }
     }
-}
-
-pub struct Snapshot {
-    pub display: Vec<DisplaySnapshot>,
 }
 
 /// Opening simulation feature definition
@@ -134,7 +149,7 @@ impl SimulationFeature for OpeningSimulationFeat {
     type Snapshot = Snapshot;
     type Command = ();
     type Query = ();
-    type Event = ();
+    type Event = SimEvent;
     type Response = ();
 }
 
@@ -151,8 +166,8 @@ impl ISimulation<OpeningSimulationFeat> for Simulation {
         self.snapshot()
     }
 
-    fn poll_events(&mut self) -> Vec<()> {
-        Vec::new()
+    fn poll_events(&mut self) -> Vec<SimEvent> {
+        self.world.resource_mut::<EventQueue>().drain()
     }
 
     fn poll_responses(&mut self) -> Vec<()> {
