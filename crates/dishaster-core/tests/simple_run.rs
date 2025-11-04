@@ -3,8 +3,8 @@
 use std::sync::Arc;
 
 use dishaster_core::{models::*, sim::*};
-use dishaster_interface::ISimulation;
 use dishrupt_core::display::DisplayModel;
+use dishrupt_simulation::ISimulation;
 
 /// Create a minimal game model registry for testing
 fn create_test_registry() -> GameModelRegistry {

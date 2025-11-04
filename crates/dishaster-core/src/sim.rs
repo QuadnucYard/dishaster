@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
+use dishrupt_simulation::ISimulation;
 
 use crate::{components::*, models::*, prelude::*, resources::*, systems::*};
 
@@ -163,7 +164,7 @@ impl Simulation {
     }
 }
 
-impl ISimulation for Simulation {
+impl ISimulation<CoreSimulationFeat> for Simulation {
     /// Advance the simulation by one time step
     ///
     /// Executes all registered systems in the proper order to update

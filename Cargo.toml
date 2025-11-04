@@ -14,6 +14,8 @@ dishrupt-core = { path = "crates/dishrupt-core" }
 dishrupt-ecs = { path = "crates/dishrupt-ecs" }
 dishrupt-rng = { path = "crates/dishrupt-rng" }
 dishrupt-persistence = { path = "crates/dishrupt-persistence" }
+dishrupt-simulation = { path = "crates/dishrupt-simulation" }
+dishrupt-runner = { path = "crates/dishrupt-runner" }
 dishrupt-l10n = { path = "crates/dishrupt-l10n" }
 dishrupt-l10n-godot = { path = "crates/dishrupt-l10n-godot" }
 dishrupt-godot = { path = "crates/dishrupt-godot" }
@@ -29,7 +31,6 @@ dishaster-interface = { path = "crates/dishaster-interface" }
 dishaster-core = { path = "crates/dishaster-core" }
 dishaster-data = { path = "crates/dishaster-data" }
 dishaster-persistence = { path = "crates/dishaster-persistence" }
-dishaster-runner = { path = "crates/dishaster-runner" }
 dishaster-ui-protocol = { path = "crates/dishaster-ui-protocol" }
 dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }
 dishaster-godot-game = { path = "crates/dishaster-godot-game" }

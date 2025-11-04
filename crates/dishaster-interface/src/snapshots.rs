@@ -2,8 +2,6 @@
 
 use dishrupt_core::prelude::*;
 
-use crate::Tick;
-
 /// Simulation state snapshot for rendering
 pub struct Snapshot {
     /// Statistics and metrics for the current simulation state.

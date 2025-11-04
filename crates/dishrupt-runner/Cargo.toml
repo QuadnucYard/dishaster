@@ -1,12 +1,12 @@
 [package]
-name = "dishaster-runner"
+name = "dishrupt-runner"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
-dishaster-interface.workspace = true
+dishrupt-simulation.workspace = true
 
 fibre = { workspace = true, optional = true }
 

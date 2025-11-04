@@ -12,12 +12,12 @@ use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelConfig};
 use dishaster_persistence::ProgressService;
-use dishaster_runner::{SimulationRunner, SnapshotFrame, SyncSimulationRunner};
 use dishaster_ui_protocol::{StatsView, UiCommand};
 use dishaster_views::DayHudState;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::{NodeExt, display::*};
 use dishrupt_l10n::tr;
+use dishrupt_runner::{ISimulation, SimulationRunner, SnapshotFrame, SyncSimulationRunner};
 use godot::{
     classes::{Node, Node2D},
     prelude::*,
@@ -61,7 +61,7 @@ struct DayTelemetry {
 pub struct Game {
     root: Gd<Node>,
 
-    sim_runner: Box<dyn SimulationRunner>,
+    sim_runner: Box<dyn SimulationRunner<CoreSimulationFeat>>,
     stage: Stage,
     stage_origin: Vector2,
     dbgviz: DbgViz,
@@ -91,9 +91,18 @@ impl Game {
     pub fn new(
         gd: Gd<Node>,
         level: LevelConfig,
-        sim_creator: impl FnOnce(Arc<GameModelRegistry>, LevelConfig) -> Box<dyn ISimulation>,
+        sim_creator: impl FnOnce(
+            Arc<GameModelRegistry>,
+            LevelConfig,
+        ) -> Box<dyn ISimulation<CoreSimulationFeat>>,
     ) -> Self {
         let db = GAME_DATA.get().expect("game data not initialized");
+
+        let telemetry = DayTelemetry {
+            seed: level.seed,
+            day: level.day,
+            ..Default::default()
+        };
 
         let map_prefab = &db
             .canteens
@@ -101,6 +110,12 @@ impl Game {
             .unwrap()
             .display
             .res;
+
+        // Initialize simulation
+        let sim = sim_creator(db.clone(), level);
+        let root_entity = sim.root_entity();
+        let default_tps = 60.0;
+        let sim_runner = SyncSimulationRunner::new(sim, default_tps);
 
         // Set up the map scene
         let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
@@ -115,28 +130,15 @@ impl Game {
         display_root_node.set_position(origin);
         display_root_node.set_z_index(20);
         let display_root = GdNode2D::new(display_root_node);
+
+        // Set up stage
         let display_ctx = DisplayContext2D {
             view_scale: Vec3::new(60.0, 50.0, 50.0),
         };
-
-        let telemetry = DayTelemetry {
-            seed: level.seed,
-            day: level.day,
-            ..Default::default()
-        };
-
-        // Initialize simulation
-        let sim = sim_creator(db.clone(), level);
-        let root_entity = sim.root_entity();
-        let default_tps = 60.0;
-        let sim_runner = SyncSimulationRunner::new(sim, default_tps);
-
-        // Set up stage
         let mut stage = Stage::new(display_ctx);
         stage.set_root(root_entity, display_root.clone());
 
         // Set up debug visualization
-
         let dbgviz = {
             let mut debug_root = stage_root.get_or_add_node_as::<Node2D>("Debug");
             debug_root.set_position(origin);

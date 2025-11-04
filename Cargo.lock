@@ -429,6 +429,7 @@ dependencies = [
  "dishrupt-core",
  "dishrupt-ecs",
  "dishrupt-rng",
+ "dishrupt-simulation",
  "log",
  "ordered-float",
  "rustc-hash",
@@ -483,13 +484,13 @@ dependencies = [
  "dishaster-interface",
  "dishaster-models",
  "dishaster-persistence",
- "dishaster-runner",
  "dishaster-ui-protocol",
  "dishaster-views",
  "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-l10n",
  "dishrupt-persistence",
+ "dishrupt-runner",
  "godot",
  "rustc-hash",
 ]
@@ -516,6 +517,7 @@ version = "0.1.0"
 dependencies = [
  "dishaster-views",
  "dishrupt-core",
+ "dishrupt-simulation",
 ]
 
 [[package]]
@@ -549,14 +551,6 @@ dependencies = [
  "ron",
  "serde",
  "tempfile",
-]
-
-[[package]]
-name = "dishaster-runner"
-version = "0.1.0"
-dependencies = [
- "dishaster-interface",
- "fibre",
 ]
 
 [[package]]
@@ -672,6 +666,21 @@ dependencies = [
  "derive_more",
  "rand",
  "rand_xoshiro",
+]
+
+[[package]]
+name = "dishrupt-runner"
+version = "0.1.0"
+dependencies = [
+ "dishrupt-simulation",
+ "fibre",
+]
+
+[[package]]
+name = "dishrupt-simulation"
+version = "0.1.0"
+dependencies = [
+ "dishrupt-core",
 ]
 
 [[package]]

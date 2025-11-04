@@ -56,6 +56,37 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 - **Dependencies**: `dishrupt-core`, `bevy_ecs`
 - **Note**: Only crate in dishrupt-\* family that depends on `bevy_ecs`
 
+### dishrupt-rng
+
+- **Purpose**: Deterministic random number generation for simulations
+- **Contains**:
+  - `WorldRng` - ECS resource wrapper for seeded RNG
+  - Thread-safe, deterministic random generation
+- **Dependencies**: `rand`, `rand_xoshiro`
+- **Note**: Ensures reproducible simulations with seed-based randomness
+
+### dishrupt-simulation
+
+- **Purpose**: Generic simulation abstractions (engine-agnostic)
+- **Contains**:
+  - `SimulationFeature` trait - defines simulation interface types (Snapshot, Command, Query, Event, Response)
+  - `ISimulation<F>` trait - core simulation interface with tick/command/query/events
+  - `Tick` type - simulation time step counter
+- **Dependencies**: `dishrupt-core`
+- **Note**: Pure trait definitions - no implementation dependencies, works with any simulation engine
+
+### dishrupt-runner
+
+- **Purpose**: Simulation execution strategies (engine-agnostic)
+- **Contains**:
+  - `SimulationRunner<F>` trait - abstraction over execution modes
+  - `SyncSimulationRunner` - synchronous, manual tick control for testing/debugging
+  - `AsyncSimulationRunner` - asynchronous execution in background thread (feature-gated)
+  - `SnapshotFrame` - bundled snapshot with events and query responses
+- **Dependencies**: `dishrupt-simulation`, `fibre` (optional, for async)
+- **Features**: `threaded` - enables async runner with background thread execution
+- **Note**: Generic over `SimulationFeature`, works with any simulation implementing `ISimulation`
+
 ### dishrupt-persistence
 
 - **Purpose**: Generic persistence trait
@@ -141,30 +172,30 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 
 ### dishaster-interface
 
-- **Purpose**: Communication interface for simulation (CQRS pattern)
+- **Purpose**: Dishaster-specific simulation interface (CQRS pattern)
 - **Contains**:
-  - `ISimulation` trait - main simulation API with separate command/query methods
+  - `CoreSimulationFeat` - implements `SimulationFeature` for Dishaster game
   - `SimCommand` - state-mutating commands (StartRun, EndRun, UpdateDishPricing, Trial\*)
   - `SimQuery` - read-only queries (Distance, Distances)
   - `SimEvent` - push-style events from simulation (AgentSpawned, DayCompleted, Trial\*)
   - `SimResponse` - query responses (Distance, Distances)
   - `Snapshot` - complete state snapshot with display data and view models
-- **Dependencies**: `dishrupt-core`, `dishaster-views`
-- **Architecture**: Separates commands (write), queries (read), events (push), and responses (pull)
-- **Note**: Uses `views` for presentation data, keeping interface layer decoupled from simulation models
+- **Dependencies**: `dishrupt-core`, `dishrupt-simulation`, `dishaster-views`
+- **Architecture**: Implements generic `SimulationFeature` trait with game-specific types
+- **Note**: Bridges generic `dishrupt-simulation` abstractions to Dishaster-specific command/query/event types
 
 ### dishaster-core
 
 - **Purpose**: Main simulation engine (ECS-based)
 - **Contains**:
-  - Bevy ECS-based simulation loop
+  - Bevy ECS-based simulation loop implementing `ISimulation<CoreSimulationFeat>`
   - Diner behavior systems (spawning, decision-making, movement, dining)
   - Service systems (window queuing, serving, cooking)
   - Pathfinding and navigation integration
   - Trial/conversation system
   - RNG management for deterministic simulation
   - Snapshot generation (converts ECS state to view models)
-- **Dependencies**: `dishrupt-core`, `dishrupt-ecs`, `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-navigation`, `bevy_ecs`
+- **Dependencies**: `dishrupt-core`, `dishrupt-ecs`, `dishrupt-rng`, `dishrupt-simulation`, `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-navigation`, `bevy_ecs`
 - **Note**: **Only game crate that depends on `bevy_ecs`** - all others are ECS-agnostic
 
 ### dishaster-navigation
@@ -199,17 +230,6 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Day progression and seed management
 - **Dependencies**: `dishrupt-core`, `dishrupt-persistence`, `dishaster-models`
 
-### dishaster-runner
-
-- **Purpose**: Simulation execution strategies
-- **Contains**:
-  - `SimulationRunner` trait - abstraction over execution modes
-  - `SyncSimulationRunner` - synchronous, manual tick control for testing/debugging
-  - `AsyncSimulationRunner` - asynchronous execution in background thread (feature-gated)
-  - `SnapshotFrame` - bundled snapshot with events and query responses
-- **Dependencies**: `dishaster-interface`, `fibre` (optional, for async)
-- **Features**: `threaded` - enables async runner with background thread execution
-
 ### dishaster-ui-protocol
 
 - **Purpose**: Communication interface between UI and game logic (UI-layer CQRS)
@@ -241,8 +261,8 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Performance tracking (tick rate, frame times)
   - Debug visualization overlays (pathfinding, queues, collision grids)
   - Input handling with `PickingContext` for controllers to emit commands
-- **Dependencies**: `dishrupt-*` (godot libs), `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-ui-protocol`, `dishaster-persistence`, `dishaster-runner`
-- **Note**: Depends on `models` for registry and persistence. Emits `UiCommand` to scene layer - **no direct UI dependencies**
+- **Dependencies**: `dishrupt-*` (core, persistence, runner, godot, l10n), `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-ui-protocol`, `dishaster-persistence`
+- **Note**: Depends on `models` for registry and persistence. Emits `UiCommand` to scene layer - **no direct UI dependencies**. Uses `dishrupt-runner` for simulation execution.
 
 ### dishaster-godot
 
@@ -278,7 +298,6 @@ graph TB
     %% Core simulation
     core[dishaster-core<br/>ECS Simulation]
     interface[dishaster-interface<br/>Sim Interface]
-    runner[dishaster-runner<br/>Execution Strategies]
 
     %% Data management
     models[dishaster-models<br/>Data Structures]
@@ -296,6 +315,9 @@ graph TB
     %% Framework - Core
     d-core[dishrupt-core<br/>Core Utils]
     d-ecs[dishrupt-ecs<br/>ECS Utils]
+    d-rng[dishrupt-rng<br/>Deterministic RNG]
+    d-simulation[dishrupt-simulation<br/>Sim Abstraction]
+    d-runner[dishrupt-runner<br/>Execution Strategies]
     d-persist[dishrupt-persistence<br/>Storage Trait]
     d-l10n[dishrupt-l10n<br/>Fluent i18n]
 
@@ -316,14 +338,12 @@ graph TB
 
     %% Presentation layer deps
     godot-game --> interface
-    godot-game --> runner
+    godot-game --> d-runner
     godot-game --> models
     godot-game --> views
     godot-game --> ui-protocol
     godot-game --> persist
     godot-game --> d-godot
-    godot-game --> d-godot-ui
-    godot-game --> d-godot-scene
     godot-game --> d-l10n
     godot-game --> d-core
     godot-game --> d-persist
@@ -348,11 +368,14 @@ graph TB
     core --> nav
     core --> d-core
     core --> d-ecs
+    core --> d-rng
+    core --> d-simulation
 
     interface --> views
     interface --> d-core
+    interface --> d-simulation
 
-    runner --> interface
+    d-runner --> d-simulation
 
     views --> d-core
 
@@ -374,6 +397,8 @@ graph TB
 
     d-ecs --> d-core
 
+    d-simulation --> d-core
+
     d-l10n-godot --> d-l10n
 
     %% Styling
@@ -385,9 +410,9 @@ graph TB
 
     class godot-ext entry
     class godot,godot-game,godot-ui,ui-protocol game
-    class core,interface,runner,nav sim
+    class core,interface,nav sim
     class models,views,data,persist data
-    class d-core,d-ecs,d-godot,d-godot-ui,d-godot-widgets,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
+    class d-core,d-ecs,d-rng,d-simulation,d-runner,d-godot,d-godot-ui,d-godot-widgets,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
 ```
 
 ## Architecture Layers
@@ -398,13 +423,15 @@ graph TB
 - `dishaster-models` - Pure simulation data structures
 - `dishaster-views` - Presentation view models (UI-friendly snapshots)
 - `dishaster-navigation` - Pathfinding algorithms (engine-agnostic)
-- `dishaster-interface` - Communication interface (CQRS)
-- `dishaster-runner` - Execution strategies (sync/async, engine-agnostic)
+- `dishaster-interface` - Dishaster-specific simulation interface implementing `SimulationFeature`
+- `dishrupt-simulation` - Generic simulation abstractions (traits and interfaces)
+- `dishrupt-runner` - Generic execution strategies (sync/async, engine-agnostic)
 
 **Philosophy**:
 
 - **ECS isolation**: Only `dishaster-core` depends on `bevy_ecs`. All other crates are ECS-agnostic.
 - **Model-View separation**: `models` contains simulation state, `views` contains presentation-friendly snapshots
+- **Generic abstractions**: `dishrupt-simulation` provides engine-agnostic traits, `dishaster-interface` implements them for Dishaster
 - **CQRS**: Interface layer enforces clear separation between commands (write), queries (read), events (push), and responses (pull)
 - **Testability**: Core simulation can run headless, deterministic, and testable without any Godot dependency
 
@@ -441,6 +468,9 @@ Reusable utilities that could be extracted into separate libraries:
 
 - Core utilities (`dishrupt-core`) - ECS-agnostic, provides `EntityId`, model registry, display traits
 - ECS integration (`dishrupt-ecs`) - Bevy ECS wrappers and conversions (only framework crate with ECS dependency)
+- RNG (`dishrupt-rng`) - Deterministic random number generation for reproducible simulations
+- Simulation abstractions (`dishrupt-simulation`) - Generic `SimulationFeature` and `ISimulation` traits
+- Execution strategies (`dishrupt-runner`) - Generic simulation runners (sync/async)
 - Display bridge (`dishrupt-godot`) - Godot node management (ECS-agnostic)
 - UI framework (`dishrupt-godot-ui`) - Generic UI utilities for Godot
 - Reactive widgets (`dishrupt-godot-widgets`) - Signal-reactive wrappers for Godot controls
@@ -489,12 +519,15 @@ The presentation layer uses a **unidirectional command pattern** inspired by CQR
 **Key Components**:
 
 1. **GameRequest**: User commands to game logic
+
    - Emitted by UI components when user clicks buttons or changes settings
 
 2. **AppRequest**: Application lifecycle commands
+
    - Handled by top-level scene management
 
 3. **UiCommand** Presentation updates from game to UI
+
    - Emitted by game logic when state changes need UI reflection
 
 4. **Command Queue**: `Game.ui_commands: Vec<UiCommand>`

@@ -10,6 +10,9 @@ use std::num::NonZeroU64;
 
 pub use model_registry::ModelId;
 
+/// Type alias for simulation tick count
+pub type Tick = u32;
+
 /// Reference to an entity in the core ECS world
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EntityId(NonZeroU64);

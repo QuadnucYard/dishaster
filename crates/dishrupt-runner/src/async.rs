@@ -7,14 +7,14 @@ use std::{
     time::{Duration, Instant},
 };
 
-use dishaster_interface::*;
+use dishrupt_simulation::{ISimulation, SimulationFeature};
 use fibre::spsc;
 
 use crate::{SimulationRunner, SnapshotFrame, extend_frame};
 
 /// Asynchronous simulation runner that runs the simulation in a background thread.
-pub struct AsyncSimulationRunner {
-    snapshot_receiver: SnapshotReceiver,
+pub struct AsyncSimulationRunner<F: SimulationFeature> {
+    snapshot_receiver: SnapshotReceiver<F>,
     #[allow(unused)]
     sim_ctrl: SimController,
 }
@@ -65,13 +65,16 @@ impl Drop for SimController {
     }
 }
 
-pub struct SnapshotReceiver(spsc::BoundedSyncReceiver<SnapshotFrame>);
+struct SnapshotReceiver<F: SimulationFeature>(spsc::BoundedSyncReceiver<SnapshotFrame<F>>);
 
-impl AsyncSimulationRunner {
+impl<F: SimulationFeature + 'static> AsyncSimulationRunner<F>
+where
+    SnapshotFrame<F>: Send,
+{
     /// Create a new asynchronous simulation runner.
-    pub fn new(mut sim: Box<dyn ISimulation + Send>, tps: f64) -> Self {
+    pub fn new(mut sim: Box<dyn ISimulation<F> + Send>, tps: f64) -> Self {
         // create channel
-        let (tx, rx) = spsc::bounded_sync::<SnapshotFrame>(3);
+        let (tx, rx) = spsc::bounded_sync(3);
 
         // stop flag
         let stop = Arc::new(AtomicBool::new(false));
@@ -126,8 +129,8 @@ impl AsyncSimulationRunner {
     }
 
     /// Poll for the latest snapshot frame from the simulation thread.
-    pub fn poll_snapshot(&mut self) -> Option<SnapshotFrame> {
-        let mut last_snap: Option<SnapshotFrame> = None;
+    pub fn poll_snapshot(&mut self) -> Option<SnapshotFrame<F>> {
+        let mut last_snap: Option<SnapshotFrame<F>> = None;
         while let Ok(snap) = self.snapshot_receiver.0.try_recv() {
             extend_frame(&mut last_snap, snap);
         }
@@ -151,20 +154,23 @@ impl AsyncSimulationRunner {
 }
 
 #[allow(unused)]
-impl SimulationRunner for AsyncSimulationRunner {
-    fn tick(&mut self, dt: f64) -> Option<SnapshotFrame> {
+impl<F: SimulationFeature + 'static> SimulationRunner<F> for AsyncSimulationRunner<F>
+where
+    SnapshotFrame<F>: Send,
+{
+    fn tick(&mut self, dt: f64) -> Option<SnapshotFrame<F>> {
         self.poll_snapshot()
     }
 
-    fn force_tick(&mut self) -> Snapshot {
+    fn force_tick(&mut self) -> F::Snapshot {
         todo!()
     }
 
-    fn send_command(&mut self, command: SimCommand) {
+    fn send_command(&mut self, command: F::Command) {
         todo!()
     }
 
-    fn send_query(&mut self, query: SimQuery) {
+    fn send_query(&mut self, query: F::Query) {
         todo!()
     }
 
