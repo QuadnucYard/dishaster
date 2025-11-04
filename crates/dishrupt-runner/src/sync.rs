@@ -9,8 +9,10 @@ use crate::{SimulationRunner, SnapshotFrame, extend_frame};
 /// this runner gives you direct control over when and how much the simulation advances.
 pub struct SyncSimulationRunner<F: SimulationFeature> {
     sim: Box<dyn ISimulation<F>>,
-    accumulator: f64,
     tps: f64,
+    accumulator: f64,
+    /// Current simulation tick count
+    tick: u32,
 }
 
 impl<F: SimulationFeature> SyncSimulationRunner<F> {
@@ -18,8 +20,9 @@ impl<F: SimulationFeature> SyncSimulationRunner<F> {
     pub fn new(sim: Box<dyn ISimulation<F>>, tps: f64) -> Self {
         Self {
             sim,
-            accumulator: 0.0,
             tps,
+            accumulator: 0.0,
+            tick: 0,
         }
     }
 }
@@ -29,7 +32,7 @@ impl<F: SimulationFeature> SimulationRunner<F> for SyncSimulationRunner<F> {
         self.accumulator += dt;
 
         let mut result: Option<SnapshotFrame<F>> = None;
-        let mut ticks = 0;
+        let mut delta_ticks = 0;
 
         loop {
             let fixed_dt = 1.0 / self.tps.max(1.0);
@@ -38,7 +41,8 @@ impl<F: SimulationFeature> SimulationRunner<F> for SyncSimulationRunner<F> {
             }
             // Advance simulation by one fixed timestep
             self.sim.tick();
-            ticks += 1;
+            self.tick += 1;
+            delta_ticks += 1;
 
             // Subtract fixed dt, keeping any remainder for next frame
             self.accumulator -= fixed_dt;
@@ -46,7 +50,8 @@ impl<F: SimulationFeature> SimulationRunner<F> for SyncSimulationRunner<F> {
             extend_frame(
                 &mut result,
                 SnapshotFrame {
-                    ticks,
+                    tick: self.tick,
+                    delta_ticks,
                     snapshot: self.sim.snapshot(),
                     events: self.sim.poll_events(),
                     responses: self.sim.poll_responses(),
@@ -59,6 +64,7 @@ impl<F: SimulationFeature> SimulationRunner<F> for SyncSimulationRunner<F> {
 
     fn force_tick(&mut self) -> F::Snapshot {
         self.sim.tick();
+        self.tick += 1;
 
         // Reset accumulator since we forced a tick
         self.accumulator = 0.0;

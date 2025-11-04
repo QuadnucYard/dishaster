@@ -164,13 +164,14 @@ impl Game {
         self.perf_tracker.tick_frame();
 
         if let Some(SnapshotFrame {
-            ticks,
+            delta_ticks,
             snapshot,
             events,
             responses,
+            ..
         }) = self.sim_runner.tick(delta)
         {
-            self.perf_tracker.tick_updates(ticks);
+            self.perf_tracker.tick_updates(delta_ticks);
 
             self.stage.present(snapshot.display.iter());
             self.dbgviz

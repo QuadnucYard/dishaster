@@ -46,8 +46,10 @@ pub trait SimulationRunner<F: SimulationFeature> {
 /// A snapshot frame paired with the number of simulation ticks it represents.
 /// This is the unit sent over the channel from the sim thread to the main thread.
 pub struct SnapshotFrame<F: SimulationFeature> {
+    /// The current tick count of the simulation.
+    pub tick: Tick,
     /// Number of ticks advanced in this frame.
-    pub ticks: Tick,
+    pub delta_ticks: Tick,
     /// The simulation snapshot after these ticks.
     pub snapshot: F::Snapshot,
     /// Events that occurred during these ticks.
@@ -58,9 +60,11 @@ pub struct SnapshotFrame<F: SimulationFeature> {
 
 impl<F: SimulationFeature> SnapshotFrame<F> {
     fn extend(&mut self, other: SnapshotFrame<F>) {
-        self.ticks = other.ticks;
+        self.tick = other.tick;
+        self.delta_ticks = other.delta_ticks;
         self.snapshot = other.snapshot;
         self.events.extend(other.events);
+        self.responses.extend(other.responses);
     }
 }
 

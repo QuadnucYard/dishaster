@@ -89,6 +89,7 @@ where
         // spawn sim thread
         let handle = thread::spawn(move || {
             let dt = 1.0 / tps;
+            let mut tick = 0;
             let mut last = Instant::now();
 
             while !stop_clone.load(Ordering::Relaxed) {
@@ -105,8 +106,10 @@ where
                 if now.duration_since(last).as_secs_f64() >= dt {
                     last = now;
                     sim.tick();
+                    tick += 1;
                     let _ = tx.send(SnapshotFrame {
-                        ticks: 1, // to be updated by receiver
+                        tick,
+                        delta_ticks: 1, // to be updated by receiver
                         snapshot: sim.snapshot(),
                         events: sim.poll_events(),
                         responses: sim.poll_responses(),
