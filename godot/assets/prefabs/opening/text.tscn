@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://inu44i7u8idx"]
+
+[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="1_ay5ey"]
+
+[sub_resource type="FontVariation" id="FontVariation_vvt12"]
+base_font = ExtResource("1_ay5ey")
+variation_opentype = {
+2003265652: 600
+}
+
+[node name="Text" type="Node2D"]
+
+[node name="Label" type="RichTextLabel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -104.0
+offset_top = -11.5
+offset_right = 104.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0.36280194, 0.19055226, 0.5102186, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/normal_font = SubResource("FontVariation_vvt12")
+theme_override_font_sizes/normal_font_size = 40
+text = "此食堂当为世界第八大奇迹！"
+fit_content = true
+autowrap_mode = 0
+horizontal_alignment = 1
+vertical_alignment = 1

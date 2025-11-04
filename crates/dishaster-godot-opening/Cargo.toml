@@ -1,0 +1,23 @@
+[package]
+name = "dishaster-godot-opening"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[lib]
+test = false
+
+[dependencies]
+dishrupt-core.workspace = true
+dishrupt-runner.workspace = true
+dishrupt-godot.workspace = true
+dishrupt-godot-ui.workspace = true
+dishrupt-godot-scene.workspace = true
+
+dishaster-opening.workspace = true
+
+godot.workspace = true
+
+[lints]
+workspace = true

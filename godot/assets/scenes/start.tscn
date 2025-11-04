@@ -1,3 +1,18 @@
 [gd_scene format=3 uid="uid://vab4k20top34"]
 
 [node name="Start" type="Node2D"]
+
+[node name="Stage" type="Node2D" parent="."]
+unique_name_in_owner = true
+y_sort_enabled = true
+
+[node name="Camera2D" type="Camera2D" parent="Stage"]
+position = Vector2(960, 540)
+
+[node name="DisplayRoot" type="Node2D" parent="Stage"]
+unique_name_in_owner = true
+y_sort_enabled = true
+
+[node name="Origin" type="Marker2D" parent="Stage"]
+unique_name_in_owner = true
+position = Vector2(960, 540)

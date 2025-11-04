@@ -129,14 +129,13 @@ impl Game {
         let mut display_root_node = gd.get_node_as::<Node2D>("%DisplayRoot");
         display_root_node.set_position(origin);
         display_root_node.set_z_index(20);
-        let display_root = GdNode2D::new(display_root_node);
 
         // Set up stage
         let display_ctx = DisplayContext2D {
             view_scale: Vec3::new(60.0, 50.0, 50.0),
         };
         let mut stage = Stage::new(display_ctx);
-        stage.set_root(root_entity, display_root.clone());
+        stage.set_root(root_entity, GdNode2D::new(display_root_node));
 
         // Set up debug visualization
         let dbgviz = {

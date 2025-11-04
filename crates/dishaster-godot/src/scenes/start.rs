@@ -1,5 +1,6 @@
 use std::any::Any;
 
+use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::StartMenuGui;
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_godot::bind::BindGodot;
@@ -10,12 +11,14 @@ use crate::scenes::proc::EnterLevelProcedure;
 
 /// The root scene. Handles interaction outside levels.
 pub struct StartScene {
+    opening: Option<Opening>,
+
     gd: Gd<Node>,
 }
 
 impl BindGodot<Node> for StartScene {
     fn new(gd: Gd<Node>) -> Self {
-        Self { gd }
+        Self { opening: None, gd }
     }
 }
 
@@ -34,9 +37,18 @@ impl Scene for StartScene {
 
     fn enter(&mut self, ctx: &mut SceneContext) {
         ctx.gui.show::<StartMenuGui>();
+
+        if self.opening.is_none() {
+            let opening = Opening::new(self.gd.clone());
+            self.opening = Some(opening);
+        }
     }
 
-    fn process(&mut self, ctx: &mut SceneContext, _delta: f64) {
+    fn process(&mut self, ctx: &mut SceneContext, delta: f64) {
+        if let Some(opening) = self.opening.as_mut() {
+            opening.process(delta);
+        };
+
         ctx.gui_cmds.run_cmds(ctx.gui);
 
         for req in ctx.gui_cmds.take_reqs() {

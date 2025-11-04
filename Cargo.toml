@@ -29,11 +29,13 @@ dishaster-models = { path = "crates/dishaster-models" }
 dishaster-views = { path = "crates/dishaster-views" }
 dishaster-interface = { path = "crates/dishaster-interface" }
 dishaster-core = { path = "crates/dishaster-core" }
+dishaster-opening = { path = "crates/dishaster-opening" }
 dishaster-data = { path = "crates/dishaster-data" }
 dishaster-persistence = { path = "crates/dishaster-persistence" }
 dishaster-ui-protocol = { path = "crates/dishaster-ui-protocol" }
 dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }
 dishaster-godot-game = { path = "crates/dishaster-godot-game" }
+dishaster-godot-opening = { path = "crates/dishaster-godot-opening" }
 dishaster-godot = { path = "crates/dishaster-godot" }
 
 bevy_color = { version = "0.17.0", default-features = false, features = ["std"] }

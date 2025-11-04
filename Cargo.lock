@@ -455,6 +455,7 @@ dependencies = [
  "dishaster-core",
  "dishaster-data",
  "dishaster-godot-game",
+ "dishaster-godot-opening",
  "dishaster-godot-ui",
  "dishaster-interface",
  "dishaster-persistence",
@@ -493,6 +494,19 @@ dependencies = [
  "dishrupt-runner",
  "godot",
  "rustc-hash",
+]
+
+[[package]]
+name = "dishaster-godot-opening"
+version = "0.1.0"
+dependencies = [
+ "dishaster-opening",
+ "dishrupt-core",
+ "dishrupt-godot",
+ "dishrupt-godot-scene",
+ "dishrupt-godot-ui",
+ "dishrupt-runner",
+ "godot",
 ]
 
 [[package]]
@@ -538,6 +552,18 @@ dependencies = [
  "edt",
  "grid",
  "pathfinding",
+]
+
+[[package]]
+name = "dishaster-opening"
+version = "0.1.0"
+dependencies = [
+ "bevy_ecs",
+ "dishrupt-core",
+ "dishrupt-ecs",
+ "dishrupt-rng",
+ "dishrupt-simulation",
+ "serde",
 ]
 
 [[package]]
