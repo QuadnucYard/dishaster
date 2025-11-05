@@ -2,7 +2,7 @@ use bevy_ecs::system::RunSystemOnce;
 use dishaster_interface::{event::*, response::*, *};
 use dishaster_navigation::*;
 
-use crate::{components::*, prelude::*, resources::*, sim::Simulation};
+use crate::{components::*, messages::RefillDispenser, prelude::*, resources::*, sim::Simulation};
 
 impl Simulation {
     /// Apply a high-level control command from the client runtime.
@@ -41,6 +41,13 @@ impl Simulation {
                 if let Some(mut dish) = self.world.get_mut::<Dish>(dish_entity.to_entity()) {
                     dish.pricing = pricing.to_model();
                 }
+            }
+
+            SimCommand::RefillDispenser(dispenser_entity) => {
+                // Spawn refill staff for the requested dispenser
+                self.world.commands().queue(move |world: &mut World| {
+                    world.write_message(RefillDispenser(dispenser_entity.to_entity()));
+                });
             }
 
             SimCommand::TrialStart(_entity_id) => {

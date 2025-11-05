@@ -73,6 +73,9 @@ pub enum UiCommand {
     /// Request opening the dish price editor for a given dish entity.
     OpenDishPriceEditor(DishPriceView),
 
+    /// Request refill for a dispenser.
+    RefillDispenser(EntityId),
+
     /// Start a trial for the given diner entity.
     TrialStart(EntityId),
     /// Show trial intro.

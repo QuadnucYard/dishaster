@@ -67,7 +67,7 @@ pub struct Game {
     dbgviz: DbgViz,
 
     perf_tracker: PerfTracker,
-    dc: DisplayPresenters,
+    pres: DisplayPresenters,
 
     phase: DayPhase,
     telemetry: DayTelemetry,
@@ -82,6 +82,7 @@ pub struct Game {
 struct DisplayPresenters {
     agents: FxHashMap<EntityId, AgentPresenter>,
     dishes: FxHashMap<EntityId, DishPresenter>,
+    dispensers: FxHashMap<EntityId, DispenserPresenter>,
 }
 
 impl Game {
@@ -151,7 +152,7 @@ impl Game {
             stage_origin: origin,
             dbgviz,
             perf_tracker: Default::default(),
-            dc: Default::default(),
+            pres: Default::default(),
             phase: DayPhase::Preparation,
             telemetry,
             debug_enabled: false,
@@ -245,7 +246,7 @@ impl Game {
 
         if forced {
             self.send_sim_command(SimCommand::EndRun);
-            self.dc.agents.clear();
+            self.pres.agents.clear();
         }
 
         progress_service()

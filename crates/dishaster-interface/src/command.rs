@@ -23,6 +23,9 @@ pub enum SimCommand {
         pricing: PricingMethod,
     },
 
+    /// Request refill for a dispenser.
+    RefillDispenser(EntityId),
+
     /// Start a trial for the given diner entity.
     TrialStart(EntityId),
     /// Launch the trial after intro is complete.

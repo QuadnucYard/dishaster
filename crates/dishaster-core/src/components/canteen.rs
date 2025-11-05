@@ -57,6 +57,8 @@ pub struct Dispenser {
     pub current_stock: u32,
     /// What type of items this dispenser provides
     pub dispenser_type: DispenserType,
+    /// Whether a refill request is pending
+    pub refill_pending: bool,
 }
 
 /// Types of items that dispensers can provide

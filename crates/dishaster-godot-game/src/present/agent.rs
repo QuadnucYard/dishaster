@@ -16,7 +16,7 @@ pub struct AgentPresenter {
 
     root: GdNode2D,
     body: Option<GdNode2D>,
-    pub feedback: FeedbackPresenter,
+    pub feedback: Option<FeedbackPresenter>,
     debug: Option<AgentDebugPresenter>,
 
     // Current item state
@@ -25,8 +25,11 @@ pub struct AgentPresenter {
 
 impl AgentPresenter {
     pub fn new(entity: EntityId, node: GdNode2D) -> Self {
-        let mut feedback = FeedbackPresenter::new(entity, node.get_node_as("Feedback"));
-        feedback.hide();
+        let feedback = node.try_get_node_as("Feedback").map(|node| {
+            let mut feedback = FeedbackPresenter::new(entity, node);
+            feedback.hide();
+            feedback
+        });
 
         let debug = node.try_get_node_as("Debug").map(AgentDebugPresenter::new);
         let body = node.try_get_node_as::<Node2D>("Body").map(GdNode2D::new);
@@ -53,7 +56,9 @@ impl AgentPresenter {
     }
 
     pub fn process(&mut self, delta: f64) {
-        self.feedback.process(delta);
+        if let Some(feedback) = &mut self.feedback {
+            feedback.process(delta);
+        }
     }
 
     pub fn update_debug(&mut self, goal_str: &str) {

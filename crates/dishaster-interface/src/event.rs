@@ -9,7 +9,13 @@ use dishrupt_core::EntityId;
 pub enum SimEvent {
     /// The current day has completed (all diners have exited and time limit reached).
     DayCompleted,
-    /// An agent has spawned in the simulation.
+
+    /// A dispenser has spawned.
+    DispenserSpawned(EntityId),
+    /// A dish has spawned with its pricing snapshot.
+    DishSpawned(DishView),
+
+    /// An agent has spawned.
     AgentSpawned {
         /// Spawned agent entity ID.
         entity: EntityId,
@@ -18,8 +24,6 @@ pub enum SimEvent {
     },
     /// An agent has despawned from the simulation.
     AgentDespawned(EntityId),
-    /// A dish has spawned in the simulation with its pricing snapshot.
-    DishSpawned(DishView),
     /// Diner's held items have changed.
     DinerItemsChanged {
         /// Diner entity ID.

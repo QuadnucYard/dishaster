@@ -6,6 +6,7 @@ mod feedback;
 mod monitor;
 mod navigation;
 mod queueing;
+mod refill;
 mod serving;
 mod spawn;
 
@@ -13,6 +14,7 @@ pub use dining::*;
 pub use monitor::*;
 pub use navigation::*;
 pub use queueing::*;
+pub use refill::*;
 pub use serving::*;
 pub use spawn::*;
 
@@ -20,5 +22,7 @@ pub use spawn::*;
 mod prelude {
     pub use dishaster_interface::event::*;
 
-    pub use crate::{components::*, constants::*, models::*, prelude::*, resources::*};
+    pub use crate::{
+        components::*, constants::*, messages::*, models::*, prelude::*, resources::*,
+    };
 }

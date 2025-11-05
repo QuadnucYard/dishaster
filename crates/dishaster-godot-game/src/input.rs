@@ -28,7 +28,7 @@ impl Game {
             GodotInputEvent::Key(key) => {
                 if key.pressed
                     && key.keycode == Key::Q
-                    && let Some(&diner) = self.dc.agents.keys().next()
+                    && let Some(&diner) = self.pres.agents.keys().next()
                 {
                     godot_print!("DEV: Starting trial for diner {:?}", diner);
                     self.ui_commands.push(UiCommand::TrialStart(diner));
@@ -64,9 +64,14 @@ impl Game {
     }
 
     fn get_pickables(&self) -> impl Iterator<Item = &dyn Pickable> {
-        (self.dc.dishes.values())
+        (self.pres.dishes.values())
             .map(|t| -> &dyn Pickable { t })
-            .chain((self.dc.agents.values()).map(|t| -> &dyn Pickable { &t.feedback }))
+            .chain(
+                (self.pres.agents.values())
+                    .filter_map(|t| t.feedback.as_ref())
+                    .map(|t| -> &dyn Pickable { t }),
+            )
+            .chain((self.pres.dispensers.values()).map(|t| -> &dyn Pickable { t }))
     }
 
     fn to_map_pos(&self, pos: Vector2) -> Vec2 {

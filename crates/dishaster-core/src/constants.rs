@@ -27,7 +27,7 @@ pub const STAFF_SERVICE_TIME_VARIATION: f32 = 0.25;
 /// Default walking speed for serving staff (meters per second)
 pub const STAFF_WALK_SPEED: f32 = 1.25;
 /// Navigation radius used for serving staff collision avoidance
-pub const STAFF_COLLISION_RADIUS: Meters = 0.35;
+pub const STAFF_COLLISION_RADIUS: Meters = 0.2;
 
 /// How close counts as sitting down at a table
 pub const TABLE_SEAT_ARRIVAL_EPS: Meters = 0.2;

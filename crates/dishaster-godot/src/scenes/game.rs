@@ -197,6 +197,10 @@ impl GameScene {
                 }
             }
 
+            UiCommand::RefillDispenser(entity) => {
+                game.send_sim_command(SimCommand::RefillDispenser(entity));
+            }
+
             UiCommand::TrialStart(entity) => {
                 godot_print!("Starting trial for entity {:?}", entity);
                 game.send_sim_command(SimCommand::TrialStart(entity));

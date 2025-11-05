@@ -65,6 +65,46 @@ pub struct ServingStaffBundle {
 /// Component linking a queue lane to its assigned staff member.
 #[derive(Component)]
 pub struct StaffForLane {
-    /// Staff entity assigned to this lane.
+    /// The staff entity that serves this lane
     pub staff: Entity,
+}
+
+/// Convenience bundle for spawning refill staff entities.
+#[derive(Bundle)]
+pub struct RefillStaffBundle {
+    /// Core staff identity
+    pub staff: RefillStaff,
+    /// Runtime state
+    pub state: RefillStaffState,
+    /// Movement component
+    pub movement: Movement,
+}
+
+/// Component identifying a refill staff member responsible for restocking dispensers.
+#[derive(Component)]
+pub struct RefillStaff {
+    /// Target dispenser entity to refill
+    pub target_dispenser: Entity,
+    /// Original spawn position to return to after refilling
+    pub spawn_pos: Vec2,
+}
+
+/// Runtime state for a refill staff member.
+#[derive(Component)]
+pub struct RefillStaffState {
+    /// Current status of the refill staff
+    pub status: RefillStaffStatus,
+    /// Time spent in current activity
+    pub activity_timer: f32,
+}
+
+/// Activity status for refill staff.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RefillStaffStatus {
+    /// Moving to the target dispenser
+    MovingToDispenser,
+    /// Refilling the dispenser
+    Refilling,
+    /// Returning to spawn point
+    Returning,
 }

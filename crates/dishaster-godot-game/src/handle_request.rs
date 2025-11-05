@@ -22,7 +22,7 @@ impl Game {
         self.dbgviz.distance_overlay.set_visible(debug_mode);
         self.dbgviz.movement_overlay.set_visible(debug_mode);
 
-        for agent in self.dc.agents.values_mut() {
+        for agent in self.pres.agents.values_mut() {
             agent.set_debug_enabled(debug_mode);
         }
     }
@@ -33,7 +33,7 @@ impl Game {
             pricing,
         });
 
-        if let Some(presenter) = self.dc.dishes.get_mut(&dish) {
+        if let Some(presenter) = self.pres.dishes.get_mut(&dish) {
             presenter.set_price(pricing);
         }
     }

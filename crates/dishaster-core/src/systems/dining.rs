@@ -252,7 +252,7 @@ fn handle_pick_tray_goal(
         &mut Movement,
         &mut EntityRng,
     )>,
-    dispenser_query: Query<(Entity, &Dispenser)>,
+    mut dispenser_query: Query<(Entity, &mut Dispenser)>,
     registry: Res<GameModelRegistryRes>,
     mut events: ResMut<EventQueue>,
 ) {
@@ -262,16 +262,23 @@ fn handle_pick_tray_goal(
         }
 
         if targets.tray_target.is_none() {
-            // Choose the closest tray dispenser
+            // Choose the closest tray dispenser with stock
             let Some((dispenser_entity, dispenser)) = dispenser_query
                 .iter()
-                .filter(|(_, d)| d.dispenser_type == DispenserType::Tray)
+                .filter(|(_, d)| {
+                    d.dispenser_type == DispenserType::Tray
+                        && (!d.center_pos.close_to(movement.pos, 3.0) || d.current_stock > 0)
+                })
                 .min_by_key(|(_, d)| {
                     let distance = movement.pos.distance_squared(d.center_pos);
                     NotNan::new(distance).unwrap()
                 })
             else {
                 // No dispensers available
+                log::warn!(
+                    target: "diner",
+                    "no_tray_dispenser: entity={entity:?}"
+                );
                 continue;
             };
             targets.tray_target = Some(dispenser_entity);
@@ -283,47 +290,66 @@ fn handle_pick_tray_goal(
             continue;
         }
 
-        if movement.target_reached {
-            // Reached the dispenser
-            log::debug!(
-                target: "diner",
-                "picked_tray: entity={entity:?}"
-            );
-
-            // Get the dispenser model handle
-            if let Some(tray_dispenser_entity) = targets.tray_target
-                && let Ok((_, dispenser)) = dispenser_query.get(tray_dispenser_entity)
-            {
-                let dispenser_model = registry.dispensers.get(dispenser.model);
-                let tray_res = dispenser_model.item_display.res.clone();
-                let tray_entity = commands
-                    .spawn((
-                        DisplayState {
-                            proto: tray_res,
-                            ..Default::default()
-                        },
-                        Transform {
-                            ..Default::default()
-                        },
-                    ))
-                    .id();
-
-                state.tray = Some(tray_entity);
-
-                events.push(SimEvent::DinerItemsChanged {
-                    entity: entity.to_entity_id(),
-                    change: DinerItemsChange::PickTray(tray_entity.to_entity_id()),
-                });
-            }
-
-            goal.update(if rng.random_bool(0.3) {
-                // 30% chance to pick chopsticks next
-                DinerGoal::PickChopsticks
-            } else {
-                DinerGoal::QueueForWindow
-            });
+        if !movement.target_reached {
             continue;
         }
+
+        // Reached the dispenser - check stock before taking
+        let Some(tray_dispenser_entity) = targets.tray_target else {
+            continue;
+        };
+        let Ok((_, mut dispenser)) = dispenser_query.get_mut(tray_dispenser_entity) else {
+            continue;
+        };
+
+        // Check if dispenser still has stock
+        if dispenser.current_stock == 0 {
+            log::warn!(
+                target: "diner",
+                "tray_dispenser_empty: entity={entity:?}, dispenser={tray_dispenser_entity:?}"
+            );
+            // Dispenser is empty, find another one
+            targets.tray_target = None;
+            continue;
+        }
+
+        // Deduct stock
+        dispenser.current_stock = dispenser.current_stock.saturating_sub(1);
+
+        log::debug!(
+            target: "diner",
+            "picked_tray: entity={entity:?}, remaining_stock={}",
+            dispenser.current_stock
+        );
+
+        // Spawn the tray item
+        let dispenser_model = registry.dispensers.get(dispenser.model);
+        let tray_res = dispenser_model.item_display.res.clone();
+        let tray_entity = commands
+            .spawn((
+                DisplayState {
+                    proto: tray_res,
+                    ..Default::default()
+                },
+                Transform {
+                    ..Default::default()
+                },
+            ))
+            .id();
+
+        state.tray = Some(tray_entity);
+
+        events.push(SimEvent::DinerItemsChanged {
+            entity: entity.to_entity_id(),
+            change: DinerItemsChange::PickTray(tray_entity.to_entity_id()),
+        });
+
+        goal.update(if rng.random_bool(0.3) {
+            // 30% chance to pick chopsticks next
+            DinerGoal::PickChopsticks
+        } else {
+            DinerGoal::QueueForWindow
+        });
     }
 }
 
@@ -336,7 +362,7 @@ fn handle_pick_chopsticks_goal(
         &mut DinerTargets,
         &mut Movement,
     )>,
-    dispenser_query: Query<(Entity, &Dispenser)>,
+    mut dispenser_query: Query<(Entity, &mut Dispenser)>,
     registry: Res<GameModelRegistryRes>,
     mut events: ResMut<EventQueue>,
 ) {
@@ -346,68 +372,96 @@ fn handle_pick_chopsticks_goal(
         }
 
         if targets.chopstick_target.is_none() {
-            // Choose the closest tray dispenser
+            // Choose the closest chopstick dispenser with stock
             let Some((dispenser_entity, dispenser)) = dispenser_query
                 .iter()
-                .filter(|(_, d)| d.dispenser_type == DispenserType::Chopstick)
+                .filter(|(_, d)| {
+                    d.dispenser_type == DispenserType::Chopstick
+                        && (!d.center_pos.close_to(movement.pos, 3.0) || d.current_stock > 0)
+                })
                 .min_by_key(|(_, d)| {
                     let distance = movement.pos.distance_squared(d.center_pos);
                     NotNan::new(distance).unwrap()
                 })
             else {
                 // No dispensers available
+                log::warn!(
+                    target: "diner",
+                    "no_chopstick_dispenser: entity={entity:?}"
+                );
                 continue;
             };
             targets.chopstick_target = Some(dispenser_entity);
             log::debug!(
                 target: "diner",
-                "picked_chopsticks: target={dispenser_entity:?}"
+                "pick_chopsticks_target: target={dispenser_entity:?}, stock={}",
+                dispenser.current_stock
             );
             movement.request_path_to_rect(dispenser.reception_area);
             continue;
         }
 
-        if movement.target_reached {
-            // Reached the dispenser
-            log::debug!(
-                target: "diner",
-                "picked_chopsticks: entity={entity:?}"
-            );
-
-            // Get the dispenser model handle
-            if let Some(chopstick_dispenser_entity) = targets.chopstick_target
-                && let Ok((_, dispenser)) = dispenser_query.get(chopstick_dispenser_entity)
-            {
-                let dispenser_model = registry.dispensers.get(dispenser.model);
-                let chopsticks_res = dispenser_model.item_display.res.clone();
-                let chopsticks_entity = commands
-                    .spawn((
-                        DisplayState {
-                            proto: chopsticks_res,
-                            ..Default::default()
-                        },
-                        Transform {
-                            ..Default::default()
-                        },
-                    ))
-                    .id();
-
-                state.chopsticks = Some(chopsticks_entity);
-
-                events.push(SimEvent::DinerItemsChanged {
-                    entity: entity.to_entity_id(),
-                    change: DinerItemsChange::PickChopsticks(chopsticks_entity.to_entity_id()),
-                });
-            }
-
-            goal.update(if state.served_dish.is_some() {
-                DinerGoal::FindSeat
-            } else {
-                println!("Chopsticks picked before being served!");
-                DinerGoal::QueueForWindow
-            });
+        if !movement.target_reached {
             continue;
         }
+
+        // Reached the dispenser - check stock before taking
+        let Some(chopstick_dispenser_entity) = targets.chopstick_target else {
+            continue;
+        };
+
+        let Ok((_, mut dispenser)) = dispenser_query.get_mut(chopstick_dispenser_entity) else {
+            continue;
+        };
+
+        // Check if dispenser still has stock
+        if dispenser.current_stock == 0 {
+            log::warn!(
+                target: "diner",
+                "chopstick_dispenser_empty: entity={entity:?}, dispenser={chopstick_dispenser_entity:?}"
+            );
+            // Dispenser is empty, find another one
+            targets.chopstick_target = None;
+            continue;
+        }
+
+        // Deduct stock
+        dispenser.current_stock = dispenser.current_stock.saturating_sub(1);
+
+        log::debug!(
+            target: "diner",
+            "picked_chopsticks: entity={entity:?}, remaining_stock={}",
+            dispenser.current_stock
+        );
+
+        // Spawn the chopsticks item
+        let dispenser_model = registry.dispensers.get(dispenser.model);
+        let chopsticks_res = dispenser_model.item_display.res.clone();
+        let chopsticks_entity = commands
+            .spawn((
+                DisplayState {
+                    proto: chopsticks_res,
+                    ..Default::default()
+                },
+                Transform {
+                    ..Default::default()
+                },
+            ))
+            .id();
+
+        state.chopsticks = Some(chopsticks_entity);
+
+        events.push(SimEvent::DinerItemsChanged {
+            entity: entity.to_entity_id(),
+            change: DinerItemsChange::PickChopsticks(chopsticks_entity.to_entity_id()),
+        });
+
+        goal.update(if state.served_dish.is_some() {
+            DinerGoal::FindSeat
+        } else {
+            println!("Chopsticks picked before being served!");
+            DinerGoal::QueueForWindow
+        });
     }
 }
 

@@ -2,11 +2,12 @@
 
 use std::sync::Arc;
 
+use bevy_ecs::message::MessageRegistry;
 use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
 use dishrupt_simulation::ISimulation;
 
-use crate::{components::*, models::*, prelude::*, resources::*, systems::*};
+use crate::{components::*, messages::*, models::*, prelude::*, resources::*, systems::*};
 
 /// Core simulation engine managing ECS world and system execution
 ///
@@ -48,6 +49,8 @@ impl Simulation {
                 dining_systems(),
                 // Allocate staff and schedule service events
                 drive_serving_sessions,
+                handle_refill_request,
+                handle_refill_staff,
                 // Update queue ordering and slot targets before movement
                 (update_queue_members, update_queue_intents),
                 // Move agents along paths
@@ -124,6 +127,9 @@ impl Simulation {
 
     /// Perform initial setup tasks at simulation startup
     fn startup(&mut self) {
+        // Add messages
+        MessageRegistry::register_message::<RefillDispenser>(&mut self.world);
+
         // Add observers for agent spawn/despawn events to log presentation events
         self.world.add_observer(
             |event: On<Add, AgentTag>,
@@ -146,6 +152,12 @@ impl Simulation {
         self.world.add_observer(
             |event: On<Remove, AgentTag>, mut events: ResMut<EventQueue>| {
                 events.push(SimEvent::AgentDespawned(event.entity.to_entity_id()));
+            },
+        );
+
+        self.world.add_observer(
+            |event: On<Add, Dispenser>, mut events: ResMut<EventQueue>| {
+                events.push(SimEvent::DispenserSpawned(event.entity.to_entity_id()));
             },
         );
 

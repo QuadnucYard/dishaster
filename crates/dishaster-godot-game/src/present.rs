@@ -1,13 +1,14 @@
 mod agent;
 mod diner_items;
 mod dish;
+mod dispenser;
 mod feedback;
 
 use dishaster_interface::{snapshots::*, *};
 use dishaster_ui_protocol::UiCommand;
 use godot::global::godot_print;
 
-pub use self::{agent::AgentPresenter, dish::DishPresenter};
+pub use self::{agent::AgentPresenter, dish::DishPresenter, dispenser::DispenserPresenter};
 use super::Game;
 
 const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
@@ -18,6 +19,17 @@ impl Game {
             match event {
                 SimEvent::DayCompleted => {
                     self.finish_day(false);
+                }
+
+                SimEvent::DispenserSpawned(entity) => {
+                    let presenter = DispenserPresenter::new(
+                        entity,
+                        self.stage
+                            .get_godot_node(entity)
+                            .cloned()
+                            .expect("missing godot node for dispenser"),
+                    );
+                    self.pres.dispensers.insert(entity, presenter);
                 }
                 SimEvent::AgentSpawned { entity, appearance } => {
                     let mut presenter = AgentPresenter::new(
@@ -31,10 +43,10 @@ impl Game {
                     if let Some(appearance) = &appearance {
                         presenter.set_appearance(appearance);
                     }
-                    self.dc.agents.insert(entity, presenter);
+                    self.pres.agents.insert(entity, presenter);
                 }
                 SimEvent::AgentDespawned(entity) => {
-                    self.dc.agents.remove(&entity);
+                    self.pres.agents.remove(&entity);
                 }
                 SimEvent::DishSpawned(vm) => {
                     let entity = vm.entity;
@@ -46,16 +58,18 @@ impl Game {
                             .expect("missing godot node for dish"),
                     );
                     presenter.set_view(vm);
-                    self.dc.dishes.insert(entity, presenter);
+                    self.pres.dishes.insert(entity, presenter);
                 }
                 SimEvent::DinerItemsChanged { entity, change } => {
-                    if let Some(agent) = self.dc.agents.get_mut(&entity) {
+                    if let Some(agent) = self.pres.agents.get_mut(&entity) {
                         agent.handle_item_change(change, &mut self.stage);
                     }
                 }
                 SimEvent::Feedback(feedback) => {
-                    if let Some(agent) = self.dc.agents.get_mut(&feedback.entity) {
-                        agent.feedback.show(&feedback.content);
+                    if let Some(agent) = self.pres.agents.get_mut(&feedback.entity)
+                        && let Some(feedback_presenter) = &mut agent.feedback
+                    {
+                        feedback_presenter.show(&feedback.content);
                     }
                 }
 
@@ -93,7 +107,7 @@ impl Game {
     }
 
     pub(crate) fn process_display(&mut self, delta: f64) {
-        for agent in self.dc.agents.values_mut() {
+        for agent in self.pres.agents.values_mut() {
             agent.process(delta);
         }
     }
@@ -101,7 +115,7 @@ impl Game {
     pub(crate) fn update_other_debug(&mut self, snapshot: &DebugSnapshots) {
         if let Some(diner_debugs) = &snapshot.diners {
             for diner_debug in diner_debugs {
-                if let Some(agent) = self.dc.agents.get_mut(&diner_debug.entity) {
+                if let Some(agent) = self.pres.agents.get_mut(&diner_debug.entity) {
                     agent.update_debug(&diner_debug.goal_str);
                 }
             }
