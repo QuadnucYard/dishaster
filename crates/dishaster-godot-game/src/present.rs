@@ -31,6 +31,15 @@ impl Game {
                     );
                     self.pres.dispensers.insert(entity, presenter);
                 }
+                SimEvent::DispenserStockChanged {
+                    entity,
+                    current_stock,
+                    capacity,
+                } => {
+                    if let Some(presenter) = self.pres.dispensers.get_mut(&entity) {
+                        presenter.set_stock(current_stock, capacity);
+                    }
+                }
                 SimEvent::AgentSpawned { entity, appearance } => {
                     let mut presenter = AgentPresenter::new(
                         entity,
@@ -109,6 +118,9 @@ impl Game {
     pub(crate) fn process_display(&mut self, delta: f64) {
         for agent in self.pres.agents.values_mut() {
             agent.process(delta);
+        }
+        for dispenser in self.pres.dispensers.values_mut() {
+            dispenser.process(delta as f32);
         }
     }
 

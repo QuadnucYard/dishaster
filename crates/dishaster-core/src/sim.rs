@@ -155,12 +155,6 @@ impl Simulation {
             },
         );
 
-        self.world.add_observer(
-            |event: On<Add, Dispenser>, mut events: ResMut<EventQueue>| {
-                events.push(SimEvent::DispenserSpawned(event.entity.to_entity_id()));
-            },
-        );
-
         // Spawn static objects once at startup
         let mut schedule = Schedule::default();
         schedule.add_systems(

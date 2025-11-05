@@ -316,14 +316,22 @@ fn handle_pick_tray_goal(
         // Deduct stock
         dispenser.current_stock = dispenser.current_stock.saturating_sub(1);
 
+        let dispenser_model = registry.dispensers.get(dispenser.model);
+
         log::debug!(
             target: "diner",
             "picked_tray: entity={entity:?}, remaining_stock={}",
             dispenser.current_stock
         );
 
+        // Emit stock changed event
+        events.push(SimEvent::DispenserStockChanged {
+            entity: tray_dispenser_entity.to_entity_id(),
+            current_stock: dispenser.current_stock,
+            capacity: dispenser_model.capacity,
+        });
+
         // Spawn the tray item
-        let dispenser_model = registry.dispensers.get(dispenser.model);
         let tray_res = dispenser_model.item_display.res.clone();
         let tray_entity = commands
             .spawn((
@@ -428,14 +436,22 @@ fn handle_pick_chopsticks_goal(
         // Deduct stock
         dispenser.current_stock = dispenser.current_stock.saturating_sub(1);
 
+        let dispenser_model = registry.dispensers.get(dispenser.model);
+
         log::debug!(
             target: "diner",
             "picked_chopsticks: entity={entity:?}, remaining_stock={}",
             dispenser.current_stock
         );
 
+        // Emit stock changed event
+        events.push(SimEvent::DispenserStockChanged {
+            entity: chopstick_dispenser_entity.to_entity_id(),
+            current_stock: dispenser.current_stock,
+            capacity: dispenser_model.capacity,
+        });
+
         // Spawn the chopsticks item
-        let dispenser_model = registry.dispensers.get(dispenser.model);
         let chopsticks_res = dispenser_model.item_display.res.clone();
         let chopsticks_entity = commands
             .spawn((

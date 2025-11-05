@@ -91,6 +91,7 @@ pub fn handle_refill_staff(
     mut dispenser_query: Query<&mut Dispenser>,
     registry: Res<GameModelRegistryRes>,
     time: Res<Time>,
+    mut events: ResMut<EventQueue>,
 ) {
     let delta = time.tick_duration as f32;
     for (entity, staff, mut state, mut movement) in staff_query.iter_mut() {
@@ -137,12 +138,20 @@ pub fn handle_refill_staff(
                         let model = registry.dispensers.get(dispenser.model);
                         dispenser.current_stock = model.capacity;
                         dispenser.refill_pending = false;
+
                         log::info!(
                             target: "refill_staff",
                             "staff={entity:?} refilled dispenser={:?} to capacity={}",
                             staff.target_dispenser,
                             model.capacity
                         );
+
+                        // Emit stock changed event
+                        events.push(SimEvent::DispenserStockChanged {
+                            entity: staff.target_dispenser.to_entity_id(),
+                            current_stock: model.capacity,
+                            capacity: model.capacity,
+                        });
                     }
 
                     // Start returning

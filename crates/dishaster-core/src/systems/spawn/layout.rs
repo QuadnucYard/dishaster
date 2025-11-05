@@ -26,7 +26,7 @@ pub fn spawn_static_objects(
         &mut events,
     );
     spawn_tables(&mut commands, &level, &registry, &display_root);
-    spawn_dispensers(&mut commands, &level, &registry, &display_root);
+    spawn_dispensers(&mut commands, &level, &registry, &display_root, &mut events);
     spawn_collectors(&mut commands, &level, &registry, &display_root);
 }
 
@@ -261,6 +261,7 @@ fn spawn_dispensers(
     level: &LevelConfig,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
+    events: &mut ResMut<EventQueue>,
 ) {
     for (placements, ty) in [
         (&level.tray_dispenser_placements, DispenserType::Tray),
@@ -270,7 +271,14 @@ fn spawn_dispensers(
         ),
     ] {
         for dispenser_placement in placements {
-            spawn_dispenser(commands, registry, dispenser_placement, ty, display_root);
+            spawn_dispenser(
+                commands,
+                registry,
+                dispenser_placement,
+                ty,
+                display_root,
+                events,
+            );
         }
     }
 }
@@ -281,6 +289,7 @@ fn spawn_dispenser(
     placement: &DispenserPlacement,
     dispenser_type: DispenserType,
     display_root: &DisplayRoot,
+    events: &mut ResMut<EventQueue>,
 ) {
     let dispenser_handle = registry
         .dispensers
@@ -288,7 +297,7 @@ fn spawn_dispenser(
         .expect("Dispenser model not found in registry");
     let model = registry.dispensers.get(dispenser_handle);
 
-    commands.spawn((
+    let entity_cmd = commands.spawn((
         Dispenser {
             model: dispenser_handle,
             center_pos: placement.center_pos,
@@ -311,6 +320,17 @@ fn spawn_dispenser(
             ..Default::default()
         },
     ));
+    let entity = entity_cmd.id();
+
+    // Emit dispenser spawned event
+    events.push(SimEvent::DispenserSpawned(entity.to_entity_id()));
+
+    // Emit initial stock state
+    events.push(SimEvent::DispenserStockChanged {
+        entity: entity.to_entity_id(),
+        current_stock: model.initial_stock,
+        capacity: model.capacity,
+    });
 }
 
 fn spawn_collectors(

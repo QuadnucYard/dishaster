@@ -12,6 +12,15 @@ pub enum SimEvent {
 
     /// A dispenser has spawned.
     DispenserSpawned(EntityId),
+    /// Dispenser stock has changed.
+    DispenserStockChanged {
+        /// Dispenser entity ID.
+        entity: EntityId,
+        /// Current stock amount.
+        current_stock: u32,
+        /// Maximum capacity.
+        capacity: u32,
+    },
     /// A dish has spawned with its pricing snapshot.
     DishSpawned(DishView),
 
