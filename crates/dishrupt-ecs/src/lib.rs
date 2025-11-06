@@ -113,3 +113,16 @@ impl<T> Default for MessageQueue<T> {
         Self(Vec::new())
     }
 }
+
+/// Extension trait to add message types to a Bevy World
+pub trait AddMessage {
+    /// Add a message type to the World
+    fn add_message<T: Message>(&mut self) -> &mut Self;
+}
+
+impl AddMessage for World {
+    fn add_message<T: Message>(&mut self) -> &mut Self {
+        bevy_ecs::message::MessageRegistry::register_message::<T>(self);
+        self
+    }
+}

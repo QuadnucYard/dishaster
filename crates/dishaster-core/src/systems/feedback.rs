@@ -1,25 +1,41 @@
 #![allow(missing_docs)]
 
-use dishaster_views::FeedbackView;
+use dishaster_views::{Feedback, FeedbackView};
 
 use super::prelude::*;
 
-// For now, we ue simple emoji strings as feedback indicators.
-// These are converted to graphical balloons in the client.
-pub const OBSERVING_FEEDBACKS: &[&str] = &["👀", "🤔", "📝"];
-pub const DECIDING_FEEDBACKS: &[&str] = &["😋", "😕", "💡"];
-pub const SERVING_FEEDBACKS: &[&str] = &["🍚", "🍲", "👍", "❓"];
+// For now, we use simple emoji strings as feedback indicators.
+pub mod feedbacks {
 
-pub fn choose_feedback<'a>(rng: &mut impl Rng, pool: &'a [&str]) -> &'a str {
-    pool.choose(rng).expect("pool is non-empty")
+    // These are converted to graphical balloons in the client.
+    pub const OBSERVING: &[&str] = &["👀", "🤔", "📝"];
+    pub const DECIDING: &[&str] = &["😋", "😕", "💡"];
+    pub const SERVING: &[&str] = &["🍚", "🍲", "👍", "❓"];
+
+    // Complaint feedbacks for different triggers
+    pub const NO_APPEALING_DISH: &[&str] = &["😞", "😕", "🤷"];
+    pub const QUEUE_TOO_LONG: &[&str] = &["😤", "⏰", "💢"];
+    pub const MISSING_UTENSILS: &[&str] = &["😠", "❓", "🤦"];
+    // Reserved for appearance quality checking (not yet implemented)
+    #[allow(dead_code)]
+    pub const APPEARANCE_MISMATCH: &[&str] = &["🤨", "😟", "👎"];
+    pub const CONTAMINATION: &[&str] = &["🤢", "😱", "🤮"];
+    pub const BAD_TASTE: &[&str] = &["😖", "😞", "🤢"];
+    pub const STILL_HUNGRY: &[&str] = &["😐", "🍚", "😕"];
 }
 
-pub trait FeedbackEmitter {
-    fn emit_feedback(&mut self, event: FeedbackView);
+pub fn choose_feedback(rng: &mut impl Rng, pool: &[&str]) -> Feedback {
+    Feedback::Thought(pool.choose(rng).cloned().expect("pool is non-empty").into())
 }
 
-impl FeedbackEmitter for EventQueue {
-    fn emit_feedback(&mut self, event: FeedbackView) {
-        self.push(SimEvent::Feedback(event));
+pub fn feedback_present_system(
+    mut feedback_messages: MessageReader<FeedbackMessage>,
+    mut events: ResMut<EventQueue>,
+) {
+    for msg in feedback_messages.read() {
+        events.push(SimEvent::Feedback(FeedbackView {
+            entity: msg.entity.to_entity_id(),
+            content: msg.content.clone(),
+        }));
     }
 }

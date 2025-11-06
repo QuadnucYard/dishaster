@@ -1,4 +1,4 @@
-use dishaster_views::{Feedback, FeedbackView};
+use dishaster_views::Feedback;
 
 use super::{feedback::*, prelude::*};
 
@@ -51,9 +51,9 @@ pub fn process_serving_messages(
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement)>,
     window_query: Query<&WindowDishes>,
     mut queue: ResMut<ServingCommsQueue>,
-    mut events: ResMut<EventQueue>,
     time: Res<Time>,
     mut rng: ResMut<ServingRng>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
     registry: Res<GameModelRegistryRes>,
 ) {
     let now = time.current_time;
@@ -102,10 +102,10 @@ pub fn process_serving_messages(
                 );
                 staff_state.last_update_time = now;
                 let feedback = Feedback::Thought(eco_format!("{}?", request.dish_name));
-                events.emit_feedback(FeedbackView {
-                    entity: staff.to_entity_id(),
+                feedback_messages.write(FeedbackMessage {
+                    entity: staff,
                     content: feedback,
-                    timestamp: now,
+                    trigger: None,
                 });
                 let delay = rng.random_range(STAFF_CONFIRM_DELAY_MIN..STAFF_CONFIRM_DELAY_MAX);
                 // Queue the verbal confirmation after a short pause to simulate speech.
@@ -128,18 +128,17 @@ pub fn process_serving_messages(
 
                 // The staff member accepted the task, so we wait for food prep.
                 staff_state.last_update_time = now;
-                let confirm_feedback = Feedback::Thought(eco_format!("{}", request.dish_name));
-                events.emit_feedback(FeedbackView {
-                    entity: staff.to_entity_id(),
-                    content: confirm_feedback.clone(),
-                    timestamp: now,
+                let confirm_feedback = Feedback::Thought(request.dish_name.clone());
+                feedback_messages.write(FeedbackMessage {
+                    entity: staff,
+                    content: confirm_feedback,
+                    trigger: None,
                 });
-                let diner_feedback =
-                    Feedback::Thought(choose_feedback(&mut rng, DECIDING_FEEDBACKS).into());
-                events.emit_feedback(FeedbackView {
-                    entity: diner.to_entity_id(),
+                let diner_feedback = choose_feedback(&mut rng, feedbacks::DECIDING);
+                feedback_messages.write(FeedbackMessage {
+                    entity: diner,
                     content: diner_feedback,
-                    timestamp: now,
+                    trigger: None,
                 });
 
                 log::debug!(
@@ -251,17 +250,16 @@ pub fn process_serving_messages(
                 }
 
                 let staff_feedback = Feedback::Thought(eco_format!("{} ✅", request.dish_name));
-                events.emit_feedback(FeedbackView {
-                    entity: staff.to_entity_id(),
+                feedback_messages.write(FeedbackMessage {
+                    entity: staff,
                     content: staff_feedback,
-                    timestamp: now,
+                    trigger: None,
                 });
-                let diner_feedback =
-                    Feedback::Thought(choose_feedback(&mut rng, SERVING_FEEDBACKS).into());
-                events.emit_feedback(FeedbackView {
-                    entity: diner.to_entity_id(),
+                let diner_feedback = choose_feedback(&mut rng, feedbacks::SERVING);
+                feedback_messages.write(FeedbackMessage {
+                    entity: diner,
                     content: diner_feedback,
-                    timestamp: now,
+                    trigger: None,
                 });
 
                 log::debug!(
@@ -295,7 +293,7 @@ pub fn drive_serving_sessions(
     registry: Res<GameModelRegistryRes>,
     mut comms: ResMut<ServingCommsQueue>,
     time: Res<Time>,
-    mut events: ResMut<EventQueue>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
 ) {
     let now = time.current_time;
 
@@ -362,10 +360,10 @@ pub fn drive_serving_sessions(
 
                 // Give the diner immediate feedback that their order was heard so they
                 // perceive progress while we wait for the delayed response.
-                events.emit_feedback(FeedbackView {
-                    entity: diner.to_entity_id(),
+                feedback_messages.write(FeedbackMessage {
+                    entity: diner,
                     content: Feedback::Thought(eco_format!("{}?", dish_name)),
-                    timestamp: now,
+                    trigger: None,
                 });
 
                 let delay = rng.random_range(ORDER_SPEECH_DELAY_MIN..ORDER_SPEECH_DELAY_MAX);

@@ -3,6 +3,7 @@
 pub use bevy_ecs::prelude::*;
 
 pub use crate::{
-    CompWrapper, IntoComponent, IntoResource, MessageQueue, ResWrapper, ToEntity, ToEntityId,
+    AddMessage, CompWrapper, IntoComponent, IntoResource, MessageQueue, ResWrapper, ToEntity,
+    ToEntityId,
     display::{DisplayRoot, DisplayState, Transform},
 };

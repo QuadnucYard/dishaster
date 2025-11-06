@@ -2,7 +2,6 @@
 
 use std::sync::Arc;
 
-use bevy_ecs::message::MessageRegistry;
 use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
 use dishaster_save_models::LevelSetupState;
@@ -60,6 +59,8 @@ impl Simulation {
                 // Sync visuals to movement positions
                 sync_transform_with_movement,
                 check_day_completion,
+                // Presentation related systems
+                feedback_present_system,
             )
                 .chain(),
         );
@@ -128,7 +129,9 @@ impl Simulation {
     /// Perform initial setup tasks at simulation startup
     fn startup(&mut self) {
         // Add messages
-        MessageRegistry::register_message::<RefillDispenser>(&mut self.world);
+        self.world
+            .add_message::<FeedbackMessage>()
+            .add_message::<RefillDispenser>();
 
         // Add observers for agent spawn/despawn events to log presentation events
         self.world.add_observer(

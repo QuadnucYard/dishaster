@@ -2,7 +2,6 @@
 
 use bevy_ecs::schedule::ScheduleConfigs;
 use dishaster_navigation::NavigationGrid;
-use dishaster_views::{Feedback, FeedbackView};
 use ordered_float::NotNan;
 
 use super::{decision::*, feedback::*, hint::*, prelude::*};
@@ -97,8 +96,7 @@ fn handle_observe_goal(
         &mut EntityRng,
     )>,
     window_query: Query<(Entity, &Window)>,
-    time: Res<Time>,
-    mut events: ResMut<EventQueue>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
 ) {
     for (entity, mut goal, mut targets, mut movement, personality, mut rng) in diner_query {
@@ -141,11 +139,11 @@ fn handle_observe_goal(
         }
 
         if rng.random_bool(0.01) {
-            events.emit_feedback(FeedbackView {
-                entity: entity.to_entity_id(),
-                content: Feedback::Thought(choose_feedback(&mut rng, OBSERVING_FEEDBACKS).into()),
-                timestamp: time.current_time,
-            })
+            feedback_messages.write(FeedbackMessage {
+                entity,
+                content: choose_feedback(&mut rng, feedbacks::OBSERVING),
+                trigger: None,
+            });
         }
     }
 }
@@ -163,8 +161,7 @@ fn handle_decide_window_goal(
     window_query: Query<(Entity, &Window, &WindowDishes)>,
     lane_query: Query<(&QueueLane, &QueueLaneMembers)>,
     registry: Res<GameModelRegistryRes>,
-    time: Res<Time>,
-    mut events: ResMut<EventQueue>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
 ) {
     let config = DecisionConfig::default();
 
@@ -219,9 +216,26 @@ fn handle_decide_window_goal(
         let chosen = select_window_from_candidates(&candidates, &config, &mut rng);
 
         let Some(window_entity) = chosen else {
-            // No suitable window found, go back to observing
-            log::debug!(target: "diner", "no suitable window found, continue observing");
-            goal.update(DinerGoal::Observe);
+            // No suitable window found - emit feedback and leave
+            log::info!(
+                target: "diner",
+                "diner {:?} leaving: no appealing dishes found",
+                entity
+            );
+
+            // Apply mood and trust penalties
+            psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
+            psych_state.trust = (psych_state.trust - 0.1).max(0.0);
+
+            // Emit complaint feedback
+            feedback_messages.write(FeedbackMessage {
+                entity,
+                content: choose_feedback(&mut rng, feedbacks::NO_APPEALING_DISH),
+                trigger: Some(FeedbackTrigger::NoAppealingDish),
+            });
+
+            // Leave the canteen
+            goal.update(DinerGoal::Leave);
             continue;
         };
 
@@ -229,10 +243,10 @@ fn handle_decide_window_goal(
 
         // Give feedback
         if rng.random_bool(0.5) {
-            events.emit_feedback(FeedbackView {
-                entity: entity.to_entity_id(),
-                content: Feedback::Thought(choose_feedback(&mut rng, DECIDING_FEEDBACKS).into()),
-                timestamp: time.current_time,
+            feedback_messages.write(FeedbackMessage {
+                entity,
+                content: choose_feedback(&mut rng, feedbacks::DECIDING),
+                trigger: None,
             });
         }
 
@@ -250,13 +264,26 @@ fn handle_pick_tray_goal(
         &mut DinerGoalState,
         &mut DinerTargets,
         &mut Movement,
+        &mut DinerPsychState,
+        &DinerPersonality,
         &mut EntityRng,
     )>,
     mut dispenser_query: Query<(Entity, &mut Dispenser)>,
     registry: Res<GameModelRegistryRes>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
-    for (entity, mut state, mut goal, mut targets, mut movement, mut rng) in diner_query {
+    for (
+        entity,
+        mut state,
+        mut goal,
+        mut targets,
+        mut movement,
+        mut psych_state,
+        _personality,
+        mut rng,
+    ) in diner_query
+    {
         if !goal.is(DinerGoal::PickTray) {
             continue;
         }
@@ -274,11 +301,28 @@ fn handle_pick_tray_goal(
                     NotNan::new(distance).unwrap()
                 })
             else {
-                // No dispensers available
+                // No dispensers available - emit feedback and wander
                 log::warn!(
                     target: "diner",
-                    "no_tray_dispenser: entity={entity:?}"
+                    "diner {:?} cannot find tray, wandering to retry",
+                    entity
                 );
+
+                // Apply mood penalty (but not trust - this could be temporary)
+                psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
+
+                // Emit complaint feedback
+                if goal.timer > 10.0 {
+                    // Only emit feedback if we've been trying for a while
+                    feedback_messages.write(FeedbackMessage {
+                        entity,
+                        content: choose_feedback(&mut rng, feedbacks::MISSING_UTENSILS),
+                        trigger: Some(FeedbackTrigger::MissingUtensils),
+                    });
+                    goal.reset_timer(); // Reset to avoid spamming feedback
+                }
+
+                // Don't leave yet - keep trying
                 continue;
             };
             targets.tray_target = Some(dispenser_entity);
@@ -374,12 +418,17 @@ fn handle_pick_chopsticks_goal(
         &mut DinerGoalState,
         &mut DinerTargets,
         &mut Movement,
+        &mut DinerPsychState,
+        &mut EntityRng,
     )>,
     mut dispenser_query: Query<(Entity, &mut Dispenser)>,
     registry: Res<GameModelRegistryRes>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
-    for (entity, mut state, mut goal, mut targets, mut movement) in diner_query {
+    for (entity, mut state, mut goal, mut targets, mut movement, mut psych_state, mut rng) in
+        diner_query
+    {
         if !goal.is(DinerGoal::PickChopsticks) {
             continue;
         }
@@ -397,11 +446,28 @@ fn handle_pick_chopsticks_goal(
                     NotNan::new(distance).unwrap()
                 })
             else {
-                // No dispensers available
+                // No dispensers available - emit feedback and wander
                 log::warn!(
                     target: "diner",
-                    "no_chopstick_dispenser: entity={entity:?}"
+                    "diner {:?} cannot find chopsticks, wandering to retry",
+                    entity
                 );
+
+                // Apply mood penalty (but not trust - this could be temporary)
+                psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
+
+                // Emit complaint feedback
+                if goal.timer > 10.0 {
+                    // Only emit feedback if we've been trying for a while
+                    feedback_messages.write(FeedbackMessage {
+                        entity,
+                        content: choose_feedback(&mut rng, feedbacks::MISSING_UTENSILS),
+                        trigger: Some(FeedbackTrigger::MissingUtensils),
+                    });
+                    goal.reset_timer(); // Reset to avoid spamming feedback
+                }
+
+                // Don't leave yet - keep trying
                 continue;
             };
             targets.chopstick_target = Some(dispenser_entity);
@@ -499,13 +565,18 @@ fn check_queue_patience(
         &mut DinerGoalState,
         &mut DinerPsychState,
         &mut DinerLongTermMemory,
+        &DinerPersonality,
         &QueueMember,
+        &mut EntityRng,
     )>,
     lane_query: Query<&QueueLaneMembers>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
 ) {
     let config = DecisionConfig::default();
 
-    for (entity, mut goal, mut psych_state, mut ltm, queue_member) in diner_query.iter_mut() {
+    for (entity, mut goal, mut psych_state, mut ltm, _personality, queue_member, mut rng) in
+        diner_query.iter_mut()
+    {
         if !goal.is(DinerGoal::QueueForWindow) {
             continue;
         }
@@ -537,6 +608,17 @@ fn check_queue_patience(
                 patience_now,
                 &config,
             );
+
+            // Additional mood and trust penalties
+            psych_state.mood = (psych_state.mood - 0.3).max(-1.0);
+            psych_state.trust = (psych_state.trust - 0.15).max(0.0);
+
+            // Emit complaint feedback
+            feedback_messages.write(FeedbackMessage {
+                entity,
+                content: choose_feedback(&mut rng, feedbacks::QUEUE_TOO_LONG),
+                trigger: Some(FeedbackTrigger::QueueTooLong),
+            });
 
             // Leave queue and exit canteen
             commands.entity(entity).remove::<QueueMember>();
@@ -823,6 +905,7 @@ fn handle_eat_goal(
         &mut DinerGoalState,
         &mut DinerState,
         &mut DinerTargets,
+        &DinerPersonality,
         &DinerDiningProfile,
         &mut DinerPsychState,
         &mut DinerLongTermMemory,
@@ -831,15 +914,60 @@ fn handle_eat_goal(
     mut table_query: Query<(Entity, &mut DiningTable)>,
     registry: Res<GameModelRegistryRes>,
     time: Res<Time>,
+    mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
     let satisfaction_weights = SatisfactionWeights::default();
+    let feedback_thresholds = FeedbackThresholds::default();
 
-    for (entity, mut goal, state, mut targets, dining_profile, mut psych_state, mut ltm, mut rng) in
-        diner_query.iter_mut()
+    for (
+        entity,
+        mut goal,
+        state,
+        mut targets,
+        _personality,
+        dining_profile,
+        mut psych_state,
+        mut ltm,
+        mut rng,
+    ) in diner_query.iter_mut()
     {
         if !goal.is(DinerGoal::Eat) {
             continue;
+        }
+
+        // Check for contamination during eating (probabilistic detection over time)
+        if let Some(ref served_dish) = state.served_dish
+            && served_dish.contamination_level > feedback_thresholds.contamination_threshold
+        {
+            // Calculate detection chance based on eating time elapsed
+            // Higher contamination = faster detection
+            let detection_rate = served_dish.contamination_level * 0.5; // 0.05/s at threshold, 0.5/s at max
+            let dt = time.tick_duration as f32;
+
+            if rng.random_bool((detection_rate * dt) as f64) {
+                log::warn!(
+                    target: "diner",
+                    "diner {:?} detected contamination: level={:.2}",
+                    entity,
+                    served_dish.contamination_level
+                );
+
+                // Apply severe penalties
+                psych_state.mood = (psych_state.mood - 0.5).max(-1.0);
+                psych_state.trust = (psych_state.trust - 0.3).max(0.0);
+
+                // Emit strong complaint
+                feedback_messages.write(FeedbackMessage {
+                    entity,
+                    content: choose_feedback(&mut rng, feedbacks::CONTAMINATION),
+                    trigger: Some(FeedbackTrigger::Contamination),
+                });
+
+                // Stop eating immediately
+                goal.update(DinerGoal::ReturnDishes);
+                continue;
+            }
         }
 
         // Calculate eating time based on diner's eating speed
@@ -873,6 +1001,23 @@ fn handle_eat_goal(
                 })
                 .unwrap_or(served_dish.price_paid * 0.9);
 
+            // Record hunger before eating
+            let hunger_before = psych_state.hunger;
+
+            // Calculate satisfaction for feedback
+            let satisfaction = compute_satisfaction(
+                dish_tags,
+                &served_dish.dish_id,
+                served_dish.price_paid,
+                base_price,
+                served_dish.served_quality,
+                served_dish.contamination_level,
+                hunger_before,
+                &ltm,
+                &satisfaction_weights,
+            );
+
+            // Update diner state
             update_after_eating(
                 dish_tags,
                 &served_dish.dish_id,
@@ -885,6 +1030,40 @@ fn handle_eat_goal(
                 &mut ltm,
                 &satisfaction_weights,
             );
+
+            // Check for bad taste feedback
+            if satisfaction < feedback_thresholds.bad_taste_threshold {
+                log::info!(
+                    target: "diner",
+                    "diner {:?} complaining: bad taste (satisfaction={:.2})",
+                    entity,
+                    satisfaction
+                );
+
+                // Emit feedback (emoji only)
+                feedback_messages.write(FeedbackMessage {
+                    entity,
+                    content: choose_feedback(&mut rng, feedbacks::BAD_TASTE),
+                    trigger: Some(FeedbackTrigger::BadTaste),
+                });
+            }
+
+            // Check for still hungry feedback
+            if psych_state.hunger > feedback_thresholds.still_hungry_threshold {
+                log::info!(
+                    target: "diner",
+                    "diner {:?} still hungry after eating (hunger={:.2})",
+                    entity,
+                    psych_state.hunger
+                );
+
+                // Mild complaint or thought
+                feedback_messages.write(FeedbackMessage {
+                    entity,
+                    content: choose_feedback(&mut rng, feedbacks::STILL_HUNGRY),
+                    trigger: Some(FeedbackTrigger::StillHungry),
+                });
+            }
         }
 
         // Free the table seat
@@ -1094,3 +1273,44 @@ fn calculate_leave_probability(personality: &Personality) -> f32 {
     // Scale to reasonable range (0.05 - 0.4)
     0.05 + base_prob * 0.35
 }
+
+/*
+/// Helper function to calculate expected quality for appearance checking
+///
+/// Combines historical memory with base dish quality to form expectations.
+pub fn compute_expected_quality(
+    dish_avg_rating: Option<f32>,
+    dish_base_quality: f32,
+    thresholds: &FeedbackThresholds,
+) -> f32 {
+    match dish_avg_rating {
+        Some(avg_rating) => {
+            // Map -1..1 rating to 0..1 quality scale
+            let rating_quality = (avg_rating + 1.0) / 2.0;
+            thresholds.memory_weight * rating_quality
+                + thresholds.base_quality_weight * dish_base_quality
+        }
+        None => {
+            // No history, just use base quality
+            dish_base_quality
+        }
+    }
+}
+
+/// Helper function to compute quality tolerance based on personality and mood
+pub fn compute_quality_tolerance(
+    adaptiveness: f32,
+    mood: f32,
+    base_tolerance: f32,
+) -> f32 {
+    base_tolerance + adaptiveness * 0.1 + (mood + 1.0) * 0.05
+}
+
+/// Helper function to compute trial trigger probability with personality modifier
+pub fn compute_trial_probability(
+    base_probability: f32,
+    confrontational: f32,
+) -> f32 {
+    (base_probability * (1.0 + confrontational * 0.5)).min(1.0)
+}
+ */

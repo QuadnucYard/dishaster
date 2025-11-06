@@ -64,16 +64,14 @@ pub struct FeedbackView {
     pub entity: EntityId,
     /// Content of the feedback.
     pub content: Feedback,
-    /// Simulation timestamp when the feedback was generated (seconds).
-    pub timestamp: f64,
 }
 
 /// Content of feedback events.
 #[derive(Debug, Clone)]
 pub enum Feedback {
-    /// Quiet thought bubble.
+    /// Thought bubble with emoji or short text
     Thought(EcoString),
-    /// Spoken feedback with implicit content.
+    /// Spoken feedback with implicit content
     Speech,
 }
 
