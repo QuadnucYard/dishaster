@@ -1,0 +1,64 @@
+[gd_scene load_steps=4 format=3 uid="uid://bxnueqr3ye383"]
+
+[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="1_war15"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qp45"]
+bg_color = Color(0.64528626, 0.48702055, 0.9345089, 0.3019608)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.85, 0.6, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="FontVariation" id="FontVariation_elk72"]
+base_font = ExtResource("1_war15")
+variation_opentype = {
+2003265652: 600
+}
+
+[node name="Hint" type="MarginContainer"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -418.0
+offset_right = 418.0
+offset_bottom = 78.0
+grow_horizontal = 2
+theme_override_constants/margin_top = 40
+
+[node name="Panel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_8qp45")
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Label" type="Label" parent="Panel/MarginContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/line_spacing = 0
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = SubResource("FontVariation_elk72")
+theme_override_font_sizes/font_size = 28
+text = "Hint提示"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Timer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 5.0
+one_shot = true

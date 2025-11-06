@@ -223,6 +223,10 @@ impl GameScene {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
                 trial_gui.hide();
             }
+
+            UiCommand::ShowHint { message } => {
+                ctx.gui.get_mut::<HintNotification>().show_hint(&message);
+            }
         }
     }
 }

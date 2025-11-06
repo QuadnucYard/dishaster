@@ -3,6 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use anyhow::{Context, Result};
 use dishaster_models::DinerPool;
 use dishrupt_persistence::Persistable;
+use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
 
 /// Current version of the progress schema stored on disk.
@@ -47,6 +48,9 @@ pub struct PlayerProgress {
     pub reputation: f32,
     /// Base seed for deterministic day generation.
     pub rng_seed: u64,
+    /// Set of hint IDs that have been shown to the player.
+    #[serde(default)]
+    pub shown_hints: FxHashSet<String>,
 }
 
 /// Snapshot of user-authored canteen layout changes.
@@ -80,6 +84,7 @@ impl UserProgress {
                 current_day: 1,
                 reputation: 50.0,
                 rng_seed: seed,
+                shown_hints: Default::default(),
             },
             canteen_layout: Default::default(),
             diner_pool: Default::default(),

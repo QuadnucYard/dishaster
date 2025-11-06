@@ -1,3 +1,5 @@
+use rustc_hash::FxHashSet;
+
 use super::prelude::*;
 use crate::{DinerProfile, DinerRandomizerModel, WindowConfiguration};
 
@@ -33,6 +35,10 @@ pub struct LevelConfig {
     /// This field is populated at runtime from persistence layer
     #[serde(skip)]
     pub persistent_diner_pool: Vec<DinerProfile>,
+
+    /// Set of hint IDs that have been shown (populated at runtime from persistence layer)
+    #[serde(skip)]
+    pub shown_hints: FxHashSet<String>,
 }
 
 impl HasId for LevelConfig {

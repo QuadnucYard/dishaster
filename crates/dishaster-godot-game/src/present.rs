@@ -6,6 +6,7 @@ mod feedback;
 
 use dishaster_interface::{snapshots::*, *};
 use dishaster_ui_protocol::UiCommand;
+use dishrupt_l10n::tr;
 use godot::global::godot_print;
 
 pub use self::{agent::AgentPresenter, dish::DishPresenter, dispenser::DispenserPresenter};
@@ -110,6 +111,20 @@ impl Game {
                     }
 
                     self.ui_commands.push(UiCommand::TrialEnd);
+                }
+
+                SimEvent::ShowHint(hint_id) => {
+                    godot_print!("Showing hint: {hint_id}");
+
+                    // Save hint immediately
+                    // let mut svc = progress_service();
+                    // let mut hints = svc.progress().player.shown_hints.clone();
+                    // hints.insert(hint_id.clone());
+                    // svc.update_shown_hints(hints);
+                    // let _ = svc.save(); // Ignore errors for hint saving
+
+                    let message = tr!(&format!("hint--{hint_id}"));
+                    self.ui_commands.push(UiCommand::ShowHint { message });
                 }
             }
         }

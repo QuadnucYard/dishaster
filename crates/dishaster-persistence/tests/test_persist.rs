@@ -23,6 +23,7 @@ fn sample_registry() -> GameModelRegistry {
         diner_randomizer: sample_diner_provider(),
         seed: 42,
         persistent_diner_pool: vec![],
+        shown_hints: Default::default(),
     };
     registry.levels.intern(level.id.clone(), level);
     registry

@@ -26,6 +26,7 @@ pub fn register_guis(registry: &mut GuiRegistry) {
         SettlementGui => "gaming/settlement",
         TimeStatsGui => "gaming/time_stats",
         TrialGui => "gaming/trial",
+        HintNotification => "gaming/hint",
     );
 }
 

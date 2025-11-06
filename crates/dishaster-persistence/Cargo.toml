@@ -11,6 +11,7 @@ dishaster-models.workspace = true
 
 anyhow.workspace = true
 ron.workspace = true
+rustc-hash.workspace = true
 serde.workspace = true
 
 [dev-dependencies]

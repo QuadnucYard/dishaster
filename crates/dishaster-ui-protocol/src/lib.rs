@@ -86,6 +86,12 @@ pub enum UiCommand {
     TrialRightSpeak(TrialSpeech),
     /// Trial has ended.
     TrialEnd,
+
+    /// Show a hint notification to the player.
+    ShowHint {
+        /// Localized hint message.
+        message: String,
+    },
 }
 
 #[allow(missing_docs)]

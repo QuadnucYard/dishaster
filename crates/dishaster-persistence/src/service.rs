@@ -3,6 +3,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result, bail};
 use dishaster_models::{GameModelRegistry, LevelConfig, ModelId};
 use dishrupt_persistence::PersistentStorage;
+use rustc_hash::FxHashSet;
 
 use crate::progress::*;
 
@@ -93,6 +94,7 @@ impl<Store: PersistentStorage> ProgressService<Store> {
             self.progress.player.rng_seed,
             self.progress.player.current_day,
         );
+        level.shown_hints = self.progress.player.shown_hints.clone();
         Ok(level)
     }
 
@@ -100,6 +102,18 @@ impl<Store: PersistentStorage> ProgressService<Store> {
     pub fn complete_day(&mut self) -> Result<()> {
         self.progress.player.current_day = self.progress.player.current_day.saturating_add(1);
         self.progress.player.rng_seed = advance_seed(self.progress.player.rng_seed);
+        self.progress.meta.updated_at_utc = now_unix();
+        self.inner.save_progress(&self.progress)?;
+        Ok(())
+    }
+
+    /// Update shown hints in progress (does not save immediately)
+    pub fn update_shown_hints(&mut self, shown_hints: FxHashSet<String>) {
+        self.progress.player.shown_hints = shown_hints;
+    }
+
+    /// Save current progress to storage
+    pub fn save(&mut self) -> Result<()> {
         self.progress.meta.updated_at_utc = now_unix();
         self.inner.save_progress(&self.progress)?;
         Ok(())

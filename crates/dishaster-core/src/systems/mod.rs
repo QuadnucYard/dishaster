@@ -3,6 +3,7 @@
 mod decision;
 mod dining;
 mod feedback;
+mod hint;
 mod monitor;
 mod navigation;
 mod queueing;

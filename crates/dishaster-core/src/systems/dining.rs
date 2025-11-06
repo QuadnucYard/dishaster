@@ -5,7 +5,12 @@ use dishaster_navigation::NavigationGrid;
 use dishaster_views::{Feedback, FeedbackView};
 use ordered_float::NotNan;
 
-use super::{decision::*, feedback::*, prelude::*};
+use super::{
+    decision::*,
+    feedback::*,
+    hint::{emit_hint_if_first_time, hints},
+    prelude::*,
+};
 
 /// Collection of schedules dining systems
 pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + 'static>> {
@@ -255,6 +260,7 @@ fn handle_pick_tray_goal(
     mut dispenser_query: Query<(Entity, &mut Dispenser)>,
     registry: Res<GameModelRegistryRes>,
     mut events: ResMut<EventQueue>,
+    mut hints: ResMut<HintTracker>,
 ) {
     for (entity, mut state, mut goal, mut targets, mut movement, mut rng) in diner_query {
         if !goal.is(DinerGoal::PickTray) {
@@ -331,6 +337,11 @@ fn handle_pick_tray_goal(
             capacity: dispenser_model.capacity,
         });
 
+        // Emit hint for first-time out-of-stock
+        if dispenser.current_stock == 0 {
+            emit_hint_if_first_time(&mut hints, &mut events, hints::DISPENSER_OUT_OF_STOCK);
+        }
+
         // Spawn the tray item
         let tray_res = dispenser_model.item_display.res.clone();
         let tray_entity = commands
@@ -373,6 +384,7 @@ fn handle_pick_chopsticks_goal(
     mut dispenser_query: Query<(Entity, &mut Dispenser)>,
     registry: Res<GameModelRegistryRes>,
     mut events: ResMut<EventQueue>,
+    mut hints: ResMut<HintTracker>,
 ) {
     for (entity, mut state, mut goal, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::PickChopsticks) {
@@ -450,6 +462,11 @@ fn handle_pick_chopsticks_goal(
             current_stock: dispenser.current_stock,
             capacity: dispenser_model.capacity,
         });
+
+        // Emit hint for first-time out-of-stock
+        if dispenser.current_stock == 0 {
+            emit_hint_if_first_time(&mut hints, &mut events, "dispenser-out-of-stock");
+        }
 
         // Spawn the chopsticks item
         let chopsticks_res = dispenser_model.item_display.res.clone();

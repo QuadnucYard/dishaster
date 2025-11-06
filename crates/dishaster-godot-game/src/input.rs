@@ -33,6 +33,10 @@ impl Game {
                     godot_print!("DEV: Starting trial for diner {:?}", diner);
                     self.ui_commands.push(UiCommand::TrialStart(diner));
                 }
+                if key.pressed && key.keycode == Key::H {
+                    let message = "This is a hint triggered by pressing the H key.".into();
+                    self.ui_commands.push(UiCommand::ShowHint { message });
+                }
             }
             _ => {}
         }

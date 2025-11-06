@@ -3,7 +3,7 @@
 use dishaster_views::{
     Appearance, DishView, FeedbackView, TrialIntro, TrialSpeech, TrialStatement,
 };
-use dishrupt_core::EntityId;
+use dishrupt_core::{EntityId, prelude::EcoString};
 
 /// Presentation events emitted by the core simulation for client display.
 pub enum SimEvent {
@@ -51,6 +51,9 @@ pub enum SimEvent {
     TrialRightSpeak(TrialSpeech),
     /// Trial has ended.
     TrialEnd,
+
+    /// Show a hint to the player for first-time events.
+    ShowHint(EcoString),
 }
 
 /// Types of changes to a diner's held items.

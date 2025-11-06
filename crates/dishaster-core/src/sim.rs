@@ -6,6 +6,7 @@ use bevy_ecs::message::MessageRegistry;
 use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
 use dishrupt_simulation::ISimulation;
+use rustc_hash::FxHashSet;
 
 use crate::{components::*, messages::*, models::*, prelude::*, resources::*, systems::*};
 
@@ -112,6 +113,8 @@ impl Simulation {
         self.world.insert_resource(DayStatus::default());
         self.world
             .insert_resource(TrialSession::new(world_rng.derive_seed()));
+        self.world
+            .insert_resource(HintTracker::new(level.shown_hints.clone()));
         self.world.insert_resource(level.into_res());
         // Derived RNGs
         self.world
@@ -241,5 +244,16 @@ impl Simulation {
             self.world.resource::<DailyDinerSchedule>(),
         );
         day_status.live_diner_count == 0 && !schedule.has_pending_spawns()
+    }
+
+    /// Get the set of shown hints from this session
+    ///
+    /// This should be called when persisting progress to save which
+    /// hints the player has already seen.
+    pub fn get_shown_hints(&self) -> FxHashSet<String> {
+        self.world
+            .get_resource::<HintTracker>()
+            .map(|tracker| tracker.shown_hints().clone())
+            .unwrap_or_default()
     }
 }
