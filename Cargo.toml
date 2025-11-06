@@ -42,7 +42,7 @@ bevy_color = { version = "0.17.0", default-features = false, features = ["std"] 
 bevy_ecs = { version = "0.17.0", default-features = false, features = ["std", "backtrace"] }
 bevy_math = { version = "0.17.0", default-features = false, features = ["std", "serialize"] }
 
-godot = "0.4.1"
+godot = "0.4.2"
 
 anyhow = "1.0"
 as-any = "0.3"
