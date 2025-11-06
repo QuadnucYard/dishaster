@@ -2,6 +2,7 @@
 
 mod canteen;
 mod cosmetic;
+mod credit;
 mod decision;
 mod diner;
 mod diner_pool;
@@ -13,6 +14,7 @@ mod trial;
 
 pub use canteen::*;
 pub use cosmetic::*;
+pub use credit::*;
 pub use decision::*;
 pub use diner::*;
 pub use diner_pool::*;

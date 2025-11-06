@@ -1,0 +1,96 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8v6h3j2nqp7k"]
+
+[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="1_q0vtb"]
+
+[sub_resource type="FontVariation" id="FontVariation_bderl"]
+base_font = ExtResource("1_q0vtb")
+variation_opentype = {
+2003265652: 500
+}
+
+[sub_resource type="FontVariation" id="FontVariation_m565p"]
+base_font = ExtResource("1_q0vtb")
+variation_opentype = {
+2003265652: 800
+}
+
+[node name="Credits" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.1, 0.1, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 80.0
+offset_top = 40.0
+offset_right = -80.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Credits"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CreditsContent" type="RichTextLabel" parent="VBox/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/normal_font = SubResource("FontVariation_bderl")
+theme_override_fonts/bold_font = SubResource("FontVariation_m565p")
+theme_override_font_sizes/normal_font_size = 24
+theme_override_font_sizes/bold_font_size = 24
+bbcode_enabled = true
+text = "[center][font_size=32]Dishaster[/font_size][/center]
+
+[b]Game Design[/b]
+• Designer Name
+
+[b]Programming[/b]
+• Programmer Name
+
+[b]Art & Graphics[/b]
+• Artist Name
+
+[b]Music & Sound[/b]
+• Composer Name
+
+[b]Special Thanks[/b]
+• Contributor 1
+• Contributor 2
+
+[center][font_size=24]Made with Godot Engine[/font_size][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="BackButton" type="LocalizedButton" parent="VBox"]
+message_id = "back.label"
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 24
+text = "Back"

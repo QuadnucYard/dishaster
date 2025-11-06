@@ -12,6 +12,11 @@ pub enum AppRequest {
     EnterLevel,
     /// Exit the current game run and return to the main menu.
     ExitLevel,
+
+    /// Show credits screen.
+    ShowCredits,
+    /// Return to main menu from credits or other screens.
+    BackToMenu,
 }
 
 impl UiRequest for AppRequest {}

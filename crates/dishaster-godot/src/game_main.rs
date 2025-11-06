@@ -1,9 +1,9 @@
 use std::{
     cell::OnceCell,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock},
 };
 
-use dishaster_core::models::GameModelRegistry;
+use dishaster_core::models::{CreditsData, GameModelRegistry};
 use dishaster_data::DataLoader;
 use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE, user_store::GodotUserStorage};
 use dishaster_godot_ui::register_guis;
@@ -163,6 +163,8 @@ impl Inner {
     }
 }
 
+pub static CREDITS: OnceLock<CreditsData> = OnceLock::new(); // placed here for now
+
 fn init_game_database(
     loader: impl FnOnce() -> Arc<GameModelRegistry>,
 ) -> &'static Arc<GameModelRegistry> {
@@ -171,16 +173,16 @@ fn init_game_database(
 
 fn init_game() {
     log::info!("Init game start");
+    let data = DataLoader::new_with_fallback("data", "../assets/data")
+        .unwrap()
+        .load_all_data()
+        .unwrap();
     let registry = init_game_database(|| {
-        let db = Arc::new(
-            DataLoader::new_with_fallback("data", "../assets/data")
-                .unwrap()
-                .load_all_data()
-                .unwrap(),
-        );
+        let db = Arc::new(data.models);
         log::info!("Loaded {} canteens", db.canteens.len());
         db
     });
+    let _ = CREDITS.set(data.credits);
 
     if PROGRESS_SERVICE
         .set(Mutex::new(

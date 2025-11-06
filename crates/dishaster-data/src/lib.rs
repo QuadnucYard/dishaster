@@ -6,10 +6,23 @@ mod trial_speech;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, bail};
-use dishaster_models::{GameModelRegistry, TrialCorpus};
+use dishaster_models::{CreditsData, GameModelRegistry, TrialCorpus};
 use dishrupt_core::model_registry::*;
 use serde::Deserialize;
 use thiserror::Error;
+
+// === Data Structures ===
+
+/// Complete set of game data assets
+#[derive(Default)]
+pub struct GameDataAssets {
+    /// Game model definitions used in the simulation
+    pub models: GameModelRegistry,
+    /// Credits data
+    pub credits: CreditsData,
+}
+
+// === Data Loader ===
 
 /// Error types for data loading operations
 #[derive(Error, Debug)]
@@ -78,7 +91,7 @@ impl DataLoader {
     }
 
     /// Load all game data and populate the model registry
-    pub fn load_all_data(&self) -> anyhow::Result<GameModelRegistry> {
+    pub fn load_all_data(&self) -> anyhow::Result<GameDataAssets> {
         let mut registry = GameModelRegistry::default();
 
         // Load each registry type from separate files
@@ -105,7 +118,14 @@ impl DataLoader {
             aq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_aq.txt")?)?,
         };
 
-        Ok(registry)
+        let credits: CreditsData = self
+            .load_ron_file(&self.assets_path.join("misc/credits.ron"))
+            .with_context(|| "Loading credits data")?;
+
+        Ok(GameDataAssets {
+            models: registry,
+            credits,
+        })
     }
 
     fn load_to_registry<T>(

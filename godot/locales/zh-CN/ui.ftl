@@ -1,15 +1,26 @@
 ### UI Translations
 
+app =
+    .title = Dishaster 菜根传奇
+
 ## Start Menu and Commons
 
 start =
     .label = 开始
+credits =
+    .label = 制作人员
 quit =
     .label = 退出
+back =
+    .label = 返回
 apply =
     .label = 应用
 cancel =
     .label = 取消
+confirm =
+    .label = 确认
+skip =
+    .label = 跳过
 
 ## In Game
 

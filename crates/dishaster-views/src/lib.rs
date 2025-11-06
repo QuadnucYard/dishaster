@@ -100,3 +100,17 @@ pub struct BodyPart {
     /// Color transformation for this part
     pub color_transform: ColorTransform,
 }
+
+/// Complete credits information for display in the credits scene
+pub struct CreditsView {
+    /// List of credit sections
+    pub sections: Vec<CreditSectionView>,
+}
+
+/// A single section in the credits
+pub struct CreditSectionView {
+    /// Localized title for the section
+    pub title: String,
+    /// List of names/entries in this section
+    pub entries: Vec<String>,
+}

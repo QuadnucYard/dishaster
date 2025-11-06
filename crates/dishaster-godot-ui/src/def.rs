@@ -21,6 +21,7 @@ pub fn register_guis(registry: &mut GuiRegistry) {
     // NOTE: the following are registered by declaration order.
     register_gui!(registry,
         StartMenuGui => "start/start_menu",
+        CreditsGui => "start/credits",
         GamingLayout => "gaming/layout",
         DishPricePopup => "gaming/price_editor",
         SettlementGui => "gaming/settlement",

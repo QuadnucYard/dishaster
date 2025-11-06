@@ -5,7 +5,8 @@ use dishaster_data::DataLoader;
 #[test]
 fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
     let loader = DataLoader::new("../../assets/data")?;
-    let registry = loader.load_all_data()?;
+    let data = loader.load_all_data()?;
+    let registry = data.models;
 
     println!("✓ Loaded {} canteens", registry.canteens.len());
     println!("✓ Loaded {} dishes", registry.dishes.len());

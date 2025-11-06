@@ -1,13 +1,14 @@
 use std::any::Any;
 
+use dishaster_core::views::{CreditSectionView, CreditsView};
 use dishaster_godot_opening::Opening;
-use dishaster_godot_ui::StartMenuGui;
+use dishaster_godot_ui::{CreditsGui, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_godot::bind::BindGodot;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use godot::{classes::Node, global::godot_print, obj::Gd};
 
-use crate::scenes::proc::EnterLevelProcedure;
+use crate::{game_main::CREDITS, scenes::proc::EnterLevelProcedure};
 
 /// The root scene. Handles interaction outside levels.
 pub struct StartScene {
@@ -69,6 +70,28 @@ impl StartScene {
             }
             AppRequest::EnterLevel => {
                 ctx.schedule(EnterLevelProcedure);
+            }
+            AppRequest::ShowCredits => {
+                let credits_data = CREDITS.get().expect("Credits should be available");
+
+                let credits_view = CreditsView {
+                    sections: credits_data
+                        .sections
+                        .iter()
+                        .map(|s| CreditSectionView {
+                            title: s.title.clone(),
+                            entries: s.entries.clone(),
+                        })
+                        .collect(),
+                };
+
+                ctx.gui.hide::<StartMenuGui>();
+                ctx.gui.get_mut::<CreditsGui>().set_view(credits_view);
+                ctx.gui.show::<CreditsGui>();
+            }
+            AppRequest::BackToMenu => {
+                ctx.gui.hide::<CreditsGui>();
+                ctx.gui.show::<StartMenuGui>();
             }
             AppRequest::ExitLevel => panic!("should not happen in start menu"),
         }

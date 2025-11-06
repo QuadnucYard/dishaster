@@ -5,6 +5,8 @@ use crate::prelude::*;
 pub struct StartMenuGui {
     #[child("%Start")]
     start_btn: ButtonA,
+    #[child("%Credits")]
+    credits_btn: ButtonA,
     #[child("%Quit")]
     quit_btn: ButtonA,
 }
@@ -17,6 +19,11 @@ impl Gui for StartMenuGui {
         let cmd = commands.clone();
         self.start_btn.on_click.connect(move || {
             cmd.push_req(AppRequest::EnterLevel);
+        });
+
+        let cmd = commands.clone();
+        self.credits_btn.on_click.connect(move || {
+            cmd.push_req(AppRequest::ShowCredits);
         });
 
         let cmd = commands.clone();

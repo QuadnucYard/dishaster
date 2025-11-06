@@ -103,7 +103,10 @@ impl GameScene {
 
     fn handle_app_request(ctx: &mut SceneContext, req: AppRequest) {
         match req {
-            AppRequest::Quit | AppRequest::EnterLevel => {
+            AppRequest::Quit
+            | AppRequest::EnterLevel
+            | AppRequest::ShowCredits
+            | AppRequest::BackToMenu => {
                 panic!("should be handled in main menu")
             }
             AppRequest::ExitLevel => {
