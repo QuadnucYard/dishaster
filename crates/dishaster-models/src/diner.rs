@@ -1,5 +1,3 @@
-use rustc_hash::{FxHashMap, FxHashSet};
-
 use super::prelude::*;
 
 /// Fixed personality traits that shape diner behavior

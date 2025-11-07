@@ -27,6 +27,8 @@ mod prelude {
     pub use dishrupt_core::prelude::*;
     pub use dishrupt_ecs::prelude::*;
     pub use dishrupt_rng::prelude::*;
+    pub use ordered_float::NotNan;
+    pub use rustc_hash::FxHashMap;
 
     pub use crate::{Tick, adapter::*};
 }

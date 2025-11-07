@@ -2,6 +2,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
 use dishaster_models::DinerPool;
+use dishrupt_core::prelude::EcoString;
 use dishrupt_persistence::Persistable;
 use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
@@ -50,7 +51,7 @@ pub struct PlayerProgress {
     pub rng_seed: u64,
     /// Set of hint IDs that have been shown to the player.
     #[serde(default)]
-    pub shown_hints: FxHashSet<String>,
+    pub shown_hints: FxHashSet<EcoString>,
 }
 
 /// Snapshot of user-authored canteen layout changes.

@@ -57,7 +57,6 @@ fn create_test_level() -> LevelConfig {
         },
         seed: 12345,
         persistent_diner_pool: vec![],
-        shown_hints: Default::default(),
     }
 }
 

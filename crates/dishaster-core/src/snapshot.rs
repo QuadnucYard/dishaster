@@ -1,6 +1,5 @@
 use dishaster_interface::snapshots::*;
 use dishaster_navigation::NavigationGrid;
-use rustc_hash::FxHashMap;
 
 use crate::{components::*, prelude::*, resources::*, sim::Simulation};
 

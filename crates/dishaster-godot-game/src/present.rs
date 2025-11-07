@@ -11,6 +11,7 @@ use godot::global::godot_print;
 
 pub use self::{agent::AgentPresenter, dish::DishPresenter, dispenser::DispenserPresenter};
 use super::Game;
+use crate::progress_service;
 
 const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
 
@@ -116,15 +117,15 @@ impl Game {
                 SimEvent::ShowHint(hint_id) => {
                     godot_print!("Showing hint: {hint_id}");
 
-                    // Save hint immediately
-                    // let mut svc = progress_service();
-                    // let mut hints = svc.progress().player.shown_hints.clone();
-                    // hints.insert(hint_id.clone());
-                    // svc.update_shown_hints(hints);
-                    // let _ = svc.save(); // Ignore errors for hint saving
+                    if self.hint_tracker.mark_shown(&hint_id) {
+                        let message = tr!(&format!("hint--{hint_id}"));
+                        self.ui_commands.push(UiCommand::ShowHint { message });
 
-                    let message = tr!(&format!("hint--{hint_id}"));
-                    self.ui_commands.push(UiCommand::ShowHint { message });
+                        // Save hint immediately
+                        let mut svc = progress_service();
+                        svc.update_shown_hint(hint_id);
+                        let _ = svc.save(); // Ignore errors for hint saving
+                    }
                 }
             }
         }

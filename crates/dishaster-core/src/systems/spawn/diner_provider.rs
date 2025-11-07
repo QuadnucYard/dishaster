@@ -1,5 +1,3 @@
-use rustc_hash::FxHashMap;
-
 use crate::systems::prelude::*;
 
 pub fn populate_diner_pool(

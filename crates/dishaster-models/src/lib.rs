@@ -30,6 +30,7 @@ mod prelude {
         model_registry::{HasId, ModelId},
         prelude::*,
     };
+    pub use rustc_hash::{FxHashMap, FxHashSet};
     pub use serde::{Deserialize, Serialize};
 
     pub use super::{Meters, MinMax, Seconds, Size, XRange};

@@ -1,6 +1,3 @@
-use ordered_float::NotNan;
-use rustc_hash::FxHashMap;
-
 use super::prelude::*;
 
 /// System that updates entities with QueueIntent to move them to the end of the specified queue lane.

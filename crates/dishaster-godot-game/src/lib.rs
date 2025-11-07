@@ -2,6 +2,7 @@
 
 mod dbgviz;
 mod handle_request;
+mod hint;
 mod input;
 pub mod perf;
 mod present;
@@ -25,7 +26,7 @@ use godot::{
 use rustc_hash::FxHashMap;
 
 use self::{perf::PerfTracker, present::*};
-use crate::{dbgviz::*, user_store::GodotUserStorage};
+use crate::{dbgviz::*, hint::HintTracker, user_store::GodotUserStorage};
 
 pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
 pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService<GodotUserStorage>>> = OnceLock::new();
@@ -67,7 +68,8 @@ pub struct Game {
     dbgviz: DbgViz,
 
     perf_tracker: PerfTracker,
-    pres: DisplayPresenters,
+    pres: Presenters,
+    hint_tracker: HintTracker,
 
     phase: DayPhase,
     telemetry: DayTelemetry,
@@ -79,7 +81,7 @@ pub struct Game {
 }
 
 #[derive(Default)]
-struct DisplayPresenters {
+struct Presenters {
     agents: FxHashMap<EntityId, AgentPresenter>,
     dishes: FxHashMap<EntityId, DishPresenter>,
     dispensers: FxHashMap<EntityId, DispenserPresenter>,
@@ -151,8 +153,11 @@ impl Game {
             stage,
             stage_origin: origin,
             dbgviz,
+
             perf_tracker: Default::default(),
             pres: Default::default(),
+            hint_tracker: Default::default(),
+
             phase: DayPhase::Preparation,
             telemetry,
             debug_enabled: false,

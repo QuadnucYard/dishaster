@@ -6,7 +6,6 @@ mod time;
 use std::{collections::VecDeque, sync::Arc};
 
 pub use buffers::*;
-use rustc_hash::FxHashSet;
 pub use time::Time;
 
 use crate::{models::*, prelude::*};
@@ -144,37 +143,5 @@ impl TrialSession {
     /// Record the player's response choice
     pub fn set_last_response(&mut self, response_index: usize) {
         self.last_response_index = Some(response_index);
-    }
-}
-
-/// Hint system for tracking first-time event guidance
-///
-/// Manages which tutorial hints have been shown to the player
-/// to avoid repeating the same guidance across sessions.
-#[derive(Resource, Default)]
-pub struct HintTracker {
-    /// Set of hint IDs that have been shown during this session
-    shown_hints: FxHashSet<String>,
-}
-
-impl HintTracker {
-    /// Create a new hint tracker with pre-shown hints
-    pub fn new(shown_hints: FxHashSet<String>) -> Self {
-        Self { shown_hints }
-    }
-
-    /// Check if a hint has been shown
-    pub fn has_shown(&self, hint_id: &str) -> bool {
-        self.shown_hints.contains(hint_id)
-    }
-
-    /// Mark a hint as shown
-    pub fn mark_shown(&mut self, hint_id: &str) {
-        self.shown_hints.insert(hint_id.into());
-    }
-
-    /// Get all shown hints for persistence
-    pub fn shown_hints(&self) -> &FxHashSet<String> {
-        &self.shown_hints
     }
 }
