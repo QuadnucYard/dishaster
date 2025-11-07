@@ -2,30 +2,37 @@ use crate::systems::prelude::*;
 
 pub fn populate_diner_pool(
     mut commands: Commands,
-    mut level: ResMut<ResWrapper<LevelConfig>>,
-    diner_randomizer: Res<ResWrapper<DinerRandomizerModel>>,
+    registry: Res<GameModelRegistryRes>,
+    mut level: ResMut<ResWrapper<LevelSetupState>>,
     mut rng: ResMut<WorldRng>,
 ) {
+    let level_config = registry
+        .levels
+        .get_by_id(&level.level_id)
+        .expect("LevelConfig not found in registry");
+
     // Get or create persistent pool from level config
-    let mut pool = if level.persistent_diner_pool.is_empty() {
+    let mut pool = if level.diner_pool.is_empty() {
         log::info!("No persistent pool found in level config, creating new one");
         DinerPool::default()
     } else {
         DinerPool {
-            profiles: std::mem::take(&mut level.persistent_diner_pool),
-            config: DinerPoolConfig::default(),
+            profiles: std::mem::take(&mut level.diner_pool),
         }
     };
 
     // Initialize pool if empty (first run)
     if pool.profiles.is_empty() {
-        log::info!(
-            "Initializing diner pool with {} profiles",
-            pool.config.initial_pool_size
-        );
+        let pool_size = level_config.diner_pool.initial_pool_size;
 
-        for i in 0..pool.config.initial_pool_size {
-            let profile = create_fresh_diner(i as u32, &diner_randomizer, &mut rng.derive_prng());
+        log::info!("Initializing diner pool with {} profiles", pool_size);
+
+        for i in 0..pool_size {
+            let profile = create_fresh_diner(
+                i as u32,
+                &level_config.diner_randomizer,
+                &mut rng.derive_prng(),
+            );
 
             pool.profiles.push(profile);
         }

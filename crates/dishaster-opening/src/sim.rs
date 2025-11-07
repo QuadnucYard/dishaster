@@ -151,6 +151,7 @@ impl SimulationFeature for OpeningSimulationFeat {
     type Query = ();
     type Event = SimEvent;
     type Response = ();
+    type Profile = ();
 }
 
 impl ISimulation<OpeningSimulationFeat> for Simulation {
@@ -181,4 +182,6 @@ impl ISimulation<OpeningSimulationFeat> for Simulation {
     fn query(&mut self, _query: ()) {
         // No queries to process
     }
+
+    fn persist(&mut self) {}
 }

@@ -11,8 +11,8 @@ pub mod user_store;
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
 use dishaster_interface::*;
-use dishaster_models::{GameModelRegistry, LevelConfig};
-use dishaster_persistence::ProgressService;
+use dishaster_models::{GameModelRegistry, LevelSetupState};
+use dishaster_persistence::PlayerService;
 use dishaster_ui_protocol::{StatsView, UiCommand};
 use dishaster_views::DayHudState;
 use dishrupt_core::prelude::*;
@@ -29,9 +29,9 @@ use self::{perf::PerfTracker, present::*};
 use crate::{dbgviz::*, hint::HintTracker, user_store::GodotUserStorage};
 
 pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
-pub static PROGRESS_SERVICE: OnceLock<Mutex<ProgressService<GodotUserStorage>>> = OnceLock::new();
+pub static PROGRESS_SERVICE: OnceLock<Mutex<PlayerService<GodotUserStorage>>> = OnceLock::new();
 
-pub fn progress_service() -> MutexGuard<'static, ProgressService<GodotUserStorage>> {
+pub fn progress_service() -> MutexGuard<'static, PlayerService<GodotUserStorage>> {
     PROGRESS_SERVICE
         .get()
         .expect("progress service not initialized")
@@ -93,10 +93,10 @@ impl Game {
     /// NOTE: the creator should START the simulation after construction
     pub fn new(
         gd: Gd<Node>,
-        level: LevelConfig,
+        level: LevelSetupState,
         sim_creator: impl FnOnce(
             Arc<GameModelRegistry>,
-            LevelConfig,
+            LevelSetupState,
         ) -> Box<dyn ISimulation<CoreSimulationFeat>>,
     ) -> Self {
         let db = GAME_DATA.get().expect("game data not initialized");
@@ -109,7 +109,7 @@ impl Game {
 
         let map_prefab = &db
             .canteens
-            .get_by_id(&db.levels.get_by_id(&level.id).unwrap().canteen)
+            .get_by_id(&db.levels.get_by_id(&level.level_id).unwrap().canteen)
             .unwrap()
             .display
             .res;
@@ -156,7 +156,9 @@ impl Game {
 
             perf_tracker: Default::default(),
             pres: Default::default(),
-            hint_tracker: Default::default(),
+            hint_tracker: HintTracker::new(
+                progress_service().profile().progress.seen_hints.clone(),
+            ),
 
             phase: DayPhase::Preparation,
             telemetry,
@@ -251,11 +253,11 @@ impl Game {
 
         if forced {
             self.send_sim_command(SimCommand::EndRun);
-            self.pres.agents.clear();
         }
 
+        let profile = self.sim_runner.persist();
         progress_service()
-            .complete_day()
+            .complete_day(profile)
             .expect("failed to complete day");
 
         self.ui_commands.push(UiCommand::FinishDay);

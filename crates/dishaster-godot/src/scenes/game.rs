@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use dishaster_core::{models::LevelConfig, sim::Simulation};
+use dishaster_core::{models::LevelSetupState, sim::Simulation};
 use dishaster_godot_game::Game;
 use dishaster_godot_ui::*;
 use dishaster_interface::SimCommand;
@@ -89,7 +89,7 @@ impl Scene for GameScene {
 }
 
 impl GameScene {
-    pub fn start_game(&mut self, ctx: &mut SceneContext, level: LevelConfig) {
+    pub fn start_game(&mut self, ctx: &mut SceneContext, level: LevelSetupState) {
         let mut game = Game::new(self.gd(), level, |db, level| {
             let mut sim = Box::new(Simulation::new(db));
             sim.start(level);

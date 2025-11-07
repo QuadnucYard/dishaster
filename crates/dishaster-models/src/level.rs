@@ -1,8 +1,10 @@
+use dishaster_save_models::{Placement, WindowConfiguration};
+
 use super::prelude::*;
-use crate::{DinerProfile, DinerRandomizerModel, WindowConfiguration};
+use crate::{DinerPoolConfig, DinerRandomizerModel};
 
 /// Complete level configuration defining the game scenario
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct LevelConfig {
     /// Unique identifier for this level
     pub id: ModelId,
@@ -16,54 +18,28 @@ pub struct LevelConfig {
     /// Diner generation parameters
     pub diner_randomizer: DinerRandomizerModel,
 
+    /// Configuration for the persistent diner pool
+    #[serde(default)]
+    pub diner_pool: DinerPoolConfig,
+
     /// Reference to the canteen model
     pub canteen: ModelId,
+
+    // To make the config file flat, we inline these fields from CanteenLayoutState
     /// Player-configured window setups
     pub window_configurations: Vec<WindowConfiguration>,
     /// Placement of dining tables
-    pub table_placements: Vec<TablePlacement>,
+    pub table_placements: Vec<Placement>,
     /// Placement of tray dispensers
-    pub tray_dispenser_placements: Vec<DispenserPlacement>,
+    pub tray_dispenser_placements: Vec<Placement>,
     /// Placement of chopstick dispensers
-    pub chopstick_dispenser_placements: Vec<DispenserPlacement>,
+    pub chopstick_dispenser_placements: Vec<Placement>,
     /// Placement of dish collectors
-    pub collector_placements: Vec<CollectorPlacement>,
-
-    /// Persistent diner pool (accumulated across days, not serialized in config)
-    /// This field is populated at runtime from persistence layer
-    #[serde(skip)]
-    pub persistent_diner_pool: Vec<DinerProfile>,
+    pub collector_placements: Vec<Placement>,
 }
 
 impl HasId for LevelConfig {
     fn id(&self) -> &ModelId {
         &self.id
     }
-}
-
-/// Physical placement configuration for dining tables
-#[derive(Debug, Clone, Deserialize)]
-pub struct TablePlacement {
-    /// Reference to table model
-    pub model: ModelId,
-    /// Center position in the canteen
-    pub center_pos: Vec2,
-}
-
-/// Physical placement configuration for item dispensers
-#[derive(Debug, Clone, Deserialize)]
-pub struct DispenserPlacement {
-    /// Reference to dispenser model
-    pub model: ModelId,
-    /// Center position in the canteen
-    pub center_pos: Vec2,
-}
-
-/// Physical placement configuration for dish collectors
-#[derive(Debug, Clone, Deserialize)]
-pub struct CollectorPlacement {
-    /// Reference to collector model
-    pub model: ModelId,
-    /// Center position in the canteen
-    pub center_pos: Vec2,
 }

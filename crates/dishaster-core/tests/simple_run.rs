@@ -25,21 +25,11 @@ fn create_test_registry() -> GameModelRegistry {
         .canteens
         .intern(canteen_model.id.clone(), canteen_model);
 
-    registry
-}
-
-/// Create a minimal test level configuration
-fn create_test_level() -> LevelConfig {
-    LevelConfig {
+    let level_config = LevelConfig {
         id: ModelId::new("test_level"),
         canteen: ModelId::new("test_canteen"),
         day: 1,
         run_length: 600.0,
-        window_configurations: vec![],
-        table_placements: vec![],
-        tray_dispenser_placements: vec![],
-        chopstick_dispenser_placements: vec![],
-        collector_placements: vec![],
         diner_randomizer: DinerRandomizerModel {
             personality: PersonalityRanges {
                 frugality: MinMax::new(0.1, 0.5),
@@ -56,7 +46,28 @@ fn create_test_level() -> LevelConfig {
             appearance: Default::default(),
         },
         seed: 12345,
-        persistent_diner_pool: vec![],
+        diner_pool: Default::default(),
+        window_configurations: vec![],
+        table_placements: vec![],
+        tray_dispenser_placements: vec![],
+        chopstick_dispenser_placements: vec![],
+        collector_placements: vec![],
+    };
+    registry
+        .levels
+        .intern(level_config.id.clone(), level_config);
+
+    registry
+}
+
+/// Create a minimal test level configuration
+fn create_test_level() -> LevelSetupState {
+    LevelSetupState {
+        level_id: ModelId::new("test_level"),
+        day: 0,
+        seed: 0,
+        canteen: Default::default(),
+        diner_pool: Default::default(),
     }
 }
 

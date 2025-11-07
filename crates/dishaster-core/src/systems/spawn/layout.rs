@@ -12,7 +12,7 @@ const PRICE_LABEL_PREFAB: &str = "dishes/price_label";
 pub fn spawn_static_objects(
     mut commands: Commands,
     canteen: Res<Canteen>,
-    level: Res<ResWrapper<LevelConfig>>,
+    level: Res<ResWrapper<LevelSetupState>>,
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
     mut events: ResMut<EventQueue>,
@@ -20,20 +20,36 @@ pub fn spawn_static_objects(
     spawn_windows(
         &mut commands,
         &canteen,
-        &level,
+        &level.canteen,
         &registry,
         &display_root,
         &mut events,
     );
-    spawn_tables(&mut commands, &level, &registry, &display_root);
-    spawn_dispensers(&mut commands, &level, &registry, &display_root, &mut events);
-    spawn_collectors(&mut commands, &level, &registry, &display_root);
+    spawn_tables(
+        &mut commands,
+        &level.canteen.placement,
+        &registry,
+        &display_root,
+    );
+    spawn_dispensers(
+        &mut commands,
+        &level.canteen.placement,
+        &registry,
+        &display_root,
+        &mut events,
+    );
+    spawn_collectors(
+        &mut commands,
+        &level.canteen.placement,
+        &registry,
+        &display_root,
+    );
 }
 
 fn spawn_windows(
     commands: &mut Commands,
     canteen: &Res<Canteen>,
-    level: &LevelConfig,
+    level: &CanteenLayoutState,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
     events: &mut ResMut<EventQueue>,
@@ -218,11 +234,11 @@ fn spawn_dish_presentations(
 
 fn spawn_tables(
     commands: &mut Commands,
-    level: &LevelConfig,
+    placements: &CanteenPlacements,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
 ) {
-    for placement in &level.table_placements {
+    for placement in &placements.tables {
         let handle = registry
             .tables
             .get_handle_by_id(&placement.model)
@@ -258,17 +274,14 @@ fn spawn_tables(
 
 fn spawn_dispensers(
     commands: &mut Commands,
-    level: &LevelConfig,
+    placements: &CanteenPlacements,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
     events: &mut ResMut<EventQueue>,
 ) {
     for (placements, ty) in [
-        (&level.tray_dispenser_placements, DispenserType::Tray),
-        (
-            &level.chopstick_dispenser_placements,
-            DispenserType::Chopstick,
-        ),
+        (&placements.tray_dispensers, DispenserType::Tray),
+        (&placements.chopstick_dispensers, DispenserType::Chopstick),
     ] {
         for dispenser_placement in placements {
             spawn_dispenser(
@@ -286,7 +299,7 @@ fn spawn_dispensers(
 fn spawn_dispenser(
     commands: &mut Commands,
     registry: &GameModelRegistry,
-    placement: &DispenserPlacement,
+    placement: &Placement,
     dispenser_type: DispenserType,
     display_root: &DisplayRoot,
     events: &mut ResMut<EventQueue>,
@@ -335,12 +348,12 @@ fn spawn_dispenser(
 
 fn spawn_collectors(
     commands: &mut Commands,
-    level: &LevelConfig,
+    placements: &CanteenPlacements,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
 ) {
     // Spawn dish collectors
-    for placement in &level.collector_placements {
+    for placement in &placements.collectors {
         let collector_handle = registry
             .collectors
             .get_handle_by_id(&placement.model)

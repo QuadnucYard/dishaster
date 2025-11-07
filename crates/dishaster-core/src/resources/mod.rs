@@ -8,7 +8,7 @@ use std::{collections::VecDeque, sync::Arc};
 pub use buffers::*;
 pub use time::Time;
 
-use crate::{models::*, prelude::*};
+use crate::{components::*, models::*, prelude::*};
 
 #[allow(missing_docs)]
 pub struct NavigationRngTag;
@@ -65,6 +65,31 @@ pub type GameModelRegistryRes = ResWrapper<Arc<GameModelRegistry>>;
 pub struct DailyDinerSchedule {
     /// List of diners scheduled to arrive today with their arrival times
     scheduled_diners: VecDeque<ScheduledDiner>,
+}
+
+/// A diner scheduled to arrive at a specific simulation time
+///
+/// Created during day initialization from persisted profiles or generated
+/// as new customers. Contains all information needed to spawn a diner entity
+/// at the designated time.
+#[derive(Debug, Clone)]
+pub struct ScheduledDiner {
+    /// Profile ID
+    pub id: u32,
+    /// The personality traits controlling decision-making behavior
+    pub personality: Personality,
+    /// Dining-specific behavioral profile
+    pub dining_profile: DiningProfile,
+    /// Current psychological state affecting decision-making
+    pub psych_state: PsychState,
+    /// The diner's accumulated memory of past dining experiences
+    pub long_term_memory: LongTermMemory,
+    /// Visual appearance (cosmetics)
+    pub appearance: Appearance,
+
+    // Session-specific attributes (generated per visit)
+    /// The simulation time when this diner should be spawned (seconds from day start)
+    pub arrival_time: Seconds,
 }
 
 impl DailyDinerSchedule {

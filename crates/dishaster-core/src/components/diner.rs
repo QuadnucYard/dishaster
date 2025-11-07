@@ -178,3 +178,31 @@ pub type DinerShortTermMemory = CompWrapper<ShortTermMemory>;
 
 /// Wrapper component for Appearance (cosmetic customization)
 pub type DinerAppearance = CompWrapper<Appearance>;
+
+/// Current psychological state affecting decision-making
+///
+/// This represents runtime state that changes during a dining session.
+#[derive(Debug, Clone)]
+pub struct PsychState {
+    /// Current hunger level (0..1, higher = more hungry)
+    pub hunger: f32,
+    /// Current mood (-1..1, negative = bad mood, positive = good mood)
+    pub mood: f32,
+    /// Current patience threshold in seconds (dynamically adjusted)
+    pub patience: f32,
+    /// Trust in the canteen (0..1, affects tolerance to issues)
+    pub trust: f32,
+}
+
+/// Short-term memory for current meal session
+/// FIXME: use it
+#[allow(unused)]
+#[derive(Debug, Clone, Default)]
+pub struct ShortTermMemory {
+    /// Windows that have been observed this session
+    pub seen_windows: FxHashSet<ModelId>,
+    /// Dishes tried in current meal
+    pub tried_dishes: Vec<ModelId>,
+    /// Perceived price references updated by seeing prices
+    pub expected_prices: FxHashMap<ModelId, f32>,
+}

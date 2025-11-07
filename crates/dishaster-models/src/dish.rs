@@ -1,6 +1,7 @@
 use dishrupt_core::display::DisplayModel;
 
 use super::prelude::*;
+use crate::DishAssignment;
 
 // ===================== Core Dish Models =====================
 
@@ -37,15 +38,6 @@ pub struct DishCharacteristics {
     /// Reference price for value comparison (used in diner decision-making)
     #[serde(default)]
     pub base_price: f32,
-}
-
-/// Different pricing strategies for dishes
-#[derive(Debug, Clone, Copy, Deserialize)]
-pub enum PricingMethod {
-    /// Fixed price per serving
-    PerPortion(f32),
-    /// Price calculated by weight (per kg)
-    ByWeight(f32),
 }
 
 // ===================== Window Service Models =====================
@@ -91,48 +83,6 @@ pub struct WindowLayout {
     pub queue_x: Vec<Meters>,
     /// Positions where dishes can be placed. Relative to the top-left corner.
     pub dish_slots: Vec<Rect>,
-}
-
-// ===================== Operational Configuration =====================
-
-/// Player's configuration for a specific window instance
-#[derive(Debug, Clone, Deserialize)]
-pub struct WindowConfiguration {
-    /// Which slot to use
-    pub slot_index: usize,
-    /// Which service template this uses
-    pub service_template: ModelId,
-    /// Whether enabled
-    pub is_enabled: bool,
-    /// Player-selected dishes
-    pub dish_assignments: Vec<DishAssignment>,
-}
-
-/// Player's assignment of a dish to a specific slot in a window
-#[derive(Debug, Clone, Deserialize)]
-pub struct DishAssignment {
-    /// Which slot to use
-    pub slot_index: usize,
-    /// Which dish to serve
-    pub dish_id: ModelId,
-    /// Player-set pricing
-    pub pricing: PricingConfig,
-}
-
-/// Player-configured pricing for a dish assignment
-#[derive(Debug, Clone, Deserialize)]
-pub struct PricingConfig {
-    /// Base price set by player
-    pub method: PricingMethod,
-}
-
-/// Pricing adjustments applied to base dish prices
-#[derive(Debug, Clone, Deserialize)]
-pub struct PriceModifier {
-    /// Type of modifier ("discount", "markup", "time_based", etc.)
-    pub modifier_type: EcoString, // "discount", "markup", "time_based", etc.
-    /// Modifier value or percentage
-    pub value: f32,
 }
 
 // ===================== Runtime State =====================

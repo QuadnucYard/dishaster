@@ -81,6 +81,10 @@ impl<F: SimulationFeature> SimulationRunner<F> for SyncSimulationRunner<F> {
         self.sim.query(query);
     }
 
+    fn persist(&mut self) -> F::Profile {
+        self.sim.persist()
+    }
+
     fn set_tps(&mut self, tps: f64) {
         if (self.tps - tps).abs() > f64::EPSILON {
             self.tps = tps;

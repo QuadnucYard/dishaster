@@ -1,0 +1,72 @@
+use crate::{CanteenLayoutState, DinerPool, prelude::*};
+
+/// Current version of the progress schema stored on disk.
+pub const USER_PROGRESS_VERSION: u32 = 1;
+
+/// Persistent representation of the player's long-term progress.
+///
+/// The structure only contains stable data that must survive across sessions.
+/// Transient entities live solely inside the simulation and never appear here.
+#[derive(Serialize, Deserialize)]
+pub struct PlayerProfile {
+    /// Metadata describing file format and timestamps.
+    pub meta: ProfileMeta,
+
+    /// Player-specific counters and unlock tracking.
+    pub progress: PlayerProgress,
+
+    /// Cumulative statistics for analytics and balancing.
+    #[serde(default)]
+    pub aggregates: AggregateStats,
+
+    /// Customized canteen layout modifications.
+    pub layout: CanteenLayoutState,
+
+    /// Aggregated memory about diners to drive future generation.
+    #[serde(default)]
+    pub diner_pool: DinerPool,
+}
+
+/// Metadata stored alongside the progress payload.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProfileMeta {
+    /// Format schema version to support migrations.
+    pub version: u32,
+    /// Creation timestamp in UTC seconds.
+    pub created_at_utc: u64,
+    /// Last updated timestamp in UTC seconds.
+    pub updated_at_utc: u64,
+}
+
+/// Player-centric state that drives level selection.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PlayerProgress {
+    /// The level played.
+    pub level_id: ModelId,
+
+    /// Day index (1-based). Increment on new day/run.
+    pub current_day: u32,
+
+    /// Reputation score used for balancing future systems.
+    pub reputation: f32,
+
+    /// Base seed for deterministic day generation.
+    pub rng_seed: u64,
+
+    /// Set of hint IDs that have been shown to the player (persisted).
+    #[serde(default)]
+    pub seen_hints: FxHashSet<EcoString>,
+}
+
+/// Lifetime statistics collected for dashboards and analytics.
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct AggregateStats {
+    /// Accumulated profit across all completed days.
+    pub lifetime_profit: f64,
+    /// Total number of diners served.
+    pub lifetime_served: u64,
+    /// Total safety incidents recorded.
+    pub safety_incidents: u32,
+    /// Average satisfaction of the most recent day.
+    pub last_day_avg_satisfaction: f32,
+}

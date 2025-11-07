@@ -1,8 +1,6 @@
 use std::sync::LazyLock;
 
-use dishaster_models::*;
-
-use super::super::prelude::*;
+use crate::systems::prelude::*;
 
 /// System that manages diner spawning based on pre-scheduled arrival times
 pub fn update_diner_spawner(

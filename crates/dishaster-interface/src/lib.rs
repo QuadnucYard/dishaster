@@ -6,6 +6,7 @@ pub mod query;
 pub mod response;
 pub mod snapshots;
 
+use dishaster_save_models::SimProfile;
 use dishrupt_simulation::SimulationFeature;
 
 pub use crate::{
@@ -22,4 +23,5 @@ impl SimulationFeature for CoreSimulationFeat {
     type Query = SimQuery;
     type Event = SimEvent;
     type Response = SimResponse;
+    type Profile = SimProfile;
 }

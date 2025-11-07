@@ -2,11 +2,16 @@ use crate::systems::prelude::*;
 
 pub fn set_daily_schedule(
     mut commands: Commands,
-    level: Res<ResWrapper<LevelConfig>>,
+    registry: Res<GameModelRegistryRes>,
+    level: Res<ResWrapper<LevelSetupState>>,
     mut pool: ResMut<ResWrapper<DinerPool>>,
     mut rng: ResMut<WorldRng>,
 ) {
-    let schedule = generate_daily_schedule(&level, &mut pool, &mut rng.derive_prng());
+    let level_config = registry
+        .levels
+        .get_by_id(&level.level_id)
+        .expect("LevelConfig not found in registry");
+    let schedule = generate_daily_schedule(level_config, &level, &mut pool, &mut rng.derive_prng());
     commands.insert_resource(schedule);
 }
 
@@ -18,21 +23,22 @@ pub fn set_daily_schedule(
 /// - Decide visits based on satisfaction memory
 /// - Assign arrival times from preferred ranges
 fn generate_daily_schedule(
-    level: &LevelConfig,
+    level_config: &LevelConfig,
+    level_setup: &LevelSetupState,
     pool: &mut DinerPool,
     rng: &mut impl Rng,
 ) -> DailyDinerSchedule {
     let mut scheduled = Vec::new();
 
     // Current "day" approximation (use level.day if available)
-    let current_day = level.day;
+    let current_day = level_setup.day;
 
     // Decide which existing diners visit today
     for profile in &mut pool.profiles {
-        apply_memory_decay(profile, &pool.config, current_day);
+        apply_memory_decay(profile, &level_config.diner_pool, current_day);
 
         // Roll dice
-        if !roll_day_visit(profile, &pool.config, rng) {
+        if !roll_day_visit(profile, &level_config.diner_pool, rng) {
             continue;
         }
 

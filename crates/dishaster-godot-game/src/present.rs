@@ -123,7 +123,7 @@ impl Game {
 
                         // Save hint immediately
                         let mut svc = progress_service();
-                        svc.update_shown_hint(hint_id);
+                        svc.update_seen_hint(hint_id);
                         let _ = svc.save(); // Ignore errors for hint saving
                     }
                 }

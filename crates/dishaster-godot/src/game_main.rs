@@ -7,7 +7,7 @@ use dishaster_core::models::{CreditsData, GameModelRegistry};
 use dishaster_data::DataLoader;
 use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE, user_store::GodotUserStorage};
 use dishaster_godot_ui::register_guis;
-use dishaster_persistence::ProgressService;
+use dishaster_persistence::PlayerService;
 use dishrupt_godot::{NodeExt, audio::AudioManager, input::listener::InputListener};
 use dishrupt_godot_scene::{SceneContext, SceneManager};
 use dishrupt_godot_ui::GuiManager;
@@ -186,13 +186,8 @@ fn init_game() {
 
     if PROGRESS_SERVICE
         .set(Mutex::new(
-            ProgressService::load_or_create(
-                GodotUserStorage,
-                registry.clone(),
-                None,
-                godot::global::randi() as u64,
-            )
-            .expect("failed to initialize progress service"),
+            PlayerService::load_or_create(GodotUserStorage, registry.clone(), None)
+                .expect("failed to initialize progress service"),
         ))
         .is_err()
     {

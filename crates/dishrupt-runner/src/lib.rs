@@ -36,6 +36,9 @@ pub trait SimulationRunner<F: SimulationFeature> {
     /// Forward a simulation query to the underlying simulation immediately.
     fn send_query(&mut self, query: F::Query);
 
+    /// Persist the current simulation state.
+    fn persist(&mut self) -> F::Profile;
+
     /// Retrieve the current ticks-per-second target.
     fn tps(&self) -> f64;
 

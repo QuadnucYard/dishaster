@@ -1,11 +1,8 @@
 //! Game model definitions and data structures
 
 mod canteen;
-mod cosmetic;
 mod credit;
 mod decision;
-mod diner;
-mod diner_pool;
 mod diner_rand;
 mod dish;
 mod level;
@@ -13,13 +10,11 @@ mod misc;
 mod trial;
 
 pub use canteen::*;
-pub use cosmetic::*;
 pub use credit::*;
 pub use decision::*;
-pub use diner::*;
-pub use diner_pool::*;
 pub use diner_rand::*;
 pub use dish::*;
+pub use dishaster_save_models::*;
 pub use level::*;
 pub use misc::*;
 pub use prelude::ModelId;
@@ -30,7 +25,6 @@ mod prelude {
         model_registry::{HasId, ModelId},
         prelude::*,
     };
-    pub use rustc_hash::{FxHashMap, FxHashSet};
     pub use serde::{Deserialize, Serialize};
 
     pub use super::{Meters, MinMax, Seconds, Size, XRange};

@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use dishaster_models::*;
-use dishaster_persistence::ProgressService;
+use dishaster_persistence::PlayerService;
 use dishrupt_persistence::FsStorage;
 use tempfile::tempdir;
 
@@ -14,15 +14,15 @@ fn sample_registry() -> GameModelRegistry {
         id: ModelId::new("level_default"),
         day: 1,
         run_length: 120.0,
+        seed: 42,
         canteen: ModelId::new("canteen_default"),
+        diner_randomizer: sample_diner_provider(),
+        diner_pool: Default::default(),
         window_configurations: vec![],
         table_placements: vec![],
         tray_dispenser_placements: vec![],
         chopstick_dispenser_placements: vec![],
         collector_placements: vec![],
-        diner_randomizer: sample_diner_provider(),
-        seed: 42,
-        persistent_diner_pool: vec![],
     };
     registry.levels.intern(level.id.clone(), level);
     registry
@@ -50,11 +50,10 @@ fn sample_diner_provider() -> DinerRandomizerModel {
 fn new_user_receives_first_day_level() -> Result<()> {
     let registry = Arc::new(sample_registry());
     let dir = tempdir()?;
-    let service = ProgressService::load_or_create(
+    let service = PlayerService::load_or_create(
         FsStorage::new(dir.path().to_path_buf()).unwrap(),
         Arc::clone(&registry),
         None,
-        12345,
     )?;
     let level = service.level_for_current_day()?;
     assert_eq!(level.day, 1);
@@ -65,22 +64,20 @@ fn new_user_receives_first_day_level() -> Result<()> {
 fn completing_day_advances_and_persists_progress() -> Result<()> {
     let registry = Arc::new(sample_registry());
     let dir = tempdir()?;
-    let mut service = ProgressService::load_or_create(
+    let mut service = PlayerService::load_or_create(
         FsStorage::new(dir.path().to_path_buf()).unwrap(),
         Arc::clone(&registry),
         None,
-        999,
     )?;
     let _initial = service.level_for_current_day()?;
-    service.complete_day()?;
+    service.complete_day(SimProfile::default())?;
     let next_level = service.level_for_current_day()?;
     assert_eq!(next_level.day, 2);
     drop(service);
-    let service = ProgressService::load_or_create(
+    let service = PlayerService::load_or_create(
         FsStorage::new(dir.path().to_path_buf()).unwrap(),
         registry,
         None,
-        0,
     )?;
     let level = service.level_for_current_day()?;
     assert_eq!(level.day, 2);

@@ -9,6 +9,7 @@ edition.workspace = true
 dishrupt-core.workspace = true
 dishrupt-simulation.workspace = true
 dishaster-views.workspace = true
+dishaster-save-models.workspace = true
 
 [lints]
 workspace = true

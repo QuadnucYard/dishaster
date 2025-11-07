@@ -436,6 +436,7 @@ dependencies = [
  "dishaster-interface",
  "dishaster-models",
  "dishaster-navigation",
+ "dishaster-save-models",
  "dishaster-views",
  "dishrupt-core",
  "dishrupt-ecs",
@@ -540,6 +541,7 @@ dependencies = [
 name = "dishaster-interface"
 version = "0.1.0"
 dependencies = [
+ "dishaster-save-models",
  "dishaster-views",
  "dishrupt-core",
  "dishrupt-simulation",
@@ -549,8 +551,8 @@ dependencies = [
 name = "dishaster-models"
 version = "0.1.0"
 dependencies = [
+ "dishaster-save-models",
  "dishrupt-core",
- "rustc-hash",
  "serde",
 ]
 
@@ -583,12 +585,21 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "dishaster-models",
+ "dishaster-save-models",
  "dishrupt-core",
  "dishrupt-persistence",
  "ron",
  "rustc-hash",
- "serde",
  "tempfile",
+]
+
+[[package]]
+name = "dishaster-save-models"
+version = "0.1.0"
+dependencies = [
+ "dishrupt-core",
+ "rustc-hash",
+ "serde",
 ]
 
 [[package]]

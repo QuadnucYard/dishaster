@@ -5,6 +5,7 @@ use std::sync::Arc;
 use bevy_ecs::message::MessageRegistry;
 use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
+use dishaster_save_models::LevelSetupState;
 use dishrupt_simulation::ISimulation;
 
 use crate::{components::*, messages::*, models::*, prelude::*, resources::*, systems::*};
@@ -85,7 +86,7 @@ impl Simulation {
     /// Sets up all level-specific resources including RNG seed, diner providers,
     /// spawning parameters, and static world objects. Must be called before
     /// the first tick() to properly initialize the simulation state.
-    pub fn start(&mut self, level: LevelConfig) {
+    pub fn start(&mut self, level: LevelSetupState) {
         const DEFAULT_TIMESTEP_S: f64 = 0.1;
 
         self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
@@ -93,7 +94,8 @@ impl Simulation {
         let mut world_rng = WorldRng::new(level.seed);
 
         let db = Arc::clone(self.world.resource::<GameModelRegistryRes>());
-        let canteen = db.canteens.get_by_id(&level.canteen).unwrap();
+        let level_config = db.levels.get_by_id(&level.level_id).unwrap();
+        let canteen = db.canteens.get_by_id(&level_config.canteen).unwrap();
 
         let world_size = canteen.size();
         self.world
@@ -102,8 +104,6 @@ impl Simulation {
         self.world.insert_resource(Canteen {
             model: canteen.clone(),
         });
-        self.world
-            .insert_resource(level.diner_randomizer.clone().into_res());
 
         self.world.insert_resource(EventQueue::default());
         self.world.insert_resource(ResponseQueue::default());
@@ -177,7 +177,6 @@ impl ISimulation<CoreSimulationFeat> for Simulation {
     /// entity states, handle interactions, and progress the simulation.
     /// This should be called at regular intervals to maintain simulation flow.
     fn tick(&mut self) {
-        // Check if time resource exists and advance it, or create a new one
         let mut time = self.world.resource_mut::<Time>();
         time.tick();
 
@@ -218,6 +217,17 @@ impl ISimulation<CoreSimulationFeat> for Simulation {
 
     fn query(&mut self, command: SimQuery) {
         self.handle_query(command);
+    }
+
+    fn persist(&mut self) -> SimProfile {
+        let level = self.world.resource::<ResWrapper<LevelSetupState>>();
+        // currently, we have not modified anything else in the profile except diner pool
+
+        SimProfile {
+            window_configurations: level.canteen.window_configurations.clone(),
+            placement: level.canteen.placement.clone(),
+            diner_profiles: self.get_updated_diner_pool(),
+        }
     }
 }
 

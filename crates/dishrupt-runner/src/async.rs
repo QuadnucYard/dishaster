@@ -177,6 +177,10 @@ where
         todo!()
     }
 
+    fn persist(&mut self) -> F::Profile {
+        todo!()
+    }
+
     fn tps(&self) -> f64 {
         todo!()
     }

@@ -15,6 +15,8 @@ pub trait SimulationFeature {
     type Event;
     /// The simulation response.
     type Response;
+    /// The persisted simulation state.
+    type Profile;
 }
 
 /// Interface for simulation implementations
@@ -39,4 +41,7 @@ pub trait ISimulation<F: SimulationFeature> {
 
     /// Apply a high-level query from the client runtime.
     fn query(&mut self, query: F::Query);
+
+    /// Persist the current simulation state for saving/loading
+    fn persist(&mut self) -> F::Profile;
 }

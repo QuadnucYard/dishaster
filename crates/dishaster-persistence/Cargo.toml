@@ -8,16 +8,18 @@ edition.workspace = true
 [dependencies]
 dishrupt-core.workspace = true
 dishrupt-persistence.workspace = true
-dishaster-models.workspace = true
+dishaster-save-models.workspace = true
+dishaster-models.workspace = true # only for registry
 
 anyhow.workspace = true
 ron.workspace = true
 rustc-hash.workspace = true
-serde.workspace = true
 
 [dev-dependencies]
 dishrupt-core.workspace = true
 dishrupt-persistence = { workspace = true, features = ["fs"] }
+dishaster-models.workspace = true
+
 tempfile.workspace = true
 
 [lints]

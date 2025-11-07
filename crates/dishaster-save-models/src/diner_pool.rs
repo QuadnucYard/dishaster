@@ -1,4 +1,41 @@
-use super::prelude::*;
+//! Common data structures for diner pool management
+//!
+//! These types are shared between simulation (core) and persistence layers
+//! to coordinate diner scheduling and memory tracking across days.
+
+use crate::{Appearance, prelude::*};
+
+/// Persistent pool of all diner profiles across days
+///
+/// This pool only grows (or is pruned externally). It contains all known diners.
+/// Each day, core decides which diners visit based on their memories.
+#[derive(Default, Clone, Serialize, Deserialize)]
+pub struct DinerPool {
+    /// All known diner profiles (grows over time)
+    pub profiles: Vec<DinerProfile>,
+}
+
+/// Runtime representation of a diner profile in the persistent pool
+///
+/// This type is used by the simulation core to track diners across days.
+/// It mirrors the persistence layer's DinerProfile but is not directly serialized.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DinerProfile {
+    /// Unique identifier for this diner (persisted across days)
+    pub id: u32,
+    /// Day of last visit (0-indexed)
+    pub last_visit_day: u32,
+    /// Total number of visits
+    pub total_visits: u32,
+    /// Personality traits controlling behavior (may evolve slightly over time)
+    pub personality: Personality,
+    /// Dining-specific behavioral profile
+    pub dining_profile: DiningProfile,
+    /// Long-term memory of dining experiences
+    pub long_term_memory: LongTermMemory,
+    /// Visual appearance (cosmetics)
+    pub appearance: Appearance,
+}
 
 /// Fixed personality traits that shape diner behavior
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -32,21 +69,6 @@ pub struct DiningProfile {
     pub preferred_arrival_time: (f32, f32),
 }
 
-/// Current psychological state affecting decision-making
-///
-/// This represents runtime state that changes during a dining session.
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct PsychState {
-    /// Current hunger level (0..1, higher = more hungry)
-    pub hunger: f32,
-    /// Current mood (-1..1, negative = bad mood, positive = good mood)
-    pub mood: f32,
-    /// Current patience threshold in seconds (dynamically adjusted)
-    pub patience: f32,
-    /// Trust in the canteen (0..1, affects tolerance to issues)
-    pub trust: f32,
-}
-
 /// Long-term memory persisted across multiple visits
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct LongTermMemory {
@@ -68,15 +90,4 @@ pub struct DishMemory {
     pub avg_rating: f32,
     /// Last time this dish was eaten (simulation time)
     pub last_eaten: Option<f32>,
-}
-
-/// Short-term memory for current meal session
-#[derive(Debug, Clone, Default)]
-pub struct ShortTermMemory {
-    /// Windows that have been observed this session
-    pub seen_windows: FxHashSet<ModelId>,
-    /// Dishes tried in current meal
-    pub tried_dishes: Vec<ModelId>,
-    /// Perceived price references updated by seeing prices
-    pub expected_prices: FxHashMap<ModelId, f32>,
 }
