@@ -6,45 +6,43 @@
         (
             title: "game-design",
             entries: [
-                "石明一夏",
-                "ChatGPT",
-                "Copilot (Claude Sonnet 4.5)",
+                ["石明一夏", "ChatGPT", "Copilot (Claude Sonnet 4.5)"],
             ],
         ),
         (
             title: "programming",
             entries: [
-                "QuadnucYard",
-                "Copilot (GPT-5-Codex, Claude Sonnet 4.5)",
+                ["QuadnucYard", "Copilot (GPT-5-Codex, Claude Sonnet 4.5)"],
             ],
         ),
         (
             title: "art-graphics",
             entries: [
-                "svgemoji <https://github.com/svgmoji/svgmoji>",
-                "豆包",
+                ["svgmoji", "豆包", "ChatGPT"],
             ],
         ),
         (
             title: "music-sound",
             entries: [
-                "Qwen-235B (小蓝鲸智能助手平台)",
-                "Suno",
+                ["Suno", "Qwen-235B (小蓝鲸智能助手平台)"],
+            ],
+        ),
+        (
+            title: "inspiration",
+            entries: [
+                ["魔法少女ノ魔女裁判", "第十九届“挑战杯”全国大学生课外学术科技作品竞赛"],
             ],
         ),
         (
             title: "special-thanks",
             entries: [
-                "Godot Engine Team",
-                "Godot Rust Contributors",
-                "Bevy ECS Contributors",
-                "Rust Community",
+                ["Godot Engine Team", "Godot Rust Contributors", "Bevy ECS Contributors", "Rust Community"],
             ],
         ),
         (
             title: "open-source",
             entries: [
-                "https://github.com/QuadnucYard/dishaster",
+                ["https://github.com/QuadnucYard/dishaster"],
             ],
         ),
     ],

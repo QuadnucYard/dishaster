@@ -16,6 +16,7 @@ pub struct CreditsData {
 pub struct CreditSection {
     /// L10n key for the section title (e.g., "game-design")
     pub title: String,
-    /// List of names/entries in this section
-    pub entries: Vec<String>,
+    /// List of names/entries in this section.
+    /// Each entry can have multiple lines, and each line contains multiple spaced items.
+    pub entries: Vec<Vec<String>>,
 }

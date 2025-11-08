@@ -1,4 +1,8 @@
-[gd_scene format=3 uid="uid://bysf0t5mnvqm"]
+[gd_scene load_steps=4 format=3 uid="uid://bysf0t5mnvqm"]
+
+[ext_resource type="Texture2D" uid="uid://g0xpfig3igsc" path="res://assets/gui/textures/start_menu_bg.png" id="1_lw2g1"]
+[ext_resource type="Theme" uid="uid://c6spuadyswnvj" path="res://assets/gui/button_theme.tres" id="2_ctnrb"]
+[ext_resource type="Texture2D" uid="uid://ckslh452pdw6d" path="res://assets/gui/textures/title.png" id="2_o2670"]
 
 [node name="StartMenu" type="Control"]
 layout_mode = 3
@@ -8,17 +12,43 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="Background" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_lw2g1")
+
+[node name="Title" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -101.0
-offset_top = -54.5
-offset_right = 101.0
-offset_bottom = 54.5
+offset_left = -475.99997
+offset_top = -495.99997
+offset_right = 625.0
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("2_o2670")
+
+[node name="PanelContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = 180.0
+offset_right = 160.0
+offset_bottom = 460.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -30,17 +60,26 @@ alignment = 1
 [node name="Start" type="LocalizedButton" parent="PanelContainer/VBoxContainer"]
 message_id = "start.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 80)
 layout_mode = 2
+theme = ExtResource("2_ctnrb")
+theme_override_font_sizes/font_size = 48
 text = "Start"
 
 [node name="Credits" type="LocalizedButton" parent="PanelContainer/VBoxContainer"]
 message_id = "credits.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 80)
 layout_mode = 2
+theme = ExtResource("2_ctnrb")
+theme_override_font_sizes/font_size = 48
 text = "Credits"
 
 [node name="Quit" type="LocalizedButton" parent="PanelContainer/VBoxContainer"]
 message_id = "quit.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 80)
 layout_mode = 2
+theme = ExtResource("2_ctnrb")
+theme_override_font_sizes/font_size = 48
 text = "Quit"

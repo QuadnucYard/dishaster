@@ -110,5 +110,5 @@ pub struct CreditSectionView {
     /// Localized title for the section
     pub title: String,
     /// List of names/entries in this section
-    pub entries: Vec<String>,
+    pub entries: Vec<Vec<String>>,
 }

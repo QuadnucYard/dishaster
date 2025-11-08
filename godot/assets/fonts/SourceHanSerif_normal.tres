@@ -1,0 +1,9 @@
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://cgfvkspact1bg"]
+
+[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="1_xg7m2"]
+
+[resource]
+base_font = ExtResource("1_xg7m2")
+variation_opentype = {
+2003265652: 400
+}

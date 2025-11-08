@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://vab4k20top34"]
+[gd_scene load_steps=2 format=3 uid="uid://vab4k20top34"]
+
+[ext_resource type="Texture2D" uid="uid://g0xpfig3igsc" path="res://assets/gui/textures/start_menu_bg.png" id="1_gelra"]
 
 [node name="Start" type="Node2D"]
 
@@ -8,6 +10,10 @@ y_sort_enabled = true
 
 [node name="Camera2D" type="Camera2D" parent="Stage"]
 position = Vector2(960, 540)
+
+[node name="Sprite2D" type="Sprite2D" parent="Stage"]
+texture = ExtResource("1_gelra")
+centered = false
 
 [node name="DisplayRoot" type="Node2D" parent="Stage"]
 unique_name_in_owner = true

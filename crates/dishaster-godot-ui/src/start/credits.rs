@@ -33,24 +33,33 @@ impl CreditsGui {
     fn format_credits(view: &CreditsView) -> String {
         let mut result = String::new();
 
+        // Overall center alignment
+        result.push_str("[center]");
         // Header
-        result.push_str("[center][font_size=32]Dishaster[/font_size][/center]\n\n");
+        result.push_str(&format!(
+            "[b][font_size=32]{}[/font_size][/b]\n",
+            tr!("credits-header")
+        ));
 
         // Each section
         for section in &view.sections {
             let section_title = tr!(&section.title);
-            result.push_str(&format!("[center][b]{}[/b][/center]\n", section_title));
+            result.push_str(&format!("[b]{}[/b]", section_title));
             for entry in &section.entries {
-                result.push_str(&format!("[center]{}[/center]\n", entry));
+                result.push_str("[br]");
+                for (i, item) in entry.iter().enumerate() {
+                    if i > 0 {
+                        result.push_str("        ");
+                    }
+                    result.push_str(item);
+                }
             }
             result.push('\n');
         }
 
         // Footer
-        result.push_str(&format!(
-            "[center][font_size=24]{}[/font_size][/center]",
-            tr!("credits-footer")
-        ));
+        result.push_str(&format!("[b]{}[/b]", tr!("credits-footer")));
+        result.push_str("[/center]");
 
         result
     }

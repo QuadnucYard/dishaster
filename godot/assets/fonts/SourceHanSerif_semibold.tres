@@ -1,0 +1,9 @@
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://b8xlji4sfc38j"]
+
+[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="1_pogwo"]
+
+[resource]
+base_font = ExtResource("1_pogwo")
+variation_opentype = {
+2003265652: 600
+}

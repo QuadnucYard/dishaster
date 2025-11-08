@@ -1,18 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://c8v6h3j2nqp7k"]
+[gd_scene load_steps=5 format=3 uid="uid://c8v6h3j2nqp7k"]
 
-[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="1_q0vtb"]
-
-[sub_resource type="FontVariation" id="FontVariation_bderl"]
-base_font = ExtResource("1_q0vtb")
-variation_opentype = {
-2003265652: 500
-}
-
-[sub_resource type="FontVariation" id="FontVariation_m565p"]
-base_font = ExtResource("1_q0vtb")
-variation_opentype = {
-2003265652: 800
-}
+[ext_resource type="Texture2D" uid="uid://gjny846uvcw0" path="res://assets/gui/textures/credits_bg.png" id="1_b2fyw"]
+[ext_resource type="FontVariation" uid="uid://cmd1qg2dgopfb" path="res://assets/fonts/SourceHanSerif_extrabold.tres" id="2_fxuuo"]
+[ext_resource type="FontVariation" uid="uid://g6u3rcecjh2g" path="res://assets/fonts/SourceHanSerif_medium.tres" id="3_w423o"]
+[ext_resource type="Theme" uid="uid://c6spuadyswnvj" path="res://assets/gui/button_theme.tres" id="4_jhegu"]
 
 [node name="Credits" type="Control"]
 layout_mode = 3
@@ -22,75 +13,73 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.1, 0.1, 0.1, 1)
+texture = ExtResource("1_b2fyw")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 80.0
-offset_top = 40.0
-offset_right = -80.0
-offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 80
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Header" type="Label" parent="VBox"]
+[node name="Header" type="Label" parent="MarginContainer/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.28449765, 0.16559735, 0.07361158, 1)
+theme_override_fonts/font = ExtResource("2_fxuuo")
 theme_override_font_sizes/font_size = 48
 text = "Credits"
 horizontal_alignment = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 0
 
-[node name="CreditsContent" type="RichTextLabel" parent="VBox/ScrollContainer"]
+[node name="CreditsContent" type="RichTextLabel" parent="MarginContainer/VBox/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_fonts/normal_font = SubResource("FontVariation_bderl")
-theme_override_fonts/bold_font = SubResource("FontVariation_m565p")
+theme_override_colors/default_color = Color(0.24593258, 0.16192493, 0.05683948, 1)
+theme_override_constants/paragraph_separation = 16
+theme_override_fonts/normal_font = ExtResource("3_w423o")
+theme_override_fonts/bold_font = ExtResource("2_fxuuo")
 theme_override_font_sizes/normal_font_size = 24
-theme_override_font_sizes/bold_font_size = 24
+theme_override_font_sizes/bold_font_size = 28
 bbcode_enabled = true
-text = "[center][font_size=32]Dishaster[/font_size][/center]
-
-[b]Game Design[/b]
-• Designer Name
-
-[b]Programming[/b]
-• Programmer Name
-
-[b]Art & Graphics[/b]
-• Artist Name
-
-[b]Music & Sound[/b]
-• Composer Name
-
-[b]Special Thanks[/b]
-• Contributor 1
-• Contributor 2
-
-[center][font_size=24]Made with Godot Engine[/font_size][/center]"
+text = "[center][b][font_size=32]Dishaster[/font_size][/b]
+[b]Game Design[/b][br]Designer Name
+[b]Programming[/b][br]Programmer Name
+[b]Art & Graphics[/b][br]Artist Name
+[b]Music & Sound[/b][br]Composer Name
+[b]Special Thanks[/b][br]Contributor 1[br]Contributor 2
+[font_size=24]Made with Godot Engine[/font_size][/center]"
 fit_content = true
 scroll_active = false
 
-[node name="BackButton" type="LocalizedButton" parent="VBox"]
+[node name="BackButton" type="LocalizedButton" parent="MarginContainer/VBox"]
 message_id = "back.label"
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(200, 60)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 24
+theme = ExtResource("4_jhegu")
+theme_override_font_sizes/font_size = 36
 text = "Back"

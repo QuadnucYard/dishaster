@@ -1,12 +1,14 @@
 # Credits Screen Localization
 
 credits-title = 制作人员
+credits-header = Dishaster 菜根传奇
 
 # Section titles (will be used to look up from credits.ron)
 game-design = 游戏设计
 programming = 程序开发
 art-graphics = 美术设计
 music-sound = 音乐音效
+inspiration = 灵感来源
 special-thanks = 特别感谢
 open-source = 开源
 
