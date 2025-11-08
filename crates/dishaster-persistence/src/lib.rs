@@ -10,7 +10,7 @@ struct PlayerProfilePersister;
 
 impl Persister<PlayerProfile> for PlayerProfilePersister {
     fn load_bytes(data: Vec<u8>) -> Result<PlayerProfile> {
-        ron::de::from_bytes(&data).context("parse user progress RON")
+        ron::de::from_bytes(&data).context("fail to parse user progress RON")
     }
 
     fn dump_bytes(value: &PlayerProfile) -> Result<Vec<u8>> {

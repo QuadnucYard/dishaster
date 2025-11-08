@@ -588,6 +588,7 @@ dependencies = [
  "dishaster-save-models",
  "dishrupt-core",
  "dishrupt-persistence",
+ "log",
  "ron",
  "rustc-hash",
  "tempfile",

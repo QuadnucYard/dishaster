@@ -28,10 +28,24 @@ impl<Store: PersistentStorage> PersistenceService<Store> {
     }
 
     pub fn load_progress(&mut self, default_level: &LevelConfig) -> Result<PlayerProfile> {
-        self.store
+        match self
+            .store
             .load_or_create_with::<_, PlayerProfilePersister>(Self::SAVE_FILE, || {
                 new_profile(default_level)
-            })
+            }) {
+            Ok(profile) => Ok(profile),
+            Err(err) => {
+                log::warn!(
+                    "Failed to load progress from {}: {}. Creating new profile.",
+                    Self::SAVE_FILE,
+                    err
+                );
+                let profile = new_profile(default_level);
+                self.store
+                    .save_with::<_, PlayerProfilePersister>(Self::SAVE_FILE, &profile)?;
+                Ok(profile)
+            }
+        }
     }
 
     pub fn save_progress(&mut self, profile: &PlayerProfile) -> Result<()> {
