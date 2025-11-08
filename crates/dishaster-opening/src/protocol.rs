@@ -38,7 +38,7 @@ pub enum ItemType {
 /// Events emitted by opening simulation
 pub enum SimEvent {
     /// Food icon spawned with visual variant and color
-    DishSpawned {
+    FoodSpawned {
         /// Entity ID of spawned food
         entity: EntityId,
         /// Sprite variant index (0-7)
@@ -47,7 +47,7 @@ pub enum SimEvent {
         color: (f32, f32, f32),
     },
     /// Face icon spawned with visual variant
-    EmojiSpawned {
+    FaceSpawned {
         /// Entity ID of spawned face
         entity: EntityId,
         /// Sprite variant index (0-7)

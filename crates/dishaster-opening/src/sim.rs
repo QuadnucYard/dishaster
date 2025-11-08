@@ -34,7 +34,7 @@ impl Simulation {
         schedule.add_systems(
             (
                 crate::systems::spawn_foods,
-                crate::systems::spawn_emojis,
+                crate::systems::spawn_faces,
                 crate::systems::spawn_texts,
                 crate::systems::update_physics,
                 crate::systems::update_texts,
@@ -77,8 +77,8 @@ impl Simulation {
         let mut query = world.query::<(
             Entity,
             &Position,
-            Option<&DishObject>,
-            Option<&EmojiObject>,
+            Option<&FoodObject>,
+            Option<&FaceObject>,
             Option<&TextObject>,
             Option<&Rotation>,
             Option<&Scale>,

@@ -4,14 +4,14 @@ use crate::prelude::*;
 
 /// Component for food icon entity
 #[derive(Component)]
-pub struct DishObject {
+pub struct FoodObject {
     /// Visual variant index (which sprite to use)
     pub variant: u8,
 }
 
 /// Component for face icon entity
 #[derive(Component)]
-pub struct EmojiObject {
+pub struct FaceObject {
     /// Visual variant index (which face sprite to use)
     pub variant: u8,
 }

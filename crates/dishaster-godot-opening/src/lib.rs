@@ -87,7 +87,7 @@ impl Opening {
     fn process_events(&mut self, events: Vec<SimEvent>) {
         for event in events {
             match event {
-                SimEvent::DishSpawned {
+                SimEvent::FoodSpawned {
                     entity,
                     variant,
                     color,
@@ -97,7 +97,7 @@ impl Opening {
                         self.presenters.foods.insert(entity, presenter);
                     }
                 }
-                SimEvent::EmojiSpawned { entity, variant } => {
+                SimEvent::FaceSpawned { entity, variant } => {
                     if let Some(node) = self.stage.get_godot_node(entity).cloned() {
                         let presenter = EmojiPresenter::new(node, variant);
                         self.presenters.faces.insert(entity, presenter);

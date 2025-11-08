@@ -10,12 +10,12 @@ pub fn spawn_foods(
     mut events: ResMut<EventQueue>,
     config: Res<OpeningConfig>,
     assets: Res<OpeningAssets>,
-    query: Query<&DishObject>,
+    query: Query<&FoodObject>,
     time: Res<DeltaTime>,
 ) {
-    timers.food += time.delta;
+    timers.food -= time.delta;
 
-    if timers.food < config.dish_spawn_interval || query.iter().count() >= config.max_foods {
+    if timers.food > 0.0 || query.iter().count() >= config.max_foods {
         return;
     }
 
@@ -28,10 +28,13 @@ pub fn spawn_foods(
     let start_y = rng.random_range(config.world_bound.min.y..config.world_bound.max.y);
     let (start_x, vx) = if from_left {
         // From left: throw to the right with higher arc
-        (config.world_bound.min.x - 2.0, rng.random_range(4.0..9.0))
+        (config.world_bound.min.x - 2.0, rng.random_range(4.0..16.0))
     } else {
         // From right: throw to the left with higher arc
-        (config.world_bound.max.x + 2.0, rng.random_range(-9.0..-4.0))
+        (
+            config.world_bound.max.x + 2.0,
+            rng.random_range(-16.0..-4.0),
+        )
     };
 
     let position = Position(vec2(start_x, start_y));
@@ -42,7 +45,7 @@ pub fn spawn_foods(
 
     let rotation = Rotation(rng.random_range(0.0..std::f32::consts::TAU));
     let rotation_speed = RotationSpeed(rng.random_range(-5.0..5.0));
-    let scale = Scale(rng.random_range(0.6..1.8));
+    let scale = Scale(rng.random_range(0.6..3.0));
 
     // Add some color variety (10% chance of bright color tint)
     let color_tint = if rng.random_bool(0.1) {
@@ -53,7 +56,7 @@ pub fn spawn_foods(
 
     let entity = commands
         .spawn((
-            DishObject { variant },
+            FoodObject { variant },
             position,
             velocity,
             rotation,
@@ -64,29 +67,29 @@ pub fn spawn_foods(
         .id();
 
     // Emit spawn event with visual data
-    events.push(SimEvent::DishSpawned {
+    events.push(SimEvent::FoodSpawned {
         entity: EntityId::new(entity.to_bits()).unwrap(),
         variant,
         color: (color_tint.r, color_tint.g, color_tint.b),
     });
 
-    timers.food = 0.0;
+    timers.food = rng.random_range(0.0..config.food_spawn_interval);
 }
 
 /// Spawn face icons based on timer
-pub fn spawn_emojis(
+pub fn spawn_faces(
     mut commands: Commands,
     mut timers: ResMut<SpawnTimers>,
     mut rng: ResMut<WorldRng>,
     mut events: ResMut<EventQueue>,
     config: Res<OpeningConfig>,
     assets: Res<OpeningAssets>,
-    query: Query<&EmojiObject>,
+    query: Query<&FaceObject>,
     time: Res<DeltaTime>,
 ) {
-    timers.face += time.delta;
+    timers.face -= time.delta;
 
-    if timers.face < config.emoji_spawn_interval || query.iter().count() >= config.max_emojis {
+    if timers.face > 0.0 || query.iter().count() >= config.max_faces {
         return;
     }
 
@@ -102,11 +105,11 @@ pub fn spawn_emojis(
 
     let rotation = Rotation(rng.random_range(-0.5..0.5));
     let rotation_speed = RotationSpeed(rng.random_range(-1.0..1.0));
-    let scale = Scale(rng.random_range(0.7..1.3));
+    let scale = Scale(rng.random_range(0.6..1.6));
 
     let entity = commands
         .spawn((
-            EmojiObject { variant },
+            FaceObject { variant },
             position,
             velocity,
             rotation,
@@ -116,12 +119,12 @@ pub fn spawn_emojis(
         .id();
 
     // Emit spawn event with visual data
-    events.push(SimEvent::EmojiSpawned {
+    events.push(SimEvent::FaceSpawned {
         entity: EntityId::new(entity.to_bits()).unwrap(),
         variant,
     });
 
-    timers.face = 0.0;
+    timers.face = rng.random_range(0.0..config.face_spawn_interval);
 }
 
 /// Spawn review text based on timer
@@ -135,9 +138,9 @@ pub fn spawn_texts(
     query: Query<&TextObject>,
     time: Res<DeltaTime>,
 ) {
-    timers.text += time.delta;
+    timers.text -= time.delta;
 
-    if timers.text < config.text_spawn_interval || query.iter().count() >= config.max_texts {
+    if timers.text > 0.0 || query.iter().count() >= config.max_texts {
         return;
     }
 
@@ -173,7 +176,7 @@ pub fn spawn_texts(
         content,
     });
 
-    timers.text = 0.0;
+    timers.text = rng.random_range(0.0..config.text_spawn_interval);
 }
 
 /// Update physics for food and face items

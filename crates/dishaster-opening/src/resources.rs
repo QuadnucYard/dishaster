@@ -11,15 +11,15 @@ pub struct OpeningConfig {
     /// World bounds (meters)
     pub world_bound: Rect,
     /// Spawn interval for food icons (seconds)
-    pub dish_spawn_interval: f32,
+    pub food_spawn_interval: f32,
     /// Spawn interval for face icons (seconds)
-    pub emoji_spawn_interval: f32,
+    pub face_spawn_interval: f32,
     /// Spawn interval for review texts (seconds)
     pub text_spawn_interval: f32,
     /// Maximum number of food icons
     pub max_foods: usize,
     /// Maximum number of face icons
-    pub max_emojis: usize,
+    pub max_faces: usize,
     /// Maximum number of review texts
     pub max_texts: usize,
     /// Gravity acceleration (m/s²)
@@ -31,11 +31,11 @@ impl Default for OpeningConfig {
         // World centered at origin: [-10, 10] x [-6, 6]
         Self {
             world_bound: Rect::new(-10.0, -6.0, 10.0, 6.0),
-            dish_spawn_interval: 0.2,
-            emoji_spawn_interval: 0.3,
-            text_spawn_interval: 2.0,
+            food_spawn_interval: 0.15,
+            face_spawn_interval: 0.2,
+            text_spawn_interval: 1.0,
             max_foods: 25,
-            max_emojis: 8,
+            max_faces: 8,
             max_texts: 4,
             gravity: 9.8,
         }
