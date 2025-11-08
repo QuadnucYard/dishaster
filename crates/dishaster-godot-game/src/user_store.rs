@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::{Result, anyhow};
-use dishrupt_persistence::{Persistable, PersistentStorage};
+use dishrupt_persistence::{PersistentStorage, Persister};
 use godot::classes::{
     FileAccess, class_macros::private::virtuals::Os::PackedArray, file_access::ModeFlags,
 };
@@ -9,7 +9,7 @@ use godot::classes::{
 pub struct GodotUserStorage;
 
 impl PersistentStorage for GodotUserStorage {
-    fn load_or_create<T: Persistable>(
+    fn load_or_create_with<T, P: Persister<T>>(
         &mut self,
         path: &str,
         init: impl FnOnce() -> T,
@@ -18,16 +18,16 @@ impl PersistentStorage for GodotUserStorage {
         let path_str = file_path.to_str().unwrap();
         if !FileAccess::file_exists(path_str) {
             let value = init();
-            self.save(path, &value)?;
+            self.save_with::<T, P>(path, &value)?;
             return Ok(value);
         }
 
         let bytes = FileAccess::get_file_as_bytes(path_str);
-        T::from_bytes_slice(bytes.as_slice())
+        P::load_bytes_slice(bytes.as_slice())
     }
 
-    fn save<T: Persistable>(&mut self, path: &str, data: &T) -> Result<()> {
-        let bytes = data.to_bytes()?;
+    fn save_with<T, P: Persister<T>>(&mut self, path: &str, data: &T) -> Result<()> {
+        let bytes = P::dump_bytes(data)?;
 
         let file_path = Path::new("user://").join(path);
         let path_str = file_path.to_str().unwrap();

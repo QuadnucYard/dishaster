@@ -4,7 +4,7 @@ use std::{fs, io::ErrorKind, path::PathBuf};
 
 use anyhow::{Context, Result};
 
-use crate::{Persistable, PersistentStorage};
+use crate::{PersistentStorage, Persister};
 
 /// Filesystem-based storage backend.
 pub struct FsStorage {
@@ -21,7 +21,7 @@ impl FsStorage {
 }
 
 impl PersistentStorage for FsStorage {
-    fn load_or_create<T: Persistable>(
+    fn load_or_create_with<T, P: Persister<T>>(
         &mut self,
         path: &str,
         init: impl FnOnce() -> T,
@@ -30,20 +30,20 @@ impl PersistentStorage for FsStorage {
         if !file_path.exists() {
             // Initialize new data and save it.
             let value = init();
-            self.save(path, &value)?;
+            self.save_with::<T, P>(path, &value)?;
             return Ok(value);
         }
 
         let data = fs::read(&file_path)?;
-        T::from_bytes(data)
+        P::load_bytes(data)
     }
 
-    fn save<T: Persistable>(&mut self, path: &str, data: &T) -> Result<()> {
+    fn save_with<T, P: Persister<T>>(&mut self, path: &str, data: &T) -> Result<()> {
         let file_path = self.root_dir.join(path);
 
         // Write to a temporary file first.
         let tmp = file_path.with_extension("tmp");
-        fs::write(&tmp, &data.to_bytes()?)
+        fs::write(&tmp, P::dump_bytes(data)?)
             .with_context(|| format!("failed to write temp save {tmp:?}"))?;
 
         // Replace the old save file with the new one.
