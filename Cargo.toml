@@ -46,6 +46,7 @@ godot = "0.4.2"
 
 anyhow = "1.0"
 as-any = "0.3"
+codespan-reporting = "0.13"
 derive_more = { version = "2", features = ["deref", "deref_mut"] }
 dodgy = "0.3"
 ecow = { version = "0.2", features = ["serde"] }

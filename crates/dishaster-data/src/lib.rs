@@ -1,5 +1,7 @@
 //! Data loading and management for Dishaster simulation
 
+#[cfg(feature = "codespan")]
+mod codespan;
 mod trial_rank;
 mod trial_speech;
 
@@ -39,6 +41,9 @@ pub enum DataError {
     /// Data validation or consistency check failed
     #[error("Data validation failed: {0}")]
     ValidationError(String),
+    /// Other unspecified error
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
 }
 
 /// Data loader for game assets from RON files
@@ -155,7 +160,15 @@ impl DataLoader {
         let content = std::fs::read_to_string(path)?;
         let options = ron::Options::default()
             .with_default_extension(Extensions::UNWRAP_NEWTYPES | Extensions::IMPLICIT_SOME);
-        let data = options.from_str(&content)?;
+        let data = match options.from_str(&content) {
+            Ok(data) => data,
+            Err(e) => {
+                #[cfg(feature = "codespan")]
+                codespan::emit_ron_error(path, &content, &e)?;
+
+                return Err(DataError::RonError(e));
+            }
+        };
         Ok(data)
     }
 
