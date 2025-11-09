@@ -1,0 +1,91 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7yq5xg8mh3pn"]
+
+[ext_resource type="Texture2D" uid="uid://gjny846uvcw0" path="res://assets/gui/textures/credits_bg.png" id="1_qxgq8"]
+
+[node name="IncidentNotification" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_qxgq8")
+
+[node name="Panel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="IncidentIcon" type="TextureRect" parent="Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "突发事故！"
+horizontal_alignment = 1
+
+[node name="DescLabel" type="RichTextLabel" parent="Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "今天有大量学生集中在午饭时间前来！"
+fit_content = true
+scroll_active = false
+
+[node name="FlavorLabel" type="RichTextLabel" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "准备好了吗？"
+fit_content = true
+scroll_active = false
+
+[node name="EffectsLabel" type="RichTextLabel" parent="Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+bbcode_enabled = true
+text = "[color=yellow]效果：[/color]
+• 客流量 +50%
+• 12:00-13:00 集中到达"
+fit_content = true
+scroll_active = false
+
+[node name="ConfirmButton" type="LocalizedButton" parent="Panel/VBox"]
+message_id = "confirm.label"
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 28
+text = "确认"

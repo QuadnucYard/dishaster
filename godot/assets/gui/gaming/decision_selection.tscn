@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://cnw8k4xh5r2qm"]
+
+[ext_resource type="Texture2D" uid="uid://gjny846uvcw0" path="res://assets/gui/textures/credits_bg.png" id="1_uj2u4"]
+[ext_resource type="PackedScene" uid="uid://dpm3k5y7h8nqx" path="res://assets/gui/gaming/decision_card.tscn" id="2_6f45u"]
+
+[node name="DecisionSelection" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_uj2u4")
+
+[node name="Panel" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 80
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="TitleLabel" type="LocalizedLabel" parent="Panel/VBox"]
+message_id = "manage-decision.title"
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "选择运营决策"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="LocalizedLabel" parent="Panel/VBox"]
+message_id = "manage-decision.subtitle"
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "选择一项决策来改善明天的运营"
+horizontal_alignment = 1
+
+[node name="Options" type="GridContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/h_separation = 20
+columns = 3
+
+[node name="DecisionOptionTemplate" parent="Panel/VBox/Options" instance=ExtResource("2_6f45u")]
+unique_name_in_owner = true
+layout_mode = 2

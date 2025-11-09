@@ -30,8 +30,6 @@ end-run =
     .label = 结束运营
 exit-level =
     .label = 退出关卡
-next-day =
-    .label = 下一天
 
 phase-preparation =
     .label = 准备阶段
@@ -53,3 +51,10 @@ price-by-portion-display =
     .label = /份
 price-by-weight-display =
     .label = /kg
+
+manage-decision =
+    .title = 选择运营决策
+    .subtitle = 选择一项决策来改善明天的运营
+
+select-option =
+    .label = 选择此项

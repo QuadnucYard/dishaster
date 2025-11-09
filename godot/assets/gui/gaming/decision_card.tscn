@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://dpm3k5y7h8nqx"]
+
+[node name="DecisionCard" type="PanelContainer"]
+custom_minimum_size = Vector2(350, 450)
+offset_right = 350.0
+offset_bottom = 590.0
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="CardIcon" type="TextureRect" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "提升设备容量"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="DescLabel" type="RichTextLabel" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "增加餐盘架和筷子柜的容量，减少缺货情况。"
+fit_content = true
+scroll_active = false
+
+[node name="FlavorLabel" type="RichTextLabel" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "投资更大的餐盘存储架。"
+fit_content = true
+scroll_active = false
+
+[node name="EffectsCaption" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0, 1)
+theme_override_font_sizes/font_size = 18
+text = "效果："
+
+[node name="EffectsLabel" type="RichTextLabel" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+bbcode_enabled = true
+text = "• 餐盘架容量 +20
+• 筷子柜容量 +20"
+fit_content = true
+scroll_active = false
+
+[node name="SelectButton" type="LocalizedButton" parent="MarginContainer/VBox"]
+message_id = "select-option.label"
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "选择此项"

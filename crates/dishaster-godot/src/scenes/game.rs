@@ -169,11 +169,17 @@ impl GameScene {
                 game.send_sim_command(SimCommand::TrialTimeout);
             }
 
+            GameRequest::ConfirmSettlement => {
+                ctx.gui.hide::<SettlementGui>();
+                ctx.gui.show::<ManageDecisionGui>();
+            }
             GameRequest::SelectDecision(index) => {
                 godot_print!("Decision selected: {}", index);
                 game.send_sim_command(SimCommand::ApplyManagementDecision(index));
             }
-            GameRequest::ConfirmIncident => {}
+            GameRequest::ConfirmIncident => {
+                ctx.gui.hide::<ManageIncidentGui>();
+            }
         }
     }
 
@@ -233,8 +239,15 @@ impl GameScene {
                 trial_gui.hide();
             }
 
-            UiCommand::ShowDecisionSelection(_view) => {}
-            UiCommand::ShowIncidentNotification(_view) => {}
+            UiCommand::ShowDecisionSelection(view) => {
+                ctx.gui.get_mut::<ManageDecisionGui>().set_view(&view);
+                // this command is emitted just after day ends
+                // we defer showing the decision GUI until settlement is confirmed
+            }
+            UiCommand::ShowIncidentNotification(view) => {
+                ctx.gui.get_mut::<ManageIncidentGui>().set_view(&view);
+                ctx.gui.get_mut::<ManageIncidentGui>().show();
+            }
 
             UiCommand::ShowHint { message } => {
                 ctx.gui.get_mut::<HintNotification>().show_hint(&message);

@@ -56,6 +56,8 @@ pub enum GameRequest {
     /// Handle trial timeout.
     TrialTimeout,
 
+    /// Confirm settlement phase and proceed to decision-making.
+    ConfirmSettlement,
     /// Select a decision from the available options.
     SelectDecision(usize),
     /// Confirm incident notification and continue to preparation phase.

@@ -47,16 +47,9 @@ scroll_active = false
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="NextDayButton" type="LocalizedButton" parent="Panel/VBox/ButtonRow"]
-message_id = "next-day.label"
+[node name="ConfirmButton" type="LocalizedButton" parent="Panel/VBox/ButtonRow"]
+message_id = "confirm.label"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Next Day"
-
-[node name="ExitButton" type="LocalizedButton" parent="Panel/VBox/ButtonRow"]
-message_id = "exit-level.label"
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Exit"
+text = "Confirm"

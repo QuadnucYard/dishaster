@@ -1,5 +1,7 @@
 mod hint;
 mod layout;
+mod manage_decision;
+mod manage_incident;
 mod price_editor;
 mod settlement;
 mod time_stats;
@@ -7,6 +9,8 @@ mod trial;
 
 pub use hint::*;
 pub use layout::*;
+pub use manage_decision::*;
+pub use manage_incident::*;
 pub use price_editor::*;
 pub use settlement::*;
 pub use time_stats::*;

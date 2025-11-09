@@ -27,7 +27,7 @@ pub struct ManagementDecisionView {
 #[derive(Debug, Clone)]
 pub struct ManagementIncidentView {
     /// Incident identifier (used to look up l10n keys)
-    pub incident_id: ModelId,
+    pub model_id: ModelId,
     // /// Icon identifier for visual representation
     // pub icon: EcoString,
     // /// List of effect descriptions to display (from l10n: `{incident_id}-effects`)

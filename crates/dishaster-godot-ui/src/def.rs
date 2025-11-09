@@ -25,6 +25,8 @@ pub fn register_guis(registry: &mut GuiRegistry) {
         GamingLayout => "gaming/layout",
         DishPricePopup => "gaming/price_editor",
         SettlementGui => "gaming/settlement",
+        ManageDecisionGui => "gaming/decision_selection",
+        ManageIncidentGui => "gaming/incident_notification",
         TimeStatsGui => "gaming/time_stats",
         TrialGui => "gaming/trial",
         HintNotification => "gaming/hint",

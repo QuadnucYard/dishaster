@@ -591,7 +591,6 @@ dependencies = [
  "dishrupt-persistence",
  "log",
  "ron",
- "rustc-hash",
  "tempfile",
 ]
 
