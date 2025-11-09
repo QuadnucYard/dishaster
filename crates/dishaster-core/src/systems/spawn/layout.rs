@@ -239,37 +239,45 @@ fn spawn_tables(
     display_root: &DisplayRoot,
 ) {
     for placement in &placements.tables {
-        let handle = registry
-            .tables
-            .get_handle_by_id(&placement.model)
-            .expect("Table model not found in registry");
-        let model = registry.tables.get(handle);
-        let seat_positions = (0..model.seats)
-            .map(|i| {
-                let local_x = (i as f32 + 0.5) / model.seats as f32 * model.size.width; // relative to top-left
-                placement.center_pos - model.size.as_vec2() / 2.0 + Vec2::new(local_x, -0.5)
-            })
-            .collect();
-        commands.spawn((
-            DiningTable {
-                model: handle,
-                center_pos: placement.center_pos,
-                seat_positions,
-                occupants: vec![None; model.seats],
-                dirtiness: 0.0,
-            },
-            BoxCollider::from_center_size(placement.center_pos, model.size.as_vec2()).into_comp(),
-            DisplayState {
-                proto: model.display.res.clone(),
-                ..Default::default()
-            },
-            Transform {
-                position: placement.center_pos.extend(0.0),
-                parent: Some(display_root.0),
-                ..Default::default()
-            },
-        ));
+        spawn_table(placement, commands, registry, display_root);
     }
+}
+
+pub fn spawn_table(
+    placement: &Placement,
+    commands: &mut Commands,
+    registry: &GameModelRegistry,
+    display_root: &DisplayRoot,
+) {
+    let model = registry
+        .tables
+        .get_by_id(&placement.model)
+        .expect("Table model not found in registry");
+    let seat_positions = (0..model.seats)
+        .map(|i| {
+            let local_x = (i as f32 + 0.5) / model.seats as f32 * model.size.width; // relative to top-left
+            placement.center_pos - model.size.as_vec2() / 2.0 + Vec2::new(local_x, -0.5)
+        })
+        .collect();
+    commands.spawn((
+        DiningTable {
+            model_id: placement.model.clone(),
+            center_pos: placement.center_pos,
+            seat_positions,
+            occupants: vec![None; model.seats],
+            dirtiness: 0.0,
+        },
+        BoxCollider::from_center_size(placement.center_pos, model.size.as_vec2()).into_comp(),
+        DisplayState {
+            proto: model.display.res.clone(),
+            ..Default::default()
+        },
+        Transform {
+            position: placement.center_pos.extend(0.0),
+            parent: Some(display_root.0),
+            ..Default::default()
+        },
+    ));
 }
 
 fn spawn_dispensers(

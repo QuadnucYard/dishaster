@@ -36,4 +36,7 @@ pub enum SimCommand {
     TrialTimeout,
     /// Proceed to the next dialogue of the trial.
     TrialProceed,
+
+    /// Apply a selected management decision by index.
+    ApplyManagementDecision(usize),
 }

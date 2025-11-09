@@ -1,0 +1,23 @@
+[
+    (
+        id: "add_tables",
+        weight: 200,
+        def: AddTables(
+            num_range: (start: 2, end: 5),
+        )
+    ),
+    (
+        id: "remove_tables",
+        weight: 150,
+        def: RemoveTables(
+            num_range: (start: 1, end: 3),
+        )
+    ),
+    (
+        id: "disarrange_tables",
+        weight: 200,
+        def: DisarrangeTables(
+            num_range: (start: 2, end: 4),
+        )
+    ),
+]

@@ -1,10 +1,13 @@
 use dishaster_interface::SimEvent;
 
-use crate::{components::Diner, events::*, prelude::*, resources::*};
+use crate::{components::Diner, events::*, prelude::*, resources::*, systems};
 
 pub fn register_lifecycle_systems(world: &mut World) {
     world.add_observer(on_run_started);
     world.add_observer(on_run_ended);
+
+    world.add_observer(systems::roll_management_decisions);
+    world.add_observer(systems::apply_management_decision);
 }
 
 fn on_run_started(_event: On<RunStarted>, mut day_status: ResMut<DayStatus>) {
@@ -28,4 +31,7 @@ fn on_run_ended(
 
     // Emit day completed event at run end
     events.push(SimEvent::DayCompleted);
+
+    // Trigger management decision roll
+    commands.trigger(RollManagementDecisions);
 }

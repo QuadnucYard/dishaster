@@ -1,0 +1,10 @@
+[
+    (
+        id: "mislabel_price",
+        weight: 100,
+        def: MislabelPrice(
+            num_range: (start: 1, end: 5),
+            overprice_rate_range: (start: 0.1, end: 1.0),
+        )
+    ),
+]

@@ -112,6 +112,16 @@ impl<T> ModelRegistry<T> {
         self.name_to_handle.get(id).copied().map(ModelHandle::new)
     }
 
+    /// Iterate over all models stored in the registry
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.models.iter()
+    }
+
+    /// Iterate over all model identifiers stored in the registry
+    pub fn keys(&self) -> impl Iterator<Item = &ModelId> {
+        self.name_to_handle.keys()
+    }
+
     /// Get the first model in the registry, if any exist
     ///
     /// Useful for scenarios where only one model of a type is expected,

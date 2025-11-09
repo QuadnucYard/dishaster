@@ -107,6 +107,8 @@ impl DataLoader {
         self.load_to_registry(&mut registry.tables, "tables.ron")?;
         self.load_to_registry(&mut registry.dispensers, "dispensers.ron")?;
         self.load_to_registry(&mut registry.collectors, "collectors.ron")?;
+        self.load_to_registry(&mut registry.mgmt_decisions, "mgmt_decisions.ron")?;
+        self.load_to_registry(&mut registry.mgmt_incidents, "mgmt_incidents.ron")?;
 
         registry.trial = TrialCorpus {
             diner_speeches: {
@@ -158,8 +160,11 @@ impl DataLoader {
         use ron::extensions::Extensions;
 
         let content = std::fs::read_to_string(path)?;
-        let options = ron::Options::default()
-            .with_default_extension(Extensions::UNWRAP_NEWTYPES | Extensions::IMPLICIT_SOME);
+        let options = ron::Options::default().with_default_extension(
+            Extensions::UNWRAP_NEWTYPES
+                | Extensions::IMPLICIT_SOME
+                | Extensions::UNWRAP_VARIANT_NEWTYPES,
+        );
         let data = match options.from_str(&content) {
             Ok(data) => data,
             Err(e) => {

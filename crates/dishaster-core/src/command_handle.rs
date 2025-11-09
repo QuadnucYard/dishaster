@@ -84,6 +84,10 @@ impl Simulation {
                     events.push(SimEvent::TrialEnd);
                 }
             }
+
+            SimCommand::ApplyManagementDecision(index) => {
+                self.world.trigger(ApplyManagementDecision(index));
+            }
         }
     }
 

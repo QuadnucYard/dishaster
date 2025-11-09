@@ -87,6 +87,15 @@ impl HasId for DispenserModel {
     }
 }
 
+/// Types of items that dispensers can provide
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub enum DispenserType {
+    /// Dispenses serving trays
+    Tray,
+    /// Dispenses chopsticks
+    Chopstick,
+}
+
 /// Configuration model for dish collection stations
 #[derive(Debug, Clone, Deserialize)]
 pub struct CollectorModel {

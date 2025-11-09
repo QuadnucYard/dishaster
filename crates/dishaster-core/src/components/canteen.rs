@@ -32,8 +32,8 @@ pub struct Dish {
 /// Dining table component for customer seating areas
 #[derive(Component)]
 pub struct DiningTable {
-    /// Reference to table model configuration
-    pub model: ModelHandle<TableModel>,
+    /// Identifier of the table model
+    pub model_id: ModelId,
     /// Physical center position of the table
     pub center_pos: Vec2,
     /// World-space positions diners should move to when seating
@@ -59,15 +59,6 @@ pub struct Dispenser {
     pub dispenser_type: DispenserType,
     /// Whether a refill request is pending
     pub refill_pending: bool,
-}
-
-/// Types of items that dispensers can provide
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DispenserType {
-    /// Dispenses serving trays
-    Tray,
-    /// Dispenses chopsticks
-    Chopstick,
 }
 
 /// Dish collection point component for used plates and trays

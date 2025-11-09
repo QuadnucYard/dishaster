@@ -170,3 +170,8 @@ impl TrialSession {
         self.last_response_index = Some(response_index);
     }
 }
+
+#[derive(Resource)]
+pub struct ManagementDecisions {
+    pub available: Vec<ManagementDecisionModel>,
+}

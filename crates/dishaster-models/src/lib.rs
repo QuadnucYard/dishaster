@@ -7,6 +7,7 @@ mod diner_rand;
 mod dish;
 mod feedback;
 mod level;
+mod management;
 mod misc;
 mod trial;
 
@@ -18,6 +19,7 @@ pub use dish::*;
 pub use dishaster_save_models::*;
 pub use feedback::*;
 pub use level::*;
+pub use management::*;
 pub use misc::*;
 pub use prelude::ModelId;
 pub use trial::*;
@@ -67,6 +69,11 @@ pub struct GameModelRegistry {
     pub dispensers: ModelRegistry<DispenserModel>,
     /// Dish collection point configurations
     pub collectors: ModelRegistry<CollectorModel>,
+
+    /// Management decision events
+    pub mgmt_decisions: ModelRegistry<ManagementDecisionTemplate>,
+    /// Management incident events
+    pub mgmt_incidents: ModelRegistry<ManagementIncidentTemplate>,
 
     /// Trial corpus
     pub trial: TrialCorpus,
