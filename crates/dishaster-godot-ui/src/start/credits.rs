@@ -1,5 +1,4 @@
 use dishaster_views::CreditsView;
-use dishrupt_l10n_godot::tr;
 
 use crate::prelude::*;
 

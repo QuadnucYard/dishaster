@@ -211,16 +211,16 @@ impl GameScene {
             UiCommand::TrialIntro(intro) => {
                 // Show trial GUI
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.intro(intro);
+                trial_gui.intro(*intro);
                 trial_gui.show();
             }
             UiCommand::TrialLeftSpeak(statement) => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.left_speak(statement);
+                trial_gui.left_speak(*statement);
             }
             UiCommand::TrialRightSpeak(speech) => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.right_speak(speech);
+                trial_gui.right_speak(*speech);
             }
             UiCommand::TrialEnd => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();

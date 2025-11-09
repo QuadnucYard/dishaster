@@ -21,7 +21,7 @@ pub enum AppRequest {
 
 impl UiRequest for AppRequest {}
 
-/// Requests that can be sent to the in-game scene.
+/// Requests that can be sent from GUI to the in-game scene.
 pub enum GameRequest {
     /// Start the current run (from preparation phase).
     StartRun,
@@ -71,7 +71,7 @@ pub enum UiCommand {
     /// Update the displayed TPS value in the time stats UI.
     UpdateTpsDisplay(f32),
     /// Update the HUD to the supplied state.
-    UpdateDayHud(DayHudState),
+    UpdateDayHud(Box<DayHudState>),
     /// Update the stats display.
     UpdateStats(StatsView),
 
@@ -84,11 +84,11 @@ pub enum UiCommand {
     /// Start a trial for the given diner entity.
     TrialStart(EntityId),
     /// Show trial intro.
-    TrialIntro(TrialIntro),
+    TrialIntro(Box<TrialIntro>),
     /// Trial diner speaks.
-    TrialLeftSpeak(TrialStatement),
+    TrialLeftSpeak(Box<TrialStatement>),
     /// Trial player responds.
-    TrialRightSpeak(TrialSpeech),
+    TrialRightSpeak(Box<TrialSpeech>),
     /// Trial has ended.
     TrialEnd,
 

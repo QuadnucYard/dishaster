@@ -152,7 +152,7 @@ impl Simulation {
             |event: On<Add, AgentTag>,
              query: Query<&DinerAppearance>,
              mut events: ResMut<EventQueue>| {
-                let appearance = query.get(event.entity).ok().map(|a| a.to_view());
+                let appearance = query.get(event.entity).ok().map(|a| a.to_view().into());
 
                 events.push(SimEvent::AgentSpawned {
                     entity: event.entity.to_entity_id(),

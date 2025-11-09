@@ -29,7 +29,7 @@ pub enum SimEvent {
         /// Spawned agent entity ID.
         entity: EntityId,
         /// Optional appearance customization data.
-        appearance: Option<Appearance>,
+        appearance: Option<Box<Appearance>>,
     },
     /// An agent has despawned from the simulation.
     AgentDespawned(EntityId),
@@ -44,11 +44,11 @@ pub enum SimEvent {
     Feedback(FeedbackView),
 
     /// Show trial intro.
-    TrialIntro(TrialIntro),
+    TrialIntro(Box<TrialIntro>),
     /// Trial diner speaks.
-    TrialLeftSpeak(TrialStatement),
+    TrialLeftSpeak(Box<TrialStatement>),
     /// Trial player responds.
-    TrialRightSpeak(TrialSpeech),
+    TrialRightSpeak(Box<TrialSpeech>),
     /// Trial has ended.
     TrialEnd,
 

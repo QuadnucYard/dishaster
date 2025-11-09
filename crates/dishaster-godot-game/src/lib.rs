@@ -221,15 +221,18 @@ impl Game {
 
     /// Called just after construction
     pub fn start_day(&mut self) {
-        self.ui_commands.push(UiCommand::UpdateDayHud(DayHudState {
-            day_label: tr!("day-display.label", "day" = self.telemetry.day),
-            phase_label: tr!("phase-preparation.label"),
-            details: "Review canteen status then press Start Day to begin.".into(),
-            show_start: true,
-            enable_start: true,
-            show_dev: true,
-            enable_dev: false,
-        }));
+        self.ui_commands.push(UiCommand::UpdateDayHud(
+            DayHudState {
+                day_label: tr!("day-display.label", "day" = self.telemetry.day),
+                phase_label: tr!("phase-preparation.label"),
+                details: "Review canteen status then press Start Day to begin.".into(),
+                show_start: true,
+                enable_start: true,
+                show_dev: true,
+                enable_dev: false,
+            }
+            .into(),
+        ));
         self.ui_commands
             .push(UiCommand::UpdateTpsDisplay(self.sim_runner.tps() as f32));
 
@@ -271,15 +274,18 @@ impl Game {
 
     fn update_hud(&mut self) {
         if self.phase == DayPhase::Running {
-            self.ui_commands.push(UiCommand::UpdateDayHud(DayHudState {
-                day_label: tr!("day-display.label", "day" = self.telemetry.day),
-                phase_label: tr!("phase-running.label"),
-                details: "Service running.".to_string(),
-                show_start: false,
-                enable_start: false,
-                show_dev: true,
-                enable_dev: true,
-            }));
+            self.ui_commands.push(UiCommand::UpdateDayHud(
+                DayHudState {
+                    day_label: tr!("day-display.label", "day" = self.telemetry.day),
+                    phase_label: tr!("phase-running.label"),
+                    details: "Service running.".to_string(),
+                    show_start: false,
+                    enable_start: false,
+                    show_dev: true,
+                    enable_dev: true,
+                }
+                .into(),
+            ));
         }
 
         self.ui_commands.push(UiCommand::UpdateStats(StatsView {

@@ -11,5 +11,6 @@ mod prelude {
     pub use dishrupt_godot_ui::*;
     pub use dishrupt_godot_ui_macros::*;
     pub use dishrupt_godot_widgets::*;
+    pub use dishrupt_l10n_godot::tr;
     pub use signals2::*;
 }

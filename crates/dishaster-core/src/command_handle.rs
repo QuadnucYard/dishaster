@@ -46,20 +46,20 @@ impl Simulation {
                 let intro = self.create_trial_intro();
 
                 let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialIntro(intro));
+                events.push(SimEvent::TrialIntro(intro.into()));
             }
             SimCommand::TrialLaunch => {
                 let statement = self.create_diner_statement();
 
                 let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialLeftSpeak(statement));
+                events.push(SimEvent::TrialLeftSpeak(statement.into()));
             }
             SimCommand::TrialRespond(resp_corpus_index) => {
                 // Respond with the selected speech
                 let speech = self.trial_respond(resp_corpus_index);
 
                 let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialRightSpeak(speech));
+                events.push(SimEvent::TrialRightSpeak(speech.into()));
             }
             SimCommand::TrialTimeout => {
                 // TODO: Simply end the trial on timeout for now.
@@ -77,7 +77,7 @@ impl Simulation {
                     let statement = self.create_diner_statement();
 
                     let mut events = self.world.resource_mut::<EventQueue>();
-                    events.push(SimEvent::TrialLeftSpeak(statement));
+                    events.push(SimEvent::TrialLeftSpeak(statement.into()));
                 } else {
                     // End of trial
                     let mut events = self.world.resource_mut::<EventQueue>();

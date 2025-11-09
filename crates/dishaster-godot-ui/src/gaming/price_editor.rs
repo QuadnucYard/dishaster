@@ -2,7 +2,6 @@ use std::cell::OnceCell;
 
 use dishaster_views::{DishPriceView, PricingMethod};
 use dishrupt_core::EntityId;
-use dishrupt_l10n_godot::tr;
 
 use crate::prelude::*;
 
