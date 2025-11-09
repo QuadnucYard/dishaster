@@ -70,6 +70,6 @@ impl DecisionOptionItem {
         self.flavor_label
             .set_text(&tr!("mgmt--{}.flavor", view.model_id));
         self.effects_label
-            .set_text(&tr!("mgmt--{}.effects", view.model_id));
+            .set_text(&tr!("mgmt--{}.effects", view.model_id; view.params.to_fluent()));
     }
 }

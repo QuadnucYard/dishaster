@@ -1,61 +1,12 @@
+mod convert;
+
 use dishaster_views::{ManagementDecisionView, ManagementDecisionsView};
 
+use self::convert::{RealizationContext, TemplateRealize, ViewParams};
 use crate::{
     events::*,
     systems::{prelude::*, spawn_table},
 };
-
-struct RealizationContext<'a> {
-    pub rng: &'a mut Prng,
-}
-
-trait TemplateRealize {
-    type Model;
-
-    fn realize(&self, ctx: RealizationContext) -> Self::Model;
-}
-
-impl TemplateRealize for ManagementDecisionTemplateDef {
-    type Model = ManagementDecisionModel;
-
-    fn realize(&self, ctx: RealizationContext) -> Self::Model {
-        use ManagementDecisionTemplateDef::*;
-        type M = ManagementDecisionModel;
-
-        match self {
-            AddTables(def) => M::AddTables(def.realize(ctx)),
-            RemoveTables(def) => M::RemoveTables(def.realize(ctx)),
-            DisarrangeTables(def) => M::DisarrangeTables(def.realize(ctx)),
-        }
-    }
-}
-
-impl TemplateRealize for AddTablesTemplate {
-    type Model = AddTablesModel;
-
-    fn realize(&self, ctx: RealizationContext) -> Self::Model {
-        let num_tables = ctx.rng.random_range(self.num_range.clone());
-        Self::Model { num_tables }
-    }
-}
-
-impl TemplateRealize for RemoveTablesTemplate {
-    type Model = RemoveTablesModel;
-
-    fn realize(&self, ctx: RealizationContext) -> Self::Model {
-        let num_tables = ctx.rng.random_range(self.num_range.clone());
-        Self::Model { num_tables }
-    }
-}
-
-impl TemplateRealize for DisarrangeTablesTemplate {
-    type Model = DisarrangeTablesModel;
-
-    fn realize(&self, ctx: RealizationContext) -> Self::Model {
-        let num_tables = ctx.rng.random_range(self.num_range.clone());
-        Self::Model { num_tables }
-    }
-}
 
 /// Roll a set of management decisions to present to the player
 pub fn roll_management_decisions(
@@ -89,8 +40,9 @@ pub fn roll_management_decisions(
             day: level.day,
             options: decisions
                 .iter()
-                .map(|(id, _model)| ManagementDecisionView {
+                .map(|(id, model)| ManagementDecisionView {
                     model_id: id.clone(),
+                    params: model.params(),
                 })
                 .collect(),
         }

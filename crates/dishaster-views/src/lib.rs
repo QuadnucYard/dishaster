@@ -1,10 +1,12 @@
 //! Snapshot representations of dish display instances and agent appearances.
 
 mod management;
+mod param;
 mod trial;
 
 use dishrupt_core::prelude::*;
 pub use management::*;
+pub use param::*;
 pub use trial::*;
 
 /// Describes the information to display in the in-game day loop overlay during

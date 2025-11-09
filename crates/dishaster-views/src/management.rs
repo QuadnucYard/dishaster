@@ -1,5 +1,7 @@
 use dishrupt_core::prelude::*;
 
+use crate::ParamsMap;
+
 /// View model for management decisions
 #[derive(Debug, Clone)]
 pub struct ManagementDecisionsView {
@@ -20,6 +22,8 @@ pub struct ManagementDecisionView {
     // pub effects: Vec<EcoString>,
     // /// Theme hint for styling ("upgrade", "risk", "neutral")
     // pub theme: EcoString,
+    /// Parameters for localization formatting
+    pub params: ParamsMap,
 }
 
 /// View model for management incident notification at day start
@@ -34,4 +38,6 @@ pub struct ManagementIncidentView {
     // pub effects: Vec<EcoString>,
     // /// Theme hint for styling ("warning", "info", "challenge")
     // pub theme: EcoString,
+    /// Parameters for localization formatting
+    pub params: ParamsMap,
 }

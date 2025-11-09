@@ -53,6 +53,18 @@ pub mod private {
             })
     }
 
+    pub fn tr_with<T>(id: &str, args: Option<&HashMap<T, FluentValue>>) -> String
+    where
+        T: AsRef<str>,
+    {
+        LOCALES
+            .lookup_single_language(&LANG.lock().unwrap(), id, args)
+            .unwrap_or_else(|err| {
+                eprintln!("Failed to get message `{id}`: {err}.");
+                id.to_string()
+            })
+    }
+
     /// Translate a message id into message string.
     pub fn try_tr_plain(id: &str) -> Option<String> {
         LOCALES
@@ -61,6 +73,8 @@ pub mod private {
     }
 }
 
+// Re-export for convenience
+pub use fluent;
 pub use private::{init, try_tr_plain};
 
 /// Translate a message id into message string. Returns [`String`].
@@ -70,6 +84,7 @@ pub use private::{init, try_tr_plain};
 /// - `tr!(id)`: No args.
 /// - `tr!(id, key1 = value1)`: With args key1=value1, ... Keys are string literals.
 /// - `tr!(fmt, fmt_args..)`: Format id with fmt_args, with no message args.
+/// - `tr!(fmt, fmt_args.. => params)`: Format id with fmt_args, with message args in `params`.
 #[macro_export]
 macro_rules! tr {
     // ($id: expr, $($key: expr => $value: expr),* $(,)?) => {
@@ -85,7 +100,11 @@ macro_rules! tr {
         )*
         $crate::private::tr_impl($id, Some(&args))
     }};
-    ($fmt: literal $(, $args: expr)+) => {
-        $crate::private::tr_impl(&format!($fmt $(,$args)+ ), None)
+    ($fmt: literal $(, $fmt_args: expr)+) => {
+        $crate::private::tr_impl(&format!($fmt $(,$fmt_args)+ ), None)
     };
+    ($fmt: literal $(, $fmt_args: expr)+ ; $args:expr) => {{
+        let args = match &$args { args => args };
+        $crate::private::tr_with(&format!($fmt $(,$fmt_args)+ ), Some( &$args ))
+    }};
 }
