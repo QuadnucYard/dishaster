@@ -81,11 +81,11 @@ impl QueueDebugOverlay {
 
     fn spawn_lane_nodes(&mut self, lane_id: EntityId) -> QueueLaneDebugNodes {
         let mut container = Node2D::new_alloc();
-        container.set_name(&format!("QueueLane_{}", lane_id.to_bits()));
+        container.set_name(&format!("QueueLane_{}", lane_id));
         self.root.add_child(&container);
 
         let mut path = Line2D::new_alloc();
-        path.set_name(&format!("QueuePath_{}", lane_id.to_bits()));
+        path.set_name(&format!("QueuePath_{}", lane_id));
         path.set_default_color(COLOR_PATH);
         path.set_width(PATH_WIDTH);
         path.set_z_index(Z_PATH);
@@ -215,11 +215,7 @@ impl QueueDebugOverlay {
 
     fn create_member_marker(lane_id: EntityId, index: usize) -> Gd<Line2D> {
         let mut marker = Line2D::new_alloc();
-        marker.set_name(&format!(
-            "QueueMemberMarker_{}_{}",
-            lane_id.to_bits(),
-            index
-        ));
+        marker.set_name(&format!("QueueMemberMarker_{}_{}", lane_id, index));
         marker.set_default_color(COLOR_MEMBER_MARKER);
         marker.set_width(MARKER_WIDTH);
         marker.set_closed(true);
@@ -229,11 +225,7 @@ impl QueueDebugOverlay {
 
     fn create_intent_connector(lane_id: EntityId, index: usize) -> Gd<Line2D> {
         let mut connector = Line2D::new_alloc();
-        connector.set_name(&format!(
-            "QueueIntentConnector_{}_{}",
-            lane_id.to_bits(),
-            index
-        ));
+        connector.set_name(&format!("QueueIntentConnector_{}_{}", lane_id, index));
         connector.set_default_color(COLOR_CONNECTOR);
         connector.set_width(CONNECTOR_WIDTH);
         connector.set_z_index(Z_CONNECTOR);
@@ -242,11 +234,7 @@ impl QueueDebugOverlay {
 
     fn create_intent_marker(lane_id: EntityId, index: usize) -> Gd<Line2D> {
         let mut marker = Line2D::new_alloc();
-        marker.set_name(&format!(
-            "QueueIntentMarker_{}_{}",
-            lane_id.to_bits(),
-            index
-        ));
+        marker.set_name(&format!("QueueIntentMarker_{}_{}", lane_id, index));
         marker.set_default_color(COLOR_INTENT_MARKER);
         marker.set_width(INTENT_MARKER_WIDTH);
         marker.set_closed(true);

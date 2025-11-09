@@ -68,7 +68,7 @@ pub fn spawn_foods(
 
     // Emit spawn event with visual data
     events.push(SimEvent::FoodSpawned {
-        entity: EntityId::new(entity.to_bits()).unwrap(),
+        entity: entity.to_entity_id(),
         variant,
         color: (color_tint.r, color_tint.g, color_tint.b),
     });
@@ -120,7 +120,7 @@ pub fn spawn_faces(
 
     // Emit spawn event with visual data
     events.push(SimEvent::FaceSpawned {
-        entity: EntityId::new(entity.to_bits()).unwrap(),
+        entity: entity.to_entity_id(),
         variant,
     });
 
@@ -145,7 +145,11 @@ pub fn spawn_texts(
     }
 
     // Pick a random review text from configured corpus
-    let content = assets.review_texts.choose(&mut rng).unwrap().to_string();
+    let content = assets
+        .review_texts
+        .choose(&mut rng)
+        .expect("no review text available")
+        .to_string();
 
     // Random color for text variety
     let text_color = ColorTint::random_bright(&mut rng);
@@ -172,7 +176,7 @@ pub fn spawn_texts(
 
     // Emit spawn event with text content and color
     events.push(SimEvent::TextSpawned {
-        entity: EntityId::new(entity.to_bits()).unwrap(),
+        entity: entity.to_entity_id(),
         content,
     });
 
@@ -250,9 +254,7 @@ pub fn despawn_out_of_bounds(
 
     for (entity, pos) in query {
         if !region.contains(pos.0) {
-            events.push(SimEvent::ObjectDespawned(
-                EntityId::new(entity.to_bits()).unwrap(),
-            ));
+            events.push(SimEvent::ObjectDespawned(entity.to_entity_id()));
             commands.entity(entity).despawn();
         }
     }

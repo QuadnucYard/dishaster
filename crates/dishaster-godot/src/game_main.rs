@@ -174,9 +174,9 @@ fn init_game_database(
 fn init_game() {
     log::info!("Init game start");
     let data = DataLoader::new_with_fallback("data", "../assets/data")
-        .unwrap()
+        .expect("failed to create data loader")
         .load_all_data()
-        .unwrap();
+        .expect("failed to load game data");
     let registry = init_game_database(|| {
         let db = Arc::new(data.models);
         log::info!("Loaded {} canteens", db.canteens.len());

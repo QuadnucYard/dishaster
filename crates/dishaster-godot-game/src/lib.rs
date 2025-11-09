@@ -107,10 +107,14 @@ impl Game {
             ..Default::default()
         };
 
+        let levle_config = db
+            .levels
+            .get_by_id(&level.level_id)
+            .expect("failed to get level");
         let map_prefab = &db
             .canteens
-            .get_by_id(&db.levels.get_by_id(&level.level_id).unwrap().canteen)
-            .unwrap()
+            .get_by_id(&levle_config.canteen)
+            .expect("failed to get canteen")
             .display
             .res;
 
@@ -122,7 +126,9 @@ impl Game {
 
         // Set up the map scene
         let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
-        let map_scene = load_prefab_sync(map_prefab).instantiate().unwrap();
+        let map_scene = load_prefab_sync(map_prefab)
+            .instantiate()
+            .expect("failed to instantiate map prefab");
         stage_root.add_child(&map_scene);
         let origin = map_scene
             .get_node_as::<Node2D>("%Origin")

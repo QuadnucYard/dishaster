@@ -96,7 +96,7 @@ fn get_pickable_under_mouse<'a>(
     query.set_position(canvas_pos);
     query.set_collide_with_areas(true);
 
-    let mut space_state = gd.get_world_2d().unwrap().get_direct_space_state().unwrap();
+    let mut space_state = gd.get_world_2d()?.get_direct_space_state()?;
 
     let result = space_state.intersect_point_ex(&query).done();
     godot_print!("pick result: {:?}", result);
@@ -109,7 +109,7 @@ fn get_pickable_under_mouse<'a>(
 
 fn screen_to_canvas(root: &Gd<Node>, screen_pos: Vector2) -> Vector2 {
     root.get_viewport()
-        .unwrap()
+        .expect("failed to get viewport")
         .get_canvas_transform()
         .affine_inverse()
         * screen_pos

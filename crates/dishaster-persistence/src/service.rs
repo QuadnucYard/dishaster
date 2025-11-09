@@ -173,7 +173,7 @@ fn new_profile(default_level: &LevelConfig) -> PlayerProfile {
 pub(crate) fn now_unix() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .unwrap()
+        .expect("system time before UNIX EPOCH")
         .as_secs()
 }
 

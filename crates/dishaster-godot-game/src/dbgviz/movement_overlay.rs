@@ -71,21 +71,21 @@ impl MovementDebugOverlay {
 
     fn spawn_nodes(&mut self, entity: EntityId) -> MovementDebugNodes {
         let mut path = Line2D::new_alloc();
-        path.set_name(&format!("MovementPath_{}", entity.to_bits()));
+        path.set_name(&format!("MovementPath_{}", entity));
         path.set_default_color(Color::from_rgba(0.2, 0.8, 1.0, 0.9));
         path.set_width(PATH_WIDTH);
         path.set_z_index(Z_PATH);
         self.root.add_child(&path);
 
         let mut velocity = Line2D::new_alloc();
-        velocity.set_name(&format!("MovementVelocity_{}", entity.to_bits()));
+        velocity.set_name(&format!("MovementVelocity_{}", entity));
         velocity.set_default_color(Color::from_rgba(1.0, 0.3, 0.3, 0.9));
         velocity.set_width(VELOCITY_WIDTH);
         velocity.set_z_index(Z_VELOCITY);
         self.root.add_child(&velocity);
 
         let mut marker = Line2D::new_alloc();
-        marker.set_name(&format!("MovementMarker_{}", entity.to_bits()));
+        marker.set_name(&format!("MovementMarker_{}", entity));
         marker.set_default_color(Color::from_rgba(1.0, 0.95, 0.4, 0.95));
         marker.set_width(MARKER_WIDTH);
         marker.set_closed(true);

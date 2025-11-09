@@ -35,7 +35,7 @@ impl GuiRegistry {
             .iter()
             .find(|(ty, _)| id == *ty)
             .map(|(_, g)| unsafe { &*Box::as_ptr(g).cast::<G>() })
-            .unwrap()
+            .expect("Gui not found")
     }
 
     pub fn get_mut<G: Gui + 'static>(&mut self) -> &mut G {
@@ -44,7 +44,7 @@ impl GuiRegistry {
             .iter_mut()
             .find(|(ty, _)| id == *ty)
             .map(|(_, g)| unsafe { &mut *Box::as_mut_ptr(g).cast::<G>() })
-            .unwrap()
+            .expect("Gui not found")
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Box<dyn Gui>> {

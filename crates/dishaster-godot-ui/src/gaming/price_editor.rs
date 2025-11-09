@@ -159,7 +159,7 @@ impl DishPricePopup {
         let Some(value) = state.parsed_value else {
             return;
         };
-        let cmd = self.commands.get_mut().unwrap();
+        let cmd = self.commands.get_mut().expect("commands not set");
         cmd.push_req(GameRequest::ApplyDishPrice {
             dish: state.entity,
             method: match state.current_mode {

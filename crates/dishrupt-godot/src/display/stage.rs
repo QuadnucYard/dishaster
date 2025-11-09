@@ -135,13 +135,13 @@ impl Stage {
             let mut child_node = self
                 .display_world
                 .get_mut(child_entity)
-                .unwrap()
+                .expect("failed to get child node")
                 .node
                 .clone();
             let mut parent_node = self
                 .display_world
                 .get_mut(parent_entity)
-                .unwrap()
+                .expect("failed to get parent node")
                 .node
                 .clone();
             if child_node.get_parent().is_some() {

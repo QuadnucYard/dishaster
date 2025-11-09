@@ -47,8 +47,7 @@ where
     pub fn get(&mut self) -> &mut T {
         let item = if self.available_num == 0 {
             // create new one
-            self.items.push(self.template.dup().into());
-            let item = self.items.last_mut().unwrap();
+            let item = self.items.push_mut(self.template.dup().into());
             item.set_parent(&mut self.container);
             item
         } else {
@@ -66,8 +65,7 @@ where
     pub fn get_to(&mut self, container: &mut UINode) -> &mut T {
         let item = if self.available_num == 0 {
             // create new one
-            self.items.push(self.template.dup().into());
-            let item = self.items.last_mut().unwrap();
+            let item = self.items.push_mut(self.template.dup().into());
             item.set_parent(container);
             item
         } else {
@@ -127,8 +125,7 @@ where
     pub fn get_to(&mut self, container: &mut UINode) -> &mut T {
         let item = if self.available_num == 0 {
             // create new one
-            self.items.push(self.template.dup().into());
-            let item = self.items.last_mut().unwrap();
+            let item = self.items.push_mut(self.template.dup().into());
             item.set_parent(container);
             item
         } else {

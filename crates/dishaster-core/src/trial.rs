@@ -94,19 +94,18 @@ fn select_next_question(trial_registry: &TrialCorpus, trial_session: &mut TrialS
     }
 
     // Fallback: random available question
-    let available_questions: Vec<usize> = (0..trial_registry.diner_speeches.len())
+    let num_questions = trial_registry.diner_speeches.len();
+    let available_questions = (0..num_questions)
         .filter(|&idx| !trial_session.has_asked(idx))
-        .collect();
+        .collect::<Vec<_>>();
 
-    let speech_index = if available_questions.is_empty() {
-        // All questions asked, pick any random one
-        trial_session
-            .rng
-            .random_range(0..trial_registry.diner_speeches.len())
-    } else {
-        // Pick a random available question
-        *available_questions.choose(&mut trial_session.rng).unwrap()
-    };
+    // Pick a random available question.
+    // If all questions asked, pick any random one
+    let speech_index = available_questions
+        .choose(&mut trial_session.rng)
+        .cloned()
+        .unwrap_or_else(|| trial_session.rng.random_range(0..num_questions));
+
     trial_session.mark_asked(speech_index);
 
     speech_index

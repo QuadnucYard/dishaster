@@ -103,8 +103,14 @@ impl Simulation {
         let mut world_rng = WorldRng::new(level.seed);
 
         let db = Arc::clone(self.world.resource::<GameModelRegistryRes>());
-        let level_config = db.levels.get_by_id(&level.level_id).unwrap();
-        let canteen = db.canteens.get_by_id(&level_config.canteen).unwrap();
+        let level_config = db
+            .levels
+            .get_by_id(&level.level_id)
+            .expect("Invalid level ID");
+        let canteen = db
+            .canteens
+            .get_by_id(&level_config.canteen)
+            .expect("Invalid canteen ID");
 
         let world_size = canteen.size();
         self.world

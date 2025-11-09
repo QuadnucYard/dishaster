@@ -406,12 +406,8 @@ fn choose_service_request(
     registry: &GameModelRegistry,
     rng: &mut impl Rng,
 ) -> Option<ServiceRequest> {
-    if dishes.dishes.is_empty() {
-        return None;
-    }
-
     // Pick a dish that is currently staged in the serving window.
-    let active = dishes.dishes.choose(rng).unwrap();
+    let active = dishes.dishes.choose(rng)?;
     let dish_handle = registry
         .dishes
         .get_handle_by_id(&active.assignment.dish_id)?;

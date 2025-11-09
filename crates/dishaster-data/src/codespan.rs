@@ -1,5 +1,6 @@
 use std::{ops::Range, path::Path};
 
+use anyhow::Context;
 use codespan_reporting::{
     diagnostic::{Diagnostic, Label},
     files::SimpleFiles,
@@ -27,7 +28,7 @@ pub fn emit_ron_error(
                     e.span.end.line,
                     e.span.end.col,
                 )
-                .unwrap(),
+                .context("Error span is out of bounds")?,
             )
             .with_message(&e.code),
         ]);

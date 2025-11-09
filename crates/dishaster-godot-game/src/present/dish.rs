@@ -24,7 +24,9 @@ pub struct DishPresenter {
 
 impl DishPresenter {
     pub fn new(entity: EntityId, node: GdNode2D) -> Self {
-        let area = node.get_child_of_type().unwrap();
+        let area = node
+            .get_child_of_type()
+            .expect("DishPresenter node does not have Area2D");
         let price_label = node.get_node_as("Price/Label");
 
         Self {
