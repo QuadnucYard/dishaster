@@ -1,7 +1,7 @@
 use super::prelude::*;
 
 pub mod hints {
-    pub const DISPENSER_OUT_OF_STOCK: &str = "dispenser_out_of_stock";
+    pub const DISPENSER_OUT_OF_STOCK: &str = "dispenser-out-of-stock";
 }
 
 pub trait HintEmitter {

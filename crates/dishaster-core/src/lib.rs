@@ -6,6 +6,7 @@ mod adapter;
 mod command_handle;
 pub(crate) mod components;
 pub(crate) mod constants;
+pub(crate) mod events;
 pub(crate) mod messages;
 pub(crate) mod resources;
 pub mod sim;

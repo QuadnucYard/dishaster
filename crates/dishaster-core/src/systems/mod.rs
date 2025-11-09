@@ -4,6 +4,7 @@ mod decision;
 mod dining;
 mod feedback;
 mod hint;
+mod lifecycle;
 mod monitor;
 mod navigation;
 mod queueing;
@@ -13,6 +14,7 @@ mod spawn;
 
 pub use dining::*;
 pub use feedback::*;
+pub use lifecycle::*;
 pub use monitor::*;
 pub use navigation::*;
 pub use queueing::*;

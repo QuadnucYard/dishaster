@@ -7,7 +7,14 @@ use dishaster_navigation::*;
 use dishaster_save_models::LevelSetupState;
 use dishrupt_simulation::ISimulation;
 
-use crate::{components::*, messages::*, models::*, prelude::*, resources::*, systems::*};
+use crate::{
+    components::*,
+    messages::*,
+    models::*,
+    prelude::*,
+    resources::*,
+    systems::{self, *},
+};
 
 /// Core simulation engine managing ECS world and system execution
 ///
@@ -37,6 +44,7 @@ impl Simulation {
 
         world.insert_resource(db.into_res());
 
+        systems::register_lifecycle_systems(&mut world);
         schedule.add_systems(
             (
                 // Recompute soft crowd costs for pathfinding

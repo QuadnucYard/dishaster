@@ -1,8 +1,7 @@
-use bevy_ecs::system::RunSystemOnce;
 use dishaster_interface::{event::*, response::*, *};
 use dishaster_navigation::*;
 
-use crate::{components::*, messages::RefillDispenser, prelude::*, resources::*, sim::Simulation};
+use crate::{components::*, events::*, messages::*, prelude::*, resources::*, sim::Simulation};
 
 impl Simulation {
     /// Apply a high-level control command from the client runtime.
@@ -16,22 +15,10 @@ impl Simulation {
             }
 
             SimCommand::StartRun => {
-                let mut day_status = self.world.resource_mut::<DayStatus>();
-                day_status.started = true;
+                self.world.trigger(RunStarted);
             }
             SimCommand::EndRun => {
-                // stop spawning
-                let mut schedule = self.world.resource_mut::<DailyDinerSchedule>();
-                schedule.finish_spawning();
-
-                // clear diners
-                let _ = self.world.run_system_once(
-                    |mut commands: Commands, query: Query<Entity, With<Diner>>| {
-                        for entity in query.iter() {
-                            commands.entity(entity).despawn();
-                        }
-                    },
-                );
+                self.world.trigger(RunEnded);
             }
 
             SimCommand::UpdateDishPricing {
