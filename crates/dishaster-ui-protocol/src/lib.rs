@@ -55,6 +55,11 @@ pub enum GameRequest {
     TrialResponseDone,
     /// Handle trial timeout.
     TrialTimeout,
+
+    /// Select a decision from the available options.
+    SelectDecision(usize),
+    /// Confirm incident notification and continue to preparation phase.
+    ConfirmIncident,
 }
 
 impl UiRequest for GameRequest {}
@@ -92,6 +97,12 @@ pub enum UiCommand {
     /// Trial has ended.
     TrialEnd,
 
+    /// Show management decisions to the player.
+    ShowDecisionSelection(Box<ManagementDecisionsView>),
+    /// Show incident notification at day start (random incident auto-applied).
+    ShowIncidentNotification(Box<ManagementIncidentView>),
+    // /// Close incident/decision UI and return to normal flow.
+    // CloseIncidentDecisionUI,
     /// Show a hint notification to the player.
     ShowHint {
         /// Localized hint message.

@@ -1,3 +1,5 @@
+use dishaster_views::{ManagementDecisionView, ManagementDecisionsView};
+
 use crate::{
     events::*,
     systems::{prelude::*, spawn_table},
@@ -60,7 +62,9 @@ pub fn roll_management_decisions(
     _event: On<RollManagementDecisions>,
     mut commands: Commands,
     registry: Res<GameModelRegistryRes>,
+    level: Res<ResWrapper<LevelSetupState>>,
     mut rng: ResMut<WorldRng>,
+    mut events: ResMut<EventQueue>,
 ) {
     /// Number of management decisions to roll each time
     const DECISION_ROLL_COUNT: usize = 3;
@@ -68,9 +72,7 @@ pub fn roll_management_decisions(
     let mut rng = rng.derive_prng();
     let templates = registry.mgmt_decisions.iter().collect::<Vec<_>>();
 
-    let mut decisions = ManagementDecisions {
-        available: Vec::new(),
-    };
+    let mut decisions = vec![];
 
     // Roll new decisions
     for _ in 0..DECISION_ROLL_COUNT {
@@ -79,11 +81,26 @@ pub fn roll_management_decisions(
         };
 
         let ctx = RealizationContext { rng: &mut rng };
-        decisions.available.push(template.def.realize(ctx));
+        decisions.push((template.id.clone(), template.def.realize(ctx)));
     }
 
+    events.push(SimEvent::ShowManagementDecisions(
+        ManagementDecisionsView {
+            day: level.day,
+            options: decisions
+                .iter()
+                .map(|(id, _model)| ManagementDecisionView {
+                    model_id: id.clone(),
+                })
+                .collect(),
+        }
+        .into(),
+    ));
+
     // Insert into resources
-    commands.insert_resource(decisions);
+    commands.insert_resource(ManagementDecisions {
+        available: decisions.into_iter().map(|(_, m)| m).collect(),
+    });
 }
 
 /// Apply a selected management decision

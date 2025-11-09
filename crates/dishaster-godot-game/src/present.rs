@@ -114,6 +114,15 @@ impl Game {
                     self.ui_commands.push(UiCommand::TrialEnd);
                 }
 
+                SimEvent::ShowManagementDecisions(view) => {
+                    self.ui_commands
+                        .push(UiCommand::ShowDecisionSelection(view));
+                }
+                SimEvent::ShowManagementIncident(view) => {
+                    self.ui_commands
+                        .push(UiCommand::ShowIncidentNotification(view));
+                }
+
                 SimEvent::ShowHint(hint_id) => {
                     godot_print!("Showing hint: {hint_id}");
 

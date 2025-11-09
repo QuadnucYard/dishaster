@@ -1,7 +1,8 @@
 //! Presentation events emitted by the core simulation for client display.
 
 use dishaster_views::{
-    Appearance, DishView, FeedbackView, TrialIntro, TrialSpeech, TrialStatement,
+    Appearance, DishView, FeedbackView, ManagementDecisionsView, ManagementIncidentView,
+    TrialIntro, TrialSpeech, TrialStatement,
 };
 use dishrupt_core::{EntityId, prelude::EcoString};
 
@@ -51,6 +52,11 @@ pub enum SimEvent {
     TrialRightSpeak(Box<TrialSpeech>),
     /// Trial has ended.
     TrialEnd,
+
+    /// Show management decisions to the player.
+    ShowManagementDecisions(Box<ManagementDecisionsView>),
+    /// Show incident notification at day start.
+    ShowManagementIncident(Box<ManagementIncidentView>),
 
     /// Show a hint to the player for first-time events.
     ShowHint(EcoString),

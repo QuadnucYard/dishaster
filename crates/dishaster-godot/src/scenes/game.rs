@@ -168,6 +168,12 @@ impl GameScene {
                 godot_print!("Trial timeout");
                 game.send_sim_command(SimCommand::TrialTimeout);
             }
+
+            GameRequest::SelectDecision(index) => {
+                godot_print!("Decision selected: {}", index);
+                game.send_sim_command(SimCommand::ApplyManagementDecision(index));
+            }
+            GameRequest::ConfirmIncident => {}
         }
     }
 
@@ -226,6 +232,9 @@ impl GameScene {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
                 trial_gui.hide();
             }
+
+            UiCommand::ShowDecisionSelection(_view) => {}
+            UiCommand::ShowIncidentNotification(_view) => {}
 
             UiCommand::ShowHint { message } => {
                 ctx.gui.get_mut::<HintNotification>().show_hint(&message);
