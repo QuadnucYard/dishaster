@@ -63,6 +63,17 @@ impl Stage {
         Some(&mut gd_node.node)
     }
 
+    pub fn get_godot_node2_mut(
+        &mut self,
+        entity1: EntityId,
+        entity2: EntityId,
+    ) -> Option<(&mut GdNode2D, &mut GdNode2D)> {
+        let e1 = *self.core_to_view.get(&entity1)?;
+        let e2 = *self.core_to_view.get(&entity2)?;
+        let gd_node = self.display_world.get2_mut(e1, e2)?;
+        Some((&mut gd_node.0.node, &mut gd_node.1.node))
+    }
+
     pub fn update(&mut self, elapsed_time: f64) {
         if !self.active {
             return;

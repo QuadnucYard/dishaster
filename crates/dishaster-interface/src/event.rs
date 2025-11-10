@@ -85,7 +85,7 @@ pub enum DinerItemsChange {
     /// Diner picked up a dish.
     PickDish(EntityId),
     /// Diner started eating at a table.
-    StartEating,
+    StartEating(EntityId, usize),
     /// Diner finished eating.
     FinishEating,
     /// Diner dropped all items (when returning dishes).

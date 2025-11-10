@@ -49,11 +49,13 @@ impl DinerItemsPresenter {
             DinerItemsChange::PickDish(dish_entity) => {
                 self.attach_dish(dish_entity, stage);
             }
-            DinerItemsChange::StartEating => {
+            DinerItemsChange::StartEating(table_entity, seat_index) => {
                 self.is_eating = true;
+                self.put_tray_on_table(table_entity, seat_index, stage);
             }
             DinerItemsChange::FinishEating => {
                 self.is_eating = false;
+                self.take_tray_from_table(stage);
             }
             DinerItemsChange::DropAll => {
                 self.tray_entity = None;
@@ -67,28 +69,23 @@ impl DinerItemsPresenter {
         self.tray_entity = Some(tray_entity);
 
         if let Some(tray_node) = stage.get_godot_node_mut(tray_entity)
-            && !self.is_eating
+            && let Some(slot) = &self.tray_slot
         {
-            if let Some(slot) = &self.tray_slot {
-                tray_node.reparent(slot);
-                tray_node.set_position(Vector2::ZERO);
-                tray_node.set_visible(true);
-            } else {
-                godot_warn!(
-                    "Agent {:?} missing tray slot for tray {:?}",
-                    self.entity,
-                    tray_entity
-                );
-            }
+            tray_node.reparent(slot);
+            tray_node.set_position(Vector2::ZERO);
+        } else {
+            godot_warn!(
+                "Agent {:?} missing tray slot for tray {:?}",
+                self.entity,
+                tray_entity
+            );
         }
     }
 
     fn attach_chopsticks(&mut self, chopsticks_entity: EntityId, stage: &Stage) {
         self.chopsticks_entity = Some(chopsticks_entity);
 
-        if let Some(chopsticks_node) = stage.get_godot_node(chopsticks_entity)
-            && !self.is_eating
-        {
+        if let Some(chopsticks_node) = stage.get_godot_node(chopsticks_entity) {
             let mut chopsticks_node = chopsticks_node.clone();
 
             // Attach to tray if it exists, otherwise to chopsticks slot
@@ -107,45 +104,59 @@ impl DinerItemsPresenter {
                     chopsticks_entity
                 );
             }
-            chopsticks_node.set_visible(true);
         }
     }
 
-    fn reposition_chopsticks_on_tray(&mut self, stage: &Stage) {
+    fn reposition_chopsticks_on_tray(&mut self, stage: &mut Stage) {
         // When tray is picked up, reposition chopsticks if they already exist
         if let Some(chopsticks_entity) = self.chopsticks_entity
             && let Some(tray_entity) = self.tray_entity
-            && let Some(chopsticks_node) = stage.get_godot_node(chopsticks_entity)
-            && let Some(tray_node) = stage.get_godot_node(tray_entity)
+            && let Some((chopsticks_node, tray_node)) =
+                stage.get_godot_node2_mut(chopsticks_entity, tray_entity)
         {
-            let mut chopsticks_node = chopsticks_node.clone();
             chopsticks_node.reparent(&**tray_node);
             chopsticks_node.set_position(Vector2::new(0.0, -5.0));
         }
     }
 
-    fn attach_dish(&mut self, dish_entity: EntityId, stage: &Stage) {
+    fn attach_dish(&mut self, dish_entity: EntityId, stage: &mut Stage) {
         self.dish_entity = Some(dish_entity);
 
-        if let Some(dish_node) = stage.get_godot_node(dish_entity)
-            && !self.is_eating
+        if let Some(tray_entity) = self.tray_entity
+            && let Some((dish_node, tray_node)) =
+                stage.get_godot_node2_mut(dish_entity, tray_entity)
         {
-            let mut dish_node = dish_node.clone();
-
             // Dish always goes on tray
-            if let Some(tray_entity) = self.tray_entity
-                && let Some(tray_node) = stage.get_godot_node(tray_entity)
-            {
-                dish_node.reparent(&**tray_node);
-                dish_node.set_position(Vector2::new(0.0, 5.0));
-                dish_node.set_visible(true);
-            } else {
-                godot_warn!(
-                    "Agent {:?} has dish {:?} but no tray",
-                    self.entity,
-                    dish_entity
-                );
-            }
+            dish_node.reparent(&**tray_node);
+            dish_node.set_position(Vector2::new(0.0, 5.0));
+        } else {
+            godot_warn!(
+                "Agent {:?} has dish {:?} but no tray",
+                self.entity,
+                dish_entity
+            );
+        }
+    }
+
+    fn put_tray_on_table(&mut self, table_entity: EntityId, seat_index: usize, stage: &mut Stage) {
+        if let Some(tray_entity) = self.tray_entity
+            && let Some((tray_node, table_node)) =
+                stage.get_godot_node2_mut(tray_entity, table_entity)
+            && let Some(slot_container) = table_node.get_node_or_null("DishSlots")
+            && let Some(slot_node) = slot_container.get_child(seat_index as i32)
+        {
+            tray_node.reparent(&slot_node);
+            tray_node.set_position(Vector2::ZERO);
+        }
+    }
+
+    fn take_tray_from_table(&mut self, stage: &mut Stage) {
+        if let Some(tray_entity) = self.tray_entity
+            && let Some(tray_node) = stage.get_godot_node_mut(tray_entity)
+            && let Some(slot) = &self.tray_slot
+        {
+            tray_node.reparent(slot);
+            tray_node.set_position(Vector2::ZERO);
         }
     }
 }

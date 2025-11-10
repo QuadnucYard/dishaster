@@ -882,7 +882,7 @@ fn handle_move_to_seat_goal(
 
             events.push(SimEvent::DinerItemsChanged {
                 entity: entity.to_entity_id(),
-                change: DinerItemsChange::StartEating,
+                change: DinerItemsChange::StartEating(table_entity.to_entity_id(), seat_index),
             });
 
             goal.update(DinerGoal::Eat);
