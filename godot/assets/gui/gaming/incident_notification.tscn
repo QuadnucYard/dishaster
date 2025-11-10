@@ -1,17 +1,44 @@
-[gd_scene load_steps=2 format=3 uid="uid://b7yq5xg8mh3pn"]
+[gd_scene load_steps=6 format=3 uid="uid://b7yq5xg8mh3pn"]
 
-[ext_resource type="Texture2D" uid="uid://gjny846uvcw0" path="res://assets/gui/textures/credits_bg.png" id="1_qxgq8"]
+[ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="1_nn76e"]
+[ext_resource type="StyleBox" uid="uid://c1c6tw762kby1" path="res://assets/themes/card.tres" id="2_5ov4g"]
+[ext_resource type="Theme" uid="uid://c5h27pdjsc30" path="res://assets/themes/round_button.tres" id="2_nn76e"]
 
-[node name="IncidentNotification" type="Control"]
-layout_mode = 3
+[sub_resource type="Theme" id="Theme_nn76e"]
+Label/colors/font_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
+Label/font_sizes/font_size = 32
+Label/fonts/font = ExtResource("1_nn76e")
+RichTextLabel/colors/default_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
+RichTextLabel/constants/line_separation = -8
+RichTextLabel/font_sizes/bold_font_size = 32
+RichTextLabel/font_sizes/bold_italics_font_size = 32
+RichTextLabel/font_sizes/italics_font_size = 32
+RichTextLabel/font_sizes/mono_font_size = 32
+RichTextLabel/font_sizes/normal_font_size = 32
+RichTextLabel/fonts/normal_font = ExtResource("1_nn76e")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nn76e"]
+bg_color = Color(0.9882353, 0.91764706, 0.7607843, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
+
+[node name="IncidentNotification" type="Panel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_nn76e")
 
 [node name="Panel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(800, 900)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -19,68 +46,81 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -400.0
-offset_top = -300.0
+offset_top = -450.0
 offset_right = 400.0
-offset_bottom = 300.0
+offset_bottom = 450.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_5ov4g")
 
-[node name="Background" type="TextureRect" parent="Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
 layout_mode = 2
-texture = ExtResource("1_qxgq8")
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="VBox" type="VBoxContainer" parent="Panel/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 16
 
-[node name="IncidentIcon" type="TextureRect" parent="Panel/VBox"]
+[node name="PanelContainer" type="PanelContainer" parent="Panel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nn76e")
+
+[node name="IncidentIcon" type="TextureRect" parent="Panel/MarginContainer/VBox/PanelContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 150)
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "突发事故！"
 horizontal_alignment = 1
 
-[node name="DescLabel" type="RichTextLabel" parent="Panel/VBox"]
+[node name="DescLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
-size_flags_vertical = 3
 bbcode_enabled = true
 text = "今天有大量学生集中在午饭时间前来！"
 fit_content = true
 scroll_active = false
 
-[node name="FlavorLabel" type="RichTextLabel" parent="Panel/VBox"]
+[node name="FlavorLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.69411767, 0.58431375, 0.5294118, 1)
 bbcode_enabled = true
 text = "准备好了吗？"
 fit_content = true
 scroll_active = false
 
-[node name="EffectsLabel" type="RichTextLabel" parent="Panel/VBox"]
+[node name="EffectsTitle" type="LocalizedLabel" parent="Panel/MarginContainer/VBox"]
+message_id = "effects-title.label"
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74910426, 0.63421166, 0, 1)
+text = "Effects:"
+
+[node name="EffectsLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
+size_flags_vertical = 3
 bbcode_enabled = true
-text = "[color=yellow]效果：[/color]
-• 客流量 +50%
+text = "• 客流量 +50%
 • 12:00-13:00 集中到达"
 fit_content = true
 scroll_active = false
 
-[node name="ConfirmButton" type="LocalizedButton" parent="Panel/VBox"]
+[node name="ConfirmButton" type="LocalizedButton" parent="Panel/MarginContainer/VBox"]
 message_id = "confirm.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 90)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 28
-text = "确认"
+theme = ExtResource("2_nn76e")
+text = "Confirm"

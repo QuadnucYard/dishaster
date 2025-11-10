@@ -132,22 +132,14 @@ impl Stage {
                 continue;
             };
 
-            let mut child_node = self
+            let (child_node, parent_node) = self
                 .display_world
-                .get_mut(child_entity)
-                .expect("failed to get child node")
-                .node
-                .clone();
-            let mut parent_node = self
-                .display_world
-                .get_mut(parent_entity)
-                .expect("failed to get parent node")
-                .node
-                .clone();
-            if child_node.get_parent().is_some() {
-                child_node.reparent(&*parent_node);
+                .get2_mut(child_entity, parent_entity)
+                .expect("failed to get child-paent node");
+            if child_node.node.get_parent().is_some() {
+                child_node.node.reparent(&*parent_node.node);
             } else {
-                parent_node.add_child(&*child_node);
+                parent_node.node.add_child(&*child_node.node);
             }
         }
     }

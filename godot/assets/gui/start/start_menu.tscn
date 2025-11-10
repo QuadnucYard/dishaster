@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bysf0t5mnvqm"]
 
 [ext_resource type="Texture2D" uid="uid://g0xpfig3igsc" path="res://assets/gui/textures/start_menu_bg.png" id="1_lw2g1"]
-[ext_resource type="Theme" uid="uid://c6spuadyswnvj" path="res://assets/gui/button_theme.tres" id="2_ctnrb"]
+[ext_resource type="Theme" uid="uid://c6spuadyswnvj" path="res://assets/themes/rect_button.tres" id="2_ctnrb"]
 [ext_resource type="Texture2D" uid="uid://ckslh452pdw6d" path="res://assets/gui/textures/title.png" id="2_o2670"]
 
 [node name="StartMenu" type="Control"]

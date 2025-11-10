@@ -1,0 +1,39 @@
+[gd_resource type="Theme" load_steps=5 format=3 uid="uid://c5h27pdjsc30"]
+
+[ext_resource type="FontVariation" uid="uid://dmd4q5is26rdj" path="res://assets/fonts/sans_bold.tres" id="1_cr3bd"]
+[ext_resource type="Texture2D" uid="uid://c4rthf3f37uno" path="res://assets/gui/textures/round_button.png" id="1_nddui"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_a8gqq"]
+content_margin_left = 32.0
+content_margin_top = 8.0
+content_margin_right = 32.0
+content_margin_bottom = 24.0
+texture = ExtResource("1_nddui")
+texture_margin_left = 64.0
+texture_margin_top = 32.0
+texture_margin_right = 64.0
+texture_margin_bottom = 40.0
+region_rect = Rect2(0, 85, 224, 85)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cr3bd"]
+content_margin_left = 32.0
+content_margin_top = 8.0
+content_margin_right = 32.0
+content_margin_bottom = 24.0
+texture = ExtResource("1_nddui")
+texture_margin_left = 64.0
+texture_margin_top = 32.0
+texture_margin_right = 64.0
+texture_margin_bottom = 40.0
+region_rect = Rect2(0, 0, 224, 85)
+
+[resource]
+Button/colors/font_color = Color(0.99607843, 0.95686275, 0.8509804, 1)
+Button/colors/font_outline_color = Color(0.4509804, 0.1764706, 0.011764706, 1)
+Button/constants/outline_size = 12
+Button/font_sizes/font_size = 32
+Button/fonts/font = ExtResource("1_cr3bd")
+Button/styles/focus = SubResource("StyleBoxTexture_a8gqq")
+Button/styles/hover = SubResource("StyleBoxTexture_a8gqq")
+Button/styles/normal = SubResource("StyleBoxTexture_cr3bd")
+Button/styles/pressed = SubResource("StyleBoxTexture_a8gqq")

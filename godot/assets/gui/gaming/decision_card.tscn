@@ -1,41 +1,77 @@
-[gd_scene format=3 uid="uid://dpm3k5y7h8nqx"]
+[gd_scene load_steps=7 format=3 uid="uid://dpm3k5y7h8nqx"]
+
+[ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="1_43q0x"]
+[ext_resource type="StyleBox" uid="uid://c1c6tw762kby1" path="res://assets/themes/card.tres" id="2_wwn4r"]
+[ext_resource type="FontVariation" uid="uid://dmd4q5is26rdj" path="res://assets/fonts/sans_bold.tres" id="3_0l35t"]
+[ext_resource type="Theme" uid="uid://c5h27pdjsc30" path="res://assets/themes/round_button.tres" id="4_wwn4r"]
+
+[sub_resource type="Theme" id="Theme_43q0x"]
+Label/colors/font_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
+Label/font_sizes/font_size = 32
+Label/fonts/font = ExtResource("1_43q0x")
+RichTextLabel/colors/default_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
+RichTextLabel/constants/line_separation = -8
+RichTextLabel/font_sizes/bold_font_size = 32
+RichTextLabel/font_sizes/bold_italics_font_size = 32
+RichTextLabel/font_sizes/italics_font_size = 32
+RichTextLabel/font_sizes/mono_font_size = 32
+RichTextLabel/font_sizes/normal_font_size = 32
+RichTextLabel/fonts/normal_font = ExtResource("1_43q0x")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wwn4r"]
+bg_color = Color(0.9882353, 0.91764706, 0.7607843, 1)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
 
 [node name="DecisionCard" type="PanelContainer"]
-custom_minimum_size = Vector2(350, 450)
-offset_right = 350.0
-offset_bottom = 590.0
+custom_minimum_size = Vector2(480, 900)
+offset_right = 360.0
+offset_bottom = 676.0
+theme = SubResource("Theme_43q0x")
+theme_override_styles/panel = ExtResource("2_wwn4r")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
 theme_override_constants/margin_left = 32
 theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 32
+theme_override_constants/margin_bottom = 20
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="CardIcon" type="TextureRect" parent="MarginContainer/VBox"]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_wwn4r")
+
+[node name="CardIcon" type="TextureRect" parent="MarginContainer/VBox/PanelContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 120)
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 80)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_fonts/font = ExtResource("3_0l35t")
+theme_override_font_sizes/font_size = 48
 text = "提升设备容量"
 horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="DescLabel" type="RichTextLabel" parent="MarginContainer/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
-size_flags_vertical = 3
 bbcode_enabled = true
 text = "增加餐盘架和筷子柜的容量，减少缺货情况。"
 fit_content = true
@@ -44,22 +80,23 @@ scroll_active = false
 [node name="FlavorLabel" type="RichTextLabel" parent="MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.6925186, 0.5827935, 0.53043956, 1)
 bbcode_enabled = true
 text = "投资更大的餐盘存储架。"
 fit_content = true
 scroll_active = false
 
-[node name="EffectsCaption" type="Label" parent="MarginContainer/VBox"]
+[node name="EffectsTitle" type="LocalizedLabel" parent="MarginContainer/VBox"]
+message_id = "effects-title.label"
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0, 1)
-theme_override_font_sizes/font_size = 18
-text = "效果："
+theme_override_colors/font_color = Color(0.74910426, 0.63421166, 0, 1)
+text = "Effects:"
 
 [node name="EffectsLabel" type="RichTextLabel" parent="MarginContainer/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
+size_flags_vertical = 3
 bbcode_enabled = true
 text = "• 餐盘架容量 +20
 • 筷子柜容量 +20"
@@ -69,6 +106,8 @@ scroll_active = false
 [node name="SelectButton" type="LocalizedButton" parent="MarginContainer/VBox"]
 message_id = "select-option.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 90)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "选择此项"
+size_flags_horizontal = 4
+theme = ExtResource("4_wwn4r")
+text = "Select"

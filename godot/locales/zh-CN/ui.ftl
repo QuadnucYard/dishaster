@@ -56,5 +56,7 @@ manage-decision =
     .title = 选择运营决策
     .subtitle = 选择一项决策来改善明天的运营
 
+effects-title =
+    .label = 效果:
 select-option =
     .label = 选择此项

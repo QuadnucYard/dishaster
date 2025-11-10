@@ -1,0 +1,9 @@
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://dmd4q5is26rdj"]
+
+[ext_resource type="FontFile" uid="uid://iami1nsb10me" path="res://assets/fonts/SourceHanSansCN-VF.otf" id="1_ck2v6"]
+
+[resource]
+base_font = ExtResource("1_ck2v6")
+variation_opentype = {
+2003265652: 700
+}

@@ -1,15 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://cnw8k4xh5r2qm"]
+[gd_scene load_steps=4 format=3 uid="uid://cnw8k4xh5r2qm"]
 
-[ext_resource type="Texture2D" uid="uid://gjny846uvcw0" path="res://assets/gui/textures/credits_bg.png" id="1_uj2u4"]
+[ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="1_uj2u4"]
 [ext_resource type="PackedScene" uid="uid://dpm3k5y7h8nqx" path="res://assets/gui/gaming/decision_card.tscn" id="2_6f45u"]
 
-[node name="DecisionSelection" type="Control"]
-layout_mode = 3
+[sub_resource type="Theme" id="Theme_6f45u"]
+Label/colors/font_color = Color(1, 1, 1, 1)
+Label/colors/font_outline_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
+Label/font_sizes/font_size = 32
+Label/fonts/font = ExtResource("1_uj2u4")
+
+[node name="DecisionSelection" type="Panel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_6f45u")
 
 [node name="Panel" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -18,38 +24,36 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 120
-theme_override_constants/margin_top = 120
-theme_override_constants/margin_right = 120
-theme_override_constants/margin_bottom = 120
-
-[node name="Background" type="TextureRect" parent="Panel"]
-layout_mode = 2
-texture = ExtResource("1_uj2u4")
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 0
 
-[node name="TitleLabel" type="LocalizedLabel" parent="Panel/VBox"]
+[node name="Header" type="VBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = -8
+
+[node name="TitleLabel" type="LocalizedLabel" parent="Panel/VBox/Header"]
 message_id = "manage-decision.title"
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
-text = "选择运营决策"
+theme_override_constants/outline_size = 24
+theme_override_font_sizes/font_size = 65
+text = "{选择运营决策}"
 horizontal_alignment = 1
 
-[node name="SubtitleLabel" type="LocalizedLabel" parent="Panel/VBox"]
+[node name="SubtitleLabel" type="LocalizedLabel" parent="Panel/VBox/Header"]
 message_id = "manage-decision.subtitle"
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "选择一项决策来改善明天的运营"
+theme_override_constants/outline_size = 16
+theme_override_font_sizes/font_size = 32
+text = "{选择一项决策来改善明天的运营}"
 horizontal_alignment = 1
 
 [node name="Options" type="GridContainer" parent="Panel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/h_separation = 20
+theme_override_constants/h_separation = 40
 columns = 3
 
 [node name="DecisionOptionTemplate" parent="Panel/VBox/Options" instance=ExtResource("2_6f45u")]
