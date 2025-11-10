@@ -14,7 +14,6 @@ dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true
 dishrupt-l10n-godot.workspace = true
 dishaster-core.workspace = true
-dishaster-interface.workspace = true
 dishaster-data.workspace = true
 dishaster-persistence.workspace = true
 dishaster-ui-protocol.workspace = true
@@ -25,6 +24,10 @@ dishaster-godot-ui.workspace = true
 env_logger.workspace = true
 godot.workspace = true
 log.workspace = true
+
+[features]
+default = []
+trace = ["dishaster-core/trace"]
 
 [lints]
 # workspace = true

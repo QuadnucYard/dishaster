@@ -160,6 +160,7 @@ dependencies = [
  "slotmap",
  "smallvec",
  "thiserror",
+ "tracing",
  "variadics_please",
 ]
 
@@ -470,7 +471,6 @@ dependencies = [
  "dishaster-godot-game",
  "dishaster-godot-opening",
  "dishaster-godot-ui",
- "dishaster-interface",
  "dishaster-persistence",
  "dishaster-ui-protocol",
  "dishrupt-godot",
@@ -601,6 +601,16 @@ dependencies = [
  "dishrupt-core",
  "rustc-hash",
  "serde",
+]
+
+[[package]]
+name = "dishaster-tests"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "dishaster-core",
+ "dishaster-data",
+ "dishaster-persistence",
 ]
 
 [[package]]
@@ -1865,6 +1875,22 @@ name = "toml_writer"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df8b2b54733674ad286d16267dcfc7a71ed5c776e4ac7aa3c3e2561f7c637bf2"
+
+[[package]]
+name = "tracing"
+version = "0.1.41"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "784e0ac535deb450455cbfa28a6f0df145ea1bb7ae51b821cf5e7927fdcfbdd0"
+dependencies = [
+ "pin-project-lite",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-core"
+version = "0.1.34"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9d12581f227e93f094d3af2ae690a574abb8a2b9b7a96e7cfe9647b2b617678"
 
 [[package]]
 name = "type-map"

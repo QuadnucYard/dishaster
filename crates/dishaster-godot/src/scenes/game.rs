@@ -1,9 +1,8 @@
 use std::any::Any;
 
-use dishaster_core::{models::LevelSetupState, sim::Simulation};
+use dishaster_core::{interface::SimCommand, models::LevelSetupState, sim::Simulation};
 use dishaster_godot_game::Game;
 use dishaster_godot_ui::*;
-use dishaster_interface::SimCommand;
 use dishaster_ui_protocol::{AppRequest, GameRequest, UiCommand};
 use dishrupt_godot::{bind::BindGodot, input::listener::GodotInputEvent};
 use dishrupt_godot_scene::*;

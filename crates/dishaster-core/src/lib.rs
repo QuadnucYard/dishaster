@@ -24,6 +24,11 @@ pub mod views {
     pub use dishaster_views::*;
 }
 
+/// Re-export of dishaster_interface
+pub mod interface {
+    pub use dishaster_interface::*;
+}
+
 mod prelude {
     pub use dishrupt_core::prelude::*;
     pub use dishrupt_ecs::prelude::*;

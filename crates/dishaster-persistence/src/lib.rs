@@ -1,10 +1,18 @@
 //! Persistence layer for Dishaster.
 
 mod service;
+
 use anyhow::{Context, Result};
 use dishaster_save_models::PlayerProfile;
-use dishrupt_persistence::Persister;
-pub use service::*;
+
+pub use self::service::PlayerService;
+
+/// Re-exports of persistence-related types.
+mod reexport {
+    pub use dishrupt_persistence::{Persistable, PersistentStorage, Persister};
+}
+
+pub use reexport::*;
 
 struct PlayerProfilePersister;
 

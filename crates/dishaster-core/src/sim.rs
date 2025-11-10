@@ -5,7 +5,8 @@ use std::sync::Arc;
 use dishaster_interface::{snapshots::*, *};
 use dishaster_navigation::*;
 use dishaster_save_models::LevelSetupState;
-use dishrupt_simulation::ISimulation;
+// Re-export simulation trait
+pub use dishrupt_simulation::ISimulation;
 
 use crate::{
     components::*,

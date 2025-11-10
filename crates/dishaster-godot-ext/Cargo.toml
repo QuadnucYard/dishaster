@@ -14,5 +14,9 @@ dishaster-godot.workspace = true
 
 godot.workspace = true
 
+[features]
+default = []
+trace = ["dishaster-godot/trace"]
+
 [lints]
 # workspace = true
