@@ -8,6 +8,10 @@ pub struct RunStarted;
 #[derive(Event)]
 pub struct RunEnded;
 
+/// Event to advance to the next day
+#[derive(Event)]
+pub struct AdvanceDay;
+
 /// Event to roll management decisions
 #[derive(Event)]
 pub struct RollManagementDecisions;

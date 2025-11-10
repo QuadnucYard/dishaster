@@ -47,6 +47,8 @@ pub struct DiningTable {
 /// Item dispenser component for trays and chopsticks
 #[derive(Component)]
 pub struct Dispenser {
+    /// Identifier of the dispenser model
+    pub model_id: ModelId,
     /// Reference to dispenser model configuration
     pub model: ModelHandle<DispenserModel>,
     /// Physical center position of the dispenser
@@ -64,6 +66,8 @@ pub struct Dispenser {
 /// Dish collection point component for used plates and trays
 #[derive(Component)]
 pub struct DishCollector {
+    /// Identifier of the collector model
+    pub model_id: ModelId,
     /// Reference to collector model configuration
     pub model: ModelHandle<CollectorModel>,
     /// Physical center position of the collector

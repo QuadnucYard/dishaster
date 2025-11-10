@@ -11,7 +11,7 @@ use godot::global::godot_print;
 
 pub use self::{agent::AgentPresenter, dish::DishPresenter, dispenser::DispenserPresenter};
 use super::Game;
-use crate::progress_service;
+use crate::{DayPhase, progress_service};
 
 const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
 
@@ -19,8 +19,27 @@ impl Game {
     pub(crate) fn process_events(&mut self, events: Vec<SimEvent>) {
         for event in events {
             match event {
+                SimEvent::Persist => {
+                    godot_print!("Persisting player progress upon request");
+
+                    let profile = self.sim_runner.persist();
+                    progress_service()
+                        .save_profile(profile)
+                        .expect("failed to persist profile");
+                }
+
+                SimEvent::RunCompleted => {
+                    godot_print!("Process SimEvent: RunCompleted");
+
+                    self.phase = DayPhase::Settlement;
+
+                    self.ui_commands.push(UiCommand::FinishRun);
+                }
                 SimEvent::DayCompleted => {
-                    self.finish_day(false);
+                    godot_print!("Process SimEvent: DayCompleted");
+
+                    // Advance to next day in level setup
+                    self.ui_commands.push(UiCommand::FinishDay);
                 }
 
                 SimEvent::DispenserSpawned(entity) => {

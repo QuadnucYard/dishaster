@@ -176,6 +176,8 @@ impl GameScene {
             GameRequest::SelectDecision(index) => {
                 godot_print!("Decision selected: {}", index);
                 game.send_sim_command(SimCommand::ApplyManagementDecision(index));
+
+                ctx.gui.hide::<ManageDecisionGui>();
             }
             GameRequest::ConfirmIncident => {
                 ctx.gui.hide::<ManageIncidentGui>();
@@ -186,9 +188,12 @@ impl GameScene {
     /// Handle UI commands emitted by game logic.
     fn handle_ui_command(ctx: &mut SceneContext, cmd: UiCommand, game: &mut Game) {
         match cmd {
-            UiCommand::FinishDay => {
+            UiCommand::FinishRun => {
                 ctx.gui.hide::<GamingLayout>();
                 ctx.gui.show::<SettlementGui>();
+            }
+            UiCommand::FinishDay => {
+                ctx.schedule(AdvanceLevelProcedure);
             }
 
             UiCommand::UpdateTpsDisplay(tps) => {

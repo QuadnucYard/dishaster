@@ -72,7 +72,9 @@ impl UiRequest for GameRequest {}
 /// Game logic (`dishaster-godot-game`) returns these commands instead of
 /// directly mutating UI components.
 pub enum UiCommand {
-    /// Signal that the current day has finished and UI should transition.
+    /// Signal that the current run has finished and UI should transition.
+    FinishRun,
+    /// Signal that the current day has finished and should advance to next day.
     FinishDay,
 
     /// Update the displayed TPS value in the time stats UI.

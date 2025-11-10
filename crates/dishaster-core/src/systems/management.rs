@@ -61,7 +61,7 @@ pub fn apply_management_decision(
     mut commands: Commands,
     mut table_query: Query<(Entity, &mut DiningTable, &mut Transform)>,
     registry: Res<GameModelRegistryRes>,
-    canteen: Res<ResWrapper<Canteen>>,
+    canteen: Res<Canteen>,
     display_root: Res<DisplayRoot>,
     decisions: Res<ManagementDecisions>,
     mut rng: ResMut<WorldRng>,
@@ -120,6 +120,9 @@ pub fn apply_management_decision(
 
     // Remove decisions after applying
     commands.remove_resource::<ManagementDecisions>();
+
+    // Advance to next day
+    commands.trigger(AdvanceDay);
 }
 
 fn random_table_position(canteen: &CanteenModel, rng: &mut Prng) -> Vec2 {

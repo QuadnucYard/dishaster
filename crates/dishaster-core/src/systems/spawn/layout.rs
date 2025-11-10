@@ -320,6 +320,7 @@ fn spawn_dispenser(
 
     let entity_cmd = commands.spawn((
         Dispenser {
+            model_id: placement.model.clone(),
             model: dispenser_handle,
             center_pos: placement.center_pos,
             reception_area: Rect::from_center_size(
@@ -369,6 +370,7 @@ fn spawn_collectors(
         let model = registry.collectors.get(collector_handle);
         commands.spawn((
             DishCollector {
+                model_id: placement.model.clone(),
                 model: collector_handle,
                 center_pos: placement.center_pos,
                 reception_area: Rect::from_center_size(

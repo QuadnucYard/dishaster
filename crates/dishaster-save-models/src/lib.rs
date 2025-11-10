@@ -22,6 +22,12 @@ mod prelude {
 /// Persistent simulation profile data to be saved between runs
 #[derive(Debug, Default)]
 pub struct SimProfile {
+    /// Day index (1-based). Increment on new day/run.
+    pub current_day: u32,
+
+    /// Seed for current run's RNG
+    pub rng_seed: u64,
+
     /// Player-configured window setups
     pub window_configurations: Vec<WindowConfiguration>,
 

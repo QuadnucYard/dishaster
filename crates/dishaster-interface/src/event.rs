@@ -7,8 +7,14 @@ use dishaster_views::{
 use dishrupt_core::{EntityId, prelude::EcoString};
 
 /// Presentation events emitted by the core simulation for client display.
+#[derive(Debug)]
 pub enum SimEvent {
-    /// The current day has completed (all diners have exited and time limit reached).
+    /// Request to persist player progress.
+    Persist,
+
+    /// The current run has completed (all diners have exited and time limit reached).
+    RunCompleted,
+    /// The current day has completed (decision made).
     DayCompleted,
 
     /// A dispenser has spawned.
@@ -63,6 +69,7 @@ pub enum SimEvent {
 }
 
 /// Types of changes to a diner's held items.
+#[derive(Debug)]
 pub enum DinerItemsChange {
     /// Diner picked up a tray.
     PickTray(EntityId),

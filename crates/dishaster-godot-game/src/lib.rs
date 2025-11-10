@@ -250,26 +250,8 @@ impl Game {
 
     pub fn force_finish_day(&mut self) {
         if self.phase == DayPhase::Running {
-            self.finish_day(true);
-        }
-    }
-
-    pub fn finish_day(&mut self, forced: bool) {
-        if self.phase != DayPhase::Running {
-            return;
-        }
-        self.phase = DayPhase::Settlement;
-
-        if forced {
             self.send_sim_command(SimCommand::EndRun);
         }
-
-        let profile = self.sim_runner.persist();
-        progress_service()
-            .complete_day(profile)
-            .expect("failed to complete day");
-
-        self.ui_commands.push(UiCommand::FinishDay);
     }
 
     fn update_hud(&mut self) {

@@ -237,30 +237,15 @@ impl ISimulation<CoreSimulationFeat> for Simulation {
     }
 
     fn persist(&mut self) -> SimProfile {
-        let level = self.world.resource::<ResWrapper<LevelSetupState>>();
-        // currently, we have not modified anything else in the profile except diner pool
-
-        SimProfile {
-            window_configurations: level.canteen.window_configurations.clone(),
-            placement: level.canteen.placement.clone(),
-            diner_profiles: self.get_updated_diner_pool(),
-        }
+        let mut persist_system = IntoSystem::into_system(systems::persist_system);
+        persist_system.initialize(&mut self.world);
+        persist_system
+            .run((), &mut self.world)
+            .expect("failed to persist simulation")
     }
 }
 
 impl Simulation {
-    /// Get the updated persistent diner pool after day ends
-    ///
-    /// This should be called at the end of the day to retrieve the pool
-    /// with all updates (new diners + memory updates).
-    /// The pool is then persisted by the godot-game layer.
-    pub fn get_updated_diner_pool(&self) -> Vec<DinerProfile> {
-        self.world
-            .get_resource::<ResWrapper<DinerPool>>()
-            .map(|pool| pool.profiles.clone())
-            .unwrap_or_default()
-    }
-
     /// Check if the current day is complete (spawning finished and all diners left)
     pub fn is_day_complete(&self) -> bool {
         let (day_status, schedule) = (

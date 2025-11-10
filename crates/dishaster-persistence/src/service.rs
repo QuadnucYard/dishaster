@@ -58,7 +58,6 @@ impl<Store: PersistentStorage> PersistenceService<Store> {
 pub struct PlayerService<Store: PersistentStorage> {
     inner: PersistenceService<Store>,
 
-    registry: Arc<GameModelRegistry>,
     profile: PlayerProfile,
 }
 
@@ -84,7 +83,6 @@ impl<Store: PersistentStorage> PlayerService<Store> {
         let progress = inner.load_progress(default_level)?;
         Ok(Self {
             inner,
-            registry,
             profile: progress,
         })
     }
@@ -96,36 +94,22 @@ impl<Store: PersistentStorage> PlayerService<Store> {
 
     /// Produce a level configuration for the player's current day.
     pub fn level_for_current_day(&self) -> Result<LevelSetupState> {
-        let level_id = self.profile.progress.level_id.clone();
-        let level = self.registry.levels.get_by_id(&level_id).with_context(|| {
-            format!("default level {level_id:?} missing from registry at runtime")
-        })?;
         let level = LevelSetupState {
-            level_id,
-            canteen: CanteenLayoutState {
-                window_configurations: level.window_configurations.clone(),
-                placement: CanteenPlacements {
-                    tables: level.table_placements.clone(),
-                    tray_dispensers: level.tray_dispenser_placements.clone(),
-                    chopstick_dispensers: level.chopstick_dispenser_placements.clone(),
-                    collectors: level.collector_placements.clone(),
-                },
-            },
+            level_id: self.profile.progress.level_id.clone(),
+            canteen: self.profile.layout.clone(),
             day: self.profile.progress.current_day,
-            seed: seed_for_day(
-                self.profile.progress.rng_seed,
-                self.profile.progress.current_day,
-            ),
+            seed: self.profile.progress.rng_seed,
             diner_pool: self.profile.diner_pool.profiles.clone(),
         };
         Ok(level)
     }
 
-    /// Persist the outcome of the day.
-    pub fn complete_day(&mut self, profile: SimProfile) -> Result<()> {
+    /// Save simulation profile data after completing a day.
+    pub fn save_profile(&mut self, profile: SimProfile) -> Result<()> {
         self.profile.meta.updated_at_utc = now_unix();
-        self.profile.progress.current_day = self.profile.progress.current_day.saturating_add(1);
-        self.profile.progress.rng_seed = advance_seed(self.profile.progress.rng_seed);
+
+        self.profile.progress.current_day = profile.current_day;
+        self.profile.progress.rng_seed = profile.rng_seed;
 
         self.profile.layout.window_configurations = profile.window_configurations;
         self.profile.layout.placement = profile.placement;
@@ -159,13 +143,21 @@ fn new_profile(default_level: &LevelConfig) -> PlayerProfile {
         },
         progress: PlayerProgress {
             level_id: default_level.id.clone(),
-            current_day: 1,
+            current_day: default_level.day,
             reputation: 50.0,
             rng_seed: default_level.seed,
             seen_hints: Default::default(),
         },
         aggregates: Default::default(),
-        layout: Default::default(),
+        layout: CanteenLayoutState {
+            window_configurations: default_level.window_configurations.clone(),
+            placement: CanteenPlacements {
+                tables: default_level.table_placements.clone(),
+                tray_dispensers: default_level.tray_dispenser_placements.clone(),
+                chopstick_dispensers: default_level.chopstick_dispenser_placements.clone(),
+                collectors: default_level.collector_placements.clone(),
+            },
+        },
         diner_pool: Default::default(),
     }
 }
@@ -175,14 +167,4 @@ pub(crate) fn now_unix() -> u64 {
         .duration_since(UNIX_EPOCH)
         .expect("system time before UNIX EPOCH")
         .as_secs()
-}
-
-fn seed_for_day(base_seed: u64, day: u32) -> u64 {
-    let day_mix = (day as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15);
-    base_seed ^ day_mix.rotate_left(13)
-}
-
-fn advance_seed(seed: u64) -> u64 {
-    seed.wrapping_mul(6_364_136_223_846_793_005)
-        .wrapping_add(1_442_695_040_888_963_407)
 }
