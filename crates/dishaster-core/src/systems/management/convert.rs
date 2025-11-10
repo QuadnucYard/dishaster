@@ -25,25 +25,43 @@ impl TemplateRealize for ManagementDecisionTemplateDef {
     type Model = ManagementDecisionModel;
 
     fn realize(&self, ctx: RealizationContext) -> Self::Model {
-        use ManagementDecisionTemplateDef::*;
-        type M = ManagementDecisionModel;
-
-        match self {
-            AddTables(def) => M::AddTables(def.realize(ctx)),
-            RemoveTables(def) => M::RemoveTables(def.realize(ctx)),
-            DisarrangeTables(def) => M::DisarrangeTables(def.realize(ctx)),
+        macro_rules! dispatch {
+            ($($variant:ident),* $(,)?) => {
+            match self {
+                    $( ManagementDecisionTemplateDef::$variant(def) => ManagementDecisionModel::$variant(def.realize(ctx)), )*
+                }
+            };
         }
+
+        dispatch!(
+            AddTables,
+            RemoveTables,
+            DisarrangeTables,
+            OpenWindow,
+            CloseWindow,
+            ChangeWindowService,
+        )
     }
 }
 
 impl ViewParams for ManagementDecisionModel {
     fn params(&self) -> ParamsMap {
-        use ManagementDecisionModel::*;
-        match self {
-            AddTables(model) => model.params(),
-            RemoveTables(model) => model.params(),
-            DisarrangeTables(model) => model.params(),
+        macro_rules! dispatch {
+            ($($variant:ident),* $(,)?) => {
+                match self {
+                    $( ManagementDecisionModel::$variant(model) => model.params(), )*
+                }
+            };
         }
+
+        dispatch!(
+            AddTables,
+            RemoveTables,
+            DisarrangeTables,
+            OpenWindow,
+            CloseWindow,
+            ChangeWindowService,
+        )
     }
 }
 
@@ -95,6 +113,48 @@ impl ViewParams for DisarrangeTablesModel {
         params! {
             num_tables => self.num_tables,
         }
+    }
+}
+
+impl TemplateRealize for OpenWindowTemplate {
+    type Model = OpenWindowModel;
+
+    fn realize(&self, _ctx: RealizationContext) -> Self::Model {
+        Self::Model {}
+    }
+}
+
+impl ViewParams for OpenWindowModel {
+    fn params(&self) -> ParamsMap {
+        params! {}
+    }
+}
+
+impl TemplateRealize for CloseWindowTemplate {
+    type Model = CloseWindowModel;
+
+    fn realize(&self, _ctx: RealizationContext) -> Self::Model {
+        Self::Model {}
+    }
+}
+
+impl ViewParams for CloseWindowModel {
+    fn params(&self) -> ParamsMap {
+        params! {}
+    }
+}
+
+impl TemplateRealize for ChangeWindowServiceTemplate {
+    type Model = ChangeWindowServiceModel;
+
+    fn realize(&self, _ctx: RealizationContext) -> Self::Model {
+        Self::Model {}
+    }
+}
+
+impl ViewParams for ChangeWindowServiceModel {
+    fn params(&self) -> ParamsMap {
+        params! {}
     }
 }
 

@@ -53,6 +53,16 @@ pub trait IntoResource {
 
 impl<T> IntoResource for T {}
 
+/// Turn a type into a Bevy event
+#[derive(Event, Default, Deref, DerefMut)]
+pub struct EventWrapper<T>(T);
+
+impl<T> From<T> for EventWrapper<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
+
 // === Entity ↔ EntityId conversions ===
 
 /// Extension trait to convert ECS Entity to EntityId

@@ -61,13 +61,13 @@ fn spawn_windows(
             .window_services
             .get_handle_by_id(&window_config.service_template)
             .expect("Window service not found in registry");
-        let service_template = registry.window_services.get(service_handle);
+        let service_model = registry.window_services.get(service_handle);
 
         // Spawn window entity with separated data
         let window_range = canteen.model.windows[window_config.slot_index];
         let window_location = XSegment::new(
-            window_range.center() - service_template.layout.size.width / 2.0,
-            window_range.center() + service_template.layout.size.width / 2.0,
+            window_range.center() - service_model.layout.size.width / 2.0,
+            window_range.center() + service_model.layout.size.width / 2.0,
             canteen.model.windows_y,
         );
         let window_entity = commands
@@ -79,7 +79,7 @@ fn spawn_windows(
                     enabled: window_config.is_enabled,
                 },
                 DisplayState {
-                    proto: service_template.display.res.clone(),
+                    proto: service_model.display.res.clone(),
                     name: Some(eco_format!("Window_{}", i)),
                 },
                 Transform {
@@ -94,7 +94,7 @@ fn spawn_windows(
             commands,
             window_entity,
             &window_config.dish_assignments,
-            service_template,
+            service_model,
             registry,
             events,
         );
@@ -138,14 +138,11 @@ fn spawn_dishes(
     commands: &mut Commands,
     window_entity: Entity,
     dish_assignments: &[DishAssignment],
-    service_template: &WindowServiceModel,
+    service_model: &WindowServiceModel,
     registry: &GameModelRegistry,
     events: &mut ResMut<EventQueue>,
 ) {
-    let layout = &service_template.layout;
-    if layout.dish_slots.is_empty() {
-        return;
-    }
+    let layout = &service_model.layout;
 
     for assignment in dish_assignments {
         let slot_index = assignment.slot_index;

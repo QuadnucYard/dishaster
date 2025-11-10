@@ -73,4 +73,7 @@ define_sum_model!(ManagementDecision {
     AddTables,
     RemoveTables,
     DisarrangeTables,
+    OpenWindow,
+    CloseWindow,
+    ChangeWindowService,
 });

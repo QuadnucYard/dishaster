@@ -23,3 +23,7 @@ pub struct ApplyManagementDecision(pub usize);
 /// Event to roll a management incident
 #[derive(Event)]
 pub struct RollManagementIncident;
+
+/// Event to dispatch a selected management decision
+#[derive(Event)]
+pub struct DispatchManagement<T>(pub T);

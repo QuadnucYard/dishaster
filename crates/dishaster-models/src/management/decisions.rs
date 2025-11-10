@@ -46,3 +46,30 @@ pub struct DisarrangeTablesModel {
     /// Number of tables to add
     pub num_tables: usize,
 }
+
+/// Template for opening a window decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "OpenWindow")]
+pub struct OpenWindowTemplate {}
+
+/// Model for opening a window decision
+#[derive(Debug, Clone)]
+pub struct OpenWindowModel {}
+
+/// Template for closing a window decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "CloseWindow")]
+pub struct CloseWindowTemplate {}
+
+/// Model for closing a window decision
+#[derive(Debug, Clone)]
+pub struct CloseWindowModel {}
+
+/// Template for changing window service decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "ChangeWindowService")]
+pub struct ChangeWindowServiceTemplate {}
+
+/// Model for changing window service decision
+#[derive(Debug, Clone)]
+pub struct ChangeWindowServiceModel {}
