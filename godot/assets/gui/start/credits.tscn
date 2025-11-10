@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://c8v6h3j2nqp7k"]
 
 [ext_resource type="Texture2D" uid="uid://gjny846uvcw0" path="res://assets/gui/textures/credits_bg.png" id="1_b2fyw"]
-[ext_resource type="FontVariation" uid="uid://cmd1qg2dgopfb" path="res://assets/fonts/serif_extrabold.tres" id="2_fxuuo"]
-[ext_resource type="FontVariation" uid="uid://g6u3rcecjh2g" path="res://assets/fonts/serif_medium.tres" id="3_w423o"]
+[ext_resource type="FontVariation" uid="uid://c2qn650okphc0" path="res://assets/fonts/sans_extrabold.tres" id="2_w423o"]
+[ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="3_b2fyw"]
 [ext_resource type="Theme" uid="uid://c6spuadyswnvj" path="res://assets/themes/rect_button.tres" id="4_jhegu"]
 
 [node name="Credits" type="Control"]
@@ -41,7 +41,7 @@ theme_override_constants/separation = 20
 [node name="Header" type="Label" parent="MarginContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.28449765, 0.16559735, 0.07361158, 1)
-theme_override_fonts/font = ExtResource("2_fxuuo")
+theme_override_fonts/font = ExtResource("2_w423o")
 theme_override_font_sizes/font_size = 48
 text = "Credits"
 horizontal_alignment = 1
@@ -59,8 +59,8 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.24593258, 0.16192493, 0.05683948, 1)
 theme_override_constants/paragraph_separation = 16
-theme_override_fonts/normal_font = ExtResource("3_w423o")
-theme_override_fonts/bold_font = ExtResource("2_fxuuo")
+theme_override_fonts/normal_font = ExtResource("3_b2fyw")
+theme_override_fonts/bold_font = ExtResource("2_w423o")
 theme_override_font_sizes/normal_font_size = 24
 theme_override_font_sizes/bold_font_size = 28
 bbcode_enabled = true
