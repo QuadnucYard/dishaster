@@ -9,6 +9,7 @@ edition.workspace = true
 test = false
 
 [dependencies]
+dishrupt-core.workspace = true
 dishrupt-godot.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true

@@ -473,6 +473,7 @@ dependencies = [
  "dishaster-godot-ui",
  "dishaster-persistence",
  "dishaster-ui-protocol",
+ "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-godot-scene",
  "dishrupt-godot-ui",

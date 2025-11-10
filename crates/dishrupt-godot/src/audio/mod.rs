@@ -1,6 +1,6 @@
 use std::{cell::OnceCell, collections::HashMap};
 
-use dishrupt_core::asset::SoundReference;
+use dishrupt_core::asset::AudioRef;
 use godot::{
     classes::{AudioStream, AudioStreamPlayer},
     prelude::*,
@@ -11,7 +11,7 @@ use crate::display::assets;
 pub struct AudioManager {
     audio_root: Gd<Node>,
 
-    sound_players: HashMap<SoundReference, Gd<AudioStreamPlayer>>,
+    sound_players: HashMap<AudioRef, Gd<AudioStreamPlayer>>,
     music_player: OnceCell<Gd<AudioStreamPlayer>>,
 
     music_volume: f32,
@@ -50,7 +50,7 @@ impl AudioManager {
         self.music_volume = volume;
     }
 
-    pub fn play_sound(&mut self, sound: &SoundReference) {
+    pub fn play_sound(&mut self, sound: &AudioRef) {
         let sound_player = self.sound_players.entry(sound.clone()).or_insert_with(|| {
             let stream = load_sound(sound);
             let mut player = AudioStreamPlayer::new_alloc();
@@ -65,7 +65,7 @@ impl AudioManager {
         sound_player.play();
     }
 
-    pub fn play_music(&mut self, music: &SoundReference) {
+    pub fn play_music(&mut self, music: &AudioRef) {
         let player = self.music_player.get_mut_or_init(|| {
             let mut player = AudioStreamPlayer::new_alloc();
             player.set_bus(Self::MUSIC_BUS);
@@ -91,10 +91,10 @@ impl AudioManager {
     }
 }
 
-fn load_sound(sound: &SoundReference) -> Gd<AudioStream> {
+fn load_sound(sound: &AudioRef) -> Gd<AudioStream> {
     load(&format!("{}{}", assets::SOUNDS, sound.path()))
 }
 
-fn load_music(sound: &SoundReference) -> Gd<AudioStream> {
+fn load_music(sound: &AudioRef) -> Gd<AudioStream> {
     load(&format!("{}{}", assets::MUSICS, sound.path()))
 }

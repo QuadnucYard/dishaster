@@ -59,9 +59,9 @@ impl fmt::Display for SpriteReference {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Deserialize)]
-pub struct SoundReference(EcoString);
+pub struct AudioRef(EcoString);
 
-impl SoundReference {
+impl AudioRef {
     pub fn new(path: impl Into<EcoString>) -> Self {
         Self(path.into())
     }
@@ -71,7 +71,7 @@ impl SoundReference {
     }
 }
 
-impl fmt::Display for SoundReference {
+impl fmt::Display for AudioRef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
     }

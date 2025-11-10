@@ -1,14 +1,17 @@
-use std::any::Any;
+use std::{any::Any, sync::LazyLock};
 
 use dishaster_core::views::{CreditSectionView, CreditsView};
 use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
+use dishrupt_core::asset::AudioRef;
 use dishrupt_godot::bind::BindGodot;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use godot::{classes::Node, global::godot_print, obj::Gd};
 
 use crate::{game_main::CREDITS, scenes::proc::EnterLevelProcedure};
+
+static MAIN_THEME_MUSIC: LazyLock<AudioRef> = LazyLock::new(|| AudioRef::new("main_theme.ogg"));
 
 /// The root scene. Handles interaction outside levels.
 pub struct StartScene {
@@ -43,6 +46,8 @@ impl Scene for StartScene {
             let opening = Opening::new(self.gd.clone());
             self.opening = Some(opening);
         }
+
+        ctx.audio.play_music(&MAIN_THEME_MUSIC);
     }
 
     fn process(&mut self, ctx: &mut SceneContext, delta: f64) {
