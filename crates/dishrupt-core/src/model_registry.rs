@@ -141,6 +141,15 @@ impl<T> ModelRegistry<T> {
     }
 }
 
+impl<T> ModelRegistry<T>
+where
+    T: HasId,
+{
+    pub fn get_id(&self, handle: ModelHandle<T>) -> &ModelId {
+        self.models[handle.0].id()
+    }
+}
+
 impl<T> Default for ModelRegistry<T> {
     fn default() -> Self {
         Self {

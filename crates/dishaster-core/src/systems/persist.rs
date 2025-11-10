@@ -1,13 +1,31 @@
 use crate::systems::prelude::*;
 
 pub fn persist_system(
+    window_query: Query<(&Window, &WindowDishes)>,
     table_query: Query<&DiningTable>,
     dispenser_query: Query<&Dispenser>,
     collector_query: Query<&DishCollector>,
-    level: Res<ResWrapper<LevelSetupState>>,
     day_status: Res<DayStatus>,
     diner_pool: Res<ResWrapper<DinerPool>>,
+    registry: Res<GameModelRegistryRes>,
 ) -> SimProfile {
+    let window_configurations = window_query
+        .iter()
+        .map(|(window, dishes)| WindowConfiguration {
+            slot_index: window.slot_index,
+            service_template: registry
+                .window_services
+                .get_id(window.service_template)
+                .clone(),
+            is_enabled: window.enabled,
+            dish_assignments: dishes
+                .dishes
+                .iter()
+                .map(|dish| dish.assignment.clone())
+                .collect(),
+        })
+        .collect();
+
     let placement = CanteenPlacements {
         tables: table_query
             .iter()
@@ -21,7 +39,7 @@ pub fn persist_system(
             .filter(|it| it.dispenser_type == DispenserType::Tray)
             .map(|disp| Placement {
                 center_pos: disp.center_pos,
-                model: disp.model_id.clone(),
+                model: registry.dispensers.get_id(disp.model).clone(),
             })
             .collect(),
         chopstick_dispensers: dispenser_query
@@ -29,14 +47,14 @@ pub fn persist_system(
             .filter(|it| it.dispenser_type == DispenserType::Chopstick)
             .map(|disp| Placement {
                 center_pos: disp.center_pos,
-                model: disp.model_id.clone(),
+                model: registry.dispensers.get_id(disp.model).clone(),
             })
             .collect(),
         collectors: collector_query
             .iter()
             .map(|collector| Placement {
                 center_pos: collector.center_pos,
-                model: collector.model_id.clone(),
+                model: registry.collectors.get_id(collector.model).clone(),
             })
             .collect(),
     };
@@ -46,7 +64,7 @@ pub fn persist_system(
     SimProfile {
         current_day: day_status.current_day,
         rng_seed: day_status.seed,
-        window_configurations: level.canteen.window_configurations.clone(),
+        window_configurations,
         placement,
         diner_profiles,
     }
