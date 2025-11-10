@@ -43,16 +43,23 @@ pub struct Canteen {
 /// with spawning systems to determine overall day completion.
 #[derive(Resource, Default)]
 pub struct DayStatus {
-    /// Number of diners currently active in the canteen
-    pub live_diner_count: usize,
-    /// Total number of diner visits since the start of the day
-    pub total_visits: usize,
+    /// Seed for the day's RNG
+    pub seed: Seed,
+    /// Current day index
+    pub current_day: Day,
+    /// Starting day index
+    pub start_day: Day,
+
     /// Whether the spawning period has begun for the current day
     pub started: bool,
     /// Whether the current day has reached completion criteria
     pub completed: bool,
     /// Whether the day completion event has been emitted
     pub completion_emitted: bool,
+    /// Number of diners currently active in the canteen
+    pub live_diner_count: usize,
+    /// Total number of diner visits since the start of the day
+    pub total_visits: usize,
 }
 
 /// Resource wrapper for Arc<GameModelRegistry>

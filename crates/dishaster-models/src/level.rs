@@ -1,4 +1,4 @@
-use dishaster_save_models::{Placement, WindowConfiguration};
+use dishaster_save_models::{Day, Placement, Seed, WindowConfiguration};
 
 use super::prelude::*;
 use crate::{DinerPoolConfig, DinerRandomizerModel};
@@ -8,13 +8,13 @@ use crate::{DinerPoolConfig, DinerRandomizerModel};
 pub struct LevelConfig {
     /// Unique identifier for this level
     pub id: ModelId,
-    /// Which day/level this represents
+    /// Starting day index
     #[serde(default)]
-    pub day: u32,
+    pub start_day: Day,
     /// Total duration of the simulation run
     pub run_length: Seconds,
     /// Random seed for reproducible gameplay
-    pub seed: u64,
+    pub seed: Seed,
     /// Diner generation parameters
     pub diner_randomizer: DinerRandomizerModel,
 

@@ -5,6 +5,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use dishaster_core::{
     interface::{SimCommand, SimEvent},
+    models::Day,
     sim::{ISimulation, Simulation},
 };
 use dishaster_data::DataLoader;
@@ -83,7 +84,9 @@ fn main() -> Result<()> {
 
     let persisted = sim.persist();
     println!("Persisted profile");
-    assert_eq!(persisted.current_day, start_day + 1); // Day should have advanced
+    assert_eq!(persisted.current_day, Day(start_day.0 + 1)); // Day should have advanced
+
+    println!("Test completed successfully.");
 
     Ok(())
 }

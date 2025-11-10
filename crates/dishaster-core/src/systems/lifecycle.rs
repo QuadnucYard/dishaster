@@ -1,5 +1,5 @@
 use dishaster_interface::SimEvent;
-use dishaster_models::LevelSetupState;
+use dishaster_models::Seed;
 
 use crate::{components::Diner, events::*, prelude::*, resources::*, systems};
 
@@ -14,6 +14,10 @@ pub fn register_lifecycle_systems(world: &mut World) {
 
 fn on_run_started(_event: On<RunStarted>, mut day_status: ResMut<DayStatus>) {
     day_status.started = true;
+
+    if day_status.current_day != day_status.start_day {
+        // emit incident for new day
+    }
 }
 
 fn on_run_ended(
@@ -40,19 +44,22 @@ fn on_run_ended(
 
 fn on_advance_day(
     _event: On<AdvanceDay>,
-    mut level: ResMut<ResWrapper<LevelSetupState>>,
+    mut day_status: ResMut<DayStatus>,
     mut events: ResMut<EventQueue>,
 ) {
-    // Update level state for next day. This will be used when persisting progress.
-    level.day += 1;
-    level.seed = advance_seed(level.seed);
+    // Update day status for next day. This will be used when persisting progress.
+    day_status.current_day.0 += 1;
+    day_status.seed = advance_seed(day_status.seed);
     events.push(SimEvent::Persist);
 
     // Emit day completed event to advance to next day.
     events.push(SimEvent::DayCompleted);
 }
 
-fn advance_seed(seed: u64) -> u64 {
-    seed.wrapping_mul(6_364_136_223_846_793_005)
-        .wrapping_add(1_442_695_040_888_963_407)
+fn advance_seed(seed: Seed) -> Seed {
+    Seed::new(
+        seed.get()
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407),
+    )
 }

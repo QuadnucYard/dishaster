@@ -4,6 +4,7 @@ pub fn set_daily_schedule(
     mut commands: Commands,
     registry: Res<GameModelRegistryRes>,
     level: Res<ResWrapper<LevelSetupState>>,
+    day_status: Res<DayStatus>,
     mut pool: ResMut<ResWrapper<DinerPool>>,
     mut rng: ResMut<WorldRng>,
 ) {
@@ -11,7 +12,8 @@ pub fn set_daily_schedule(
         .levels
         .get_by_id(&level.level_id)
         .expect("LevelConfig not found in registry");
-    let schedule = generate_daily_schedule(level_config, &level, &mut pool, &mut rng.derive_prng());
+    let schedule =
+        generate_daily_schedule(level_config, &day_status, &mut pool, &mut rng.derive_prng());
     commands.insert_resource(schedule);
 }
 
@@ -24,14 +26,14 @@ pub fn set_daily_schedule(
 /// - Assign arrival times from preferred ranges
 fn generate_daily_schedule(
     level_config: &LevelConfig,
-    level_setup: &LevelSetupState,
+    day_status: &DayStatus,
     pool: &mut DinerPool,
     rng: &mut impl Rng,
 ) -> DailyDinerSchedule {
     let mut scheduled = Vec::new();
 
     // Current "day" approximation (use level.day if available)
-    let current_day = level_setup.day;
+    let current_day = day_status.current_day;
 
     // Decide which existing diners visit today
     for profile in &mut pool.profiles {
@@ -77,8 +79,8 @@ fn generate_daily_schedule(
     DailyDinerSchedule::new(scheduled)
 }
 
-fn apply_memory_decay(profile: &mut DinerProfile, config: &DinerPoolConfig, current_day: u32) {
-    let days_since_visit = current_day.saturating_sub(profile.last_visit_day);
+fn apply_memory_decay(profile: &mut DinerProfile, config: &DinerPoolConfig, current_day: Day) {
+    let days_since_visit = current_day.0.saturating_sub(profile.last_visit_day.0);
     if days_since_visit == 0 {
         return;
     }

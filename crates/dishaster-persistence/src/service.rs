@@ -143,7 +143,7 @@ fn new_profile(default_level: &LevelConfig) -> PlayerProfile {
         },
         progress: PlayerProgress {
             level_id: default_level.id.clone(),
-            current_day: default_level.day,
+            current_day: default_level.start_day,
             reputation: 50.0,
             rng_seed: default_level.seed,
             seen_hints: Default::default(),

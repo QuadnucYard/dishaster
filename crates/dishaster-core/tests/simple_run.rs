@@ -28,7 +28,7 @@ fn create_test_registry() -> GameModelRegistry {
     let level_config = LevelConfig {
         id: ModelId::new("test_level"),
         canteen: ModelId::new("test_canteen"),
-        day: 1,
+        start_day: Day(0),
         run_length: 600.0,
         diner_randomizer: DinerRandomizerModel {
             personality: PersonalityRanges {
@@ -45,7 +45,7 @@ fn create_test_registry() -> GameModelRegistry {
             },
             appearance: Default::default(),
         },
-        seed: 12345,
+        seed: Default::default(),
         diner_pool: Default::default(),
         window_configurations: vec![],
         table_placements: vec![],
@@ -64,8 +64,8 @@ fn create_test_registry() -> GameModelRegistry {
 fn create_test_level() -> LevelSetupState {
     LevelSetupState {
         level_id: ModelId::new("test_level"),
-        day: 0,
-        seed: 0,
+        day: Default::default(),
+        seed: Default::default(),
         canteen: Default::default(),
         diner_pool: Default::default(),
     }

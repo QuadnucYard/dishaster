@@ -3,7 +3,7 @@
 //! These types are shared between simulation (core) and persistence layers
 //! to coordinate diner scheduling and memory tracking across days.
 
-use crate::{Appearance, prelude::*};
+use crate::{Appearance, Day, prelude::*};
 
 /// Persistent pool of all diner profiles across days
 ///
@@ -23,8 +23,8 @@ pub struct DinerPool {
 pub struct DinerProfile {
     /// Unique identifier for this diner (persisted across days)
     pub id: u32,
-    /// Day of last visit (0-indexed)
-    pub last_visit_day: u32,
+    /// Day of last visit
+    pub last_visit_day: Day,
     /// Total number of visits
     pub total_visits: u32,
     /// Personality traits controlling behavior (may evolve slightly over time)

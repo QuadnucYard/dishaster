@@ -1,4 +1,8 @@
-use crate::{DinerProfile, prelude::*};
+use crate::{DinerProfile, Seed, prelude::*};
+
+/// Day index wrapper
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Day(pub u32);
 
 /// Complete save state for a specific level run
 #[derive(Debug, Serialize, Deserialize)]
@@ -6,11 +10,11 @@ pub struct LevelSetupState {
     /// Identifier for the level being played
     pub level_id: ModelId,
 
-    /// Current day index (1-based)
-    pub day: u32,
+    /// Current day index
+    pub day: Day,
 
     /// Seed for the day's RNG
-    pub seed: u64,
+    pub seed: Seed,
 
     /// Player-customized canteen layout and configurations
     pub canteen: CanteenLayoutState,

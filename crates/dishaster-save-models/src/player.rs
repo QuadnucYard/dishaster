@@ -1,4 +1,4 @@
-use crate::{CanteenLayoutState, DinerPool, prelude::*};
+use crate::{CanteenLayoutState, Day, DinerPool, Seed, prelude::*};
 
 /// Current version of the progress schema stored on disk.
 pub const USER_PROGRESS_VERSION: u32 = 1;
@@ -44,14 +44,14 @@ pub struct PlayerProgress {
     /// The level played.
     pub level_id: ModelId,
 
-    /// Day index (1-based). Increment on new day/run.
-    pub current_day: u32,
+    /// Day index.
+    pub current_day: Day,
 
     /// Reputation score used for balancing future systems.
     pub reputation: f32,
 
     /// Base seed for deterministic day generation.
-    pub rng_seed: u64,
+    pub rng_seed: Seed,
 
     /// Set of hint IDs that have been shown to the player (persisted).
     #[serde(default)]

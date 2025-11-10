@@ -13,7 +13,7 @@ pub fn roll_management_decisions(
     _event: On<RollManagementDecisions>,
     mut commands: Commands,
     registry: Res<GameModelRegistryRes>,
-    level: Res<ResWrapper<LevelSetupState>>,
+    day_status: Res<DayStatus>,
     mut rng: ResMut<WorldRng>,
     mut events: ResMut<EventQueue>,
 ) {
@@ -37,7 +37,7 @@ pub fn roll_management_decisions(
 
     events.push(SimEvent::ShowManagementDecisions(
         ManagementDecisionsView {
-            day: level.day,
+            day: day_status.current_day.0,
             options: decisions
                 .iter()
                 .map(|(id, model)| ManagementDecisionView {

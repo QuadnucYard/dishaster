@@ -54,7 +54,7 @@ fn create_fresh_diner(
         dining_profile: random_dining_profile(&randomizer.dining, rng),
         long_term_memory: random_ltm(rng),
         appearance: random_appearance(&randomizer.appearance, rng),
-        last_visit_day: 0, // Never visited yet
+        last_visit_day: Day(0), // Never visited yet
         total_visits: 0,
     }
 }

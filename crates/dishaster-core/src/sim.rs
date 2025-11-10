@@ -101,7 +101,7 @@ impl Simulation {
 
         self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
 
-        let mut world_rng = WorldRng::new(level.seed);
+        let mut world_rng = WorldRng::new(level.seed.get());
 
         let db = Arc::clone(self.world.resource::<GameModelRegistryRes>());
         let level_config = db
@@ -125,7 +125,12 @@ impl Simulation {
         self.world.insert_resource(ResponseQueue::default());
 
         self.world.insert_resource(ServingCommsQueue::default());
-        self.world.insert_resource(DayStatus::default());
+        self.world.insert_resource(DayStatus {
+            seed: level.seed,
+            current_day: level.day,
+            start_day: level_config.start_day,
+            ..Default::default()
+        });
         self.world
             .insert_resource(TrialSession::new(world_rng.derive_seed()));
         self.world.insert_resource(level.into_res());

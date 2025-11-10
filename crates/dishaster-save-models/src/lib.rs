@@ -19,14 +19,30 @@ mod prelude {
     pub use serde::{Deserialize, Serialize};
 }
 
+/// Seed wrapper for RNG seeds
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct Seed(u64);
+
+impl Seed {
+    /// Create a new Seed from a u64 value
+    pub fn new(seed: u64) -> Self {
+        Self(seed)
+    }
+
+    /// Get the underlying seed value
+    pub fn get(&self) -> u64 {
+        self.0
+    }
+}
+
 /// Persistent simulation profile data to be saved between runs
 #[derive(Debug, Default)]
 pub struct SimProfile {
     /// Day index (1-based). Increment on new day/run.
-    pub current_day: u32,
+    pub current_day: Day,
 
     /// Seed for current run's RNG
-    pub rng_seed: u64,
+    pub rng_seed: Seed,
 
     /// Player-configured window setups
     pub window_configurations: Vec<WindowConfiguration>,

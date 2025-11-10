@@ -5,6 +5,7 @@ pub fn persist_system(
     dispenser_query: Query<&Dispenser>,
     collector_query: Query<&DishCollector>,
     level: Res<ResWrapper<LevelSetupState>>,
+    day_status: Res<DayStatus>,
     diner_pool: Res<ResWrapper<DinerPool>>,
 ) -> SimProfile {
     let placement = CanteenPlacements {
@@ -43,8 +44,8 @@ pub fn persist_system(
     let diner_profiles = diner_pool.profiles.clone();
 
     SimProfile {
-        current_day: level.day,
-        rng_seed: level.seed,
+        current_day: day_status.current_day,
+        rng_seed: day_status.seed,
         window_configurations: level.canteen.window_configurations.clone(),
         placement,
         diner_profiles,

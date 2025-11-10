@@ -12,9 +12,9 @@ fn sample_registry() -> GameModelRegistry {
     let mut registry = GameModelRegistry::default();
     let level = LevelConfig {
         id: ModelId::new("level_default"),
-        day: 1,
+        start_day: Day(5),
         run_length: 120.0,
-        seed: 42,
+        seed: Seed::new(42),
         canteen: ModelId::new("canteen_default"),
         diner_randomizer: sample_diner_provider(),
         diner_pool: Default::default(),
@@ -56,6 +56,6 @@ fn new_user_receives_first_day_level() -> Result<()> {
         None,
     )?;
     let level = service.level_for_current_day()?;
-    assert_eq!(level.day, 1);
+    assert_eq!(level.day, Day(5)); // start_day from LevelConfig
     Ok(())
 }

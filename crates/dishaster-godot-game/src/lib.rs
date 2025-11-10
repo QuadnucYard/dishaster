@@ -102,8 +102,8 @@ impl Game {
         let db = GAME_DATA.get().expect("game data not initialized");
 
         let telemetry = DayTelemetry {
-            seed: level.seed,
-            day: level.day,
+            seed: level.seed.get(),
+            day: level.day.0,
             ..Default::default()
         };
 
