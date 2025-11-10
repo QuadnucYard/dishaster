@@ -63,22 +63,6 @@ fn spawn_windows(
             .expect("Window service not found in registry");
         let service_template = registry.window_services.get(service_handle);
 
-        // Create active dishes from configuration
-        let active_dishes: Vec<ActiveDish> = window_config
-            .dish_assignments
-            .iter()
-            .map(|assignment| ActiveDish {
-                assignment: assignment.clone(),
-                state: DishRuntimeState {
-                    current_quantity: DEFAULT_DISH_QUANTITY,
-                    current_quality: DEFAULT_DISH_QUALITY,
-                    contamination_level: DEFAULT_DISH_CONTAMINATION,
-                    last_restocked: DEFAULT_DISH_LAST_RESTOCKED_S,
-                    service_count: 0,
-                },
-            })
-            .collect();
-
         // Spawn window entity with separated data
         let window_range = canteen.model.windows[window_config.slot_index];
         let window_location = XSegment::new(
@@ -106,19 +90,14 @@ fn spawn_windows(
             ))
             .id();
 
-        spawn_dish_presentations(
+        spawn_dishes(
             commands,
             window_entity,
-            &active_dishes,
+            &window_config.dish_assignments,
             service_template,
             registry,
             events,
         );
-
-        // Add dishes as separate component for better data locality
-        commands.entity(window_entity).insert(WindowDishes {
-            dishes: active_dishes,
-        });
 
         // Fill spaces between windows with colliders
         commands.spawn(
@@ -155,37 +134,45 @@ fn spawn_windows(
     );
 }
 
-fn spawn_dish_presentations(
+fn spawn_dishes(
     commands: &mut Commands,
     window_entity: Entity,
-    dishes: &[ActiveDish],
+    dish_assignments: &[DishAssignment],
     service_template: &WindowServiceModel,
     registry: &GameModelRegistry,
     events: &mut ResMut<EventQueue>,
 ) {
-    if dishes.is_empty() {
-        return;
-    }
-
     let layout = &service_template.layout;
     if layout.dish_slots.is_empty() {
         return;
     }
 
-    for active in dishes {
-        let slot_index = active.assignment.slot_index;
+    for assignment in dish_assignments {
+        let slot_index = assignment.slot_index;
         let Some(slot_rect) = layout.dish_slots.get(slot_index) else {
             continue;
         };
 
         let dish_handle = registry
             .dishes
-            .get_handle_by_id(&active.assignment.dish_id)
+            .get_handle_by_id(&assignment.dish_id)
             .expect("Dish not found in registry");
         let dish_model = registry.dishes.get(dish_handle);
 
+        // Wrapper entity to hold dish and label
         let wrapper_entity = commands
             .spawn((
+                Dish {
+                    assignment: assignment.clone(),
+                    state: DishRuntimeState {
+                        current_quantity: DEFAULT_DISH_QUANTITY,
+                        current_quality: DEFAULT_DISH_QUALITY,
+                        contamination_level: DEFAULT_DISH_CONTAMINATION,
+                        // last_restocked: DEFAULT_DISH_LAST_RESTOCKED_S,
+                        // service_count: 0,
+                    },
+                },
+                ServedAtWindow(window_entity),
                 DisplayState {
                     name: Some(eco_format!("WindowDish_Slot{}", slot_index)),
                     ..Default::default()
@@ -199,6 +186,7 @@ fn spawn_dish_presentations(
             ))
             .id();
 
+        // Dish display
         commands.spawn((
             DisplayState {
                 proto: dish_model.display.res.clone(),
@@ -211,6 +199,7 @@ fn spawn_dish_presentations(
             ChildOf(wrapper_entity),
         ));
 
+        // Price label
         commands.spawn((
             DisplayState {
                 proto: PrefabReference::new(PRICE_LABEL_PREFAB),
@@ -226,8 +215,8 @@ fn spawn_dish_presentations(
 
         events.push(SimEvent::DishSpawned(DishView {
             entity: wrapper_entity.to_entity_id(),
-            dish_id: active.assignment.dish_id.clone(),
-            pricing: active.assignment.pricing.method.to_view(),
+            dish_id: assignment.dish_id.clone(),
+            pricing: assignment.pricing.to_view(),
         }));
     }
 }

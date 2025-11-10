@@ -159,6 +159,7 @@ fn handle_decide_window_goal(
         &mut EntityRng,
     )>,
     window_query: Query<(Entity, &Window, &WindowDishes)>,
+    dish_query: Query<&Dish>,
     lane_query: Query<(&QueueLane, &QueueLaneMembers)>,
     registry: Res<GameModelRegistryRes>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
@@ -199,7 +200,8 @@ fn handle_decide_window_goal(
 
             if let Some(candidate) = evaluate_window(
                 window_entity,
-                &window_dishes.dishes,
+                window_dishes,
+                &dish_query,
                 queue_length,
                 avg_service_time,
                 personality,

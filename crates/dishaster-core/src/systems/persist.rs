@@ -2,6 +2,7 @@ use crate::systems::prelude::*;
 
 pub fn persist_system(
     window_query: Query<(&Window, &WindowDishes)>,
+    dish_query: Query<&Dish>,
     table_query: Query<&DiningTable>,
     dispenser_query: Query<&Dispenser>,
     collector_query: Query<&DishCollector>,
@@ -19,9 +20,14 @@ pub fn persist_system(
                 .clone(),
             is_enabled: window.enabled,
             dish_assignments: dishes
-                .dishes
                 .iter()
-                .map(|dish| dish.assignment.clone())
+                .map(|dish_entity| {
+                    dish_query
+                        .get(dish_entity)
+                        .expect("dish for window")
+                        .assignment
+                        .clone()
+                })
                 .collect(),
         })
         .collect();

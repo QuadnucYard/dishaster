@@ -25,9 +25,11 @@ impl Simulation {
                 dish_entity,
                 pricing,
             } => {
-                if let Some(mut dish) = self.world.get_mut::<Dish>(dish_entity.to_entity()) {
-                    dish.pricing = pricing.to_model();
-                }
+                let Some(mut dish) = self.world.get_mut::<Dish>(dish_entity.to_entity()) else {
+                    return; // TODO: emit error event
+                };
+
+                dish.assignment.pricing = pricing.to_model();
             }
 
             SimCommand::RefillDispenser(dispenser_entity) => {

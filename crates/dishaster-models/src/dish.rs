@@ -1,7 +1,6 @@
 use dishrupt_core::display::DisplayModel;
 
 use super::prelude::*;
-use crate::DishAssignment;
 
 // ===================== Core Dish Models =====================
 
@@ -83,30 +82,4 @@ pub struct WindowLayout {
     pub queue_x: Vec<Meters>,
     /// Positions where dishes can be placed. Relative to the top-left corner.
     pub dish_slots: Vec<Rect>,
-}
-
-// ===================== Runtime State =====================
-
-/// Runtime state of an active dish in a window
-#[derive(Debug, Clone)]
-pub struct ActiveDish {
-    /// Configuration this came from
-    pub assignment: DishAssignment,
-    /// Current runtime state
-    pub state: DishRuntimeState,
-}
-
-/// Dynamic state tracking for dishes during simulation
-#[derive(Debug, Clone)]
-pub struct DishRuntimeState {
-    /// Current quantity available
-    pub current_quantity: f32,
-    /// Current quality (may degrade)
-    pub current_quality: f32,
-    /// Current contamination level
-    pub contamination_level: f32,
-    /// When last restocked
-    pub last_restocked: f32,
-    /// Times served today
-    pub service_count: u32,
 }

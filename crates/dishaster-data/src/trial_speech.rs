@@ -1,4 +1,4 @@
-use dishaster_models::{TrialSpeech, TrialSpeechItem};
+use dishaster_models::{TrialResponse, TrialSpeech, TrialSpeechItem};
 use thiserror::Error;
 
 /// An error that occurred while parsing trial speech items.
@@ -21,7 +21,7 @@ pub fn populate_trial_speech_items(
 
 /// Populate `TrialResponse` items.
 pub fn populate_trial_response_items(
-    responses: &mut [dishaster_models::TrialResponse],
+    responses: &mut [TrialResponse],
 ) -> Result<(), TrailSpeechParseError> {
     for response in responses {
         hydrate_speech_items(&mut response.content)?;

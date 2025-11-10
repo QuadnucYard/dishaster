@@ -31,8 +31,8 @@
                 service_template: "combo_window_1",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "combo_a", pricing: (method: PerPortion(12.0))),
-                    (slot_index: 1, dish_id: "combo_b", pricing: (method: PerPortion(14.0))),
+                    (slot_index: 0, dish_id: "combo_a", pricing: PerPortion(12.0)),
+                    (slot_index: 1, dish_id: "combo_b", pricing: PerPortion(14.0)),
                 ],
             ),
             (
@@ -40,8 +40,8 @@
                 service_template: "combo_window_2",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "combo_c", pricing: (method: PerPortion(10.0))),
-                    (slot_index: 1, dish_id: "combo_d", pricing: (method: PerPortion(15.0))),
+                    (slot_index: 0, dish_id: "combo_c", pricing: PerPortion(10.0)),
+                    (slot_index: 1, dish_id: "combo_d", pricing: PerPortion(15.0)),
                 ],
             ),
             (
@@ -49,8 +49,8 @@
                 service_template: "combo_window_3",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "combo_a", pricing: (method: PerPortion(12.0))),
-                    (slot_index: 1, dish_id: "combo_c", pricing: (method: PerPortion(10.0))),
+                    (slot_index: 0, dish_id: "combo_a", pricing: PerPortion(12.0)),
+                    (slot_index: 1, dish_id: "combo_c", pricing: PerPortion(10.0)),
                 ],
             ),
 
@@ -60,10 +60,10 @@
                 service_template: "general_window_1",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "rice", pricing: (method: ByWeight(2.0))), // ¥2/kg = ¥1/0.5kg
-                    (slot_index: 1, dish_id: "kung_pao_chicken", pricing: (method: ByWeight(36.0))),
-                    (slot_index: 2, dish_id: "tomato_egg", pricing: (method: PerPortion(3.0))),
-                    (slot_index: 3, dish_id: "stir_fried_cabbage", pricing: (method: PerPortion(1.5))),
+                    (slot_index: 0, dish_id: "rice", pricing: ByWeight(2.0)), // ¥2/kg = ¥1/0.5kg
+                    (slot_index: 1, dish_id: "kung_pao_chicken", pricing: ByWeight(36.0)),
+                    (slot_index: 2, dish_id: "tomato_egg", pricing: PerPortion(3.0)),
+                    (slot_index: 3, dish_id: "stir_fried_cabbage", pricing: PerPortion(1.5)),
                 ],
             ),
             (
@@ -71,10 +71,10 @@
                 service_template: "general_window_2",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "rice", pricing: (method: ByWeight(2.0))),
-                    (slot_index: 1, dish_id: "braised_pork", pricing: (method: ByWeight(48.0))),
-                    (slot_index: 2, dish_id: "mapo_tofu", pricing: (method: PerPortion(3.0))),
-                    (slot_index: 3, dish_id: "spinach_garlic", pricing: (method: PerPortion(2.5))),
+                    (slot_index: 0, dish_id: "rice", pricing: ByWeight(2.0)),
+                    (slot_index: 1, dish_id: "braised_pork", pricing: ByWeight(48.0)),
+                    (slot_index: 2, dish_id: "mapo_tofu", pricing: PerPortion(3.0)),
+                    (slot_index: 3, dish_id: "spinach_garlic", pricing: PerPortion(2.5)),
                 ],
             ),
             (
@@ -82,10 +82,10 @@
                 service_template: "general_window_3",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "rice", pricing: (method: ByWeight(2.0))),
-                    (slot_index: 1, dish_id: "beef_potato", pricing: (method: ByWeight(58.0))),
-                    (slot_index: 2, dish_id: "fish_fragrant_eggplant", pricing: (method: PerPortion(3.5))),
-                    (slot_index: 3, dish_id: "potato_shreds", pricing: (method: PerPortion(2.0))),
+                    (slot_index: 0, dish_id: "rice", pricing: ByWeight(2.0)),
+                    (slot_index: 1, dish_id: "beef_potato", pricing: ByWeight(58.0)),
+                    (slot_index: 2, dish_id: "fish_fragrant_eggplant", pricing: PerPortion(3.5)),
+                    (slot_index: 3, dish_id: "potato_shreds", pricing: PerPortion(2.0)),
                 ],
             ),
 
@@ -95,9 +95,9 @@
                 service_template: "specialty_window_1",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "rice", pricing: (method: ByWeight(2.0))),
-                    (slot_index: 1, dish_id: "sichuan_boiled_fish", pricing: (method: PerPortion(16.0))),
-                    (slot_index: 2, dish_id: "twice_cooked_pork", pricing: (method: PerPortion(13.0))),
+                    (slot_index: 0, dish_id: "rice", pricing: ByWeight(2.0)),
+                    (slot_index: 1, dish_id: "sichuan_boiled_fish", pricing: PerPortion(16.0)),
+                    (slot_index: 2, dish_id: "twice_cooked_pork", pricing: PerPortion(13.0)),
                 ],
             ),
             (
@@ -105,9 +105,9 @@
                 service_template: "specialty_window_2",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "rice", pricing: (method: ByWeight(2.0))),
-                    (slot_index: 1, dish_id: "steamed_fish", pricing: (method: PerPortion(15.0))),
-                    (slot_index: 2, dish_id: "crispy_duck", pricing: (method: PerPortion(17.0))),
+                    (slot_index: 0, dish_id: "rice", pricing: ByWeight(2.0)),
+                    (slot_index: 1, dish_id: "steamed_fish", pricing: PerPortion(15.0)),
+                    (slot_index: 2, dish_id: "crispy_duck", pricing: PerPortion(17.0)),
                 ],
             ),
             (
@@ -115,9 +115,9 @@
                 service_template: "specialty_window_3",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "rice", pricing: (method: ByWeight(2.0))),
-                    (slot_index: 1, dish_id: "hotpot_meat", pricing: (method: PerPortion(18.0))),
-                    (slot_index: 2, dish_id: "twice_cooked_pork", pricing: (method: PerPortion(13.0))),
+                    (slot_index: 0, dish_id: "rice", pricing: ByWeight(2.0)),
+                    (slot_index: 1, dish_id: "hotpot_meat", pricing: PerPortion(18.0)),
+                    (slot_index: 2, dish_id: "twice_cooked_pork", pricing: PerPortion(13.0)),
                 ],
             ),
 
@@ -127,9 +127,9 @@
                 service_template: "noodle_window_1",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "dan_dan_noodles", pricing: (method: PerPortion(10.0))),
-                    (slot_index: 1, dish_id: "beef_noodle_soup", pricing: (method: PerPortion(16.0))),
-                    (slot_index: 2, dish_id: "dumplings", pricing: (method: PerPortion(5.0))),
+                    (slot_index: 0, dish_id: "dan_dan_noodles", pricing: PerPortion(10.0)),
+                    (slot_index: 1, dish_id: "beef_noodle_soup", pricing: PerPortion(16.0)),
+                    (slot_index: 2, dish_id: "dumplings", pricing: PerPortion(5.0)),
                 ],
             ),
             (
@@ -137,9 +137,9 @@
                 service_template: "noodle_window_2",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "zhajiang_noodles", pricing: (method: PerPortion(11.0))),
-                    (slot_index: 1, dish_id: "fried_noodles", pricing: (method: PerPortion(8.0))),
-                    (slot_index: 2, dish_id: "steamed_buns", pricing: (method: PerPortion(3.0))),
+                    (slot_index: 0, dish_id: "zhajiang_noodles", pricing: PerPortion(11.0)),
+                    (slot_index: 1, dish_id: "fried_noodles", pricing: PerPortion(8.0)),
+                    (slot_index: 2, dish_id: "steamed_buns", pricing: PerPortion(3.0)),
                 ],
             ),
             (
@@ -147,10 +147,10 @@
                 service_template: "snack_window",
                 is_enabled: true,
                 dish_assignments: [
-                    (slot_index: 0, dish_id: "pan_fried_buns", pricing: (method: PerPortion(4.0))),
-                    (slot_index: 1, dish_id: "spring_rolls", pricing: (method: PerPortion(3.5))),
-                    (slot_index: 2, dish_id: "fried_dough_sticks", pricing: (method: PerPortion(1.5))),
-                    (slot_index: 3, dish_id: "mantou", pricing: (method: PerPortion(1.0))),
+                    (slot_index: 0, dish_id: "pan_fried_buns", pricing: PerPortion(4.0)),
+                    (slot_index: 1, dish_id: "spring_rolls", pricing: PerPortion(3.5)),
+                    (slot_index: 2, dish_id: "fried_dough_sticks", pricing: PerPortion(1.5)),
+                    (slot_index: 3, dish_id: "mantou", pricing: PerPortion(1.0)),
                 ],
             ),
         ],

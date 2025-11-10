@@ -50,6 +50,7 @@ pub fn process_serving_messages(
     mut sessions: Query<(Entity, &mut ServiceSession, &mut DinerState)>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement)>,
     window_query: Query<&WindowDishes>,
+    dish_query: Query<&Dish>,
     mut queue: ResMut<ServingCommsQueue>,
     time: Res<Time>,
     mut rng: ResMut<ServingRng>,
@@ -195,15 +196,14 @@ pub fn process_serving_messages(
                 let service_time = (now - session.started_at) as f32;
 
                 // Query window dishes to get current state and pricing
-                if let Ok(window_dishes) = window_query.get(session.window)
-                    // Find the dish that was requested
-                    && let Some(active_dish) = window_dishes
-                        .dishes
-                        .iter()
-                        .find(|d| d.assignment.dish_id == request.dish_id)
-                {
+                if let Some(dish) = window_query.iter_descendants(session.window).find_map(|e| {
+                    dish_query
+                        .get(e)
+                        .ok()
+                        .filter(|d| d.assignment.dish_id == request.dish_id)
+                }) {
                     // Calculate price based on pricing config
-                    let price_paid = match active_dish.assignment.pricing.method {
+                    let price_paid = match dish.assignment.pricing {
                         PricingMethod::PerPortion(price) => price,
                         PricingMethod::ByWeight(price_per_kg) => {
                             // For now, assume standard portion weight of 0.5 kg
@@ -234,11 +234,11 @@ pub fn process_serving_messages(
                     diner_state.served_dish = Some(ServedDish {
                         entity: dish_entity,
                         dish_id: request.dish_id.clone(),
-                        served_quantity: active_dish.state.current_quantity.min(1.0),
-                        served_quality: active_dish.state.current_quality,
+                        served_quantity: dish.state.current_quantity.min(1.0),
+                        served_quality: dish.state.current_quality,
                         price_paid,
                         service_time,
-                        contamination_level: active_dish.state.contamination_level,
+                        contamination_level: dish.state.contamination_level,
                     });
                 } else {
                     log::warn!(
@@ -288,6 +288,7 @@ pub fn drive_serving_sessions(
     mut diner_query: Query<(Entity, &mut ServiceSession, &Movement, &mut EntityRng), With<Diner>>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement), Without<Diner>>,
     window_query: Query<&WindowDishes>,
+    dish_query: Query<&Dish>,
     lane_query: Query<(&StaffForLane,)>,
     windows: Query<&Window>,
     registry: Res<GameModelRegistryRes>,
@@ -323,7 +324,8 @@ pub fn drive_serving_sessions(
                         // Diner is misconfigured without a window snapshot.
                         continue;
                     };
-                    let Some(request) = choose_service_request(window_dishes, &registry, &mut rng)
+                    let Some(request) =
+                        choose_service_request(window_dishes, &dish_query, &registry, &mut rng)
                     else {
                         // No dishes left in the window; mark the session complete gracefully.
                         staff_state.reset(now);
@@ -403,20 +405,22 @@ pub fn drive_serving_sessions(
 
 fn choose_service_request(
     dishes: &WindowDishes,
+    dish_query: &Query<&Dish>,
     registry: &GameModelRegistry,
     rng: &mut impl Rng,
 ) -> Option<ServiceRequest> {
+    // FIXME: the dish should be chosen by the diner preferences, not randomly.
+
     // Pick a dish that is currently staged in the serving window.
-    let active = dishes.dishes.choose(rng)?;
-    let dish_handle = registry
-        .dishes
-        .get_handle_by_id(&active.assignment.dish_id)?;
+    let dish_entity = *dishes.collection().choose(rng)?;
+    let dish = dish_query.get(dish_entity).ok()?;
+    let dish_handle = registry.dishes.get_handle_by_id(&dish.assignment.dish_id)?;
     // Look up the dish model to copy presentation details for feedback later.
     let dish_model = registry.dishes.get(dish_handle);
 
     // Populate the request struct that sessions carry for the rest of the workflow.
     Some(ServiceRequest {
-        dish_id: active.assignment.dish_id.clone(),
+        dish_id: dish.assignment.dish_id.clone(),
         dish_name: dish_model.id.clone().to_string(), // Use the model ID as a fallback name
         base_service_time: dish_model.characteristics.serving_time,
     })

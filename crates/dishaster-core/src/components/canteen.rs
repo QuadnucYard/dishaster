@@ -15,20 +15,6 @@ pub struct Window {
     pub enabled: bool,
 }
 
-/// Active dishes in a window - separate component for better data locality
-#[derive(Component)]
-pub struct WindowDishes {
-    /// Currently available dishes in this window
-    pub dishes: Vec<ActiveDish>,
-}
-
-/// An active dish available at a service window
-#[derive(Component)]
-pub struct Dish {
-    /// Pricing method for this dish
-    pub pricing: PricingMethod,
-}
-
 /// Dining table component for customer seating areas
 #[derive(Component)]
 pub struct DiningTable {

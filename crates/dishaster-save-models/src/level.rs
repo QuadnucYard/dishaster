@@ -83,14 +83,7 @@ pub struct DishAssignment {
     /// Which dish to serve
     pub dish_id: ModelId,
     /// Player-set pricing
-    pub pricing: PricingConfig,
-}
-
-/// Player-configured pricing for a dish assignment
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct PricingConfig {
-    /// Base price set by player
-    pub method: PricingMethod,
+    pub pricing: PricingMethod,
 }
 
 /// Different pricing strategies for dishes

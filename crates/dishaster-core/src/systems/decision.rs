@@ -354,7 +354,8 @@ pub struct WindowCandidate {
 /// For now, we use the maximum dish score as the window score (best dish determines appeal).
 pub fn evaluate_window(
     window_entity: Entity,
-    dishes: &[dishaster_models::ActiveDish],
+    window_dishes: &WindowDishes,
+    dish_query: &Query<&Dish>,
     queue_length: usize,
     avg_service_time: f32,
     personality: &Personality,
@@ -363,7 +364,7 @@ pub fn evaluate_window(
     registry: &Arc<GameModelRegistry>,
     config: &DecisionConfig,
 ) -> Option<WindowCandidate> {
-    if dishes.is_empty() {
+    if dish_query.is_empty() {
         return None;
     }
 
@@ -372,8 +373,12 @@ pub fn evaluate_window(
     // Score each dish in the window
     let mut dish_scores = Vec::new();
 
-    for active_dish in dishes {
-        let dish_id = &active_dish.assignment.dish_id;
+    for &dish_entity in window_dishes.collection() {
+        let Ok(dish) = dish_query.get(dish_entity) else {
+            continue;
+        };
+
+        let dish_id = &dish.assignment.dish_id;
 
         // Get dish model for tags and base price
         let Some(dish_model) = registry.dishes.get_by_id(dish_id) else {
@@ -384,9 +389,9 @@ pub fn evaluate_window(
         let dish_tags = &dish_model.characteristics.tags;
 
         // Get current price
-        let current_price = match active_dish.assignment.pricing.method {
-            dishaster_models::PricingMethod::PerPortion(price) => price,
-            dishaster_models::PricingMethod::ByWeight(price_per_kg) => price_per_kg * 0.2, // Assume 200g portion
+        let current_price = match dish.assignment.pricing {
+            PricingMethod::PerPortion(price) => price,
+            PricingMethod::ByWeight(price_per_kg) => price_per_kg * 0.2, // Assume 200g portion
         };
 
         // Use base price from model, or estimate if not set
@@ -396,7 +401,7 @@ pub fn evaluate_window(
             current_price * 0.9 // Fallback: assume slight markup
         };
 
-        let quality = active_dish.state.current_quality;
+        let quality = dish.state.current_quality;
 
         let score = compute_dish_score(
             dish_tags,

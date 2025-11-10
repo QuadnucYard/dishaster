@@ -38,5 +38,3 @@ pub const DEFAULT_DISH_QUANTITY: f32 = 100.0;
 pub const DEFAULT_DISH_QUALITY: f32 = 0.8;
 /// Contamination level in [0,1], where 0 is clean and 1 is hazardous
 pub const DEFAULT_DISH_CONTAMINATION: f32 = 0.0;
-/// Seconds since epoch or day start; 0 means "not set yet" for our sim
-pub const DEFAULT_DISH_LAST_RESTOCKED_S: f32 = 0.0;
