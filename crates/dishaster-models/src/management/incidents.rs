@@ -16,6 +16,6 @@ pub struct MislabelPriceTemplate {
 /// Model for mislabeling prices incident
 #[derive(Debug, Clone)]
 pub struct MislabelPriceModel {
-    /// List of overpriced items and their overprice rates
-    pub overpriced_items: Vec<(ModelId, f32)>,
+    /// Overpriced rates
+    pub overpriced_rates: Vec<f32>,
 }

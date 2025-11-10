@@ -11,15 +11,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("1_uj2u4")
-
 [node name="Panel" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -27,10 +18,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 80
-theme_override_constants/margin_top = 80
-theme_override_constants/margin_right = 80
-theme_override_constants/margin_bottom = 80
+theme_override_constants/margin_left = 120
+theme_override_constants/margin_top = 120
+theme_override_constants/margin_right = 120
+theme_override_constants/margin_bottom = 120
+
+[node name="Background" type="TextureRect" parent="Panel"]
+layout_mode = 2
+texture = ExtResource("1_uj2u4")
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2

@@ -19,6 +19,8 @@ pub trait ViewParams {
     fn params(&self) -> ParamsMap;
 }
 
+// === Implementations for management decision templates and models ===
+
 impl TemplateRealize for ManagementDecisionTemplateDef {
     type Model = ManagementDecisionModel;
 
@@ -93,5 +95,54 @@ impl ViewParams for DisarrangeTablesModel {
         params! {
             num_tables => self.num_tables,
         }
+    }
+}
+
+// === Implementations for management incidents templates and models ===
+
+impl TemplateRealize for ManagementIncidentTemplateDef {
+    type Model = ManagementIncidentModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        use ManagementIncidentTemplateDef::*;
+        type M = ManagementIncidentModel;
+
+        match self {
+            MislabelPrice(def) => M::MislabelPrice(def.realize(ctx)),
+        }
+    }
+}
+
+impl ViewParams for ManagementIncidentModel {
+    fn params(&self) -> ParamsMap {
+        use ManagementIncidentModel::*;
+        match self {
+            MislabelPrice(model) => model.params(),
+        }
+    }
+}
+
+impl TemplateRealize for MislabelPriceTemplate {
+    type Model = MislabelPriceModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        let num_items = ctx.rng.random_range(self.num_range.clone());
+
+        let mut rates = Vec::with_capacity(num_items);
+        for _ in 0..num_items {
+            let overprice_rate = ctx.rng.random_range(self.overprice_rate_range.clone());
+            rates.push(overprice_rate);
+        }
+
+        Self::Model {
+            overpriced_rates: rates,
+        }
+    }
+}
+
+impl ViewParams for MislabelPriceModel {
+    fn params(&self) -> ParamsMap {
+        // we do not provide any specific params for this incident
+        params! {}
     }
 }

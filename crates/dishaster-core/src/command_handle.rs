@@ -30,6 +30,12 @@ impl Simulation {
                 };
 
                 dish.assignment.pricing = pricing.to_model();
+
+                let mut events = self.world.resource_mut::<EventQueue>();
+                events.push(SimEvent::DishPriceChanged {
+                    entity: dish_entity,
+                    new_pricing: pricing,
+                });
             }
 
             SimCommand::RefillDispenser(dispenser_entity) => {

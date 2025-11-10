@@ -33,8 +33,6 @@ impl Game {
             pricing,
         });
 
-        if let Some(presenter) = self.pres.dishes.get_mut(&dish) {
-            presenter.set_price(pricing);
-        }
+        // The UI will be updated via the SimEvent::DishPriceChanged event
     }
 }

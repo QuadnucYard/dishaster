@@ -61,6 +61,16 @@ impl Game {
                         presenter.set_stock(current_stock, capacity);
                     }
                 }
+
+                SimEvent::DishPriceChanged {
+                    entity,
+                    new_pricing,
+                } => {
+                    if let Some(presenter) = self.pres.dishes.get_mut(&entity) {
+                        presenter.set_price(new_pricing);
+                    }
+                }
+
                 SimEvent::AgentSpawned { entity, appearance } => {
                     let mut presenter = AgentPresenter::new(
                         entity,

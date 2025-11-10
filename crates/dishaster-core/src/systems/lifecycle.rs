@@ -10,13 +10,19 @@ pub fn register_lifecycle_systems(world: &mut World) {
 
     world.add_observer(systems::roll_management_decisions);
     world.add_observer(systems::apply_management_decision);
+    world.add_observer(systems::roll_management_incident);
 }
 
-fn on_run_started(_event: On<RunStarted>, mut day_status: ResMut<DayStatus>) {
+fn on_run_started(
+    _event: On<RunStarted>,
+    mut commands: Commands,
+    mut day_status: ResMut<DayStatus>,
+) {
     day_status.started = true;
 
     if day_status.current_day != day_status.start_day {
         // emit incident for new day
+        commands.trigger(RollManagementIncident);
     }
 }
 

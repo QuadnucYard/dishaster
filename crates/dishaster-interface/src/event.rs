@@ -2,7 +2,7 @@
 
 use dishaster_views::{
     Appearance, DishView, FeedbackView, ManagementDecisionsView, ManagementIncidentView,
-    TrialIntro, TrialSpeech, TrialStatement,
+    PricingMethod, TrialIntro, TrialSpeech, TrialStatement,
 };
 use dishrupt_core::{EntityId, prelude::EcoString};
 
@@ -30,6 +30,13 @@ pub enum SimEvent {
     },
     /// A dish has spawned with its pricing snapshot.
     DishSpawned(DishView),
+    /// A dish's price has changed.
+    DishPriceChanged {
+        /// Dish entity ID.
+        entity: EntityId,
+        /// New pricing method.
+        new_pricing: PricingMethod,
+    },
 
     /// An agent has spawned.
     AgentSpawned {
