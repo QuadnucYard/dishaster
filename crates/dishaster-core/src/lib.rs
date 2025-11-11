@@ -13,6 +13,7 @@ pub mod sim;
 mod snapshot;
 pub(crate) mod systems;
 pub(crate) mod trial;
+pub(crate) mod utils;
 
 /// Re-export of dishaster_models
 pub mod models {

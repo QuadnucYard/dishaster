@@ -51,6 +51,13 @@ fn generate_daily_schedule(
         // Randomize hunger for this visit (not persistent)
         let hunger = rng.random_range(0.3..1.0);
 
+        // Calculate meal budget with random variation
+        // Base: economic_capacity adjusted by hunger
+        // Random factor: 0.85~1.15 to simulate daily variation in spending willingness
+        let base_budget = profile.dining_profile.economic_capacity * (0.2 + 0.6 * hunger);
+        let random_factor = rng.random_range(0.85..1.15);
+        let meal_budget = base_budget * random_factor;
+
         scheduled.push(ScheduledDiner {
             id: profile.id,
             personality: profile.personality.clone(),
@@ -64,6 +71,7 @@ fn generate_daily_schedule(
             long_term_memory: profile.long_term_memory.clone(),
             appearance: profile.appearance.clone(),
             arrival_time,
+            meal_budget,
         });
 
         profile.last_visit_day = current_day;

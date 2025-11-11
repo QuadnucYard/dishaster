@@ -12,7 +12,8 @@
             adaptiveness: (0.1, 0.6),    // Flexibility to changes
         ),
         dining: (
-            economic_capacity: (10.0, 50.0), // Budget range
+            economic_capacity: (10.0, 20.0), // Student budget range (yuan)
+            max_satiation: (80.0, 130.0),    // Appetite variation (small to large)
             eating_speed: (0.5, 1.5),        // Eating speed multiplier
         ),
         movement: (

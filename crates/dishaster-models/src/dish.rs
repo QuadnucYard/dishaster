@@ -38,6 +38,45 @@ pub struct DishCharacteristics {
     /// Reference price for value comparison (used in diner decision-making)
     #[serde(default)]
     pub base_price: f32,
+
+    /// Weight distribution for portion sizes
+    #[serde(default)]
+    pub weight_distrib: DishWeightDistribution,
+    /// Satiation contribution per kilogram (how filling this dish is per kg)
+    #[serde(default = "default_satiation_per_kg")]
+    pub satiation_per_kg: f32,
+}
+
+/// Weight distribution parameters for dish portions
+#[derive(Debug, Clone, Deserialize)]
+pub struct DishWeightDistribution {
+    /// Mean weight of a standard portion (kg)
+    pub mean: f32,
+    /// Standard deviation of portion weight (kg)
+    pub stddev: f32,
+}
+
+impl Default for DishWeightDistribution {
+    fn default() -> Self {
+        DishWeightDistribution {
+            mean: 0.15,   // 150g standard portion (typical 大伙 dish: 100-200g)
+            stddev: 0.03, // ±30g variation
+        }
+    }
+}
+
+/// Default satiation per kilogram
+///
+/// Calibrated for student diners who typically order 2 dishes (sometimes 2-4):
+/// - 150g dish (0.15kg) → 22.5 satiation units (~23% of max 100)
+/// - 200g dish (0.2kg) → 30 units (30% of max)
+/// - Typical 2-dish meal (300g) → 45 satiation (~45% of max)
+/// - Large 3-dish meal (450g) → 67.5 satiation (~68% of max)
+/// - Maximum 4-dish meal (600g) → 90 satiation (90% of max)
+///
+/// This means students feel satisfied with 2 dishes, very full with 3-4 dishes.
+fn default_satiation_per_kg() -> f32 {
+    150.0 // 150 satiation units per kg
 }
 
 // ===================== Window Service Models =====================

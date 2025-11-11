@@ -97,6 +97,8 @@ pub struct ScheduledDiner {
     // Session-specific attributes (generated per visit)
     /// The simulation time when this diner should be spawned (seconds from day start)
     pub arrival_time: Seconds,
+    /// Budget allocated for this meal (calculated once at spawn with randomness)
+    pub meal_budget: f32,
 }
 
 impl DailyDinerSchedule {

@@ -550,7 +550,7 @@ fn handle_pick_chopsticks_goal(
             change: DinerItemsChange::PickChopsticks(chopsticks_entity.to_entity_id()),
         });
 
-        goal.update(if state.served_dish.is_some() {
+        goal.update(if !state.served_dishes.is_empty() {
             DinerGoal::FindSeat
         } else {
             println!("Chopsticks picked before being served!");
@@ -720,17 +720,19 @@ fn handle_get_served_goal(
             .remove::<QueueMember>()
             .remove::<ServiceSession>();
 
-        let Some(served_dish) = &state.served_dish else {
+        if state.served_dishes.is_empty() {
             log::error!(
                 target: "diner",
-                "diner {} has no served dish after service completion!",
+                "diner {} has no served dishes after service completion!",
                 entity
             );
             continue;
-        };
+        }
+
+        // Emit events for all dishes picked up
         events.push(SimEvent::DinerItemsChanged {
             entity: entity.to_entity_id(),
-            change: DinerItemsChange::PickDish(served_dish.entity.to_entity_id()),
+            change: DinerItemsChange::PickDish(state.served_dishes[0].entity.to_entity_id()),
         });
 
         goal.update(if targets.chopstick_target.is_some() {
@@ -939,36 +941,37 @@ fn handle_eat_goal(
         }
 
         // Check for contamination during eating (probabilistic detection over time)
-        if let Some(ref served_dish) = state.served_dish
-            && served_dish.contamination_level > feedback_thresholds.contamination_threshold
-        {
-            // Calculate detection chance based on eating time elapsed
-            // Higher contamination = faster detection
-            let detection_rate = served_dish.contamination_level * 0.5; // 0.05/s at threshold, 0.5/s at max
-            let dt = time.tick_duration as f32;
+        // Check all dishes for contamination
+        for served_dish in &state.served_dishes {
+            if served_dish.contamination_level > feedback_thresholds.contamination_threshold {
+                // Calculate detection chance based on eating time elapsed
+                // Higher contamination = faster detection
+                let detection_rate = served_dish.contamination_level * 0.5; // 0.05/s at threshold, 0.5/s at max
+                let dt = time.tick_duration as f32;
 
-            if rng.random_bool((detection_rate * dt) as f64) {
-                log::warn!(
-                    target: "diner",
-                    "diner {:?} detected contamination: level={:.2}",
-                    entity,
-                    served_dish.contamination_level
-                );
+                if rng.random_bool((detection_rate * dt) as f64) {
+                    log::warn!(
+                        target: "diner",
+                        "diner {:?} detected contamination: level={:.2}",
+                        entity,
+                        served_dish.contamination_level
+                    );
 
-                // Apply severe penalties
-                psych_state.mood = (psych_state.mood - 0.5).max(-1.0);
-                psych_state.trust = (psych_state.trust - 0.3).max(0.0);
+                    // Apply severe penalties
+                    psych_state.mood = (psych_state.mood - 0.5).max(-1.0);
+                    psych_state.trust = (psych_state.trust - 0.3).max(0.0);
 
-                // Emit strong complaint
-                feedback_messages.write(FeedbackMessage {
-                    entity,
-                    content: choose_feedback(&mut rng, feedbacks::CONTAMINATION),
-                    trigger: Some(FeedbackTrigger::Contamination),
-                });
+                    // Emit strong complaint
+                    feedback_messages.write(FeedbackMessage {
+                        entity,
+                        content: choose_feedback(&mut rng, feedbacks::CONTAMINATION),
+                        trigger: Some(FeedbackTrigger::Contamination),
+                    });
 
-                // Stop eating immediately
-                goal.update(DinerGoal::ReturnDishes);
-                continue;
+                    // Stop eating immediately
+                    goal.update(DinerGoal::ReturnDishes);
+                    continue;
+                }
             }
         }
 
@@ -981,8 +984,8 @@ fn handle_eat_goal(
             continue;
         }
 
-        // Finished eating - update memory and psychological state
-        if let Some(ref served_dish) = state.served_dish {
+        // Finished eating - update memory and psychological state for all dishes
+        for served_dish in &state.served_dishes {
             // Get dish model for tags and base price
             let dish_tags = registry
                 .dishes
@@ -1155,7 +1158,9 @@ fn handle_return_dishes_goal(
             if let Some(tray_entity) = state.tray.take() {
                 commands.entity(tray_entity).despawn();
             }
-            if let Some(served_dish) = state.served_dish.take() {
+
+            // Despawn all served dishes
+            for served_dish in state.served_dishes.drain(..) {
                 commands.entity(served_dish.entity).despawn();
             }
 

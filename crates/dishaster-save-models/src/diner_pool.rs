@@ -60,8 +60,34 @@ pub struct Personality {
 /// They represent learned or physiological characteristics related to eating.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DiningProfile {
-    /// Economic capacity (how much they can/will spend)
+    /// Economic capacity - base amount willing to spend per meal (yuan)
+    ///
+    /// In this game, all diners are students. Typical values:
+    /// - Typical student: 12 yuan per meal
+    /// - Range: 10-20+ yuan (some may spend more occasionally)
+    ///
+    /// The actual meal budget is calculated once at spawn with random variation:
+    /// `meal_budget = economic_capacity * (0.2 + 0.6 * hunger) * random(0.85~1.15)`
+    /// This represents daily variation in spending willingness.
     pub economic_capacity: f32,
+    /// Maximum satiation capacity (stomach size) - varies by individual
+    ///
+    /// Represents how much food the diner can physically consume when fully hungry.
+    /// Works with hunger level to determine desired satiation:
+    /// `desired_satiation = hunger × max_satiation`
+    ///
+    /// Typical values for students:
+    /// - Small appetite: 80-90 units
+    /// - Normal appetite: 90-110 units
+    /// - Large appetite: 110-130 units
+    ///
+    /// Examples with 150 units/kg satiation rate:
+    /// - Small (85): When hungry (H=0.8), wants ~68 units (~2 dishes, 280g)
+    /// - Normal (100): When hungry (H=0.8), wants ~80 units (2-3 dishes, 350g)
+    /// - Large (120): When hungry (H=0.8), wants ~96 units (3-4 dishes, 450g)
+    ///
+    /// When less hungry (H=0.4), all diners order proportionally less food.
+    pub max_satiation: f32,
     /// Eating speed multiplier (0.5 = slow, 1.0 = normal, 1.5 = fast)
     /// Actual eating time = dish_base_time / eating_speed
     pub eating_speed: f32,

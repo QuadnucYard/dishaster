@@ -58,7 +58,10 @@ fn spawn_scheduled_diner(
         DinerBundle {
             diner: Diner { id: diner_id },
 
-            state: DinerState::default(),
+            state: DinerState {
+                meal_budget: scheduled.meal_budget,
+                ..Default::default()
+            },
             goal: DinerGoalState::default(),
             targets: DinerTargets::default(),
 

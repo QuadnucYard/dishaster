@@ -36,8 +36,13 @@ pub struct DinerState {
     pub tray: Option<Entity>,
     /// Entity of the chopsticks held by the diner, if any
     pub chopsticks: Option<Entity>,
-    /// Served dish held by the diner, if any
-    pub served_dish: Option<ServedDish>,
+    /// Served dishes held by the diner (can hold multiple)
+    pub served_dishes: Vec<ServedDish>,
+    /// Total amount spent on current meal (accumulated)
+    pub total_spent: f32,
+    /// Budget allocated for this meal
+    #[allow(dead_code)] // Will be used for budget constraints in future
+    pub meal_budget: f32,
 }
 
 /// What gets served to a diner
@@ -47,12 +52,15 @@ pub struct ServedDish {
     pub entity: Entity,
     /// Original dish reference
     pub dish_id: ModelId,
+    /// Actual weight of the portion served (kg)
+    #[allow(dead_code)] // Will be used for nutrition tracking in future
+    pub served_weight: f32,
     /// Actual values at time of service
     #[allow(unused)]
     pub served_quantity: f32,
     /// Quality level when served
     pub served_quality: f32,
-    /// Final price charged to customer
+    /// Final price charged to customer (calculated from weight if ByWeight)
     pub price_paid: f32,
     /// Time taken to serve this dish
     #[allow(unused)]
@@ -195,14 +203,20 @@ pub struct PsychState {
 }
 
 /// Short-term memory for current meal session
-/// FIXME: use it
-#[allow(unused)]
 #[derive(Debug, Clone, Default)]
 pub struct ShortTermMemory {
     /// Windows that have been observed this session
+    #[allow(dead_code)] // For future window exploration behavior
     pub seen_windows: FxHashSet<ModelId>,
     /// Dishes tried in current meal
+    #[allow(dead_code)] // For future variety tracking
     pub tried_dishes: Vec<ModelId>,
     /// Perceived price references updated by seeing prices
+    #[allow(dead_code)] // For future price learning
     pub expected_prices: FxHashMap<ModelId, f32>,
+    /// Initial dining intentions formed after entering
+    /// Maps dish_id to desire weight (higher = want more)
+    pub dish_intentions: FxHashMap<ModelId, f32>,
+    /// Dishes currently ordered in this serving session
+    pub current_order: Vec<ModelId>,
 }

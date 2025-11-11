@@ -39,7 +39,8 @@ fn sample_diner_provider() -> DinerRandomizerModel {
             adaptiveness: MinMax::new(0.2, 0.8),
         },
         dining: DiningRanges {
-            economic_capacity: MinMax::new(10.0, 30.0),
+            economic_capacity: MinMax::new(10.0, 20.0),
+            max_satiation: MinMax::new(80.0, 130.0),
             eating_speed: MinMax::new(0.5, 1.5),
         },
         appearance: Default::default(),

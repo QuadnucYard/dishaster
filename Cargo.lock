@@ -485,6 +485,7 @@ dependencies = [
  "dishrupt-simulation",
  "log",
  "ordered-float",
+ "rand_distr",
  "rustc-hash",
 ]
 

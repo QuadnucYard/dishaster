@@ -66,6 +66,7 @@ paste = "1.0"
 pathfinding = "4.14.0"
 rand = { version = "0.9", default-features = false, features = ["std"] }
 rand_core = "0.9"
+rand_distr = "0.5"
 rand_xoshiro = "0.7"
 ron = "0.11"
 rustc-hash = "2"

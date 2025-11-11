@@ -19,6 +19,7 @@ dishaster-navigation.workspace = true
 bevy_ecs.workspace = true
 log.workspace = true
 ordered-float.workspace = true
+rand_distr.workspace = true
 rustc-hash.workspace = true
 
 [features]

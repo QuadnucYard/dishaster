@@ -40,7 +40,8 @@ fn create_test_registry() -> GameModelRegistry {
                 adaptiveness: MinMax::new(0.1, 0.6),
             },
             dining: DiningRanges {
-                economic_capacity: MinMax::new(10.0, 50.0),
+                economic_capacity: MinMax::new(10.0, 20.0), // Student range
+                max_satiation: MinMax::new(80.0, 130.0),    // Small to large appetite
                 eating_speed: MinMax::new(0.5, 1.5),
             },
             appearance: Default::default(),

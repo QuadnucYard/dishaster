@@ -63,6 +63,8 @@ pub struct PersonalityRanges {
 pub struct DiningRanges {
     /// Range for economic capacity
     pub economic_capacity: MinMax<f32>,
+    /// Range for maximum satiation (stomach capacity)
+    pub max_satiation: MinMax<f32>,
     /// Range for eating speed multiplier
     pub eating_speed: MinMax<f32>,
 }

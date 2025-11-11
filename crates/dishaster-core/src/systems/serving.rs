@@ -1,6 +1,7 @@
 use dishaster_views::Feedback;
+use rand_distr::Normal;
 
-use super::{feedback::*, prelude::*};
+use super::{feedback::*, ordering::*, prelude::*};
 
 /// Queue of delayed serving communication messages to simulate human interaction latency.
 #[derive(Resource, Default)]
@@ -185,8 +186,8 @@ pub fn process_serving_messages(
                     // Another staffer already completed the order.
                     continue;
                 }
-                // The loop closes once the dish is ready.
-                session.stage = ServiceStage::Completed;
+                // Dish is ready - decide if ordering more after this
+                session.stage = ServiceStage::DecideNextDish;
 
                 let Some(request) = session.request.as_ref() else {
                     continue;
@@ -202,15 +203,6 @@ pub fn process_serving_messages(
                         .ok()
                         .filter(|d| d.model_id == request.dish_id)
                 }) {
-                    // Calculate price based on pricing config
-                    let price_paid = match dish.pricing {
-                        PricingMethod::PerPortion(price) => price,
-                        PricingMethod::ByWeight(price_per_kg) => {
-                            // For now, assume standard portion weight of 0.5 kg
-                            price_per_kg * 0.5
-                        }
-                    };
-
                     let Some(dish_model) = registry.dishes.get_by_id(&request.dish_id) else {
                         log::error!(
                             target: "diner",
@@ -219,7 +211,26 @@ pub fn process_serving_messages(
                         );
                         continue;
                     };
-                    // Assign the served dish to the diner's state
+
+                    // Sample actual portion weight from normal distribution
+                    let served_weight = Normal::new(
+                        dish_model.characteristics.weight_distrib.mean,
+                        dish_model.characteristics.weight_distrib.stddev,
+                    )
+                    .unwrap()
+                    .sample(&mut rng)
+                    .max(0.01);
+
+                    // Calculate price based on actual weight for ByWeight pricing
+                    let price_paid = match dish.pricing {
+                        PricingMethod::PerPortion(price) => price,
+                        PricingMethod::ByWeight(price_per_kg) => {
+                            // Use sampled weight to calculate actual price
+                            price_per_kg * served_weight
+                        }
+                    };
+
+                    // Create dish entity and add to served_dishes Vec
                     let dish_entity = commands
                         .spawn((
                             DisplayState {
@@ -231,15 +242,21 @@ pub fn process_serving_messages(
                             },
                         ))
                         .id();
-                    diner_state.served_dish = Some(ServedDish {
+
+                    // Push to served_dishes Vec with actual weight
+                    diner_state.served_dishes.push(ServedDish {
                         entity: dish_entity,
                         dish_id: request.dish_id.clone(),
+                        served_weight,
                         served_quantity: dish.state.current_quantity.min(1.0),
                         served_quality: dish.state.current_quality,
                         price_paid,
                         service_time,
                         contamination_level: dish.state.contamination_level,
                     });
+
+                    // Update total spent
+                    diner_state.total_spent += price_paid;
                 } else {
                     log::warn!(
                         target: "serving",
@@ -264,10 +281,12 @@ pub fn process_serving_messages(
 
                 log::debug!(
                     target: "serving",
-                    "Staff {} completed order for diner {}: {}",
+                    "Staff {} completed dish {} for diner {} ({}/{})",
                     staff,
+                    request.dish_name,
                     diner,
-                    request.dish_name
+                    session.current_dish_index + 1,
+                    session.planned_order.len()
                 );
 
                 release_staff(&mut staff_state, now);
@@ -283,9 +302,35 @@ fn release_staff(staff_state: &mut ServingStaffState, now: f64) {
     staff_state.reset(now);
 }
 
+fn staff_alignment_target(
+    diner_pos: Vec2,
+    staff: &ServingStaff,
+    windows: &Query<&Window>,
+) -> Option<Vec2> {
+    let window = windows.get(staff.window).ok()?;
+    Some(vec2(
+        (diner_pos.x).clamp(window.location.x_min, window.location.x_max),
+        window.location.y + WINDOW_STAFF_OFFSET,
+    ))
+}
+
 /// Progress service sessions by allocating staff and queuing conversation beats.
 pub fn drive_serving_sessions(
-    mut diner_query: Query<(Entity, &mut ServiceSession, &Movement, &mut EntityRng), With<Diner>>,
+    mut diner_query: Query<
+        (
+            Entity,
+            &mut ServiceSession,
+            &mut DinerState,
+            &Movement,
+            &mut EntityRng,
+            &DinerPersonality,
+            &DinerPsychState,
+            &DinerDiningProfile,
+            &DinerLongTermMemory,
+            &mut DinerShortTermMemory,
+        ),
+        With<Diner>,
+    >,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement), Without<Diner>>,
     window_query: Query<&WindowDishes>,
     dish_query: Query<&Dish>,
@@ -295,10 +340,23 @@ pub fn drive_serving_sessions(
     mut comms: ResMut<ServingCommsQueue>,
     time: Res<Time>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
+    ordering_config: Res<OrderingConfig>,
 ) {
     let now = time.current_time;
 
-    for (diner, mut session, diner_movement, mut rng) in diner_query.iter_mut() {
+    for (
+        diner,
+        mut session,
+        mut diner_state,
+        diner_movement,
+        mut rng,
+        personality,
+        psych_state,
+        dining_profile,
+        ltm,
+        mut stm,
+    ) in diner_query.iter_mut()
+    {
         // Each phase of the service state machine either allocates resources,
         // waits on delayed conversation steps, or concludes the interaction.
         match session.stage {
@@ -319,20 +377,53 @@ pub fn drive_serving_sessions(
                     continue;
                 };
 
-                if session.request.is_none() {
+                // Decide the full order if not already planned
+                if session.planned_order.is_empty() {
                     let Some(window_dishes) = window_query.get(session.window).ok() else {
                         // Diner is misconfigured without a window snapshot.
                         continue;
                     };
-                    let Some(request) =
-                        choose_service_request(window_dishes, &dish_query, &registry, &mut rng)
-                    else {
-                        // No dishes left in the window; mark the session complete gracefully.
+
+                    // Budget and spending are already initialized at spawn time
+                    // Just reset the spending counter for this meal
+                    diner_state.total_spent = 0.0;
+
+                    // Call the ordering decision system to plan the full order
+                    let planned_order = decide_order(
+                        window_dishes,
+                        &dish_query,
+                        personality,
+                        psych_state,
+                        dining_profile,
+                        ltm,
+                        &mut stm,
+                        &registry,
+                        &ordering_config,
+                        diner_state.meal_budget,
+                        &mut rng,
+                    );
+
+                    if planned_order.is_empty() {
+                        // No dishes available or no suitable dishes; complete session
                         staff_state.reset(now);
                         session.stage = ServiceStage::Completed;
                         continue;
-                    };
-                    session.request = Some(request);
+                    }
+
+                    session.planned_order = planned_order;
+                    session.current_dish_index = 0;
+                }
+
+                // Get the next dish from the planned order
+                if session.request.is_none() {
+                    if session.current_dish_index >= session.planned_order.len() {
+                        // All dishes have been processed, move to payment
+                        session.stage = ServiceStage::Payment;
+                        continue;
+                    }
+
+                    session.request =
+                        Some(session.planned_order[session.current_dish_index].clone());
                 }
 
                 let dish_name = {
@@ -368,7 +459,7 @@ pub fn drive_serving_sessions(
                     trigger: None,
                 });
 
-                let delay = rng.random_range(ORDER_SPEECH_DELAY_MIN..ORDER_SPEECH_DELAY_MAX);
+                let delay: f32 = rng.random_range(ORDER_SPEECH_DELAY_MIN..ORDER_SPEECH_DELAY_MAX);
                 comms.schedule(
                     now + f64::from(delay),
                     ServingMessage {
@@ -398,42 +489,34 @@ pub fn drive_serving_sessions(
                     );
                 }
             }
+            ServiceStage::DecideNextDish => {
+                // After receiving a dish, decide if ordering more
+                session.current_dish_index += 1;
+
+                if session.current_dish_index < session.planned_order.len() {
+                    // More dishes to order - go back to AssignStaff to get next dish
+                    session.stage = ServiceStage::AssignStaff;
+                    session.request = None;
+                } else {
+                    // All dishes ordered - proceed to payment
+                    session.stage = ServiceStage::Payment;
+                }
+            }
+            ServiceStage::Payment => {
+                // Payment/checkout stage - show total feedback and complete
+                // TODO: Add payment animation/feedback here in future
+
+                log::debug!(
+                    target: "serving",
+                    "diner {} completing payment, total dishes: {}",
+                    diner,
+                    session.planned_order.len()
+                );
+
+                // Transition to completed
+                session.stage = ServiceStage::Completed;
+            }
             ServiceStage::Completed => {}
         }
     }
-}
-
-fn choose_service_request(
-    dishes: &WindowDishes,
-    dish_query: &Query<&Dish>,
-    registry: &GameModelRegistry,
-    rng: &mut impl Rng,
-) -> Option<ServiceRequest> {
-    // FIXME: the dish should be chosen by the diner preferences, not randomly.
-
-    // Pick a dish that is currently staged in the serving window.
-    let dish_entity = *dishes.collection().choose(rng)?;
-    let dish = dish_query.get(dish_entity).ok()?;
-    let dish_handle = registry.dishes.get_handle_by_id(&dish.model_id)?;
-    // Look up the dish model to copy presentation details for feedback later.
-    let dish_model = registry.dishes.get(dish_handle);
-
-    // Populate the request struct that sessions carry for the rest of the workflow.
-    Some(ServiceRequest {
-        dish_id: dish.model_id.clone(),
-        dish_name: dish_model.id.clone().to_string(), // Use the model ID as a fallback name
-        base_service_time: dish_model.characteristics.serving_time,
-    })
-}
-
-fn staff_alignment_target(
-    diner_pos: Vec2,
-    staff: &ServingStaff,
-    windows: &Query<&Window>,
-) -> Option<Vec2> {
-    let window = windows.get(staff.window).ok()?;
-    Some(vec2(
-        (diner_pos.x).clamp(window.location.x_min, window.location.x_max),
-        window.location.y + WINDOW_STAFF_OFFSET,
-    ))
 }

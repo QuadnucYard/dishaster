@@ -14,10 +14,14 @@ pub struct ServiceSession {
     pub staff: Option<Entity>,
     /// Current progress in the counter interaction.
     pub stage: ServiceStage,
-    /// Requested dish information for feedback and billing.
+    /// Current dish being processed in the order
     pub request: Option<ServiceRequest>,
     /// Timestamp when the session started.
     pub started_at: f64,
+    /// Planned order of dishes to get (decided at session start)
+    pub planned_order: Vec<ServiceRequest>,
+    /// Index of current dish in planned_order
+    pub current_dish_index: usize,
 }
 
 impl ServiceSession {
@@ -30,6 +34,8 @@ impl ServiceSession {
             stage: ServiceStage::AssignStaff,
             request: None,
             started_at: now,
+            planned_order: Vec::new(),
+            current_dish_index: 0,
         }
     }
 }
@@ -54,6 +60,10 @@ pub enum ServiceStage {
     WaitingForStaffResponse,
     /// Staff acknowledged and is preparing the dish.
     WaitingForDish,
+    /// Dish received, deciding whether to order more
+    DecideNextDish,
+    /// Payment/checkout stage (刷卡结账)
+    Payment,
     /// Service completed and ready to transition to the next diner state.
     Completed,
 }

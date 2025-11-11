@@ -81,11 +81,13 @@ fn random_dining_profile(dr: &DiningRanges, rng: &mut impl Rng) -> DiningProfile
 
     // Sample behavioral parameters from randomizer ranges
     let economic_capacity = rng.random_range(dr.economic_capacity.min..dr.economic_capacity.max);
+    let max_satiation = rng.random_range(dr.max_satiation.min..dr.max_satiation.max);
     // Eating speed: 0.5 = slow eater, 1.0 = normal, 1.5 = fast eater
     let eating_speed = rng.random_range(dr.eating_speed.min..dr.eating_speed.max);
 
     DiningProfile {
         economic_capacity,
+        max_satiation,
         eating_speed,
         preferred_arrival_time,
     }
