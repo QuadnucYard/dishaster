@@ -15,6 +15,7 @@ pub fn spawn_static_objects(
     level: Res<ResWrapper<LevelSetupState>>,
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
+    mut rng: ResMut<WorldRng>,
     mut events: ResMut<EventQueue>,
 ) {
     spawn_windows(
@@ -23,6 +24,7 @@ pub fn spawn_static_objects(
         &level.canteen,
         &registry,
         &display_root,
+        &mut rng.derive_prng(),
         &mut events,
     );
     spawn_tables(
@@ -52,6 +54,7 @@ fn spawn_windows(
     level: &CanteenLayoutState,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
+    rng: &mut Prng,
     events: &mut ResMut<EventQueue>,
 ) {
     let mut last_window_x = 0.0;
@@ -59,8 +62,13 @@ fn spawn_windows(
     for (i, window_config) in level.window_configurations.iter().enumerate() {
         let service_handle = registry
             .window_services
-            .get_handle_by_id(&window_config.service_template)
-            .expect("Window service not found in registry");
+            .get_handle_by_id(&window_config.service)
+            .unwrap_or_else(|| {
+                panic!(
+                    "Window service '{}' not found in registry",
+                    window_config.service
+                )
+            });
         let service_model = registry.window_services.get(service_handle);
 
         // Spawn window entity with separated data
@@ -76,7 +84,7 @@ fn spawn_windows(
                     service_template: service_handle,
                     slot_index: window_config.slot_index,
                     location: window_location,
-                    enabled: window_config.is_enabled,
+                    disabled: window_config.is_disabled,
                 },
                 DisplayState {
                     proto: service_model.display.res.clone(),
@@ -90,10 +98,23 @@ fn spawn_windows(
             ))
             .id();
 
+        let dish_assignments = service_model
+            .dish_options
+            .choose_multiple(rng, service_model.layout.dish_slots.len())
+            .map(|opt| DishAssignment {
+                dish_id: opt.dish_id.clone(),
+                pricing: window_config
+                    .price_override
+                    .get(&opt.dish_id)
+                    .cloned()
+                    .unwrap_or(opt.pricing),
+            })
+            .collect::<Vec<_>>();
+
         spawn_dishes(
             commands,
             window_entity,
-            &window_config.dish_assignments,
+            &dish_assignments,
             service_model,
             registry,
             events,
@@ -134,6 +155,11 @@ fn spawn_windows(
     );
 }
 
+struct DishAssignment {
+    pub dish_id: ModelId,
+    pub pricing: PricingMethod,
+}
+
 fn spawn_dishes(
     commands: &mut Commands,
     window_entity: Entity,
@@ -144,11 +170,8 @@ fn spawn_dishes(
 ) {
     let layout = &service_model.layout;
 
-    for assignment in dish_assignments {
-        let slot_index = assignment.slot_index;
-        let Some(slot_rect) = layout.dish_slots.get(slot_index) else {
-            continue;
-        };
+    for (slot_index, assignment) in dish_assignments.iter().enumerate() {
+        let slot_rect = &layout.dish_slots[slot_index];
 
         let dish_handle = registry
             .dishes
@@ -160,7 +183,8 @@ fn spawn_dishes(
         let wrapper_entity = commands
             .spawn((
                 Dish {
-                    assignment: assignment.clone(),
+                    model_id: assignment.dish_id.clone(),
+                    pricing: assignment.pricing,
                     state: DishRuntimeState {
                         current_quantity: DEFAULT_DISH_QUANTITY,
                         current_quality: DEFAULT_DISH_QUALITY,

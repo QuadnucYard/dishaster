@@ -11,8 +11,8 @@ pub struct Window {
     pub slot_index: usize,
     /// Position in the canteen (should correspond to canteen layout)
     pub location: XSegment,
-    /// Whether the window is currently open for service
-    pub enabled: bool,
+    /// Whether the window is currently closed
+    pub disabled: bool,
 }
 
 /// Dining table component for customer seating areas

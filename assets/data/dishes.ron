@@ -1,44 +1,12 @@
 [
-    // 主食类 (Staples)
+    // ==================== 主食类 (Staples) ====================
     (
         id: "rice", // 米饭
         characteristics: (
             quality_range: (0.7, 1.0),
             serving_time: 5.0,
             tags: ["staple", "rice", "mild"],
-            base_price: 2.0, // ¥1/0.5kg, 按重量计价
-        ),
-        display: (res: "dishes/rice"),
-    ),
-    (
-        id: "noodles", // 面条
-        characteristics: (
-            quality_range: (0.6, 0.95),
-            serving_time: 8.0,
-            tags: ["staple", "noodle", "mild"],
-            base_price: 6.0,
-        ),
-        // display: (res: "dishes/noodles"),
-        display: (res: "dishes/rice"),
-    ),
-    (
-        id: "fried_rice", // 炒饭
-        characteristics: (
-            quality_range: (0.65, 0.9),
-            serving_time: 10.0,
-            tags: ["staple", "rice", "fried", "savory"],
-            base_price: 8.0,
-        ),
-        // display: (res: "dishes/fried_rice"),
-        display: (res: "dishes/rice"),
-    ),
-    (
-        id: "fried_noodles", // 炒面
-        characteristics: (
-            quality_range: (0.65, 0.9),
-            serving_time: 10.0,
-            tags: ["staple", "noodle", "fried", "savory"],
-            base_price: 8.0,
+            base_price: 2.0, // ¥2/kg (按重量计价)
         ),
         display: (res: "dishes/rice"),
     ),
@@ -50,11 +18,264 @@
             tags: ["staple", "steamed", "mild"],
             base_price: 1.0,
         ),
-        // display: (res: "dishes/mantou"),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "congee", // 白粥
+        characteristics: (
+            quality_range: (0.75, 0.95),
+            serving_time: 4.0,
+            tags: ["staple", "soup", "mild", "light"],
+            base_price: 1.5,
+        ),
         display: (res: "dishes/rice"),
     ),
 
-    // 荤菜类 (Meat Dishes) - 按重量计价 ¥28-90/kg
+    // ==================== 套餐类 (Combo Meals) ====================
+    // 经济实惠的固定搭配套餐
+
+    // 盖浇饭类 (Rice Bowls with Toppings)
+    (
+        id: "char_siu_rice", // 叉烧饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "pork", "rice", "savory"],
+            base_price: 12.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "roast_duck_rice", // 烧鸭饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "duck", "rice", "savory"],
+            base_price: 14.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "roast_pork_rice", // 烧肉饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "pork", "rice", "savory"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "roast_chicken_rice", // 烧鸡饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "chicken", "rice", "savory"],
+            base_price: 12.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "braised_chicken_rice", // 卤鸡饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "chicken", "rice", "savory"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "soy_sauce_chicken_rice", // 豉油鸡饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "chicken", "rice", "savory"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "curry_chicken_rice", // 咖喱鸡饭
+        characteristics: (
+            quality_range: (0.7, 0.9),
+            serving_time: 12.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "chicken", "rice", "curry"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "curry_beef_rice", // 咖喱牛肉饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "beef", "rice", "curry"],
+            base_price: 15.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "pork_chop_rice", // 猪扒饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "pork", "rice", "fried"],
+            base_price: 15.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "chicken_cutlet_rice", // 鸡排饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "chicken", "rice", "fried"],
+            base_price: 14.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "beef_brisket_rice", // 牛腩饭
+        characteristics: (
+            quality_range: (0.75, 0.95),
+            serving_time: 12.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "beef", "rice", "braised"],
+            base_price: 16.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "braised_pork_rice", // 卤肉饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "pork", "rice", "braised"],
+            base_price: 12.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "fish_fillet_rice", // 鱼片饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            risk_level: 0.15,
+            tags: ["combo", "fish", "rice", "light"],
+            base_price: 14.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "kung_pao_chicken_rice", // 宫保鸡丁盖饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 11.0,
+            risk_level: 0.1,
+            tags: ["combo", "meat", "chicken", "rice", "spicy"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "mapo_tofu_rice", // 麻婆豆腐盖饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            tags: ["combo", "tofu", "rice", "spicy"],
+            base_price: 11.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "tomato_egg_rice", // 番茄鸡蛋盖饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 10.0,
+            tags: ["combo", "egg", "rice", "vegetable", "light"],
+            base_price: 10.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+
+    // 炒饭类 (Fried Rice)
+    (
+        id: "egg_fried_rice", // 蛋炒饭
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 10.0,
+            tags: ["combo", "rice", "egg", "fried"],
+            base_price: 8.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "yangzhou_fried_rice", // 扬州炒饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            tags: ["combo", "rice", "egg", "meat", "fried"],
+            base_price: 12.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "shrimp_fried_rice", // 虾仁炒饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            risk_level: 0.1,
+            tags: ["combo", "rice", "seafood", "fried"],
+            base_price: 14.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "beef_fried_rice", // 牛肉炒饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            risk_level: 0.1,
+            tags: ["combo", "rice", "beef", "fried"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "ham_fried_rice", // 火腿炒饭
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 11.0,
+            tags: ["combo", "rice", "meat", "fried"],
+            base_price: 10.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "pineapple_fried_rice", // 菠萝炒饭
+        characteristics: (
+            quality_range: (0.7, 0.9),
+            serving_time: 13.0,
+            tags: ["combo", "rice", "fried", "sweet"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+
+    // ==================== 荤菜类 (Meat Dishes - 按重量) ====================
+    // 按重量售卖的荤菜 ¥28-70/kg
     (
         id: "kung_pao_chicken", // 宫保鸡丁
         characteristics: (
@@ -64,7 +285,6 @@
             tags: ["meat", "chicken", "spicy", "fried", "hot"],
             base_price: 36.0, // ¥36/kg
         ),
-        // display: (res: "dishes/kung_pao_chicken"),
         display: (res: "dishes/rice"),
     ),
     (
@@ -74,32 +294,87 @@
             serving_time: 12.0,
             risk_level: 0.15,
             tags: ["meat", "pork", "sweet", "fried"],
-            base_price: 42.0, // ¥42/kg
+            base_price: 42.0,
         ),
-        // display: (res: "dishes/sweet_sour_pork"),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "braised_pork", // 红烧肉
+        id: "braised_pork_belly", // 红烧肉
         characteristics: (
             quality_range: (0.7, 0.95),
             serving_time: 10.0,
             risk_level: 0.1,
             tags: ["meat", "pork", "savory", "braised", "hot"],
-            base_price: 48.0, // ¥48/kg
+            base_price: 48.0,
         ),
-        // display: (res: "dishes/braised_pork"),
         display: (res: "dishes/rice"),
     ),
+    (
+        id: "cola_chicken_wings", // 可乐鸡翅
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 13.0,
+            risk_level: 0.1,
+            tags: ["meat", "chicken", "sweet", "braised"],
+            base_price: 52.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "black_pepper_beef", // 黑椒牛柳
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 13.0,
+            risk_level: 0.1,
+            tags: ["meat", "beef", "savory", "fried", "hot"],
+            base_price: 65.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "beef_potato_stew", // 土豆烧牛肉
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 13.0,
+            risk_level: 0.1,
+            tags: ["meat", "beef", "savory", "hot", "braised"],
+            base_price: 58.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "fried_pork_cutlet", // 炸猪排
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 14.0,
+            risk_level: 0.15,
+            tags: ["meat", "pork", "fried", "crispy"],
+            base_price: 55.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "salt_pepper_ribs", // 椒盐排骨
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 14.0,
+            risk_level: 0.15,
+            tags: ["meat", "pork", "fried", "crispy", "savory"],
+            base_price: 60.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+
+    // ==================== 半荤半素类 (Meat & Veg - 按份) ====================
+    // 小炒类 ¥3-5/份
     (
         id: "mapo_tofu", // 麻婆豆腐
         characteristics: (
             quality_range: (0.65, 0.95),
             serving_time: 10.0,
             tags: ["tofu", "meat", "spicy", "hot", "savory"],
-            base_price: 3.0, // 按份，有点肉末的小炒
+            base_price: 3.5,
         ),
-        // display: (res: "dishes/mapo_tofu"),
         display: (res: "dishes/rice"),
     ),
     (
@@ -108,25 +383,54 @@
             quality_range: (0.6, 0.9),
             serving_time: 11.0,
             tags: ["vegetable", "meat", "eggplant", "spicy", "savory"],
-            base_price: 3.5, // 按份，有点肉末的小炒
+            base_price: 3.5,
         ),
-        // display: (res: "dishes/fish_fragrant_eggplant"),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "beef_potato", // 土豆烧牛肉
+        id: "green_pepper_pork", // 青椒肉丝
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 10.0,
+            tags: ["meat", "pork", "vegetable", "fried", "savory"],
+            base_price: 4.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "twice_cooked_pork", // 回锅肉
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 13.0,
+            serving_time: 12.0,
             risk_level: 0.1,
-            tags: ["meat", "beef", "savory", "hot"],
-            base_price: 58.0, // ¥58/kg
+            tags: ["meat", "pork", "spicy", "savory", "sichuan"],
+            base_price: 4.5,
         ),
-        // display: (res: "dishes/beef_potato"),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "scrambled_eggs_tomato", // 西红柿炒鸡蛋
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 9.0,
+            tags: ["egg", "vegetable", "mild", "savory"],
+            base_price: 3.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "scrambled_eggs_cucumber", // 黄瓜炒鸡蛋
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 9.0,
+            tags: ["egg", "vegetable", "mild", "light"],
+            base_price: 3.0,
+        ),
         display: (res: "dishes/rice"),
     ),
 
-    // 素菜类 (Vegetable Dishes) - 按份计价 ¥1-4/份
+    // ==================== 素菜类 (Vegetable Dishes - 按份) ====================
+    // ¥1.5-3/份
     (
         id: "stir_fried_cabbage", // 清炒白菜
         characteristics: (
@@ -135,18 +439,16 @@
             tags: ["vegetable", "light", "healthy", "fried"],
             base_price: 1.5,
         ),
-        // display: (res: "dishes/stir_fried_cabbage"),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "tomato_egg", // 西红柿炒鸡蛋
+        id: "stir_fried_bok_choy", // 清炒小白菜
         characteristics: (
-            quality_range: (0.7, 0.95),
-            serving_time: 9.0,
-            tags: ["egg", "vegetable", "mild", "savory"],
-            base_price: 3.0,
+            quality_range: (0.65, 0.9),
+            serving_time: 8.0,
+            tags: ["vegetable", "light", "healthy", "fried"],
+            base_price: 1.5,
         ),
-        // display: (res: "dishes/tomato_egg"),
         display: (res: "dishes/rice"),
     ),
     (
@@ -157,7 +459,6 @@
             tags: ["vegetable", "fried", "crispy"],
             base_price: 2.0,
         ),
-        // display: (res: "dishes/potato_shreds"),
         display: (res: "dishes/rice"),
     ),
     (
@@ -168,11 +469,50 @@
             tags: ["vegetable", "light", "healthy", "garlic"],
             base_price: 2.5,
         ),
-        // display: (res: "dishes/spinach_garlic"),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "chinese_broccoli_garlic", // 蒜蓉芥兰
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 7.0,
+            tags: ["vegetable", "light", "healthy", "garlic"],
+            base_price: 2.5,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "stir_fried_bean_sprouts", // 炒豆芽
+        characteristics: (
+            quality_range: (0.6, 0.85),
+            serving_time: 7.0,
+            tags: ["vegetable", "light", "fried", "crispy"],
+            base_price: 1.5,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "stir_fried_water_spinach", // 炒空心菜
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 8.0,
+            tags: ["vegetable", "light", "fried", "garlic"],
+            base_price: 2.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "braised_eggplant", // 红烧茄子
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 11.0,
+            tags: ["vegetable", "eggplant", "savory", "braised"],
+            base_price: 2.5,
+        ),
         display: (res: "dishes/rice"),
     ),
 
-    // 汤类 (Soups)
+    // ==================== 汤类 (Soups) ====================
     (
         id: "egg_drop_soup", // 蛋花汤
         characteristics: (
@@ -181,18 +521,16 @@
             tags: ["soup", "egg", "light", "hot"],
             base_price: 2.0,
         ),
-        // display: (res: "dishes/egg_drop_soup"),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "seaweed_soup", // 紫菜汤
+        id: "seaweed_egg_soup", // 紫菜蛋花汤
         characteristics: (
-            quality_range: (0.65, 0.9),
+            quality_range: (0.7, 0.95),
             serving_time: 6.0,
-            tags: ["soup", "light", "healthy", "hot"],
-            base_price: 1.5,
+            tags: ["soup", "egg", "light", "hot"],
+            base_price: 2.0,
         ),
-        // display: (res: "dishes/seaweed_soup"),
         display: (res: "dishes/rice"),
     ),
     (
@@ -203,20 +541,28 @@
             tags: ["soup", "egg", "vegetable", "hot"],
             base_price: 2.5,
         ),
-        // display: (res: "dishes/tomato_egg_soup"),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "winter_melon_soup", // 冬瓜汤
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 7.0,
+            tags: ["soup", "vegetable", "light", "hot"],
+            base_price: 2.0,
+        ),
         display: (res: "dishes/rice"),
     ),
 
-    // 面食类 (Noodle Dishes)
+    // ==================== 面食类 (Noodle Dishes - 套餐) ====================
     (
         id: "dan_dan_noodles", // 担担面
         characteristics: (
             quality_range: (0.65, 0.95),
             serving_time: 12.0,
-            tags: ["noodle", "spicy", "savory", "hot"],
+            tags: ["noodle", "spicy", "savory", "hot", "sichuan"],
             base_price: 10.0,
         ),
-        // display: (res: "dishes/dan_dan_noodles"),
         display: (res: "dishes/rice"),
     ),
     (
@@ -228,7 +574,6 @@
             tags: ["noodle", "soup", "meat", "beef", "hot"],
             base_price: 16.0,
         ),
-        // display: (res: "dishes/beef_noodle_soup"),
         display: (res: "dishes/rice"),
     ),
     (
@@ -239,20 +584,185 @@
             tags: ["noodle", "pork", "savory"],
             base_price: 11.0,
         ),
-        // display: (res: "dishes/zhajiang_noodles"),
         display: (res: "dishes/rice"),
     ),
-
-    // 小吃类 (Snacks)
     (
-        id: "dumplings", // 水饺
+        id: "tomato_egg_noodles", // 西红柿鸡蛋面
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 12.0,
+            tags: ["noodle", "soup", "egg", "vegetable", "hot"],
+            base_price: 10.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "fried_noodles", // 炒面
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 12.0,
+            tags: ["noodle", "fried", "savory"],
+            base_price: 9.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "wonton_noodles", // 馄饨面
         characteristics: (
             quality_range: (0.7, 0.95),
             serving_time: 14.0,
-            tags: ["dumpling", "meat", "steamed"],
-            base_price: 5.0, // 一份(8-10个)
+            tags: ["noodle", "soup", "dumpling", "hot"],
+            base_price: 12.0,
         ),
-        // display: (res: "dishes/dumplings"),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "hot_dry_noodles", // 热干面
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 10.0,
+            tags: ["noodle", "savory", "sesame"],
+            base_price: 8.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "lanzhou_beef_noodles", // 兰州拉面
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 14.0,
+            risk_level: 0.1,
+            tags: ["noodle", "beef", "soup", "halal"],
+            base_price: 13.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "chongqing_noodles", // 重庆小面
+        characteristics: (
+            quality_range: (0.7, 0.9),
+            serving_time: 11.0,
+            tags: ["noodle", "spicy", "sichuan"],
+            base_price: 10.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "crossing_bridge_noodles", // 过桥米线
+        characteristics: (
+            quality_range: (0.75, 0.95),
+            serving_time: 16.0,
+            risk_level: 0.1,
+            tags: ["noodle", "soup", "yunnan", "hot"],
+            base_price: 15.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "cold_noodles", // 凉面
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 8.0,
+            tags: ["noodle", "cold", "refreshing"],
+            base_price: 8.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "shrimp_wonton_noodles", // 虾仁云吞面
+        characteristics: (
+            quality_range: (0.75, 0.95),
+            serving_time: 14.0,
+            risk_level: 0.1,
+            tags: ["noodle", "wonton", "seafood", "soup"],
+            base_price: 15.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "pork_chop_noodles", // 排骨面
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 15.0,
+            risk_level: 0.1,
+            tags: ["noodle", "pork", "soup", "hot"],
+            base_price: 14.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+
+    // ==================== 小吃类 (Snacks - 水饺等套餐) ====================
+    (
+        id: "pork_dumplings", // 猪肉水饺
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 14.0,
+            tags: ["dumpling", "meat", "pork", "steamed"],
+            base_price: 8.0, // 一份(10个)
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "vegetable_dumplings", // 素水饺
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 14.0,
+            tags: ["dumpling", "vegetable", "steamed"],
+            base_price: 7.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "pork_cabbage_dumplings", // 猪肉白菜饺子
+        characteristics: (
+            quality_range: (0.7, 0.9),
+            serving_time: 14.0,
+            tags: ["dumpling", "pork", "vegetable"],
+            base_price: 8.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "pork_chive_dumplings", // 猪肉韭菜饺子
+        characteristics: (
+            quality_range: (0.7, 0.9),
+            serving_time: 14.0,
+            tags: ["dumpling", "pork", "vegetable"],
+            base_price: 8.5,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "three_delicacy_dumplings", // 三鲜饺子
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 14.0,
+            risk_level: 0.1,
+            tags: ["dumpling", "seafood", "pork"],
+            base_price: 10.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "shrimp_dumplings", // 虾仁饺子
+        characteristics: (
+            quality_range: (0.75, 0.95),
+            serving_time: 14.0,
+            risk_level: 0.1,
+            tags: ["dumpling", "seafood"],
+            base_price: 12.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "beef_dumplings", // 牛肉饺子
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 14.0,
+            risk_level: 0.1,
+            tags: ["dumpling", "beef"],
+            base_price: 10.0,
+        ),
         display: (res: "dishes/rice"),
     ),
     (
@@ -261,18 +771,27 @@
             quality_range: (0.7, 0.95),
             serving_time: 12.0,
             tags: ["dumpling", "meat", "fried", "crispy"],
-            base_price: 4.0, // 一份(4-6个)
+            base_price: 6.0, // 一份(4个)
         ),
-        // display: (res: "dishes/pan_fried_buns"),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "steamed_buns", // 包子
+        id: "steamed_pork_buns", // 猪肉包子
         characteristics: (
             quality_range: (0.7, 0.95),
             serving_time: 8.0,
-            tags: ["dumpling", "meat", "steamed"],
-            base_price: 3.0, // 一份(2-3个)
+            tags: ["dumpling", "meat", "pork", "steamed"],
+            base_price: 4.0, // 一份(2个)
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "steamed_veggie_buns", // 素菜包子
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 8.0,
+            tags: ["dumpling", "vegetable", "steamed"],
+            base_price: 3.0,
         ),
         display: (res: "dishes/rice"),
     ),
@@ -282,7 +801,7 @@
             quality_range: (0.65, 0.9),
             serving_time: 10.0,
             tags: ["snack", "fried", "crispy", "vegetable"],
-            base_price: 3.5, // 一份(3-4个)
+            base_price: 4.0, // 一份(3个)
         ),
         display: (res: "dishes/rice"),
     ),
@@ -292,87 +811,127 @@
             quality_range: (0.6, 0.9),
             serving_time: 5.0,
             tags: ["snack", "fried", "crispy"],
-            base_price: 1.5, // 一根
+            base_price: 2.0, // 一根
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "sesame_pancake", // 烧饼
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 6.0,
+            tags: ["snack", "baked", "sesame"],
+            base_price: 2.5,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "scallion_pancake", // 葱油饼
+        characteristics: (
+            quality_range: (0.65, 0.9),
+            serving_time: 7.0,
+            tags: ["snack", "fried", "savory", "scallion"],
+            base_price: 3.0,
         ),
         display: (res: "dishes/rice"),
     ),
 
-    // 套餐类 (Combo Meals) - 荤菜+蔬菜拼盘 ¥10-18/份
+    // ==================== 特色套餐 (Specialty Combos) ====================
+    // 煲仔饭、麻辣烫等特色套餐
     (
-        id: "combo_a", // A套餐
+        id: "clay_pot_rice", // 煲仔饭
         characteristics: (
-            quality_range: (0.7, 0.95),
-            serving_time: 15.0,
-            risk_level: 0.1,
-            tags: ["combo", "meat", "rice", "vegetable"],
-            base_price: 12.0, // 荤素搭配套餐
+            quality_range: (0.75, 0.95),
+            serving_time: 20.0,
+            tags: ["combo", "rice", "cantonese", "special"],
+            base_price: 15.0,
         ),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "combo_b", // B套餐
+        id: "sausage_clay_pot_rice", // 腊味煲仔饭
         characteristics: (
-            quality_range: (0.7, 0.95),
-            serving_time: 15.0,
-            risk_level: 0.1,
-            tags: ["combo", "meat", "rice", "soup"],
-            base_price: 14.0, // 荤素+汤套餐
-        ),
-        display: (res: "dishes/rice"),
-    ),
-    (
-        id: "combo_c", // C套餐
-        characteristics: (
-            quality_range: (0.7, 0.95),
-            serving_time: 15.0,
-            tags: ["combo", "vegetable", "rice", "light"],
-            base_price: 10.0, // 素菜套餐
-        ),
-        display: (res: "dishes/rice"),
-    ),
-    (
-        id: "combo_d", // D套餐
-        characteristics: (
-            quality_range: (0.7, 0.95),
-            serving_time: 15.0,
-            risk_level: 0.1,
-            tags: ["combo", "meat", "spicy", "rice"],
-            base_price: 15.0, // 特色荤菜套餐
-        ),
-        display: (res: "dishes/rice"),
-    ),
-
-    // 特色菜 (Specialty Dishes) - 按份 ¥10-18/份
-    (
-        id: "sichuan_boiled_fish", // 水煮鱼
-        characteristics: (
-            quality_range: (0.65, 0.95),
-            serving_time: 18.0,
-            risk_level: 0.15,
-            tags: ["specialty", "fish", "spicy", "hot", "sichuan"],
+            quality_range: (0.75, 0.95),
+            serving_time: 20.0,
+            tags: ["combo", "rice", "meat", "cantonese", "special"],
             base_price: 16.0,
         ),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "twice_cooked_pork", // 回锅肉
+        id: "chicken_clay_pot_rice", // 滑鸡煲仔饭
         characteristics: (
-            quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            quality_range: (0.75, 0.95),
+            serving_time: 20.0,
             risk_level: 0.1,
-            tags: ["specialty", "pork", "spicy", "savory", "sichuan"],
-            base_price: 13.0,
+            tags: ["combo", "rice", "chicken", "cantonese", "special"],
+            base_price: 17.0,
         ),
         display: (res: "dishes/rice"),
     ),
     (
-        id: "hotpot_meat", // 麻辣香锅
+        id: "sichuan_spicy_hot_pot", // 麻辣烫
+        characteristics: (
+            quality_range: (0.7, 0.9),
+            serving_time: 15.0,
+            tags: ["combo", "hot_pot", "spicy", "sichuan"],
+            base_price: 12.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "mala_xiang_guo", // 麻辣香锅
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 18.0,
+            risk_level: 0.1,
+            tags: ["combo", "stir_fry", "spicy", "sichuan"],
+            base_price: 18.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "spicy_grilled_fish", // 烤鱼
+        characteristics: (
+            quality_range: (0.75, 0.95),
+            serving_time: 25.0,
+            risk_level: 0.15,
+            tags: ["combo", "fish", "spicy", "grilled", "special"],
+            base_price: 35.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "stone_pot_bibimbap", // 石锅拌饭
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 15.0,
+            tags: ["combo", "rice", "korean", "mixed"],
+            base_price: 14.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+
+    // ==================== 特色菜 (Specialty Dishes) ====================
+    (
+        id: "boiled_fish_chili", // 水煮鱼
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 18.0,
+            risk_level: 0.15,
+            tags: ["specialty", "fish", "spicy", "hot", "sichuan"],
+            base_price: 18.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "spicy_hotpot", // 麻辣香锅
         characteristics: (
             quality_range: (0.7, 0.95),
             serving_time: 20.0,
             risk_level: 0.15,
-            tags: ["specialty", "meat", "spicy", "hot"],
-            base_price: 18.0,
+            tags: ["specialty", "meat", "spicy", "hot", "sichuan"],
+            base_price: 20.0,
         ),
         display: (res: "dishes/rice"),
     ),
@@ -383,7 +942,29 @@
             serving_time: 16.0,
             risk_level: 0.2,
             tags: ["specialty", "fish", "light", "steamed", "healthy"],
-            base_price: 15.0,
+            base_price: 16.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "braised_fish", // 红烧鱼
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 17.0,
+            risk_level: 0.15,
+            tags: ["specialty", "fish", "savory", "braised"],
+            base_price: 16.0,
+        ),
+        display: (res: "dishes/rice"),
+    ),
+    (
+        id: "sweet_sour_fish", // 糖醋鱼
+        characteristics: (
+            quality_range: (0.7, 0.95),
+            serving_time: 17.0,
+            risk_level: 0.15,
+            tags: ["specialty", "fish", "sweet", "fried"],
+            base_price: 17.0,
         ),
         display: (res: "dishes/rice"),
     ),
@@ -393,8 +974,8 @@
             quality_range: (0.7, 0.95),
             serving_time: 17.0,
             risk_level: 0.15,
-            tags: ["specialty", "meat", "fried", "crispy", "savory"],
-            base_price: 17.0,
+            tags: ["specialty", "duck", "fried", "crispy", "savory"],
+            base_price: 18.0,
         ),
         display: (res: "dishes/rice"),
     ),

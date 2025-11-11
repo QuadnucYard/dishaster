@@ -12,23 +12,29 @@ pub fn persist_system(
 ) -> SimProfile {
     let window_configurations = window_query
         .iter()
-        .map(|(window, dishes)| WindowConfiguration {
-            slot_index: window.slot_index,
-            service_template: registry
-                .window_services
-                .get_id(window.service_template)
-                .clone(),
-            is_enabled: window.enabled,
-            dish_assignments: dishes
-                .iter()
-                .map(|dish_entity| {
-                    dish_query
-                        .get(dish_entity)
-                        .expect("dish for window")
-                        .assignment
-                        .clone()
-                })
-                .collect(),
+        .map(|(window, dishes)| {
+            let service = registry.window_services.get(window.service_template);
+
+            WindowConfiguration {
+                slot_index: window.slot_index,
+                service: service.id.clone(),
+                is_disabled: window.disabled,
+                price_override: dishes
+                    .iter()
+                    .filter_map(|dish_entity| {
+                        let dish = dish_query.get(dish_entity).ok()?;
+                        let price = dish.pricing;
+                        if service
+                            .dish_options
+                            .iter()
+                            .any(|opt| opt.dish_id == dish.model_id && opt.pricing == price)
+                        {
+                            return None;
+                        }
+                        Some((dish.model_id.clone(), price))
+                    })
+                    .collect(),
+            }
         })
         .collect();
 

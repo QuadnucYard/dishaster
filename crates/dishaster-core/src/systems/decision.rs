@@ -378,7 +378,7 @@ pub fn evaluate_window(
             continue;
         };
 
-        let dish_id = &dish.assignment.dish_id;
+        let dish_id = &dish.model_id;
 
         // Get dish model for tags and base price
         let Some(dish_model) = registry.dishes.get_by_id(dish_id) else {
@@ -389,7 +389,7 @@ pub fn evaluate_window(
         let dish_tags = &dish_model.characteristics.tags;
 
         // Get current price
-        let current_price = match dish.assignment.pricing {
+        let current_price = match dish.pricing {
             PricingMethod::PerPortion(price) => price,
             PricingMethod::ByWeight(price_per_kg) => price_per_kg * 0.2, // Assume 200g portion
         };

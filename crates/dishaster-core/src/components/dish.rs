@@ -15,8 +15,10 @@ pub struct WindowDishes(Vec<Entity>);
 /// An active dish available at a service window
 #[derive(Component)]
 pub struct Dish {
-    /// Configuration this came from
-    pub assignment: DishAssignment,
+    /// Reference to the dish model
+    pub model_id: ModelId,
+    /// Player-set pricing
+    pub pricing: PricingMethod,
     /// Current runtime state
     pub state: DishRuntimeState,
 }

@@ -68,26 +68,17 @@ pub struct WindowConfiguration {
     /// Which slot to use
     pub slot_index: usize,
     /// Which service template this uses
-    pub service_template: ModelId,
-    /// Whether enabled
-    pub is_enabled: bool,
-    /// Player-selected dishes
-    pub dish_assignments: Vec<DishAssignment>,
-}
-
-/// Player's assignment of a dish to a specific slot in a window
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct DishAssignment {
-    /// Which slot to use
-    pub slot_index: usize,
-    /// Which dish to serve
-    pub dish_id: ModelId,
-    /// Player-set pricing
-    pub pricing: PricingMethod,
+    pub service: ModelId,
+    /// Whether disabled
+    #[serde(default)]
+    pub is_disabled: bool,
+    /// Optional pricing overrides for dishes served at this window
+    #[serde(default)]
+    pub price_override: FxHashMap<ModelId, PricingMethod>,
 }
 
 /// Different pricing strategies for dishes
-#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub enum PricingMethod {
     /// Fixed price per serving
     PerPortion(f32),

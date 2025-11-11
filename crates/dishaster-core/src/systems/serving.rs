@@ -200,10 +200,10 @@ pub fn process_serving_messages(
                     dish_query
                         .get(e)
                         .ok()
-                        .filter(|d| d.assignment.dish_id == request.dish_id)
+                        .filter(|d| d.model_id == request.dish_id)
                 }) {
                     // Calculate price based on pricing config
-                    let price_paid = match dish.assignment.pricing {
+                    let price_paid = match dish.pricing {
                         PricingMethod::PerPortion(price) => price,
                         PricingMethod::ByWeight(price_per_kg) => {
                             // For now, assume standard portion weight of 0.5 kg
@@ -414,13 +414,13 @@ fn choose_service_request(
     // Pick a dish that is currently staged in the serving window.
     let dish_entity = *dishes.collection().choose(rng)?;
     let dish = dish_query.get(dish_entity).ok()?;
-    let dish_handle = registry.dishes.get_handle_by_id(&dish.assignment.dish_id)?;
+    let dish_handle = registry.dishes.get_handle_by_id(&dish.model_id)?;
     // Look up the dish model to copy presentation details for feedback later.
     let dish_model = registry.dishes.get(dish_handle);
 
     // Populate the request struct that sessions carry for the rest of the workflow.
     Some(ServiceRequest {
-        dish_id: dish.assignment.dish_id.clone(),
+        dish_id: dish.model_id.clone(),
         dish_name: dish_model.id.clone().to_string(), // Use the model ID as a fallback name
         base_service_time: dish_model.characteristics.serving_time,
     })

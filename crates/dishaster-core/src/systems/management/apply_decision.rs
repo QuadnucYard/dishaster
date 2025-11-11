@@ -123,7 +123,7 @@ fn apply_open_window(
                 service_template: service_handle,
                 slot_index,
                 location: XSegment::new(0., 0., 0.), // does not matter
-                enabled: true,
+                disabled: false,
             },))
             .id();
 

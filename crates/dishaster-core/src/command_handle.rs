@@ -29,7 +29,7 @@ impl Simulation {
                     return; // TODO: emit error event
                 };
 
-                dish.assignment.pricing = pricing.to_model();
+                dish.pricing = pricing.to_model();
 
                 let mut events = self.world.resource_mut::<EventQueue>();
                 events.push(SimEvent::DishPriceChanged {

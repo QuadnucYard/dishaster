@@ -109,7 +109,7 @@ fn handle_observe_goal(
             || !movement.has_path() && goal.timer > 5.0 / personality.decisiveness.max(0.1)
         {
             // Simple logic: pick a random available window to observe.
-            let available_windows = window_query.iter().filter(|(_, w)| w.enabled);
+            let available_windows = window_query.iter().filter(|(_, w)| !w.disabled);
 
             let Some((window_entity, window)) = available_windows.choose(&mut rng) else {
                 // No windows available, decide to leave.
@@ -184,7 +184,7 @@ fn handle_decide_window_goal(
         let mut candidates = Vec::new();
 
         for (window_entity, window, window_dishes) in window_query.iter() {
-            if !window.enabled {
+            if window.disabled {
                 continue;
             }
 

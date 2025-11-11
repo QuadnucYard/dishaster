@@ -1,9 +1,309 @@
 [
-    // 套餐窗口 (Combo Windows) - 1 queue each
+    // ==================== 套餐窗口 (Combo Windows) ====================
+    // Quick service with complete combo meals
     (
-        id: "combo_window_1",
+        id: "combo_window_roast",
         window_type: General,
-        name: "套餐一",
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [1.0],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "char_siu_rice", pricing: PerPortion(12.0)),
+            (dish_id: "roast_duck_rice", pricing: PerPortion(14.0)),
+            (dish_id: "braised_chicken_rice", pricing: PerPortion(13.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "combo_window_fried",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [1.0],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "curry_chicken_rice", pricing: PerPortion(13.0)),
+            (dish_id: "pork_chop_rice", pricing: PerPortion(15.0)),
+            (dish_id: "beef_brisket_rice", pricing: PerPortion(16.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+
+    // ==================== 大伙窗口 (Main Dish Windows) ====================
+    // Mixed meat and vegetable dishes, weight-based pricing
+    (
+        id: "main_window_sichuan",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "kung_pao_chicken", pricing: ByWeight(36.0)),
+            (dish_id: "mapo_tofu", pricing: PerPortion(3.5)),
+            (dish_id: "twice_cooked_pork", pricing: PerPortion(4.5)),
+            (dish_id: "fish_fragrant_eggplant", pricing: PerPortion(3.5)),
+            (dish_id: "stir_fried_cabbage", pricing: PerPortion(1.5)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "main_window_homestyle",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "braised_pork_belly", pricing: ByWeight(48.0)),
+            (dish_id: "scrambled_eggs_tomato", pricing: PerPortion(3.0)),
+            (dish_id: "green_pepper_pork", pricing: PerPortion(4.0)),
+            (dish_id: "potato_shreds", pricing: PerPortion(2.0)),
+            (dish_id: "spinach_garlic", pricing: PerPortion(2.5)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "main_window_premium",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "black_pepper_beef", pricing: ByWeight(65.0)),
+            (dish_id: "beef_potato_stew", pricing: ByWeight(58.0)),
+            (dish_id: "cola_chicken_wings", pricing: ByWeight(52.0)),
+            (dish_id: "scrambled_eggs_cucumber", pricing: PerPortion(3.0)),
+            (dish_id: "chinese_broccoli_garlic", pricing: PerPortion(2.5)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "main_window_classic",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "sweet_sour_pork", pricing: ByWeight(42.0)),
+            (dish_id: "fried_pork_cutlet", pricing: ByWeight(55.0)),
+            (dish_id: "salt_pepper_ribs", pricing: ByWeight(60.0)),
+            (dish_id: "stir_fried_bok_choy", pricing: PerPortion(1.5)),
+            (dish_id: "braised_eggplant", pricing: PerPortion(2.5)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+
+    // ==================== 面食窗口 (Noodle Windows) ====================
+    (
+        id: "noodle_window_soup",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "beef_noodle_soup", pricing: PerPortion(16.0)),
+            (dish_id: "tomato_egg_noodles", pricing: PerPortion(10.0)),
+            (dish_id: "wonton_noodles", pricing: PerPortion(12.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "noodle_window_dry",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "dan_dan_noodles", pricing: PerPortion(10.0)),
+            (dish_id: "zhajiang_noodles", pricing: PerPortion(11.0)),
+            (dish_id: "fried_noodles", pricing: PerPortion(9.0)),
+            (dish_id: "hot_dry_noodles", pricing: PerPortion(8.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+
+    // ==================== 小吃窗口 (Snack Windows) ====================
+    (
+        id: "snack_window_dumplings",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "pork_dumplings", pricing: PerPortion(8.0)),
+            (dish_id: "vegetable_dumplings", pricing: PerPortion(7.0)),
+            (dish_id: "pan_fried_buns", pricing: PerPortion(6.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "snack_window_buns",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "steamed_pork_buns", pricing: PerPortion(4.0)),
+            (dish_id: "steamed_veggie_buns", pricing: PerPortion(3.0)),
+            (dish_id: "mantou", pricing: PerPortion(1.0)),
+            (dish_id: "scallion_pancake", pricing: PerPortion(3.5)),
+            (dish_id: "sesame_pancake", pricing: PerPortion(2.5)),
+            (dish_id: "fried_dough_sticks", pricing: PerPortion(2.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "snack_window_breakfast",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "congee", pricing: PerPortion(1.5)),
+            (dish_id: "fried_dough_sticks", pricing: PerPortion(2.0)),
+            (dish_id: "spring_rolls", pricing: PerPortion(4.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+
+    // ==================== 特色菜窗口 (Specialty Windows) ====================
+    (
+        id: "specialty_window_fish",
+        window_type: Specialty,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "boiled_fish_chili", pricing: PerPortion(18.0)),
+            (dish_id: "steamed_fish", pricing: PerPortion(16.0)),
+            (dish_id: "braised_fish", pricing: PerPortion(16.0)),
+            (dish_id: "sweet_sour_fish", pricing: PerPortion(17.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "specialty_window_sichuan",
+        window_type: Specialty,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "spicy_hotpot", pricing: PerPortion(20.0)),
+            (dish_id: "boiled_fish_chili", pricing: PerPortion(18.0)),
+            (dish_id: "twice_cooked_pork", pricing: PerPortion(4.5)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "specialty_window_duck",
+        window_type: Specialty,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "crispy_duck", pricing: PerPortion(18.0)),
+            (dish_id: "roast_duck_rice", pricing: PerPortion(14.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+
+    // ==================== 盖浇饭窗口 (Rice Bowl Windows) ====================
+    (
+        id: "combo_window_rice_bowls",
+        window_type: General,
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [1.0],
@@ -13,12 +313,17 @@
                 (min: (0.5, 0.5), max: (1.0, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "kung_pao_chicken_rice", pricing: PerPortion(13.0)),
+            (dish_id: "mapo_tofu_rice", pricing: PerPortion(11.0)),
+            (dish_id: "tomato_egg_rice", pricing: PerPortion(10.0)),
+            (dish_id: "curry_beef_rice", pricing: PerPortion(15.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
     (
-        id: "combo_window_2",
+        id: "combo_window_fried_rice",
         window_type: General,
-        name: "套餐二",
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [1.0],
@@ -28,12 +333,19 @@
                 (min: (0.5, 0.5), max: (1.0, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "yangzhou_fried_rice", pricing: PerPortion(12.0)),
+            (dish_id: "shrimp_fried_rice", pricing: PerPortion(14.0)),
+            (dish_id: "beef_fried_rice", pricing: PerPortion(13.0)),
+            (dish_id: "egg_fried_rice", pricing: PerPortion(8.0)),
+            (dish_id: "ham_fried_rice", pricing: PerPortion(10.0)),
+            (dish_id: "pineapple_fried_rice", pricing: PerPortion(13.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
     (
-        id: "combo_window_3",
+        id: "combo_window_roast_meats",
         window_type: General,
-        name: "快餐套餐",
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [1.0],
@@ -43,14 +355,36 @@
                 (min: (0.5, 0.5), max: (1.0, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "roast_pork_rice", pricing: PerPortion(13.0)),
+            (dish_id: "roast_chicken_rice", pricing: PerPortion(12.0)),
+            (dish_id: "soy_sauce_chicken_rice", pricing: PerPortion(13.0)),
+            (dish_id: "braised_pork_rice", pricing: PerPortion(12.0)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    (
+        id: "combo_window_cutlets",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [1.0],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "chicken_cutlet_rice", pricing: PerPortion(14.0)),
+            (dish_id: "fish_fillet_rice", pricing: PerPortion(14.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
 
-    // 大伙窗口 (General Food Windows) - 2 queues each
+    // ==================== 更多面食窗口 (More Noodle Windows) ====================
     (
-        id: "general_window_1",
+        id: "noodle_window_regional",
         window_type: General,
-        name: "大伙一",
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [0.5, 1.5],
@@ -58,49 +392,52 @@
                 (min: (0.5, 0.0), max: (1.0, 0.5)),
                 (min: (1.0, 0.0), max: (1.5, 0.5)),
                 (min: (0.5, 0.5), max: (1.0, 1.0)),
-                (min: (1.0, 0.5), max: (1.5, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "lanzhou_beef_noodles", pricing: PerPortion(13.0)),
+            (dish_id: "chongqing_noodles", pricing: PerPortion(10.0)),
+            (dish_id: "crossing_bridge_noodles", pricing: PerPortion(15.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
     (
-        id: "general_window_2",
+        id: "noodle_window_premium",
         window_type: General,
-        name: "大伙二",
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [0.5, 1.5],
             dish_slots: [
                 (min: (0.5, 0.0), max: (1.0, 0.5)),
                 (min: (1.0, 0.0), max: (1.5, 0.5)),
-                (min: (0.5, 0.5), max: (1.0, 1.0)),
-                (min: (1.0, 0.5), max: (1.5, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "shrimp_wonton_noodles", pricing: PerPortion(15.0)),
+            (dish_id: "pork_chop_noodles", pricing: PerPortion(14.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
     (
-        id: "general_window_3",
+        id: "noodle_window_cold",
         window_type: General,
-        name: "大伙三",
         layout: (
             size: (width: 2.0, height: 3.0),
-            queue_x: [0.5, 1.5],
+            queue_x: [1.0],
             dish_slots: [
                 (min: (0.5, 0.0), max: (1.0, 0.5)),
-                (min: (1.0, 0.0), max: (1.5, 0.5)),
-                (min: (0.5, 0.5), max: (1.0, 1.0)),
-                (min: (1.0, 0.5), max: (1.5, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "cold_noodles", pricing: PerPortion(8.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
 
-    // 特色菜窗口 (Specialty Windows) - 2 queues each
+    // ==================== 更多水饺窗口 (More Dumpling Windows) ====================
     (
-        id: "specialty_window_1",
-        window_type: Specialty,
-        name: "特色一",
+        id: "snack_window_dumplings_premium",
+        window_type: General,
         layout: (
             size: (width: 2.0, height: 3.0),
             queue_x: [0.5, 1.5],
@@ -110,84 +447,66 @@
                 (min: (0.5, 0.5), max: (1.0, 1.0)),
             ],
         ),
-        display: (res: "windows/sample_window"),
-    ),
-    (
-        id: "specialty_window_2",
-        window_type: Specialty,
-        name: "特色二",
-        layout: (
-            size: (width: 2.0, height: 3.0),
-            queue_x: [0.5, 1.5],
-            dish_slots: [
-                (min: (0.5, 0.0), max: (1.0, 0.5)),
-                (min: (1.0, 0.0), max: (1.5, 0.5)),
-                (min: (0.5, 0.5), max: (1.0, 1.0)),
-            ],
-        ),
-        display: (res: "windows/sample_window"),
-    ),
-    (
-        id: "specialty_window_3",
-        window_type: Specialty,
-        name: "特色三",
-        layout: (
-            size: (width: 2.0, height: 3.0),
-            queue_x: [0.5, 1.5],
-            dish_slots: [
-                (min: (0.5, 0.0), max: (1.0, 0.5)),
-                (min: (1.0, 0.0), max: (1.5, 0.5)),
-                (min: (0.5, 0.5), max: (1.0, 1.0)),
-            ],
-        ),
+        dish_options: [
+            (dish_id: "pork_cabbage_dumplings", pricing: PerPortion(8.0)),
+            (dish_id: "pork_chive_dumplings", pricing: PerPortion(8.5)),
+            (dish_id: "three_delicacy_dumplings", pricing: PerPortion(10.0)),
+            (dish_id: "shrimp_dumplings", pricing: PerPortion(12.0)),
+            (dish_id: "beef_dumplings", pricing: PerPortion(10.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
 
-    // 面点/小吃窗口 (Noodle/Snack Windows) - 2 queues each
+    // ==================== 特色套餐窗口 (Specialty Combo Windows) ====================
     (
-        id: "noodle_window_1",
-        window_type: General,
-        name: "面点一",
+        id: "specialty_combo_clay_pot",
+        window_type: Specialty,
         layout: (
             size: (width: 2.0, height: 3.0),
-            queue_x: [0.5, 1.5],
+            queue_x: [1.0],
             dish_slots: [
                 (min: (0.5, 0.0), max: (1.0, 0.5)),
                 (min: (1.0, 0.0), max: (1.5, 0.5)),
-                (min: (0.5, 0.5), max: (1.0, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "clay_pot_rice", pricing: PerPortion(15.0)),
+            (dish_id: "sausage_clay_pot_rice", pricing: PerPortion(16.0)),
+            (dish_id: "chicken_clay_pot_rice", pricing: PerPortion(17.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
     (
-        id: "noodle_window_2",
-        window_type: General,
-        name: "面点二",
+        id: "specialty_combo_spicy",
+        window_type: Specialty,
         layout: (
             size: (width: 2.0, height: 3.0),
-            queue_x: [0.5, 1.5],
+            queue_x: [1.0],
             dish_slots: [
                 (min: (0.5, 0.0), max: (1.0, 0.5)),
                 (min: (1.0, 0.0), max: (1.5, 0.5)),
-                (min: (0.5, 0.5), max: (1.0, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "sichuan_spicy_hot_pot", pricing: PerPortion(12.0)),
+            (dish_id: "mala_xiang_guo", pricing: PerPortion(18.0)),
+            (dish_id: "spicy_grilled_fish", pricing: PerPortion(35.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
     (
-        id: "snack_window",
-        window_type: General,
-        name: "小吃",
+        id: "specialty_combo_korean",
+        window_type: Specialty,
         layout: (
             size: (width: 2.0, height: 3.0),
-            queue_x: [0.5, 1.5],
+            queue_x: [1.0],
             dish_slots: [
                 (min: (0.5, 0.0), max: (1.0, 0.5)),
-                (min: (1.0, 0.0), max: (1.5, 0.5)),
-                (min: (0.5, 0.5), max: (1.0, 1.0)),
-                (min: (1.0, 0.5), max: (1.5, 1.0)),
             ],
         ),
+        dish_options: [
+            (dish_id: "stone_pot_bibimbap", pricing: PerPortion(14.0)),
+        ],
         display: (res: "windows/sample_window"),
     ),
 ]

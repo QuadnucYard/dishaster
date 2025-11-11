@@ -23,7 +23,7 @@ fn apply_mislabel_price(
             continue;
         };
 
-        let (original_price, new_price) = match &mut dish.assignment.pricing {
+        let (original_price, new_price) = match &mut dish.pricing {
             PricingMethod::PerPortion(v) | PricingMethod::ByWeight(v) => {
                 let original_price = *v;
                 let new_price = original_price * (1.0 + rate);
@@ -34,14 +34,14 @@ fn apply_mislabel_price(
 
         log::info!(
             "Mislabeling price for dish {:?}: {:.2} -> {:.2}",
-            dish.assignment.dish_id,
+            dish.model_id,
             original_price,
             new_price
         );
 
         events.push(SimEvent::DishPriceChanged {
             entity: dish_entity.to_entity_id(),
-            new_pricing: dish.assignment.pricing.to_view(),
+            new_pricing: dish.pricing.to_view(),
         });
     }
 }

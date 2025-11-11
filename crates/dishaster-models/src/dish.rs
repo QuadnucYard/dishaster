@@ -1,3 +1,4 @@
+use dishaster_save_models::PricingMethod;
 use dishrupt_core::display::DisplayModel;
 
 use super::prelude::*;
@@ -59,10 +60,11 @@ pub struct WindowServiceModel {
     pub id: ModelId,
     /// Type category of this window
     pub window_type: WindowType,
-    /// Display name for this service window
-    pub name: EcoString,
     /// Physical layout
     pub layout: WindowLayout,
+    /// Dishes offered at this service window, which will be randomly selected from
+    /// to populate the actual menu during gameplay
+    pub dish_options: Vec<PricedDish>,
     /// Display model
     pub display: DisplayModel,
 }
@@ -82,4 +84,13 @@ pub struct WindowLayout {
     pub queue_x: Vec<Meters>,
     /// Positions where dishes can be placed. Relative to the top-left corner.
     pub dish_slots: Vec<Rect>,
+}
+
+/// Dish offered at a service window with a specific price
+#[derive(Debug, Clone, Deserialize)]
+pub struct PricedDish {
+    /// Reference to the dish model
+    pub dish_id: ModelId,
+    /// Price charged for this dish at the service window
+    pub pricing: PricingMethod,
 }
