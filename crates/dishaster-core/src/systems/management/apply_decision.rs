@@ -104,60 +104,24 @@ fn apply_open_window(
         .filter(|&i| !window_query.iter().any(|(_, w)| w.slot_index == i))
         .collect::<Vec<_>>();
 
-    // Open a new window with random service type
-    let service_model = registry
-        .window_services
-        .iter()
-        .choose(&mut rng)
-        .expect("No window models in registry")
-        .clone();
     let service_handle = registry
         .window_services
-        .get_handle_by_id(&service_model.id)
-        .expect("Service model handle not found");
+        .handles()
+        .choose(&mut rng)
+        .expect("No window models in registry");
 
     if let Some(&slot_index) = available_slots.choose(&mut rng) {
         // Now only spawn the components needed for persistence
-        let _window_entity = commands
-            .spawn((Window {
-                service_template: service_handle,
-                slot_index,
-                location: XSegment::new(0., 0., 0.), // does not matter
-                disabled: false,
-            },))
-            .id();
-
-        // Spawn dishes for this window
-        // TODO: assign dishes
-        /* for assignment in dish_assignments {
-            let slot_index = assignment.slot_index;
-            let Some(slot_rect) = layout.dish_slots.get(slot_index) else {
-                continue;
-            };
-
-            let dish_handle = registry
-                .dishes
-                .get_handle_by_id(&assignment.dish_id)
-                .expect("Dish not found in registry");
-            let dish_model = registry.dishes.get(dish_handle);
-
-            commands.spawn((
-                Dish {
-                    assignment: assignment.clone(),
-                    state: DishRuntimeState {
-                        current_quantity: DEFAULT_DISH_QUANTITY,
-                        current_quality: DEFAULT_DISH_QUALITY,
-                        contamination_level: DEFAULT_DISH_CONTAMINATION,
-                        // last_restocked: DEFAULT_DISH_LAST_RESTOCKED_S,
-                        // service_count: 0,
-                    },
-                },
-                ServedAtWindow(window_entity),
-            ));
-        } */
+        commands.spawn(Window {
+            service_template: service_handle,
+            slot_index,
+            location: XSegment::new(0., 0., 0.), // does not matter
+            disabled: false,
+        });
     }
 }
 
+/// Close a random window
 fn apply_close_window(
     _event: On<DispatchManagement<CloseWindowModel>>,
     mut commands: Commands,
@@ -171,6 +135,22 @@ fn apply_close_window(
     commands.entity(window).despawn();
 }
 
-fn apply_change_window_service(_event: On<DispatchManagement<ChangeWindowServiceModel>>) {
-    // TODO
+/// Change the service type of a random window
+fn apply_change_window_service(
+    _event: On<DispatchManagement<ChangeWindowServiceModel>>,
+    mut window_query: Query<&mut Window>,
+    registry: Res<GameModelRegistryRes>,
+    mut rng: ResMut<WorldRng>,
+) {
+    let Some(mut window) = window_query.iter_mut().choose(&mut rng) else {
+        return;
+    };
+
+    let service_handle = registry
+        .window_services
+        .handles()
+        .choose(&mut rng)
+        .expect("No window models in registry");
+
+    window.service_template = service_handle;
 }

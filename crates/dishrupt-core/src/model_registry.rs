@@ -122,6 +122,11 @@ impl<T> ModelRegistry<T> {
         self.name_to_handle.keys()
     }
 
+    /// Iterate over all model handles stored in the registry
+    pub fn handles(&self) -> impl Iterator<Item = ModelHandle<T>> {
+        (0..self.models.len()).map(ModelHandle::new)
+    }
+
     /// Get the first model in the registry, if any exist
     ///
     /// Useful for scenarios where only one model of a type is expected,
