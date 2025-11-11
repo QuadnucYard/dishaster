@@ -10,6 +10,7 @@ test = false
 
 [dependencies]
 dishrupt-core.workspace = true
+dishrupt-asset.workspace = true
 dishrupt-runner.workspace = true
 dishrupt-godot.workspace = true
 dishaster-opening.workspace = true

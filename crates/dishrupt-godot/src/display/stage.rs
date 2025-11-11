@@ -1,5 +1,6 @@
 use std::cell::OnceCell;
 
+use dishrupt_asset::AssetCatalog;
 use dishrupt_core::prelude::*;
 use rustc_hash::{FxHashMap, FxHashSet};
 use slab::Slab;
@@ -23,9 +24,9 @@ pub struct Stage {
 }
 
 impl Stage {
-    pub fn new(display_ctx: DisplayContext2D) -> Self {
+    pub fn new(display_ctx: DisplayContext2D, catalog: AssetCatalog) -> Self {
         Self {
-            factory: Default::default(),
+            factory: DisplayFactory::new(catalog),
             display_ctx,
             display_world: Default::default(),
             core_to_view: Default::default(),

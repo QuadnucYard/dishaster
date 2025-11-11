@@ -9,7 +9,7 @@ use dishrupt_godot_scene::*;
 use dishrupt_godot_ui::UITree;
 use godot::{classes::Node, prelude::*};
 
-use crate::scenes::proc::*;
+use crate::{game_main::ASSET_CATALOG, scenes::proc::*};
 
 /// The in-game scene. Recreate the inner `Game` instance on each run.
 pub struct GameScene {
@@ -89,7 +89,8 @@ impl Scene for GameScene {
 
 impl GameScene {
     pub fn start_game(&mut self, ctx: &mut SceneContext, level: LevelSetupState) {
-        let mut game = Game::new(self.gd(), level, |db, level| {
+        let catalog = ASSET_CATALOG.get().unwrap().clone();
+        let mut game = Game::new(self.gd(), catalog, level, |db, level| {
             let mut sim = Box::new(Simulation::new(db));
             sim.start(level);
             sim

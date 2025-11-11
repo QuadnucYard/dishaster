@@ -466,6 +466,7 @@ dependencies = [
 name = "dishaster-godot"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "dishaster-core",
  "dishaster-data",
  "dishaster-godot-game",
@@ -473,6 +474,7 @@ dependencies = [
  "dishaster-godot-ui",
  "dishaster-persistence",
  "dishaster-ui-protocol",
+ "dishrupt-asset",
  "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-godot-scene",
@@ -501,6 +503,7 @@ dependencies = [
  "dishaster-persistence",
  "dishaster-ui-protocol",
  "dishaster-views",
+ "dishrupt-asset",
  "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-l10n",
@@ -515,6 +518,7 @@ name = "dishaster-godot-opening"
 version = "0.1.0"
 dependencies = [
  "dishaster-opening",
+ "dishrupt-asset",
  "dishrupt-core",
  "dishrupt-godot",
  "dishrupt-runner",
@@ -528,8 +532,8 @@ version = "0.1.0"
 dependencies = [
  "dishaster-ui-protocol",
  "dishaster-views",
+ "dishrupt-asset",
  "dishrupt-core",
- "dishrupt-godot",
  "dishrupt-godot-ui",
  "dishrupt-godot-ui-macros",
  "dishrupt-godot-widgets",
@@ -630,6 +634,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "dishrupt-asset"
+version = "0.1.0"
+dependencies = [
+ "rustc-hash",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "dishrupt-core"
 version = "0.1.0"
 dependencies = [
@@ -653,6 +666,7 @@ name = "dishrupt-godot"
 version = "0.1.0"
 dependencies = [
  "derive_more",
+ "dishrupt-asset",
  "dishrupt-core",
  "godot",
  "rustc-hash",

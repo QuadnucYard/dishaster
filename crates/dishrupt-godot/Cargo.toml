@@ -10,6 +10,7 @@ test = false
 
 [dependencies]
 dishrupt-core.workspace = true
+dishrupt-asset.workspace = true
 
 derive_more.workspace = true
 godot.workspace = true

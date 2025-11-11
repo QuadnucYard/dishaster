@@ -9,7 +9,10 @@ use dishrupt_godot::bind::BindGodot;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use godot::{classes::Node, global::godot_print, obj::Gd};
 
-use crate::{game_main::CREDITS, scenes::proc::EnterLevelProcedure};
+use crate::{
+    game_main::{ASSET_CATALOG, CREDITS},
+    scenes::proc::EnterLevelProcedure,
+};
 
 static MAIN_THEME_MUSIC: LazyLock<AudioRef> = LazyLock::new(|| AudioRef::new("main_theme.ogg"));
 
@@ -43,7 +46,8 @@ impl Scene for StartScene {
         ctx.gui.show::<StartMenuGui>();
 
         if self.opening.is_none() {
-            let opening = Opening::new(self.gd.clone());
+            let catalog = ASSET_CATALOG.get().unwrap().clone();
+            let opening = Opening::new(self.gd.clone(), catalog);
             self.opening = Some(opening);
         }
 

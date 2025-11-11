@@ -10,6 +10,7 @@ test = false
 
 [dependencies]
 dishrupt-core.workspace = true
+dishrupt-asset.workspace = true
 dishrupt-godot.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true
@@ -22,6 +23,7 @@ dishaster-godot-game.workspace = true
 dishaster-godot-opening.workspace = true
 dishaster-godot-ui.workspace = true
 
+anyhow.workspace = true
 env_logger.workspace = true
 godot.workspace = true
 log.workspace = true

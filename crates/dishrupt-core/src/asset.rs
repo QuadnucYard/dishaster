@@ -1,8 +1,7 @@
 use core::fmt;
 
+use ecow::EcoString;
 use serde::{Deserialize, Serialize};
-
-use crate::prelude::*;
 
 /// Reference to a prefab resource.
 ///
@@ -12,24 +11,14 @@ use crate::prelude::*;
 pub struct PrefabReference(EcoString);
 
 impl PrefabReference {
+    /// Create a new prefab reference
     pub fn new(path: impl Into<EcoString>) -> Self {
         Self(path.into())
     }
 
+    /// Get the prefab path
     pub fn path(&self) -> &EcoString {
         &self.0
-    }
-
-    pub fn stem(&self) -> &str {
-        self.0.rsplit('/').next().unwrap()
-    }
-
-    pub fn parent(&self) -> &str {
-        if let Some(i) = self.0.rfind('/') {
-            &self.0[..i]
-        } else {
-            ""
-        }
     }
 }
 
@@ -39,14 +28,17 @@ impl fmt::Display for PrefabReference {
     }
 }
 
+/// Reference to a sprite resource
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Deserialize)]
 pub struct SpriteReference(EcoString);
 
 impl SpriteReference {
+    /// Create a new sprite reference
     pub fn new(path: impl Into<EcoString>) -> Self {
         Self(path.into())
     }
 
+    /// Get the sprite path
     pub fn path(&self) -> &EcoString {
         &self.0
     }
@@ -58,14 +50,17 @@ impl fmt::Display for SpriteReference {
     }
 }
 
+/// Reference to an audio resource
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Deserialize)]
 pub struct AudioRef(EcoString);
 
 impl AudioRef {
+    /// Create a new audio reference
     pub fn new(path: impl Into<EcoString>) -> Self {
         Self(path.into())
     }
 
+    /// Get the audio path
     pub fn path(&self) -> &EcoString {
         &self.0
     }

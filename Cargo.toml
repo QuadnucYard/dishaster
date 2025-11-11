@@ -13,6 +13,7 @@ edition = "2024"
 dishrupt-core = { path = "crates/dishrupt-core" }
 dishrupt-ecs = { path = "crates/dishrupt-ecs" }
 dishrupt-rng = { path = "crates/dishrupt-rng" }
+dishrupt-asset = { path = "crates/dishrupt-asset" }
 dishrupt-persistence = { path = "crates/dishrupt-persistence" }
 dishrupt-simulation = { path = "crates/dishrupt-simulation" }
 dishrupt-runner = { path = "crates/dishrupt-runner" }

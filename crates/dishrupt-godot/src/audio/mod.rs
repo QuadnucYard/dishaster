@@ -1,12 +1,11 @@
 use std::{cell::OnceCell, collections::HashMap};
 
+use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_core::asset::AudioRef;
 use godot::{
     classes::{AudioStream, AudioStreamPlayer},
     prelude::*,
 };
-
-use crate::display::assets;
 
 pub struct AudioManager {
     audio_root: Gd<Node>,
@@ -16,13 +15,15 @@ pub struct AudioManager {
 
     music_volume: f32,
     sound_volume: f32,
+
+    catalog: AssetCatalog,
 }
 
 impl AudioManager {
     const MUSIC_BUS: &str = "Music";
     const SOUND_BUS: &str = "Sound";
 
-    pub fn new(audio_root: Gd<Node>) -> AudioManager {
+    pub fn new(audio_root: Gd<Node>, catalog: AssetCatalog) -> AudioManager {
         Self {
             audio_root,
 
@@ -31,6 +32,8 @@ impl AudioManager {
 
             music_volume: 0.0,
             sound_volume: 0.0,
+
+            catalog,
         }
     }
 
@@ -52,7 +55,7 @@ impl AudioManager {
 
     pub fn play_sound(&mut self, sound: &AudioRef) {
         let sound_player = self.sound_players.entry(sound.clone()).or_insert_with(|| {
-            let stream = load_sound(sound);
+            let stream = load_sound(&self.catalog, sound);
             let mut player = AudioStreamPlayer::new_alloc();
             player.set_bus(Self::SOUND_BUS);
             player.set_stream(&stream);
@@ -66,6 +69,7 @@ impl AudioManager {
     }
 
     pub fn play_music(&mut self, music: &AudioRef) {
+        let stream = load_music(&self.catalog, music);
         let player = self.music_player.get_mut_or_init(|| {
             let mut player = AudioStreamPlayer::new_alloc();
             player.set_bus(Self::MUSIC_BUS);
@@ -73,7 +77,6 @@ impl AudioManager {
             player
         });
 
-        let stream = load_music(music);
         player.set_stream(&stream);
         player.play();
     }
@@ -91,10 +94,22 @@ impl AudioManager {
     }
 }
 
-fn load_sound(sound: &AudioRef) -> Gd<AudioStream> {
-    load(&format!("{}{}", assets::SOUNDS, sound.path()))
+fn load_sound(catalog: &AssetCatalog, sound: &AudioRef) -> Gd<AudioStream> {
+    let ResourceLocator::Uri(uri) = catalog
+        .resolve(AssetKind::Sound, sound.path())
+        .unwrap_or_else(|e| panic!("failed to resolve sound: {sound}: {e}"))
+    else {
+        panic!("expected URI for sound asset");
+    };
+    load(&uri)
 }
 
-fn load_music(sound: &AudioRef) -> Gd<AudioStream> {
-    load(&format!("{}{}", assets::MUSICS, sound.path()))
+fn load_music(catalog: &AssetCatalog, music: &AudioRef) -> Gd<AudioStream> {
+    let ResourceLocator::Uri(uri) = catalog
+        .resolve(AssetKind::Music, music.path())
+        .unwrap_or_else(|e| panic!("failed to resolve music: {music}: {e}"))
+    else {
+        panic!("expected URI for sound asset");
+    };
+    load(&uri)
 }

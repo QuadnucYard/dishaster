@@ -10,7 +10,7 @@ test = false
 
 [dependencies]
 dishrupt-core.workspace = true
-dishrupt-godot.workspace = true
+dishrupt-asset.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-godot-ui-macros.workspace = true
 dishrupt-godot-widgets.workspace = true

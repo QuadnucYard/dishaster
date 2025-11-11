@@ -187,9 +187,7 @@ impl DataLoader {
         }
 
         let path: PathBuf = self.assets_path.join(filename);
-        let content = std::fs::read_to_string(&path)?;
-        let data = toml::from_str::<Items<T>>(&content)
-            .with_context(|| format!("Loading corpus {path:?}"))?;
+        let data = load_toml::<Items<T>>(&path)?;
         Ok(data.item)
     }
 
@@ -199,4 +197,16 @@ impl DataLoader {
             .with_context(|| format!("Loading text file {path:?}"))?;
         Ok(content)
     }
+}
+
+/// Load and parse a TOML file into the specified data structure
+pub fn load_toml<T>(path: &Path) -> anyhow::Result<T>
+where
+    T: serde::de::DeserializeOwned,
+{
+    let content = std::fs::read_to_string(path)
+        .with_context(|| format!("Reading TOML file {}", path.display()))?;
+    let data = toml::from_str::<T>(&content)
+        .with_context(|| format!("Parsing TOML file {}", path.display()))?;
+    Ok(data)
 }

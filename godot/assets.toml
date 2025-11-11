@@ -1,0 +1,25 @@
+
+[kinds.scene]
+prefix = "res://assets/scenes"
+default_ext = "tscn"
+
+[kinds.gui]
+prefix = "res://assets/gui"
+default_ext = "tscn"
+
+[kinds.prefab]
+prefix = "res://assets/prefabs"
+default_ext = "tscn"
+
+[kinds.texture]
+prefix = "res://assets/sprites"
+default_ext = "tres"
+
+[kinds.music]
+prefix = "res://assets/music"
+
+[kinds.sound]
+prefix = "res://assets/sounds"
+
+[kinds.music.aliases]
+main_theme = "main_theme.ogg"

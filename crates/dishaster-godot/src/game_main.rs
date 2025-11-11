@@ -1,13 +1,16 @@
 use std::{
     cell::OnceCell,
+    path::Path,
     sync::{Arc, Mutex, OnceLock},
 };
 
+use anyhow::{Context, Result, anyhow};
 use dishaster_core::models::{CreditsData, GameModelRegistry};
-use dishaster_data::DataLoader;
+use dishaster_data::{DataLoader, load_toml};
 use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE, user_store::GodotUserStorage};
 use dishaster_godot_ui::register_guis;
 use dishaster_persistence::PlayerService;
+use dishrupt_asset::{AssetCatalog, AssetPathConfig, AssetResolver};
 use dishrupt_godot::{NodeExt, audio::AudioManager, input::listener::InputListener};
 use dishrupt_godot_scene::{SceneContext, SceneManager};
 use dishrupt_godot_ui::GuiManager;
@@ -82,10 +85,15 @@ impl Inner {
 
         let input_listener = root.get_or_add_node_of_type::<InputListener>();
 
+        let catalog = ASSET_CATALOG.get().unwrap().clone();
+
         Self {
-            scene_manager: SceneManager::new(scene_root.upcast(), DefaultSceneLoader),
+            scene_manager: SceneManager::new(
+                scene_root.upcast(),
+                DefaultSceneLoader::new(catalog.clone()),
+            ),
             gui: GuiManager::new(gui_root.upcast()),
-            audio: AudioManager::new(audio_root),
+            audio: AudioManager::new(audio_root, catalog),
             l10n: Default::default(),
             input_listener,
 
@@ -94,7 +102,10 @@ impl Inner {
     }
 
     fn ready(&mut self) {
-        register_guis(&mut self.gui.registry);
+        register_guis(
+            &mut self.gui.registry,
+            &ASSET_CATALOG.get().unwrap().clone(),
+        );
         self.gui.ready();
 
         self.scene_manager.schedule(StartProcedure);
@@ -163,7 +174,9 @@ impl Inner {
     }
 }
 
-pub static CREDITS: OnceLock<CreditsData> = OnceLock::new(); // placed here for now
+pub(crate) static ASSET_CATALOG: OnceLock<AssetCatalog> = OnceLock::new();
+
+pub(crate) static CREDITS: OnceLock<CreditsData> = OnceLock::new(); // placed here for now
 
 fn init_game_database(
     loader: impl FnOnce() -> Arc<GameModelRegistry>,
@@ -171,34 +184,46 @@ fn init_game_database(
     GAME_DATA.get_or_init(loader)
 }
 
-fn init_game() {
+fn init_game() -> Result<()> {
     log::info!("Init game start");
+
+    let assets_path_config =
+        load_toml::<AssetPathConfig>(Path::new("assets.toml")).context("loading assets.toml")?;
+    println!("Loaded assets config: {assets_path_config:#?}");
+    let catalog = AssetCatalog::new(Arc::new(assets_path_config), AssetResolver);
+
+    ASSET_CATALOG
+        .set(catalog)
+        .map_err(|_| anyhow!("failed to set global asset catalog"))?;
+
     let data = DataLoader::new_with_fallback("data", "../assets/data")
-        .expect("failed to create data loader")
+        .context("failed to create data loader")?
         .load_all_data()
-        .expect("failed to load game data");
+        .context("failed to load game data")?;
     let registry = init_game_database(|| {
         let db = Arc::new(data.models);
         log::info!("Loaded {} canteens", db.canteens.len());
         db
     });
-    let _ = CREDITS.set(data.credits);
+    CREDITS
+        .set(data.credits)
+        .map_err(|_| anyhow!("Credits data already initialized"))?;
 
-    if PROGRESS_SERVICE
+    PROGRESS_SERVICE
         .set(Mutex::new(
             PlayerService::load_or_create(GodotUserStorage, registry.clone(), None)
-                .expect("failed to initialize progress service"),
+                .context("failed to initialize progress service")?,
         ))
-        .is_err()
-    {
-        panic!("progress service already initialized");
-    }
+        .map_err(|_| anyhow!("Progress service already initialized"))?;
+
     log::info!("Progress service initialized");
 
     dishrupt_l10n_godot::init();
     log::info!("Localization initialized");
 
     /* setup_preference(); */
+
+    Ok(())
 }
 
 /*

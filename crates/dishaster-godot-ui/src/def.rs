@@ -1,4 +1,4 @@
-use dishrupt_godot::display::assets;
+use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_godot_ui::*;
 use godot::{
     classes::{Node, PackedScene},
@@ -7,19 +7,19 @@ use godot::{
 
 use crate::*;
 
-macro_rules! create_gui {
-    ($t: ty, $path: literal) => {{ <$t>::new(UINode(load_ui($path))) }};
-}
+pub fn register_guis(registry: &mut GuiRegistry, catalog: &AssetCatalog) {
+    macro_rules! create_gui {
+        ($t: ty, $path: literal) => {{ <$t>::new(UINode(load_ui($path, catalog))) }};
+    }
 
-macro_rules! register_gui {
-    ($r: ident, $($t: ty => $path: literal),* $(,)?) => {
-        $( $r.register(create_gui!($t, $path)); )*
-    };
-}
+    macro_rules! register_gui {
+        ($($t: ty => $path: literal),* $(,)?) => {
+            $( registry.register(create_gui!($t, $path)); )*
+        };
+    }
 
-pub fn register_guis(registry: &mut GuiRegistry) {
     // NOTE: the following are registered by declaration order.
-    register_gui!(registry,
+    register_gui!(
         StartMenuGui => "start/start_menu",
         CreditsGui => "start/credits",
         GamingLayout => "gaming/layout",
@@ -33,9 +33,13 @@ pub fn register_guis(registry: &mut GuiRegistry) {
     );
 }
 
-fn load_ui<T>(path: &str) -> Gd<T>
+fn load_ui<T>(path: &str, catalog: &AssetCatalog) -> Gd<T>
 where
     T: Inherits<Node>,
 {
-    load::<PackedScene>(&format!("{}{path}.tscn", assets::GUI)).instantiate_as()
+    let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Gui, path) else {
+        godot_error!("Failed to resolve GUI asset: {path}");
+        panic!("Failed to resolve GUI asset: {path}");
+    };
+    load::<PackedScene>(&uri).instantiate_as()
 }

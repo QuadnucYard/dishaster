@@ -15,6 +15,7 @@ use dishaster_models::{GameModelRegistry, LevelSetupState};
 use dishaster_persistence::PlayerService;
 use dishaster_ui_protocol::{StatsView, UiCommand};
 use dishaster_views::DayHudState;
+use dishrupt_asset::AssetCatalog;
 use dishrupt_core::prelude::*;
 use dishrupt_godot::{NodeExt, display::*};
 use dishrupt_l10n::tr;
@@ -93,6 +94,7 @@ impl Game {
     /// NOTE: the creator should START the simulation after construction
     pub fn new(
         gd: Gd<Node>,
+        asset_catalog: AssetCatalog,
         level: LevelSetupState,
         sim_creator: impl FnOnce(
             Arc<GameModelRegistry>,
@@ -126,7 +128,7 @@ impl Game {
 
         // Set up the map scene
         let mut stage_root = gd.get_node_as::<Node2D>("%Stage");
-        let map_scene = load_prefab_sync(map_prefab)
+        let map_scene = load_prefab_sync(map_prefab, &asset_catalog)
             .instantiate()
             .expect("failed to instantiate map prefab");
         stage_root.add_child(&map_scene);
@@ -143,7 +145,7 @@ impl Game {
         let display_ctx = DisplayContext2D {
             view_scale: Vec3::new(60.0, 50.0, 50.0),
         };
-        let mut stage = Stage::new(display_ctx);
+        let mut stage = Stage::new(display_ctx, asset_catalog);
         stage.set_root(root_entity, GdNode2D::new(display_root_node));
 
         // Set up debug visualization

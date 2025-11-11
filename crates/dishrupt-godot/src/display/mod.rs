@@ -1,4 +1,3 @@
-pub mod assets;
 mod context;
 mod factory;
 mod node;

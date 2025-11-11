@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_core::asset::{PrefabReference, SpriteReference};
 use godot::{
     classes::{Marker2D, Node2D, PackedScene, ResourceLoader, Sprite2D, Texture2D},
@@ -7,7 +8,6 @@ use godot::{
 };
 use rustc_hash::FxHashMap;
 
-use super::assets;
 use crate::display::node::GdNode2D;
 
 struct PooledNode {
@@ -85,6 +85,7 @@ impl Drop for FactoryItem {
 }
 
 pub struct DisplayFactory {
+    catalog: AssetCatalog,
     res_registry: FxHashMap<PrefabReference, PrefabIndex>,
     items: Vec<FactoryItem>,
     active: Vec<ActiveNode>,
@@ -96,8 +97,9 @@ impl DisplayFactory {
     const DECAY_INTERVAL: u32 = 60;
     const DECAY_AT_AGE: u32 = 600;
 
-    pub fn new() -> Self {
+    pub fn new(catalog: AssetCatalog) -> Self {
         Self {
+            catalog,
             res_registry: Default::default(),
             items: Default::default(),
             active: Default::default(),
@@ -131,7 +133,10 @@ impl DisplayFactory {
         let item_index = *self.res_registry.entry(prefab.clone()).or_insert_with(|| {
             let next_index = self.items.len() as PrefabIndex;
             self.items
-                .push(FactoryItem::from_prefab(load_or_make_prefab_sync(prefab)));
+                .push(FactoryItem::from_prefab(load_or_make_prefab_sync(
+                    prefab,
+                    &self.catalog,
+                )));
             next_index
         });
         let item = &mut self.items[item_index as usize];
@@ -189,40 +194,51 @@ impl DisplayFactory {
     }
 }
 
-impl Default for DisplayFactory {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-pub fn load_prefab_sync(prefab: &PrefabReference) -> Gd<PackedScene> {
-    load(&format!("{}{}.tscn", assets::PREFABS, prefab.path()))
+pub fn load_prefab_sync(prefab: &PrefabReference, catalog: &AssetCatalog) -> Gd<PackedScene> {
+    let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Prefab, prefab.path()) else {
+        panic!("failed to resolve prefab: {}", prefab.path());
+    };
+    load(&uri)
 }
 
 /// Load the given prefab from godot resources.
 /// If it not exists, assume it is a sprite.
-pub fn load_or_make_prefab_sync(prefab: &PrefabReference) -> Gd<PackedScene> {
+pub fn load_or_make_prefab_sync(
+    prefab: &PrefabReference,
+    catalog: &AssetCatalog,
+) -> Gd<PackedScene> {
     // Try loading prefab. We do not use `try_load` to avoid unnecessary debugger error.
-    let prefab_path = format!("{}{}.tscn", assets::PREFABS, prefab.path());
+    let Ok(ResourceLocator::Uri(prefab_path)) = catalog.resolve(AssetKind::Prefab, prefab.path())
+    else {
+        panic!("failed to resolve prefab: {}", prefab.path());
+    };
     if ResourceLoader::singleton().exists(&prefab_path) {
         return load(&prefab_path);
     }
 
-    godot_warn!("Prefab `{}` not found. Try to load as sprite.", prefab_path);
-    let texture_path = format!("{}{}.tres", assets::SPRITES, prefab.path());
+    godot_warn!("Prefab `{prefab_path}` not found. Try to load as sprite.");
     let mut scene = PackedScene::new_gd();
     let mut sprite = Sprite2D::new_alloc();
-    if let Ok(texture) = try_load::<Texture2D>(&texture_path) {
+    if let Some(texture) = try_load_texture_sync(&SpriteReference::new(prefab.path()), catalog) {
         sprite.set_texture(&texture);
     }
     scene.pack(&sprite);
     scene
 }
 
-pub fn load_texture_sync(sprite: &SpriteReference) -> Gd<Texture2D> {
-    load(&format!("{}{}.tres", assets::SPRITES, sprite.path()))
+pub fn load_texture_sync(sprite: &SpriteReference, catalog: &AssetCatalog) -> Gd<Texture2D> {
+    let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Texture, sprite.path()) else {
+        panic!("failed to resolve texture: {}", sprite.path());
+    };
+    load(&uri)
 }
 
-pub fn try_load_texture_sync(sprite: &SpriteReference) -> Option<Gd<Texture2D>> {
-    try_load(&format!("{}{}.tres", assets::SPRITES, sprite.path())).ok()
+pub fn try_load_texture_sync(
+    sprite: &SpriteReference,
+    catalog: &AssetCatalog,
+) -> Option<Gd<Texture2D>> {
+    let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Texture, sprite.path()) else {
+        panic!("failed to resolve texture: {}", sprite.path());
+    };
+    try_load(&uri).ok()
 }
