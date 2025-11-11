@@ -456,6 +456,7 @@ dependencies = [
  "codespan-reporting",
  "dishaster-models",
  "dishrupt-core",
+ "log",
  "ron",
  "serde",
  "thiserror",
@@ -616,6 +617,7 @@ dependencies = [
  "dishaster-core",
  "dishaster-data",
  "dishaster-persistence",
+ "env_logger",
 ]
 
 [[package]]

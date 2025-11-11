@@ -17,6 +17,7 @@ dishaster-data.workspace = true
 dishaster-persistence.workspace = true
 
 anyhow.workspace = true
+env_logger.workspace = true
 
 [lints]
 workspace = true

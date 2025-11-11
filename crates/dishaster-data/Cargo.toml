@@ -11,6 +11,7 @@ dishaster-models.workspace = true
 
 anyhow.workspace = true
 codespan-reporting = { workspace = true, optional = true }
+log.workspace = true
 serde.workspace = true
 ron.workspace = true
 thiserror.workspace = true

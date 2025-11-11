@@ -5,7 +5,10 @@ mod codespan;
 mod trial_rank;
 mod trial_speech;
 
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{Context, bail};
 use dishaster_models::{CreditsData, GameModelRegistry, TrialCorpus};
@@ -49,6 +52,8 @@ pub enum DataError {
 /// Data loader for game assets from RON files
 pub struct DataLoader {
     assets_path: PathBuf,
+
+    index: HashMap<String, String>,
 }
 
 impl DataLoader {
@@ -65,7 +70,10 @@ impl DataLoader {
                 ),
             )));
         }
-        Ok(Self { assets_path })
+        Ok(Self {
+            assets_path,
+            index: Default::default(),
+        })
     }
 
     /// Create a new data loader, falling back to an alternative path if the primary does not exist
@@ -89,26 +97,33 @@ impl DataLoader {
             }
             Ok(Self {
                 assets_path: fallback_path,
+                index: Default::default(),
             })
         } else {
-            Ok(Self { assets_path })
+            Ok(Self {
+                assets_path,
+                index: Default::default(),
+            })
         }
     }
 
     /// Load all game data and populate the model registry
-    pub fn load_all_data(&self) -> anyhow::Result<GameDataAssets> {
+    pub fn load_all_data(&mut self) -> anyhow::Result<GameDataAssets> {
+        self.index =
+            load_toml(&self.assets_path.join("index.toml")).context("loading data index file")?;
+
         let mut registry = GameModelRegistry::default();
 
         // Load each registry type from separate files
-        self.load_to_registry(&mut registry.levels, "levels.ron")?;
-        self.load_to_registry(&mut registry.canteens, "canteens.ron")?;
-        self.load_to_registry(&mut registry.dishes, "dishes.ron")?;
-        self.load_to_registry(&mut registry.window_services, "window_services.ron")?;
-        self.load_to_registry(&mut registry.tables, "tables.ron")?;
-        self.load_to_registry(&mut registry.dispensers, "dispensers.ron")?;
-        self.load_to_registry(&mut registry.collectors, "collectors.ron")?;
-        self.load_to_registry(&mut registry.mgmt_decisions, "mgmt_decisions.ron")?;
-        self.load_to_registry(&mut registry.mgmt_incidents, "mgmt_incidents.ron")?;
+        self.load_to_registry(&mut registry.levels, "levels")?;
+        self.load_to_registry(&mut registry.canteens, "canteens")?;
+        self.load_to_registry(&mut registry.dishes, "dishes")?;
+        self.load_to_registry(&mut registry.window_services, "window_services")?;
+        self.load_to_registry(&mut registry.tables, "tables")?;
+        self.load_to_registry(&mut registry.dispensers, "dispensers")?;
+        self.load_to_registry(&mut registry.collectors, "collectors")?;
+        self.load_to_registry(&mut registry.mgmt_decisions, "mgmt_decisions")?;
+        self.load_to_registry(&mut registry.mgmt_incidents, "mgmt_incidents")?;
 
         registry.trial = TrialCorpus {
             diner_speeches: {
@@ -135,21 +150,86 @@ impl DataLoader {
         })
     }
 
-    fn load_to_registry<T>(
+    fn load_to_registry<T>(&self, registry: &mut ModelRegistry<T>, key: &str) -> anyhow::Result<()>
+    where
+        T: serde::de::DeserializeOwned + HasId,
+    {
+        let path = self.assets_path.join(self.index.get(key).ok_or_else(|| {
+            DataError::ValidationError(format!("No index entry for data file key: {}", key))
+        })?);
+
+        if path.is_file() {
+            return self.load_ron_to_registry(registry, &path);
+        }
+        if path.is_dir() {
+            // Load all RON files in the directory
+            let mut has_loaded = false;
+            for entry in std::fs::read_dir(&path)? {
+                let entry = entry?;
+                let entry_path = entry.path();
+                if !entry_path.is_file() {
+                    continue;
+                }
+                match self.load_ron_to_registry_single(registry, &entry_path) {
+                    Ok(_) => {
+                        has_loaded = true;
+                    }
+                    Err(e) => {
+                        // Log the error but continue loading other files
+                        log::error!("Failed to load data file {}: {}", entry_path.display(), e);
+                    }
+                }
+            }
+            if !has_loaded {
+                log::error!(
+                    "No valid data files found in directory for key {}: {}",
+                    key,
+                    path.display()
+                );
+            }
+        } else {
+            log::error!(
+                "Data path for key {} is neither a file nor a directory: {}",
+                key,
+                path.display()
+            );
+        }
+        Ok(())
+    }
+
+    fn load_ron_to_registry<T>(
         &self,
         registry: &mut ModelRegistry<T>,
-        filename: &str,
+        path: &Path,
     ) -> anyhow::Result<()>
     where
         T: serde::de::DeserializeOwned + HasId,
     {
-        let path = self.assets_path.join(filename);
         let models: Vec<T> = self
-            .load_ron_file(&path)
-            .with_context(|| format!("Loading {filename}"))?;
+            .load_ron_file(path)
+            .with_context(|| format!("Loading {}", path.display()))?;
+
         for model in models {
             registry.intern(model.id().clone(), model);
         }
+
+        Ok(())
+    }
+
+    fn load_ron_to_registry_single<T>(
+        &self,
+        registry: &mut ModelRegistry<T>,
+        path: &Path,
+    ) -> anyhow::Result<()>
+    where
+        T: serde::de::DeserializeOwned + HasId,
+    {
+        let model: T = self
+            .load_ron_file(path)
+            .with_context(|| format!("Loading {}", path.display()))?;
+
+        registry.intern(model.id().clone(), model);
+
         Ok(())
     }
 

@@ -44,7 +44,9 @@ impl RunSteps for Simulation {
 }
 
 fn main() -> Result<()> {
-    let loader = DataLoader::new("../assets/data")?;
+    env_logger::Builder::new().init();
+
+    let mut loader = DataLoader::new("../assets/data")?;
     let data = loader.load_all_data()?;
     let registry = Arc::new(data.models);
 
