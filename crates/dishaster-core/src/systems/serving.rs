@@ -248,7 +248,7 @@ pub fn process_serving_messages(
                         entity: dish_entity,
                         dish_id: request.dish_id.clone(),
                         served_weight,
-                        served_quantity: dish.state.current_quantity.min(1.0),
+                        remaining_weight: served_weight, // Initialize remaining weight
                         served_quality: dish.state.current_quality,
                         price_paid,
                         service_time,

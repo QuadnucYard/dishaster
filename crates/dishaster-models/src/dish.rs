@@ -45,6 +45,19 @@ pub struct DishCharacteristics {
     /// Satiation contribution per kilogram (how filling this dish is per kg)
     #[serde(default = "default_satiation_per_kg")]
     pub satiation_per_kg: f32,
+    /// Typical eating time per kilogram (seconds/kg)
+    ///
+    /// This represents how long it takes to eat 1kg of this dish type.
+    /// The actual eating time is: weight × eating_time_per_kg / eating_speed
+    ///
+    /// Realistic values:
+    /// - Rice/mantou: 120-150 s/kg (solid starches take time to chew)
+    /// - Stir-fried dishes: 180-240 s/kg (need to pick up and chew)
+    /// - Soups: 300-400 s/kg (sipping takes longer despite liquid form)
+    /// - Noodles: 150-200 s/kg (easier to eat than rice but still solid)
+    /// - Dumplings: 200-250 s/kg (need to bite, chew carefully)
+    #[serde(default = "default_eating_time_per_kg")]
+    pub eating_time_per_kg: f32,
 }
 
 /// Weight distribution parameters for dish portions
@@ -77,6 +90,21 @@ impl Default for DishWeightDistribution {
 /// This means students feel satisfied with 2 dishes, very full with 3-4 dishes.
 fn default_satiation_per_kg() -> f32 {
     150.0 // 150 satiation units per kg
+}
+
+/// Default eating time per kilogram (seconds/kg)
+///
+/// Calibrated for typical Chinese canteen meals where diners finish in 10-20 minutes.
+/// Realistic calibration:
+/// - Typical meal: 350g (2 dishes + rice)
+/// - Average eating time: 15 minutes = 900 seconds
+/// - Base rate: 900s / 0.35kg ≈ 2571 s/kg
+/// - With eating_speed variation (0.5-1.5):
+///   - Slow eater (0.5×): ~30 min for 350g meal
+///   - Normal (1.0×): ~15 min for 350g meal
+///   - Fast eater (1.5×): ~10 min for 350g meal
+fn default_eating_time_per_kg() -> f32 {
+    2500.0 // ~2500 seconds per kg (realistic canteen pace)
 }
 
 // ===================== Window Service Models =====================

@@ -53,11 +53,10 @@ pub struct ServedDish {
     /// Original dish reference
     pub dish_id: ModelId,
     /// Actual weight of the portion served (kg)
-    #[allow(dead_code)] // Will be used for nutrition tracking in future
-    pub served_weight: f32,
-    /// Actual values at time of service
     #[allow(unused)]
-    pub served_quantity: f32,
+    pub served_weight: f32,
+    /// Remaining weight to eat (kg) - decreases as diner eats
+    pub remaining_weight: f32,
     /// Quality level when served
     pub served_quality: f32,
     /// Final price charged to customer (calculated from weight if ByWeight)

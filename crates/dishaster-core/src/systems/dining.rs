@@ -923,11 +923,12 @@ fn handle_eat_goal(
 ) {
     let satisfaction_weights = SatisfactionWeights::default();
     let feedback_thresholds = FeedbackThresholds::default();
+    let dt = time.tick_duration as f32;
 
     for (
         entity,
         mut goal,
-        state,
+        mut state,
         mut targets,
         _personality,
         dining_profile,
@@ -947,7 +948,6 @@ fn handle_eat_goal(
                 // Calculate detection chance based on eating time elapsed
                 // Higher contamination = faster detection
                 let detection_rate = served_dish.contamination_level * 0.5; // 0.05/s at threshold, 0.5/s at max
-                let dt = time.tick_duration as f32;
 
                 if rng.random_bool((detection_rate * dt) as f64) {
                     log::warn!(
@@ -975,14 +975,61 @@ fn handle_eat_goal(
             }
         }
 
-        // Calculate eating time based on diner's eating speed
-        // Default base eating time is 30 seconds, modified by eating speed
-        const DEFAULT_EATING_TIME: f32 = 30.0;
-        let eating_time = DEFAULT_EATING_TIME / dining_profile.eating_speed;
+        // Calculate eating progress - probabilistically consume food over time
+        // The eating rate depends on dish type and diner's eating speed
+        let mut all_finished = true;
 
-        if goal.timer < eating_time {
+        for served_dish in state.served_dishes.iter_mut() {
+            if served_dish.remaining_weight <= 0.0 {
+                continue; // Already finished this dish
+            }
+
+            all_finished = false;
+
+            // Get dish model to access eating_time_per_kg
+            let eating_time_per_kg = registry
+                .dishes
+                .get_by_id(&served_dish.dish_id)
+                .map(|m| m.characteristics.eating_time_per_kg)
+                .unwrap_or(200.0); // Default fallback
+
+            // Calculate eating rate: kg/second
+            // eating_speed is a multiplier (0.5 = slow, 1.0 = normal, 1.5 = fast)
+            // eating_time_per_kg is seconds/kg (200 s/kg typical)
+            // eating_rate = eating_speed / eating_time_per_kg
+            let eating_rate = dining_profile.eating_speed / eating_time_per_kg;
+
+            // Expected consumption this tick
+            let expected_consumption = eating_rate * dt;
+
+            // Add randomness: actual consumption varies ±50% around expected
+            // This makes finish time indeterminate
+            let randomness_factor = rng.random_range(0.5..1.5);
+            let actual_consumption = expected_consumption * randomness_factor;
+
+            // Consume food (don't go below 0)
+            let consumed = actual_consumption.min(served_dish.remaining_weight);
+            served_dish.remaining_weight -= consumed;
+
+            log::trace!(
+                target: "diner",
+                "eating progress: diner={entity:?} dish={} remaining={:.3}kg rate={:.4}kg/s",
+                served_dish.dish_id,
+                served_dish.remaining_weight,
+                eating_rate
+            );
+        }
+
+        // Check if all dishes are finished
+        if !all_finished {
             continue;
         }
+
+        log::debug!(
+            target: "diner",
+            "finished eating: diner={entity:?} total_time={:.1}s",
+            goal.timer
+        );
 
         // Finished eating - update memory and psychological state for all dishes
         for served_dish in &state.served_dishes {

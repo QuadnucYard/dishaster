@@ -26,6 +26,7 @@ pub struct Dish {
 /// Dynamic state tracking for dishes during simulation
 pub struct DishRuntimeState {
     /// Current quantity available
+    #[allow(unused)]
     pub current_quantity: f32,
     /// Current quality (may degrade)
     pub current_quality: f32,
