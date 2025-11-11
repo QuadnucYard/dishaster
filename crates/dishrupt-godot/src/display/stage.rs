@@ -2,6 +2,7 @@ use std::cell::OnceCell;
 
 use dishrupt_asset::AssetCatalog;
 use dishrupt_core::prelude::*;
+use godot::global::godot_error;
 use rustc_hash::{FxHashMap, FxHashSet};
 use slab::Slab;
 
@@ -106,6 +107,16 @@ impl Stage {
             if let Some(e) = self.core_to_view.get(&display.core_id) {
                 // update existing node
                 let node = self.display_world.get_mut(*e).unwrap();
+                if !node.node.is_instance_valid() {
+                    godot_error!(
+                        "Godot node for display entity {} is invalid: {:?}",
+                        display.core_id,
+                        display
+                    );
+                    // Godot node got deleted externally, remove from mapping
+                    self.core_to_view.remove(&display.core_id);
+                    continue;
+                }
                 update_godot_display_node2d(node, display, ctx);
             } else {
                 // create new node

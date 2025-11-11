@@ -17,7 +17,10 @@ use dishrupt_godot_ui::GuiManager;
 use dishrupt_l10n_godot::LocalizationManager;
 use godot::{classes::CanvasLayer, prelude::*};
 
-use crate::scenes::{DefaultSceneLoader, proc::*};
+use crate::{
+    panic::{has_panic_occurred, init_backtrace_handle},
+    scenes::{DefaultSceneLoader, proc::*},
+};
 
 /// The root scene. Handles interaction outside levels.
 #[derive(GodotClass)]
@@ -118,6 +121,11 @@ impl Inner {
     }
 
     fn process(&mut self, delta: f64) {
+        if has_panic_occurred() {
+            return;
+        }
+        init_backtrace_handle();
+
         if !self.late_initialized {
             self.ready_late();
             self.late_initialized = true;
@@ -156,6 +164,11 @@ impl Inner {
     }
 
     fn physics_process(&mut self, delta: f64) {
+        if has_panic_occurred() {
+            return;
+        }
+        init_backtrace_handle();
+
         self.scene_manager.inspect_active_scene_mut(|scene| {
             let ctx = &mut SceneContext {
                 gui: &mut self.gui.registry,

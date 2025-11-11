@@ -1,2 +1,3 @@
 pub mod game_main;
-pub mod scenes;
+pub(crate) mod panic;
+pub(crate) mod scenes;

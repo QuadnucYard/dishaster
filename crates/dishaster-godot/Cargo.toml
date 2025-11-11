@@ -24,12 +24,15 @@ dishaster-godot-opening.workspace = true
 dishaster-godot-ui.workspace = true
 
 anyhow.workspace = true
+backtrace.workspace = true
+color-backtrace.workspace = true
 env_logger.workspace = true
 godot.workspace = true
 log.workspace = true
 
 [features]
-default = []
+default = ["debug"]
+debug = []
 trace = ["dishaster-core/trace"]
 
 [lints]
