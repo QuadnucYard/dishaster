@@ -55,7 +55,10 @@ impl AgentPresenter {
         }
     }
 
-    pub fn process(&mut self, delta: f64) {
+    pub fn process(&mut self, delta: f64, stage: &mut Stage) {
+        if let Some(diner_items) = &mut self.diner_items {
+            diner_items.process(delta, stage);
+        }
         if let Some(feedback) = &mut self.feedback {
             feedback.process(delta);
         }

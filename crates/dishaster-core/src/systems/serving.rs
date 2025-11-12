@@ -47,15 +47,14 @@ enum ServingMessageKind {
 
 /// Advance serving conversations using queued messages.
 pub fn process_serving_messages(
-    mut commands: Commands,
-    mut sessions: Query<(Entity, &mut ServiceSession, &mut DinerState)>,
+    mut sessions: Query<(Entity, &mut ServiceSession)>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement)>,
     window_query: Query<&WindowDishes>,
     dish_query: Query<&Dish>,
     mut queue: ResMut<ServingCommsQueue>,
     time: Res<Time>,
-    mut daily_stats: ResMut<DailyStats>,
     mut rng: ResMut<ServingRng>,
+    mut served_messages: MessageWriter<DishServed>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     registry: Res<GameModelRegistryRes>,
 ) {
@@ -71,7 +70,7 @@ pub fn process_serving_messages(
             );
             continue;
         };
-        let Ok((_, mut session, mut diner_state)) = sessions.get_mut(diner) else {
+        let Ok((_, mut session)) = sessions.get_mut(diner) else {
             log::warn!(
                 target: "diner",
                 "Diner session not found: {diner:?}"
@@ -231,36 +230,15 @@ pub fn process_serving_messages(
                         }
                     };
 
-                    // Create dish entity and add to served_dishes Vec
-                    let dish_entity = commands
-                        .spawn((
-                            DisplayState {
-                                proto: dish_model.display.res.clone(),
-                                ..Default::default()
-                            },
-                            Transform {
-                                ..Default::default()
-                            },
-                        ))
-                        .id();
-
-                    // Push to served_dishes Vec with actual weight
-                    diner_state.served_dishes.push(ServedDish {
-                        entity: dish_entity,
+                    served_messages.write(DishServed {
+                        diner,
                         dish_id: request.dish_id.clone(),
-                        served_weight,
-                        remaining_weight: served_weight, // Initialize remaining weight
-                        served_quality: dish.state.current_quality,
-                        price_paid,
                         service_time,
-                        contamination_level: dish.state.contamination_level,
+                        price: price_paid,
+                        weight: served_weight,
+                        quality: dish.state.current_quality,
+                        contamination: dish.state.contamination_level,
                     });
-
-                    // Update total spent
-                    diner_state.total_spent += price_paid;
-
-                    // Track revenue in daily stats
-                    daily_stats.total_revenue += price_paid;
                 } else {
                     log::warn!(
                         target: "serving",
@@ -522,5 +500,68 @@ pub fn drive_serving_sessions(
             }
             ServiceStage::Completed => {}
         }
+    }
+}
+
+pub fn on_dish_served(
+    mut served_messages: MessageReader<DishServed>,
+    mut commands: Commands,
+    mut diner_query: Query<&mut DinerState>,
+    registry: Res<GameModelRegistryRes>,
+    mut daily_stats: ResMut<DailyStats>,
+    mut events: ResMut<EventQueue>,
+) {
+    for &DishServed {
+        diner,
+        ref dish_id,
+        service_time,
+        price,
+        weight,
+        quality,
+        contamination,
+    } in served_messages.read()
+    {
+        let dish_model = registry.dishes.get_by_id(dish_id).unwrap();
+
+        let Ok(mut diner_state) = diner_query.get_mut(diner) else {
+            continue;
+        };
+
+        // Create dish entity and add to served_dishes Vec
+        let dish_entity = commands
+            .spawn((
+                DisplayState {
+                    proto: dish_model.display.res.clone(),
+                    ..Default::default()
+                },
+                Transform {
+                    ..Default::default()
+                },
+            ))
+            .id();
+
+        // Push to served_dishes Vec with actual weight
+        diner_state.served_dishes.push(ServedDish {
+            entity: dish_entity,
+            dish_id: dish_id.clone(),
+            served_weight: weight,
+            remaining_weight: weight, // Initialize remaining weight
+            served_quality: quality,
+            price_paid: price,
+            service_time,
+            contamination_level: contamination,
+        });
+
+        // Update total spent
+        diner_state.total_spent += price;
+
+        // Track revenue in daily stats
+        daily_stats.total_revenue += price;
+
+        // Emit events for all dishes picked up
+        events.push(SimEvent::DinerItemsChanged {
+            entity: diner.to_entity_id(),
+            change: DinerItemsChange::PickDish(dish_entity.to_entity_id()),
+        });
     }
 }

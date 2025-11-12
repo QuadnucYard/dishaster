@@ -13,8 +13,11 @@ pub struct DinerItemsPresenter {
     // Current item state
     tray_entity: Option<EntityId>,
     chopsticks_entity: Option<EntityId>,
-    dish_entity: Option<EntityId>,
+    dish_entities: Vec<EntityId>,
     is_eating: bool,
+    eating_time: f32,
+
+    anim_speed: f32,
 }
 
 impl DinerItemsPresenter {
@@ -31,8 +34,30 @@ impl DinerItemsPresenter {
 
             tray_entity: None,
             chopsticks_entity: None,
-            dish_entity: None,
+            dish_entities: Default::default(),
             is_eating: false,
+            eating_time: 0.0,
+
+            anim_speed: godot::global::randf_range(5.0, 10.0) as f32,
+        }
+    }
+
+    pub fn process(&mut self, delta: f64, stage: &mut Stage) {
+        // Animate the chopsticks if the diner is eating
+        if self.is_eating {
+            self.animate_chopsticks(stage);
+            self.eating_time += delta as f32;
+        }
+    }
+
+    fn animate_chopsticks(&mut self, stage: &mut Stage) {
+        if let Some(chopsticks_entity) = self.chopsticks_entity
+            && let Some(chopsticks_node) = stage.get_godot_node_mut(chopsticks_entity)
+        {
+            let anim_speed = self.anim_speed;
+            let anim_amplitude = 20.0;
+            let y_offset = anim_amplitude * ((self.eating_time * anim_speed).sin() - 3.0);
+            chopsticks_node.set_position(Vector2::new(10.0, y_offset));
         }
     }
 
@@ -60,7 +85,7 @@ impl DinerItemsPresenter {
             DinerItemsChange::DropAll => {
                 self.tray_entity = None;
                 self.chopsticks_entity = None;
-                self.dish_entity = None;
+                self.dish_entities.clear();
             }
         }
     }
@@ -120,7 +145,7 @@ impl DinerItemsPresenter {
     }
 
     fn attach_dish(&mut self, dish_entity: EntityId, stage: &mut Stage) {
-        self.dish_entity = Some(dish_entity);
+        self.dish_entities.push(dish_entity);
 
         if let Some(tray_entity) = self.tray_entity
             && let Some((dish_node, tray_node)) =
@@ -128,7 +153,8 @@ impl DinerItemsPresenter {
         {
             // Dish always goes on tray
             dish_node.reparent(&**tray_node);
-            dish_node.set_position(Vector2::new(0.0, 5.0));
+            let offset = 5.0 * (self.dish_entities.len() - 1) as f32; // Stack dishes with offset
+            dish_node.set_position(Vector2::new(0.0, 5.0 - offset));
         } else {
             godot_warn!(
                 "Agent {:?} has dish {:?} but no tray",

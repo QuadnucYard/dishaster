@@ -171,7 +171,7 @@ impl Game {
 
     pub(crate) fn process_display(&mut self, delta: f64) {
         for agent in self.pres.agents.values_mut() {
-            agent.process(delta);
+            agent.process(delta, &mut self.stage);
         }
         for dispenser in self.pres.dispensers.values_mut() {
             dispenser.process(delta as f32);

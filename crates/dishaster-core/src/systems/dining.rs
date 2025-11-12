@@ -692,7 +692,6 @@ fn handle_get_served_goal(
         &DinerTargets,
         &ServiceSession,
     )>,
-    mut events: ResMut<EventQueue>,
 ) {
     for (entity, mut goal, state, targets, session) in diner_query {
         if !goal.is(DinerGoal::GetServed) {
@@ -723,12 +722,6 @@ fn handle_get_served_goal(
             );
             continue;
         }
-
-        // Emit events for all dishes picked up
-        events.push(SimEvent::DinerItemsChanged {
-            entity: entity.to_entity_id(),
-            change: DinerItemsChange::PickDish(state.served_dishes[0].entity.to_entity_id()),
-        });
 
         goal.update(if targets.chopstick_target.is_some() {
             DinerGoal::FindSeat

@@ -54,6 +54,8 @@ impl Simulation {
                 update_diner_spawner,
                 // Deliver delayed serving communications before state updates
                 process_serving_messages,
+                // Handle dish served events
+                on_dish_served,
                 // Agents decide targets and compute paths
                 dining_systems(),
                 // Allocate staff and schedule service events
@@ -155,6 +157,7 @@ impl Simulation {
     fn startup(&mut self) {
         // Add messages
         self.world
+            .add_message::<DishServed>()
             .add_message::<FeedbackMessage>()
             .add_message::<RefillDispenser>();
 
