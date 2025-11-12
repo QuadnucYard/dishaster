@@ -666,6 +666,7 @@ dependencies = [
  "dishaster-data",
  "dishaster-persistence",
  "dishaster-validation",
+ "dishrupt-rng",
  "env_logger",
 ]
 

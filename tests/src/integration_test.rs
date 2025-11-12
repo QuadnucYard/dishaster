@@ -10,6 +10,7 @@ use dishaster_core::{
 };
 use dishaster_data::DataLoader;
 use dishaster_persistence::{PersistentStorage, Persister, PlayerService};
+use dishrupt_rng::{Prng, prelude::Rng};
 
 /// In-memory persistent storage for testing purposes.
 pub struct MemoryStorage;
@@ -53,14 +54,14 @@ fn main() -> Result<()> {
     dishaster_validation::validate_registry(&registry)?;
     println!("✓ Data validation passed");
 
-    let service = PlayerService::load_or_create(MemoryStorage, &registry, None)?;
+    let mut service = PlayerService::load_or_create(MemoryStorage, &registry, None)?;
     dishaster_validation::validate_player_profile(service.profile(), &registry)?;
     println!("✓ Player profile validation passed");
 
     let level = service.level_for_current_day()?;
     let start_day = level.day;
 
-    let mut sim = Simulation::new(registry);
+    let mut sim = Simulation::new(registry.clone());
     sim.start(level);
 
     // Let the simulation stabilize a bit
@@ -68,13 +69,13 @@ fn main() -> Result<()> {
 
     // Start the run
     sim.command(SimCommand::StartRun);
-    sim.run_steps(100);
+    sim.run_steps(10000);
 
     // End the run and check for completion events
     sim.command(SimCommand::EndRun);
     sim.run_steps(1);
     let events = sim.poll_events();
-    println!("Events: {} {:#?}", events.len(), events);
+    println!("Events: {}", events.len());
     assert!(events.iter().any(|e| matches!(e, SimEvent::RunCompleted)));
     assert!(
         events
@@ -86,13 +87,51 @@ fn main() -> Result<()> {
     sim.command(SimCommand::ApplyManagementDecision(0));
     sim.run_steps(1);
     let events = sim.poll_events();
-    println!("Events after decision: {} {:#?}", events.len(), events);
+    println!("Events after decision: {}", events.len());
     assert!(events.iter().any(|e| matches!(e, SimEvent::Persist)));
     assert!(events.iter().any(|e| matches!(e, SimEvent::DayCompleted)));
 
     let persisted = sim.persist();
     println!("Persisted profile");
     assert_eq!(persisted.current_day, Day(start_day.0 + 1)); // Day should have advanced
+
+    service.save_profile(persisted)?;
+    std::mem::drop(sim);
+
+    // now run more days
+    let mut rng = Prng::new(42);
+    for i in 0..100 {
+        println!("--- Day {} ---", i + 1);
+
+        // Start next day
+        let level = service.level_for_current_day()?;
+        let mut sim = Simulation::new(registry.clone());
+        sim.start(level);
+        sim.run_steps(10);
+
+        // Start the run
+        sim.command(SimCommand::StartRun);
+        sim.run_steps(100);
+
+        // End the run
+        sim.command(SimCommand::EndRun);
+        sim.run_steps(1);
+
+        let events = sim.poll_events();
+        assert!(events.iter().any(|e| matches!(e, SimEvent::RunCompleted)));
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, SimEvent::ShowManagementDecisions(_)))
+        );
+
+        // Apply a management decision
+        sim.command(SimCommand::ApplyManagementDecision(rng.random_range(0..3)));
+        sim.run_steps(1);
+
+        let persisted = sim.persist();
+        service.save_profile(persisted)?;
+    }
 
     println!("Test completed successfully.");
 

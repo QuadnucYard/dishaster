@@ -51,6 +51,6 @@ jobs:
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --tests --workspace
       - name: Run tests with all features
-        run: cargo test --workspace --all-features
+        run: cargo test --tests --workspace --all-features

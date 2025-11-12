@@ -12,6 +12,7 @@ path = "src/integration_test.rs"
 harness = false
 
 [dependencies]
+dishrupt-rng.workspace = true
 dishaster-core.workspace = true
 dishaster-data.workspace = true
 dishaster-persistence.workspace = true
