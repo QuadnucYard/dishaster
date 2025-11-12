@@ -222,11 +222,14 @@ fn init_game() -> Result<()> {
         .set(data.credits)
         .map_err(|_| anyhow!("Credits data already initialized"))?;
 
+    let mut service = PlayerService::load_or_create(GodotUserStorage, registry, None)
+        .context("failed to initialize progress service")?;
+    if dishaster_validation::validate_player_profile(service.profile(), registry).is_err() {
+        log::warn!("Player profile validation failed, resetting to default profile");
+        service.recreate_profile(registry, None)?;
+    };
     PROGRESS_SERVICE
-        .set(Mutex::new(
-            PlayerService::load_or_create(GodotUserStorage, registry.clone(), None)
-                .context("failed to initialize progress service")?,
-        ))
+        .set(Mutex::new(service))
         .map_err(|_| anyhow!("Progress service already initialized"))?;
 
     log::info!("Progress service initialized");

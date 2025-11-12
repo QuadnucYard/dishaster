@@ -53,7 +53,7 @@ fn new_user_receives_first_day_level() -> Result<()> {
     let dir = tempdir()?;
     let service = PlayerService::load_or_create(
         FsStorage::new(dir.path().to_path_buf()).unwrap(),
-        Arc::clone(&registry),
+        &registry,
         None,
     )?;
     let level = service.level_for_current_day()?;

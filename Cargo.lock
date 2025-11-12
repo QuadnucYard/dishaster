@@ -496,6 +496,7 @@ dependencies = [
  "anyhow",
  "codespan-reporting",
  "dishaster-models",
+ "dishaster-validation",
  "dishrupt-core",
  "log",
  "ron",
@@ -509,7 +510,6 @@ name = "dishaster-godot"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "backtrace",
  "color-backtrace",
  "dishaster-core",
  "dishaster-data",
@@ -518,6 +518,7 @@ dependencies = [
  "dishaster-godot-ui",
  "dishaster-persistence",
  "dishaster-ui-protocol",
+ "dishaster-validation",
  "dishrupt-asset",
  "dishrupt-core",
  "dishrupt-godot",
@@ -660,6 +661,7 @@ dependencies = [
  "dishaster-core",
  "dishaster-data",
  "dishaster-persistence",
+ "dishaster-validation",
  "env_logger",
 ]
 
@@ -669,6 +671,16 @@ version = "0.1.0"
 dependencies = [
  "dishaster-views",
  "dishrupt-core",
+]
+
+[[package]]
+name = "dishaster-validation"
+version = "0.1.0"
+dependencies = [
+ "dishaster-models",
+ "dishaster-save-models",
+ "dishrupt-core",
+ "thiserror",
 ]
 
 [[package]]

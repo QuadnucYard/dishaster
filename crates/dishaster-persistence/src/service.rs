@@ -1,7 +1,4 @@
-use std::{
-    sync::Arc,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
 use dishaster_models::{
@@ -65,26 +62,27 @@ impl<Store: PersistentStorage> PlayerService<Store> {
     /// Load (or create) progress and prepare a service ready to dispense levels.
     pub fn load_or_create(
         store: Store,
-        registry: Arc<GameModelRegistry>,
+        registry: &GameModelRegistry,
         default_level_id: Option<ModelId>,
     ) -> Result<Self> {
         let mut inner = PersistenceService::new(store);
 
-        let default_level = match default_level_id {
-            Some(id) => registry
-                .levels
-                .get_by_id(&id)
-                .context("level does not exist")?,
-            None => registry
-                .levels
-                .first()
-                .context("no level configurations available in registry")?,
-        };
-        let progress = inner.load_progress(default_level)?;
-        Ok(Self {
-            inner,
-            profile: progress,
-        })
+        let default_level = get_default_level(registry, default_level_id)?;
+        let profile = inner.load_progress(default_level)?;
+        Ok(Self { inner, profile })
+    }
+
+    /// Create a new profile, replacing any existing progress.
+    pub fn recreate_profile(
+        &mut self,
+        registry: &GameModelRegistry,
+        default_level_id: Option<ModelId>,
+    ) -> Result<()> {
+        let default_level = get_default_level(registry, default_level_id)?;
+        let profile = new_profile(default_level);
+        self.profile = profile;
+        self.inner.save_progress(&self.profile)?;
+        Ok(())
     }
 
     /// Access the immutable progress snapshot managed by the service.
@@ -129,6 +127,22 @@ impl<Store: PersistentStorage> PlayerService<Store> {
         self.profile.meta.updated_at_utc = now_unix();
         self.inner.save_progress(&self.profile)?;
         Ok(())
+    }
+}
+
+fn get_default_level(
+    registry: &GameModelRegistry,
+    default_level_id: Option<ModelId>,
+) -> Result<&LevelConfig> {
+    match default_level_id {
+        Some(id) => registry
+            .levels
+            .get_by_id(&id)
+            .context("level does not exist"),
+        None => registry
+            .levels
+            .first()
+            .context("no level configurations available in registry"),
     }
 }
 

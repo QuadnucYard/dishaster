@@ -17,6 +17,9 @@ ron.workspace = true
 thiserror.workspace = true
 toml.workspace = true
 
+[dev-dependencies]
+dishaster-validation.workspace = true
+
 [features]
 default = ["codespan"]
 codespan = ["codespan-reporting"]

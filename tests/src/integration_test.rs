@@ -50,7 +50,13 @@ fn main() -> Result<()> {
     let data = loader.load_all_data()?;
     let registry = Arc::new(data.models);
 
-    let service = PlayerService::load_or_create(MemoryStorage, registry.clone(), None)?;
+    dishaster_validation::validate_registry(&registry)?;
+    println!("✓ Data validation passed");
+
+    let service = PlayerService::load_or_create(MemoryStorage, &registry, None)?;
+    dishaster_validation::validate_player_profile(service.profile(), &registry)?;
+    println!("✓ Player profile validation passed");
+
     let level = service.level_for_current_day()?;
     let start_day = level.day;
 

@@ -34,6 +34,7 @@ dishaster-core = { path = "crates/dishaster-core" }
 dishaster-opening = { path = "crates/dishaster-opening" }
 dishaster-data = { path = "crates/dishaster-data" }
 dishaster-persistence = { path = "crates/dishaster-persistence" }
+dishaster-validation = { path = "crates/dishaster-validation" }
 dishaster-ui-protocol = { path = "crates/dishaster-ui-protocol" }
 dishaster-godot-ui = { path = "crates/dishaster-godot-ui" }
 dishaster-godot-game = { path = "crates/dishaster-godot-game" }

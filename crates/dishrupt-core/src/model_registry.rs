@@ -94,6 +94,11 @@ impl<T> ModelRegistry<T> {
         ModelHandle::new(idx)
     }
 
+    /// Check if a model with the given identifier exists in the registry
+    pub fn contains_id(&self, id: &ModelId) -> bool {
+        self.name_to_handle.contains_key(id)
+    }
+
     /// Retrieve a model using its type-safe handle
     ///
     /// # Panics

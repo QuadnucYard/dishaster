@@ -1,5 +1,6 @@
 //! Example program to test loading data from the assets directory
 
+use anyhow::Context;
 use dishaster_data::DataLoader;
 
 #[test]
@@ -48,6 +49,10 @@ fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
         registry.trial.aq_ranks.len(),
         "Mismatched number of responses and AQ ranks"
     );
+
+    // Validate all loaded data
+    dishaster_validation::validate_registry(&registry).context("validating game model registry")?;
+    println!("✓ Data validation passed");
 
     Ok(())
 }

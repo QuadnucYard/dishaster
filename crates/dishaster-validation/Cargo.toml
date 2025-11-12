@@ -1,0 +1,16 @@
+[package]
+name = "dishaster-validation"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-core.workspace = true
+dishaster-models.workspace = true
+dishaster-save-models.workspace = true
+
+thiserror.workspace = true
+
+[lints]
+workspace = true

@@ -15,6 +15,7 @@ harness = false
 dishaster-core.workspace = true
 dishaster-data.workspace = true
 dishaster-persistence.workspace = true
+dishaster-validation.workspace = true
 
 anyhow.workspace = true
 env_logger.workspace = true
