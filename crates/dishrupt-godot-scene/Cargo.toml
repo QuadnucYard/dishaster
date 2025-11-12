@@ -9,7 +9,8 @@ edition.workspace = true
 test = false
 
 [dependencies]
-dishrupt-godot.workspace = true
+dishrupt-godot-audio.workspace = true
+dishrupt-godot-input.workspace = true
 dishrupt-godot-ui.workspace = true
 
 godot.workspace = true

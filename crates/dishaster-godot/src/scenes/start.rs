@@ -5,8 +5,8 @@ use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_core::asset::AudioRef;
-use dishrupt_godot::bind::BindGodot;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
+use dishrupt_godot_utils::BindGodot;
 use godot::{classes::Node, global::godot_print, obj::Gd};
 
 use crate::{

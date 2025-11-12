@@ -521,9 +521,11 @@ dependencies = [
  "dishaster-validation",
  "dishrupt-asset",
  "dishrupt-core",
- "dishrupt-godot",
+ "dishrupt-godot-audio",
+ "dishrupt-godot-input",
  "dishrupt-godot-scene",
  "dishrupt-godot-ui",
+ "dishrupt-godot-utils",
  "dishrupt-l10n-godot",
  "env_logger",
  "godot",
@@ -550,7 +552,9 @@ dependencies = [
  "dishaster-views",
  "dishrupt-asset",
  "dishrupt-core",
- "dishrupt-godot",
+ "dishrupt-godot-display",
+ "dishrupt-godot-input",
+ "dishrupt-godot-utils",
  "dishrupt-l10n",
  "dishrupt-persistence",
  "dishrupt-runner",
@@ -565,7 +569,7 @@ dependencies = [
  "dishaster-opening",
  "dishrupt-asset",
  "dishrupt-core",
- "dishrupt-godot",
+ "dishrupt-godot-display",
  "dishrupt-runner",
  "godot",
  "rustc-hash",
@@ -719,22 +723,40 @@ dependencies = [
 ]
 
 [[package]]
-name = "dishrupt-godot"
+name = "dishrupt-godot-audio"
+version = "0.1.0"
+dependencies = [
+ "dishrupt-asset",
+ "dishrupt-core",
+ "godot",
+]
+
+[[package]]
+name = "dishrupt-godot-display"
 version = "0.1.0"
 dependencies = [
  "derive_more",
  "dishrupt-asset",
  "dishrupt-core",
+ "dishrupt-godot-utils",
  "godot",
  "rustc-hash",
  "slab",
 ]
 
 [[package]]
+name = "dishrupt-godot-input"
+version = "0.1.0"
+dependencies = [
+ "godot",
+]
+
+[[package]]
 name = "dishrupt-godot-scene"
 version = "0.1.0"
 dependencies = [
- "dishrupt-godot",
+ "dishrupt-godot-audio",
+ "dishrupt-godot-input",
  "dishrupt-godot-ui",
  "godot",
  "log",
@@ -755,6 +777,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "dishrupt-godot-utils"
+version = "0.1.0"
+dependencies = [
+ "bevy_math",
+ "godot",
 ]
 
 [[package]]

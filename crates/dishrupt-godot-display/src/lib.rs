@@ -1,3 +1,5 @@
+//! Godot display stage integration.
+
 mod context;
 mod factory;
 mod node;

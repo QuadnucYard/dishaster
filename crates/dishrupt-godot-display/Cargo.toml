@@ -1,22 +1,19 @@
 [package]
-name = "dishaster-godot-opening"
+name = "dishrupt-godot-display"
 version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 edition.workspace = true
 
-[lib]
-test = false
-
 [dependencies]
 dishrupt-core.workspace = true
 dishrupt-asset.workspace = true
-dishrupt-runner.workspace = true
-dishrupt-godot-display.workspace = true
-dishaster-opening.workspace = true
+dishrupt-godot-utils.workspace = true
 
+derive_more.workspace = true
 godot.workspace = true
 rustc-hash.workspace = true
+slab.workspace = true
 
 [lints]
 workspace = true

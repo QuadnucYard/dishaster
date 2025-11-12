@@ -4,8 +4,8 @@ mod game;
 mod start;
 
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
-use dishrupt_godot::bind::BindGodot;
 use dishrupt_godot_scene::*;
+use dishrupt_godot_utils::BindGodot;
 pub use game::GameScene;
 use godot::{
     classes::{Node, PackedScene},

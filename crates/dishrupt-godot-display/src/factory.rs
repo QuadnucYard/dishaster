@@ -1,3 +1,5 @@
+//! Factory for creating and pooling display nodes.
+
 use std::collections::VecDeque;
 
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
@@ -8,7 +10,7 @@ use godot::{
 };
 use rustc_hash::FxHashMap;
 
-use crate::display::node::GdNode2D;
+use crate::node::GdNode2D;
 
 struct PooledNode {
     node: GdNode2D,
@@ -84,6 +86,7 @@ impl Drop for FactoryItem {
     }
 }
 
+/// Factory for creating and pooling display nodes.
 pub struct DisplayFactory {
     catalog: AssetCatalog,
     res_registry: FxHashMap<PrefabReference, PrefabIndex>,
@@ -97,6 +100,7 @@ impl DisplayFactory {
     const DECAY_INTERVAL: u32 = 60;
     const DECAY_AT_AGE: u32 = 600;
 
+    /// Create a new display factory.
     pub fn new(catalog: AssetCatalog) -> Self {
         Self {
             catalog,
@@ -107,11 +111,13 @@ impl DisplayFactory {
         }
     }
 
+    /// Initialize the factory with dummy prefabs.
     pub fn init(&mut self) {
         self.prepare_dummy_prefab::<Node2D>("");
         self.prepare_dummy_prefab::<Marker2D>("$Marker2D");
     }
 
+    /// Prepare a dummy prefab for the given type.
     pub fn prepare_dummy_prefab<T>(&mut self, name: &str)
     where
         T: GodotClass
@@ -129,6 +135,7 @@ impl DisplayFactory {
         self.res_registry.insert(dummy_prefab.clone(), next_index);
     }
 
+    /// Create a new display node from the given prefab.
     pub fn create(&mut self, prefab: &PrefabReference) -> GdNode2D {
         let item_index = *self.res_registry.entry(prefab.clone()).or_insert_with(|| {
             let next_index = self.items.len() as PrefabIndex;
@@ -154,6 +161,7 @@ impl DisplayFactory {
         node
     }
 
+    /// Tidy up the factory by removing invalid nodes and decaying pools.
     pub fn tidy(&mut self, elapsed_time: u32) {
         self.active
             .extract_if(.., |an| !an.node.is_instance_valid())
@@ -182,6 +190,7 @@ impl DisplayFactory {
         }
     }
 
+    /// Flush the factory, clearing all pools and active nodes.
     pub fn flush(&mut self) {
         println!("flush factory");
         self.last_decay_time = 0;
@@ -194,6 +203,7 @@ impl DisplayFactory {
     }
 }
 
+/// Load the given prefab from godot resources.
 pub fn load_prefab_sync(prefab: &PrefabReference, catalog: &AssetCatalog) -> Gd<PackedScene> {
     let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Prefab, prefab.path()) else {
         panic!("failed to resolve prefab: {}", prefab.path());
@@ -226,6 +236,7 @@ pub fn load_or_make_prefab_sync(
     scene
 }
 
+/// Load the texture for the given sprite reference.
 pub fn load_texture_sync(sprite: &SpriteReference, catalog: &AssetCatalog) -> Gd<Texture2D> {
     let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Texture, sprite.path()) else {
         panic!("failed to resolve texture: {}", sprite.path());
@@ -233,6 +244,7 @@ pub fn load_texture_sync(sprite: &SpriteReference, catalog: &AssetCatalog) -> Gd
     load(&uri)
 }
 
+/// Try to load the texture for the given sprite reference.
 pub fn try_load_texture_sync(
     sprite: &SpriteReference,
     catalog: &AssetCatalog,

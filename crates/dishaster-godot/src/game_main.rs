@@ -11,9 +11,11 @@ use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE, user_store::GodotUserSto
 use dishaster_godot_ui::register_guis;
 use dishaster_persistence::PlayerService;
 use dishrupt_asset::{AssetCatalog, AssetPathConfig, AssetResolver};
-use dishrupt_godot::{NodeExt, audio::AudioManager, input::listener::InputListener};
+use dishrupt_godot_audio::AudioManager;
+use dishrupt_godot_input::listener::InputListener;
 use dishrupt_godot_scene::{SceneContext, SceneManager};
 use dishrupt_godot_ui::GuiManager;
+use dishrupt_godot_utils::NodeExt;
 use dishrupt_l10n_godot::LocalizationManager;
 use godot::{classes::CanvasLayer, prelude::*};
 

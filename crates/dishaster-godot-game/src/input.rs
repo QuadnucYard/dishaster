@@ -1,7 +1,7 @@
 use dishaster_interface::*;
 use dishaster_ui_protocol::UiCommand;
 use dishrupt_core::prelude::*;
-use dishrupt_godot::input::{event::MouseButtonEvent, listener::GodotInputEvent};
+use dishrupt_godot_input::event::{GodotInputEvent, MouseButtonEvent};
 use godot::{
     classes::{Area2D, Node, Node2D, PhysicsPointQueryParameters2D},
     global::{Key, MouseButton},

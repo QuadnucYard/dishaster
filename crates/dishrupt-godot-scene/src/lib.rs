@@ -6,7 +6,8 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use dishrupt_godot::{audio::AudioManager, input::listener::GodotInputEvent};
+use dishrupt_godot_audio::AudioManager;
+use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_ui::{GuiCommands, GuiRegistry};
 use godot::{classes::Node, obj::Gd};
 pub use manager::*;

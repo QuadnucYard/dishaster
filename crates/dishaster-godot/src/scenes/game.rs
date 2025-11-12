@@ -4,9 +4,10 @@ use dishaster_core::{interface::SimCommand, models::LevelSetupState, sim::Simula
 use dishaster_godot_game::Game;
 use dishaster_godot_ui::*;
 use dishaster_ui_protocol::{AppRequest, GameRequest, UiCommand};
-use dishrupt_godot::{bind::BindGodot, input::listener::GodotInputEvent};
+use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_scene::*;
 use dishrupt_godot_ui::UITree;
+use dishrupt_godot_utils::BindGodot;
 use godot::{classes::Node, prelude::*};
 
 use crate::{game_main::ASSET_CATALOG, scenes::proc::*};

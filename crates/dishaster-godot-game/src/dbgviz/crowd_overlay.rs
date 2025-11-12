@@ -2,7 +2,8 @@ use std::iter::FromIterator;
 
 use dishaster_interface::snapshots::CrowdFieldDebugSnapshot;
 use dishrupt_core::prelude::*;
-use dishrupt_godot::{bind::IntoGodot, display::DisplayContext2D};
+use dishrupt_godot_display::DisplayContext2D;
+use dishrupt_godot_utils::IntoGodot;
 use godot::{
     classes::{Image, ImageTexture, Node2D, Sprite2D, canvas_item::TextureFilter, image::Format},
     prelude::*,

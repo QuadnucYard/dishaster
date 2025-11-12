@@ -1,22 +1,32 @@
-use dishrupt_core::prelude::*;
+//! Utilities for binding framework types to Godot types.
+
+use bevy_math::prelude::*;
 use godot::{
     classes::Node,
     obj::{Gd, Inherits},
 };
 
+/// Trait for converting from Godot types to framework types.
 pub trait FromGodot<T> {
+    /// Convert from a Godot type to a framework type.
     fn from_godot(value: T) -> Self;
 }
 
+/// Trait for converting from framework types to Godot types.
 pub trait IntoGodot<T> {
+    /// Convert from a framework type to a Godot type.
     fn into_godot(self) -> T;
 }
 
+/// Trait for converting from Godot types to framework simulation types.
 pub trait IntoSim<T> {
+    /// Convert from a Godot type to a framework simulation type.
     fn into_sim(self) -> T;
 }
 
+/// Trait for binding Godot objects to framework types.
 pub trait BindGodot<T: Inherits<Node>> {
+    /// Create a new framework type from a Godot object.
     fn new(gd: Gd<T>) -> Self;
 }
 

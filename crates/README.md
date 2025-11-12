@@ -42,7 +42,7 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Display traits and asset management
   - Model registry system (type-safe data storage)
   - Math utilities and basic types
-- **Dependencies**: `bevy_math`, `ecow`, `rustc-hash`, `serde`
+- **Dependencies**: `bevy_math`
 - **Note**: No ECS dependencies - purely generic abstractions
 
 ### dishrupt-ecs
@@ -95,6 +95,15 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - `PersistentStorage` trait (filesystem backend)
 - **Dependencies**: Minimal
 
+### dishrupt-asset
+
+- **Purpose**: Asset catalog and path resolution
+- **Contains**:
+  - `AssetCatalog` - centralized asset registry with path resolution
+  - `AssetKind` - type-safe asset categorization
+  - `ResourceLocator` - path resolution for different asset types
+- **Note**: Engine-agnostic asset management for loading resources by reference
+
 ### dishrupt-l10n
 
 - **Purpose**: Localization with Fluent
@@ -107,16 +116,47 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 - **Contains**: Localized UI nodes for Godot
 - **Dependencies**: `dishrupt-l10n`, godot
 
-### dishrupt-godot
+### dishrupt-godot-utils
 
-- **Purpose**: Godot display and input integration
+- **Purpose**: Utility extensions and traits for Godot integration
+- **Contains**:
+  - `BindGodot`, `FromGodot`, `IntoGodot`, `IntoSim` - type conversion traits
+  - `NodeExt`, `ObjectExt` - convenience extensions for Godot types
+  - Callable utilities for signal handling
+- **Dependencies**: `bevy_math`, godot
+- **Note**: Low-level utilities for bridging Rust types with Godot types
+
+### dishrupt-godot-display
+
+- **Purpose**: Display stage integration for Godot
 - **Contains**:
   - Display system for syncing transforms to Godot nodes
-  - Asset loading utilities (prefabs, textures, sprites)
-  - Input handling (mouse, keyboard events)
   - Node pooling and factory system
-- **Dependencies**: `dishrupt-core`, godot
+  - Display context management
+  - Prefab and sprite loading utilities
+- **Dependencies**: `dishrupt-core`, `dishrupt-asset`, `dishrupt-godot-utils`, godot
 - **Note**: ECS-agnostic - works with any system that provides `EntityId` and display snapshots
+
+### dishrupt-godot-input
+
+- **Purpose**: Input event handling for Godot
+- **Contains**:
+  - Mouse and keyboard event abstractions
+  - Input event listener system
+  - Event processing utilities
+- **Dependencies**: godot
+- **Note**: Provides Rust-friendly wrappers for Godot input events
+
+### dishrupt-godot-audio
+
+- **Purpose**: Audio management for Godot
+- **Contains**:
+  - `AudioManager` - centralized sound and music playback
+  - Volume control for music and sound effects
+  - Audio bus management
+  - Asset catalog integration for audio loading
+- **Dependencies**: `dishrupt-core`, `dishrupt-asset`, godot
+- **Note**: Manages audio resources with asset references and automatic cleanup
 
 ### dishrupt-godot-ui
 
@@ -208,6 +248,18 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Movement interpolation utilities
 - **Dependencies**: External libs only (`pathfinding`, `edt`, `dodgy`, `grid`)
 
+### dishaster-opening
+
+- **Purpose**: Opening animation simulation (standalone mini-simulation)
+- **Contains**:
+  - ECS-based simulation for title screen animation
+  - Flying food items, emoji faces, and review texts
+  - Physics and spawning systems for animated elements
+  - `OpeningSimulationFeat` - implements `SimulationFeature` for opening
+  - Snapshot generation for display layer
+- **Dependencies**: `dishrupt-core`, `dishrupt-ecs`, `dishrupt-rng`, `dishrupt-simulation`, `bevy_ecs`
+- **Note**: Independent simulation separate from main game, reuses simulation framework
+
 ### dishaster-data
 
 - **Purpose**: Asset loading from RON files
@@ -248,7 +300,7 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 - **Purpose**: Game-specific UI components for Godot
 - **Contains**:
   - Emits `GameRequest` / `AppRequest` to game layer
-- **Dependencies**: `dishrupt-core`, `dishrupt-godot`, `dishrupt-godot-ui`, `dishrupt-l10n-godot`, `dishaster-views`, `dishaster-ui-protocol`
+- **Dependencies**: `dishrupt-core`, `dishrupt-godot-display`, `dishrupt-godot-input`, `dishrupt-godot-ui`, `dishrupt-l10n-godot`, `dishaster-views`, `dishaster-ui-protocol`
 - **Note**: Uses `views` for presentation data - no dependency on `models` or game logic
 
 ### dishaster-godot-game
@@ -261,8 +313,19 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
   - Performance tracking (tick rate, frame times)
   - Debug visualization overlays (pathfinding, queues, collision grids)
   - Input handling with `PickingContext` for controllers to emit commands
-- **Dependencies**: `dishrupt-*` (core, persistence, runner, godot, l10n), `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-ui-protocol`, `dishaster-persistence`
+- **Dependencies**: `dishrupt-*` (core, asset, persist, runner, godot-display, godot-audio, l10n), `dishaster-models`, `dishaster-views`, `dishaster-interface`, `dishaster-ui-protocol`, `dishaster-persistence`
 - **Note**: Depends on `models` for registry and persistence. Emits `UiCommand` to scene layer - **no direct UI dependencies**. Uses `dishrupt-runner` for simulation execution.
+
+### dishaster-godot-opening
+
+- **Purpose**: Godot presentation for opening animation
+- **Contains**:
+  - `Opening` - manages opening simulation runner and display stage
+  - Presenters for dishes, emojis, and text elements
+  - Node pooling and visual effects for title screen
+  - Event-driven spawning and cleanup
+- **Dependencies**: `dishrupt-core`, `dishrupt-asset`, `dishrupt-runner`, `dishrupt-godot-display`, `dishaster-opening`
+- **Note**: Self-contained presentation for title screen, independent of main game UI
 
 ### dishaster-godot
 
@@ -293,11 +356,13 @@ graph TB
     %% Presentation layer
     godot-game[dishaster-godot-game<br/>Simulation Runner]
     godot-ui[dishaster-godot-ui<br/>Game UI]
+    godot-opening[dishaster-godot-opening<br/>Opening Animation]
     ui-protocol[dishaster-ui-protocol<br/>UI Interface]
 
     %% Core simulation
     core[dishaster-core<br/>ECS Simulation]
     interface[dishaster-interface<br/>Sim Interface]
+    opening[dishaster-opening<br/>Opening Sim]
 
     %% Data management
     models[dishaster-models<br/>Data Structures]
@@ -306,7 +371,10 @@ graph TB
     nav[dishaster-navigation<br/>Pathfinding]
 
     %% Framework - Godot
-    d-godot[dishrupt-godot<br/>Godot Bridge]
+    d-godot-display[dishrupt-godot-display<br/>Display Stage]
+    d-godot-input[dishrupt-godot-input<br/>Input Events]
+    d-godot-audio[dishrupt-godot-audio<br/>Audio Manager]
+    d-godot-utils[dishrupt-godot-utils<br/>Godot Utils]
     d-godot-ui[dishrupt-godot-ui<br/>UI Framework]
     d-godot-widgets[dishrupt-godot-widgets<br/>Reactive Widgets]
     d-godot-scene[dishrupt-godot-scene<br/>Scene Stack]
@@ -319,6 +387,7 @@ graph TB
     d-simulation[dishrupt-simulation<br/>Sim Abstraction]
     d-runner[dishrupt-runner<br/>Execution Strategies]
     d-persist[dishrupt-persistence<br/>Storage Trait]
+    d-asset[dishrupt-asset<br/>Asset Catalog]
     d-l10n[dishrupt-l10n<br/>Fluent i18n]
 
     %% Presentation data
@@ -330,6 +399,7 @@ graph TB
     %% Top level deps
     godot --> godot-game
     godot --> godot-ui
+    godot --> godot-opening
     godot --> d-godot-scene
     godot --> d-l10n-godot
     godot --> core
@@ -343,9 +413,11 @@ graph TB
     godot-game --> views
     godot-game --> ui-protocol
     godot-game --> persist
-    godot-game --> d-godot
+    godot-game --> d-godot-display
+    godot-game --> d-godot-audio
     godot-game --> d-l10n
     godot-game --> d-core
+    godot-game --> d-asset
     godot-game --> d-persist
 
     ui-protocol --> views
@@ -353,13 +425,26 @@ graph TB
 
     godot-ui --> views
     godot-ui --> ui-protocol
-    godot-ui --> d-godot
+    godot-ui --> d-godot-display
+    godot-ui --> d-godot-input
     godot-ui --> d-godot-ui
     godot-ui --> d-godot-widgets
     godot-ui --> d-l10n-godot
     godot-ui --> d-core
 
     d-godot-widgets --> d-godot-ui
+
+    %% Opening animation deps
+    godot-opening --> opening
+    godot-opening --> d-core
+    godot-opening --> d-asset
+    godot-opening --> d-runner
+    godot-opening --> d-godot-display
+
+    opening --> d-core
+    opening --> d-ecs
+    opening --> d-rng
+    opening --> d-simulation
 
     %% Core simulation deps
     core --> models
@@ -390,10 +475,17 @@ graph TB
     models --> d-core
 
     %% Framework godot deps
-    d-godot-scene --> d-godot
+    d-godot-scene --> d-godot-display
     d-godot-scene --> d-godot-ui
 
-    d-godot --> d-core
+    d-godot-display --> d-core
+    d-godot-display --> d-asset
+    d-godot-display --> d-godot-utils
+
+    d-godot-audio --> d-core
+    d-godot-audio --> d-asset
+
+    d-godot-utils --> d-core
 
     d-ecs --> d-core
 
@@ -409,10 +501,10 @@ graph TB
     classDef framework fill:#a8dadc,stroke:#457b9d,stroke-width:2px,color:#000
 
     class godot-ext entry
-    class godot,godot-game,godot-ui,ui-protocol game
-    class core,interface,nav sim
+    class godot,godot-game,godot-ui,godot-opening,ui-protocol game
+    class core,interface,opening,nav sim
     class models,views,data,persist data
-    class d-core,d-ecs,d-rng,d-simulation,d-runner,d-godot,d-godot-ui,d-godot-widgets,d-godot-scene,d-persist,d-l10n,d-l10n-godot framework
+    class d-core,d-ecs,d-rng,d-simulation,d-runner,d-godot-display,d-godot-input,d-godot-audio,d-godot-utils,d-godot-ui,d-godot-widgets,d-godot-scene,d-persist,d-asset,d-l10n,d-l10n-godot framework
 ```
 
 ## Architecture Layers
@@ -423,6 +515,7 @@ graph TB
 - `dishaster-models` - Pure simulation data structures
 - `dishaster-views` - Presentation view models (UI-friendly snapshots)
 - `dishaster-navigation` - Pathfinding algorithms (engine-agnostic)
+- `dishaster-opening` - Opening animation simulation (standalone mini-simulation)
 - `dishaster-interface` - Dishaster-specific simulation interface implementing `SimulationFeature`
 - `dishrupt-simulation` - Generic simulation abstractions (traits and interfaces)
 - `dishrupt-runner` - Generic execution strategies (sync/async, engine-agnostic)
@@ -432,6 +525,7 @@ graph TB
 - **ECS isolation**: Only `dishaster-core` depends on `bevy_ecs`. All other crates are ECS-agnostic.
 - **Model-View separation**: `models` contains simulation state, `views` contains presentation-friendly snapshots
 - **Generic abstractions**: `dishrupt-simulation` provides engine-agnostic traits, `dishaster-interface` implements them for Dishaster
+- **Multiple simulations**: Opening animation is a separate, lightweight simulation demonstrating framework reusability
 - **CQRS**: Interface layer enforces clear separation between commands (write), queries (read), events (push), and responses (pull)
 - **Testability**: Core simulation can run headless, deterministic, and testable without any Godot dependency
 
@@ -447,6 +541,7 @@ graph TB
 - `dishaster-ui-protocol` - UI communication interface (CQRS for presentation layer)
 - `dishaster-godot-game` - Wraps simulation, handles display updates, emits UI commands
 - `dishaster-godot-ui` - Game-specific UI components, consumes `views` and emits requests
+- `dishaster-godot-opening` - Opening animation presentation with display stage
 - `dishaster-godot` - Scene management and app lifecycle, orchestrates UI updates
 
 **Philosophy**:
@@ -460,6 +555,7 @@ graph TB
   - `godot-game` emits commands, never mutates UI directly
   - `dishaster-godot` (scene layer) orchestrates both via `handle_game_request()` and `handle_ui_command()`
 - **No circular deps**: `ui-protocol` breaks potential `godot-game` ↔ `godot-ui` cycle
+- **Modular presentations**: Opening animation has its own self-contained presenter, demonstrating reusability
 - **Input handling**: Controllers use `PickingContext { cmds: &mut Vec<UiCommand> }` to emit commands on user interaction
 
 ### Layer 4: Framework (dishrupt-\*)
@@ -471,7 +567,11 @@ Reusable utilities that could be extracted into separate libraries:
 - RNG (`dishrupt-rng`) - Deterministic random number generation for reproducible simulations
 - Simulation abstractions (`dishrupt-simulation`) - Generic `SimulationFeature` and `ISimulation` traits
 - Execution strategies (`dishrupt-runner`) - Generic simulation runners (sync/async)
-- Display bridge (`dishrupt-godot`) - Godot node management (ECS-agnostic)
+- Asset management (`dishrupt-asset`) - Asset catalog and path resolution
+- Godot utilities (`dishrupt-godot-utils`) - Type conversion and extension traits for Godot integration
+- Display bridge (`dishrupt-godot-display`) - Display stage with node management and pooling (ECS-agnostic)
+- Input handling (`dishrupt-godot-input`) - Input event abstractions for Godot
+- Audio management (`dishrupt-godot-audio`) - Audio playback with asset catalog integration
 - UI framework (`dishrupt-godot-ui`) - Generic UI utilities for Godot
 - Reactive widgets (`dishrupt-godot-widgets`) - Signal-reactive wrappers for Godot controls
 - Scene management (`dishrupt-godot-scene`) - Scene stack and transitions

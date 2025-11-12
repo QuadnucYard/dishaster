@@ -17,7 +17,8 @@ use dishaster_ui_protocol::{StatsView, UiCommand};
 use dishaster_views::DayHudState;
 use dishrupt_asset::AssetCatalog;
 use dishrupt_core::prelude::*;
-use dishrupt_godot::{NodeExt, display::*};
+use dishrupt_godot_display::{DisplayContext2D, GdNode2D, Stage, load_prefab_sync};
+use dishrupt_godot_utils::NodeExt;
 use dishrupt_l10n::tr;
 use dishrupt_runner::{ISimulation, SimulationRunner, SnapshotFrame, SyncSimulationRunner};
 use godot::{

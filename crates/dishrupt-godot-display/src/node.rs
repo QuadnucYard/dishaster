@@ -1,20 +1,23 @@
 use derive_more::{Deref, DerefMut};
 use dishrupt_core::prelude::*;
+use dishrupt_godot_utils::IntoGodot;
 use godot::prelude::*;
 
 use super::context::DisplayContext2D;
-use crate::bind::IntoGodot;
 
+/// Pooled handler of Godot Node2D
 #[derive(Debug, Clone, Deref, DerefMut)]
 pub struct GdNode2D(Gd<Node2D>);
 
 impl GdNode2D {
+    /// Create a new GdNode2D from a Godot Node2D.
     pub fn new(node: Gd<impl Inherits<Node2D>>) -> Self {
         Self(node.upcast())
     }
 }
 
 impl GdNode2D {
+    /// Destroy the node.
     pub fn destroy(&mut self) {}
 }
 
@@ -24,12 +27,15 @@ unsafe impl Sync for GdNode2D {}
 
 /// Pooled handler of Godot Node2D
 pub struct GodotDisplayNode2D {
+    /// Bound entity id
     pub bind: Option<EntityId>,
 
+    /// Godot node
     pub node: GdNode2D,
 }
 
 impl GodotDisplayNode2D {
+    /// Create a new GodotDisplayNode2D from a Godot Node2D.
     pub fn new(node: GdNode2D) -> Self {
         Self {
             bind: Default::default(),
@@ -37,6 +43,7 @@ impl GodotDisplayNode2D {
         }
     }
 
+    /// Create a new GodotDisplayNode2D bound to an entity.
     pub fn new_bind(node: GdNode2D, entity: EntityId) -> Self {
         Self {
             bind: Some(entity),
@@ -44,6 +51,7 @@ impl GodotDisplayNode2D {
         }
     }
 
+    /// Bind to an entity.
     pub fn bind_to(&mut self, entity: EntityId) {
         self.bind = Some(entity);
     }
@@ -60,6 +68,7 @@ impl GodotDisplayNode2D {
        }
     */
 
+    /// Set the parent node.
     pub fn set_parent(&mut self, parent: &mut Self) {
         if self.node.get_parent().is_some() {
             self.node.reparent(&*parent.node);
@@ -68,6 +77,7 @@ impl GodotDisplayNode2D {
         }
     }
 
+    /// Detach from the parent node.
     pub fn detach(&mut self) {
         let node = &self.node;
         if node.is_instance_valid()
@@ -77,14 +87,17 @@ impl GodotDisplayNode2D {
         }
     }
 
+    /// Reset the node state.
     pub fn reset(&mut self) {
         self.node.request_ready();
     }
 
+    /// Check if the node is valid.
     pub fn is_valid(&self) -> bool {
         self.node.is_instance_valid() && self.node.get_parent().is_some()
     }
 
+    /// Destroy the node.
     pub fn destroy(&mut self) {
         self.detach();
     }
@@ -103,6 +116,7 @@ impl Drop for GodotDisplayNode2D {
     }
 }
 
+/// Update the Godot Node2D from the display snapshot.
 pub fn update_godot_display_node2d(
     node_handle: &mut GodotDisplayNode2D,
     snapshot: &DisplaySnapshot,

@@ -2,9 +2,8 @@ use std::collections::HashMap;
 
 use godot::{classes::Node, obj::Gd};
 
-use super::{Scene, SceneContext};
 use crate::{
-    SceneId, SceneProcedureContext,
+    Scene, SceneContext, SceneId, SceneProcedureContext,
     proc::{SceneProcedure, SceneProcedurePoll},
 };
 

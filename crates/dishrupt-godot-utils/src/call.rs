@@ -1,8 +1,11 @@
+//! Utilities for creating Godot Callables from Rust functions.
+
 use godot::{
     builtin::{Callable, Variant},
     meta::FromGodot,
 };
 
+/// Creates a `Callable` from a function that takes a slice of `Variant` references.
 pub fn make_callable<F>(name: &str, mut func: F) -> Callable
 where
     F: 'static + FnMut(&[&Variant]),
@@ -14,8 +17,9 @@ where
 
 macro_rules! impl_connect_fn {
     ($name:ident; $fn_name: ident; $($args:ident)*; $($indiced:literal)*) => {
-
+        /// Trait for connecting a signal to a local function with specific argument types.
         pub trait $name {
+            /// Connects a signal to a local function.
             fn $fn_name<F, $($args,)*>(&mut self, signal: &str, func: F)
             where
                 F: 'static + FnMut($($args,)*),

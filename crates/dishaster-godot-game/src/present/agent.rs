@@ -1,7 +1,7 @@
 use dishaster_interface::event::DinerItemsChange;
 use dishaster_views::{Appearance, BodyPart};
 use dishrupt_core::EntityId;
-use dishrupt_godot::display::*;
+use dishrupt_godot_display::{GdNode2D, Stage};
 use godot::{
     classes::{CanvasItem, Label, Node2D},
     prelude::*,

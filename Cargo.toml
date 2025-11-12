@@ -19,7 +19,10 @@ dishrupt-simulation = { path = "crates/dishrupt-simulation" }
 dishrupt-runner = { path = "crates/dishrupt-runner" }
 dishrupt-l10n = { path = "crates/dishrupt-l10n" }
 dishrupt-l10n-godot = { path = "crates/dishrupt-l10n-godot" }
-dishrupt-godot = { path = "crates/dishrupt-godot" }
+dishrupt-godot-audio = { path = "crates/dishrupt-godot-audio" }
+dishrupt-godot-display = { path = "crates/dishrupt-godot-display" }
+dishrupt-godot-input = { path = "crates/dishrupt-godot-input" }
+dishrupt-godot-utils = { path = "crates/dishrupt-godot-utils" }
 dishrupt-godot-ui = { path = "crates/dishrupt-godot-ui" }
 dishrupt-godot-ui-macros = { path = "crates/dishrupt-godot-ui-macros" }
 dishrupt-godot-widgets = { path = "crates/dishrupt-godot-widgets" }

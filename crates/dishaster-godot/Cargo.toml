@@ -11,7 +11,9 @@ test = false
 [dependencies]
 dishrupt-core.workspace = true
 dishrupt-asset.workspace = true
-dishrupt-godot.workspace = true
+dishrupt-godot-utils.workspace = true
+dishrupt-godot-audio.workspace = true
+dishrupt-godot-input.workspace = true
 dishrupt-godot-ui.workspace = true
 dishrupt-godot-scene.workspace = true
 dishrupt-l10n-godot.workspace = true

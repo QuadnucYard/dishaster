@@ -1,3 +1,5 @@
+//! Context for display and simulation space translation.
+
 use dishrupt_core::prelude::*;
 use godot::builtin::Vector2;
 
@@ -11,6 +13,7 @@ pub struct DisplayContext2D {
 }
 
 impl DisplayContext2D {
+    /// Create a new display context with the given scale factors.
     pub fn aspect_ratio(&self) -> f32 {
         self.view_scale.x / self.view_scale.y
     }

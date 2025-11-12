@@ -5,7 +5,8 @@ mod movement_overlay;
 mod queue_overlay;
 
 use dishaster_interface::snapshots::DebugSnapshots;
-use dishrupt_godot::{NodeExt, display::DisplayContext2D};
+use dishrupt_godot_display::DisplayContext2D;
+use dishrupt_godot_utils::NodeExt;
 use godot::{classes::Node2D, prelude::*};
 
 use self::{

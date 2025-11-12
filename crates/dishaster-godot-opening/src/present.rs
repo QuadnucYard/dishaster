@@ -1,6 +1,6 @@
 //! Presenters for opening animation items
 
-use dishrupt_godot::display::GdNode2D;
+use dishrupt_godot_display::GdNode2D;
 use godot::{
     classes::{RichTextLabel, Sprite2D},
     prelude::*,

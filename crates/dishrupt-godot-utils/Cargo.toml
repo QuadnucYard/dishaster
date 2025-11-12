@@ -1,0 +1,13 @@
+[package]
+name = "dishrupt-godot-utils"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy_math.workspace = true
+godot.workspace = true
+
+[lints]
+workspace = true

@@ -1,6 +1,6 @@
 use dishaster_interface::event::DinerItemsChange;
 use dishrupt_core::EntityId;
-use dishrupt_godot::display::*;
+use dishrupt_godot_display::{GdNode2D, Stage};
 use godot::{classes::Node2D, prelude::*};
 
 pub struct DinerItemsPresenter {

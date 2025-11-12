@@ -1,7 +1,7 @@
 use dishaster_ui_protocol::UiCommand;
 use dishaster_views::Feedback;
 use dishrupt_core::EntityId;
-use dishrupt_godot::input::event::MouseButtonEvent;
+use dishrupt_godot_input::event::MouseButtonEvent;
 use godot::{
     classes::{Label, Node2D},
     prelude::*,

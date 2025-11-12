@@ -1,3 +1,7 @@
+//! Dishrupt Godot Input Listener
+//!
+//! This module defines a Godot node that listens for input events and queues them for processing.
+
 use std::collections::VecDeque;
 
 use godot::{
@@ -5,16 +9,10 @@ use godot::{
     prelude::*,
 };
 
-use super::event::{KeyEvent, MouseButtonEvent, MouseMotionEvent};
-
-#[derive(Debug)]
-pub enum GodotInputEvent {
-    Button(MouseButtonEvent),
-    Motion(MouseMotionEvent),
-    Key(KeyEvent),
-}
+use crate::event::{GodotInputEvent, KeyEvent, MouseButtonEvent, MouseMotionEvent};
 
 impl GodotInputEvent {
+    /// Check if the event corresponds to an action type.
     pub fn is_action_type(&self) -> bool {
         match self {
             GodotInputEvent::Button(e) => e.raw.is_action_type(),
@@ -23,6 +21,7 @@ impl GodotInputEvent {
         }
     }
 
+    /// Check if the action is currently pressed.
     pub fn is_action_pressed(&self, action: &str) -> bool {
         match self {
             GodotInputEvent::Button(e) => e.raw.is_action_pressed(action),
@@ -31,6 +30,7 @@ impl GodotInputEvent {
         }
     }
 
+    /// Check if the action is currently pressed, with exact match.
     pub fn is_action_pressed_exact(&self, action: &str) -> bool {
         match self {
             GodotInputEvent::Button(e) => {
@@ -43,6 +43,7 @@ impl GodotInputEvent {
         }
     }
 
+    /// Check if the action was released.
     pub fn is_action_released(&self, action: &str) -> bool {
         match self {
             GodotInputEvent::Button(e) => e.raw.is_action_released(action),
@@ -51,6 +52,7 @@ impl GodotInputEvent {
         }
     }
 
+    /// Check if the action was released, with exact match.
     pub fn is_action_released_exact(&self, action: &str) -> bool {
         match self {
             GodotInputEvent::Button(e) => {
@@ -63,6 +65,7 @@ impl GodotInputEvent {
         }
     }
 
+    /// Get the mouse position associated with the event.
     pub fn mouse_position(&self) -> Vector2 {
         match self {
             GodotInputEvent::Button(e) => e.position,
@@ -72,6 +75,7 @@ impl GodotInputEvent {
     }
 }
 
+/// A Godot node that listens for input events and queues them.
 #[derive(GodotClass)]
 #[class(base=Node, init)]
 pub struct InputListener {
@@ -81,6 +85,7 @@ pub struct InputListener {
 }
 
 impl InputListener {
+    /// Drain all queued input events.
     pub fn drain_events(&mut self) -> impl Iterator<Item = GodotInputEvent> {
         self.input_event.drain(..)
     }

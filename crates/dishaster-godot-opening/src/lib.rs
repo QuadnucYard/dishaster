@@ -9,7 +9,7 @@ use dishaster_opening::{
 };
 use dishrupt_asset::AssetCatalog;
 use dishrupt_core::{EntityId, prelude::*};
-use dishrupt_godot::display::{DisplayContext2D, GdNode2D, Stage};
+use dishrupt_godot_display::{DisplayContext2D, GdNode2D, Stage};
 use dishrupt_runner::{ISimulation, SimulationRunner, SnapshotFrame, SyncSimulationRunner};
 use godot::{
     classes::{Node, Node2D},

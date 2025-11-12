@@ -1,6 +1,7 @@
 use dishaster_ui_protocol::UiCommand;
 use dishrupt_core::EntityId;
-use dishrupt_godot::{display::*, input::event::MouseButtonEvent};
+use dishrupt_godot_display::GdNode2D;
+use dishrupt_godot_input::event::MouseButtonEvent;
 use godot::{
     classes::{Area2D, Sprite2D},
     prelude::*,

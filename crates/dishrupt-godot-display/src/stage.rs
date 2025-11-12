@@ -7,10 +7,11 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use slab::Slab;
 
 use super::{DisplayFactory, GodotDisplayNode2D, context::DisplayContext2D};
-use crate::display::node::{GdNode2D, update_godot_display_node2d};
+use crate::node::{GdNode2D, update_godot_display_node2d};
 
 type NodeHandle = usize;
 
+/// The stage managing display nodes and their synchronization with the core simulation.
 pub struct Stage {
     factory: DisplayFactory,
 
@@ -25,6 +26,7 @@ pub struct Stage {
 }
 
 impl Stage {
+    /// Create a new stage with the given display context and asset catalog.
     pub fn new(display_ctx: DisplayContext2D, catalog: AssetCatalog) -> Self {
         Self {
             factory: DisplayFactory::new(catalog),
@@ -36,10 +38,12 @@ impl Stage {
         }
     }
 
+    /// Get the display context.
     pub fn display_context(&self) -> &DisplayContext2D {
         &self.display_ctx
     }
 
+    /// Set the root Godot node for the stage.
     pub fn set_root(&mut self, display_id: EntityId, gd_node: GdNode2D) {
         godot::global::godot_print!("Stage display root mounted at {}", gd_node.get_path());
         let root_entity = self
@@ -53,18 +57,21 @@ impl Stage {
         self.factory.init();
     }
 
+    /// Get reference to the Godot node for the given entity.
     pub fn get_godot_node(&self, entity: EntityId) -> Option<&GdNode2D> {
         let e = *self.core_to_view.get(&entity)?;
         let gd_node = self.display_world.get(e)?;
         Some(&gd_node.node)
     }
 
+    /// Get mutable reference to the Godot node for the given entity.
     pub fn get_godot_node_mut(&mut self, entity: EntityId) -> Option<&mut GdNode2D> {
         let e = *self.core_to_view.get(&entity)?;
         let gd_node = self.display_world.get_mut(e)?;
         Some(&mut gd_node.node)
     }
 
+    /// Get mutable references to the Godot nodes for the given entities.
     pub fn get_godot_node2_mut(
         &mut self,
         entity1: EntityId,
@@ -76,6 +83,7 @@ impl Stage {
         Some((&mut gd_node.0.node, &mut gd_node.1.node))
     }
 
+    /// Update the stage with the elapsed time.
     pub fn update(&mut self, elapsed_time: f64) {
         if !self.active {
             return;
@@ -83,6 +91,7 @@ impl Stage {
         self.factory.tidy((elapsed_time * 60.0) as u32);
     }
 
+    /// Present a display snapshot directly with an existing Godot node.
     pub fn present_direct(&mut self, display: &DisplaySnapshot, gd_node: GdNode2D) -> NodeHandle {
         let node = GodotDisplayNode2D::new_bind(gd_node, display.core_id);
         let e = self.display_world.insert(node);
@@ -91,6 +100,7 @@ impl Stage {
         e
     }
 
+    /// Present the given display snapshots, updating or creating Godot nodes as necessary.
     pub fn present<'a>(&mut self, displays: impl Iterator<Item = &'a DisplaySnapshot>) {
         let ctx = &self.display_ctx;
 
@@ -167,6 +177,7 @@ impl Stage {
         }
     }
 
+    /// Flush any pending operations in the display factory.
     pub fn flush(&mut self) {
         self.factory.flush();
     }

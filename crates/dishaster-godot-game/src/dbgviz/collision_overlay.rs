@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use dishaster_interface::snapshots::{CollisionCellDebugSnapshot, CollisionGridDebugSnapshot};
 use dishrupt_core::prelude::*;
-use dishrupt_godot::display::DisplayContext2D;
+use dishrupt_godot_display::DisplayContext2D;
 use godot::{
     classes::{Line2D, Node2D},
     prelude::*,

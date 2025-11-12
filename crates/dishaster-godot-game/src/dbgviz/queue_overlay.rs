@@ -4,7 +4,7 @@ use dishaster_interface::snapshots::{
     QueueIntentDebugSnapshot, QueueLaneDebugSnapshot, QueueMemberDebugSnapshot,
 };
 use dishrupt_core::EntityId;
-use dishrupt_godot::display::DisplayContext2D;
+use dishrupt_godot_display::DisplayContext2D;
 use godot::{
     classes::{Line2D, Node2D},
     prelude::*,
