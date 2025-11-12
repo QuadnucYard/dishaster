@@ -91,3 +91,20 @@ pub enum DinerItemsChange {
     /// Diner dropped all items (when returning dishes).
     DropAll,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn event_size() {
+        const MAX_SIZE: usize = 40;
+        let actual_size = std::mem::size_of::<SimEvent>();
+        assert!(
+            actual_size <= MAX_SIZE,
+            "SimEvent size is {}, exceeds maximum of {}",
+            actual_size,
+            MAX_SIZE
+        );
+    }
+}

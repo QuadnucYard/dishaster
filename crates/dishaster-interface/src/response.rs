@@ -5,7 +5,7 @@ pub enum SimResponse {
     /// Response to a distance query.
     Distance(Option<f32>),
     /// Response to a distance field query.
-    Distances(DistancesResponse),
+    Distances(Box<DistancesResponse>),
 }
 
 /// Response to a distance field query.

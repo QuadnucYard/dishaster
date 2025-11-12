@@ -282,7 +282,7 @@ impl Game {
             ));
         }
 
-        self.ui_commands.push(UiCommand::UpdateStats(StatsView {
+        let view = Box::new(StatsView {
             sim_tick: self.telemetry.tick,
             sim_time: self.telemetry.seconds,
             fps: self.perf_tracker.last_fps,
@@ -292,6 +292,7 @@ impl Game {
             consumption_kg: self.telemetry.consumption_kg,
             revenue: self.telemetry.revenue,
             completed_diners: self.telemetry.completed_diners,
-        }));
+        });
+        self.ui_commands.push(UiCommand::UpdateStats(view));
     }
 }

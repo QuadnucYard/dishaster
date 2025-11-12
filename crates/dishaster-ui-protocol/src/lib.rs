@@ -82,7 +82,7 @@ pub enum UiCommand {
     /// Update the HUD to the supplied state.
     UpdateDayHud(Box<DayHudState>),
     /// Update the stats display.
-    UpdateStats(StatsView),
+    UpdateStats(Box<StatsView>),
 
     /// Request opening the dish price editor for a given dish entity.
     OpenDishPriceEditor(DishPriceView),
@@ -131,4 +131,21 @@ pub struct StatsView {
     pub revenue: f32,
     /// Total food consumed today in kilograms
     pub consumption_kg: f32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn command_size() {
+        const MAX_SIZE: usize = 48;
+        let actual_size = std::mem::size_of::<UiCommand>();
+        assert!(
+            actual_size <= MAX_SIZE,
+            "UiCommand size is {}, exceeds maximum of {}",
+            actual_size,
+            MAX_SIZE
+        );
+    }
 }

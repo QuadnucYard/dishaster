@@ -123,7 +123,7 @@ impl Simulation {
                     }
                 };
                 let mut responses = self.world.resource_mut::<ResponseQueue>();
-                responses.push(SimResponse::Distances(resp));
+                responses.push(SimResponse::Distances(resp.into()));
             }
         }
     }
