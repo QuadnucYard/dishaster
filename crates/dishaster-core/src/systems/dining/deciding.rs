@@ -4,10 +4,10 @@
 //! using mathematical scoring functions to model diner preferences, psychological state,
 //! and memory-based decision making.
 
-use std::sync::Arc;
-
-use super::prelude::*;
-use crate::utils::{sample_softmax, sigmoid};
+use crate::{
+    systems::prelude::*,
+    utils::{sample_softmax, sigmoid},
+};
 
 // ===================== Scoring Functions =====================
 
@@ -149,21 +149,6 @@ pub fn update_patience(personality: &Personality, psych_state: &mut PsychState) 
 pub fn apply_mood_decay(psych_state: &mut PsychState, delta_time: f32, tau_mood: f32) {
     let decay_rate = delta_time / tau_mood;
     psych_state.mood *= (1.0 - decay_rate).max(0.0);
-}
-
-/// Update psychological state after abandoning a queue
-pub fn handle_abandon_penalty(
-    psych_state: &mut PsychState,
-    ltm: &mut LongTermMemory,
-    estimated_wait: f32,
-    patience_now: f32,
-    config: &DecisionConfig,
-) {
-    let excess_ratio = (estimated_wait - patience_now) / patience_now.max(1.0);
-    let mood_penalty = config.abandon_mood_penalty * excess_ratio.max(0.0);
-
-    psych_state.mood = (psych_state.mood - mood_penalty).max(-1.0);
-    ltm.overall_like = (ltm.overall_like - 0.02).max(0.0);
 }
 
 // ===================== Satisfaction and Memory Updates =====================
@@ -324,7 +309,7 @@ pub fn evaluate_window(
     personality: &Personality,
     psych_state: &PsychState,
     ltm: &LongTermMemory,
-    registry: &Arc<GameModelRegistry>,
+    registry: &GameModelRegistry,
     config: &DecisionConfig,
 ) -> Option<WindowCandidate> {
     if dish_query.is_empty() {

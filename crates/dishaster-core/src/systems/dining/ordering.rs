@@ -7,8 +7,10 @@
 //! - Dish quality and pricing
 //! - Variety seeking (avoid ordering same dish multiple times)
 
-use super::prelude::*;
-use crate::utils::sigmoid;
+use crate::{
+    systems::{choose_feedback, feedbacks, prelude::*},
+    utils::sigmoid,
+};
 
 /// Estimate dish price for decision-making before ordering
 ///
@@ -18,43 +20,6 @@ fn estimate_dish_price(pricing: &PricingMethod, characteristics: &DishCharacteri
     match pricing {
         PricingMethod::PerPortion(price) => *price,
         PricingMethod::ByWeight(price_per_kg) => price_per_kg * characteristics.weight_distrib.mean,
-    }
-}
-
-/// Parameters for ordering decisions
-#[derive(Debug, Clone, Resource)]
-pub struct OrderingConfig {
-    /// Tolerance for "close enough" to desired satiation (fraction of diner's max)
-    /// When sat_needed <= tolerance × max_satiation, stop ordering
-    pub satiation_tolerance: f32,
-    /// Maximum number of different dishes one person can order
-    pub max_dishes_per_order: usize,
-    /// Weight for taste/preference in scoring (0..1)
-    pub taste_weight: f32,
-    /// Weight for quality in scoring (0..1)
-    pub quality_weight: f32,
-    /// Variety penalty factor (penalizes repeated dishes)
-    pub variety_beta: f32,
-    /// Sigmoid steepness for taste score
-    pub sigmoid_k: f32,
-    /// Maximum budget overspend factor (e.g., 1.2 = can spend up to 120% of budget)
-    pub max_budget_overspend: f32,
-    /// Base probability of accepting over-budget dish (0..1)
-    pub overspend_base_prob: f32,
-}
-
-impl Default for OrderingConfig {
-    fn default() -> Self {
-        Self {
-            satiation_tolerance: 0.05, // Stop when within 5% of desired satiation
-            max_dishes_per_order: 4,
-            taste_weight: 0.6,
-            quality_weight: 0.4,
-            variety_beta: 0.6,
-            sigmoid_k: 2.0,
-            max_budget_overspend: 1.3, // Can exceed budget by up to 30%
-            overspend_base_prob: 0.3,  // 30% base chance to accept overspend
-        }
     }
 }
 
@@ -285,4 +250,238 @@ fn deterministic_noise_f32(seed: u64, key: &str) -> f32 {
     // Map to [-1, 1]
     let v = (h % 100000) as f32 / 100000.0;
     (v - 0.5) * 2.0
+}
+
+/// Create session at front of queue using validated tentative order
+pub fn handle_create_session_from_tentative_order(
+    commands: &mut Commands,
+    entity: Entity,
+    goal: &mut DinerGoalState,
+    diner_state: &mut DinerState,
+    targets: &mut DinerTargets,
+    psych_state: &mut PsychState,
+    rng: &mut EntityRng,
+    queue_member: &QueueMember,
+    window_dishes_query: &Query<&WindowDishes>,
+    dish_query: &Query<&Dish>,
+    lane_query: &Query<(&QueueLane, &QueueLaneMembers)>,
+    time: &Time,
+    feedback_messages: &mut MessageWriter<FeedbackMessage>,
+) {
+    let Ok((lane, _)) = lane_query.get(queue_member.lane) else {
+        return;
+    };
+    let window_entity = lane.owner;
+
+    // Verify window still has dishes
+    let Some(window_dishes) = window_dishes_query.get(window_entity).ok() else {
+        log::warn!(
+            target: "diner",
+            "diner {:?} at front of queue but window {:?} has no dishes",
+            entity,
+            window_entity
+        );
+        commands.entity(entity).remove::<QueueMember>();
+        goal.update(DinerGoal::Leave);
+        return;
+    };
+
+    // Validate tentative order exists
+    if targets.tentative_order.is_empty() {
+        log::warn!(
+            target: "diner",
+            "diner {:?} at front of queue but has no tentative order, leaving",
+            entity
+        );
+        apply_no_order_penalties(entity, psych_state, rng, feedback_messages);
+        commands.entity(entity).remove::<QueueMember>();
+        goal.update(DinerGoal::Leave);
+        return;
+    }
+
+    // Validate dishes are still available
+    let planned_order =
+        validate_tentative_order(window_dishes, dish_query, &targets.tentative_order);
+
+    if planned_order.is_empty() {
+        log::warn!(
+            target: "diner",
+            "diner {:?} tentative order no longer valid (all dishes unavailable), leaving",
+            entity
+        );
+        apply_dishes_unavailable_penalties(entity, psych_state, rng, feedback_messages);
+        commands.entity(entity).remove::<QueueMember>();
+        goal.update(DinerGoal::Leave);
+        return;
+    }
+
+    // Log order changes
+    if planned_order.len() < targets.tentative_order.len() {
+        log::debug!(
+            target: "diner",
+            "diner {:?} order reduced from {} to {} dishes due to availability",
+            entity,
+            targets.tentative_order.len(),
+            planned_order.len()
+        );
+    }
+
+    // Create session
+    diner_state.total_spent = 0.0;
+    log::debug!(
+        target: "diner",
+        "diner {:?} confirming tentative order with {} dishes",
+        entity,
+        planned_order.len()
+    );
+
+    let mut session = ServiceSession::new(window_entity, queue_member.lane, time.current_time);
+    session.planned_order = planned_order;
+    commands.entity(entity).insert(session);
+    targets.tentative_order.clear();
+    goal.update(DinerGoal::GetServed);
+}
+
+/// Allow diners waiting in queue to re-evaluate their order
+pub fn handle_queue_re_evaluation(
+    commands: &mut Commands,
+    entity: Entity,
+    goal: &mut DinerGoalState,
+    diner_state: &mut DinerState,
+    targets: &mut DinerTargets,
+    personality: &Personality,
+    psych_state: &mut PsychState,
+    dining_profile: &DiningProfile,
+    ltm: &LongTermMemory,
+    stm: &mut ShortTermMemory,
+    rng: &mut EntityRng,
+    queue_member: &QueueMember,
+    window_dishes_query: &Query<&WindowDishes>,
+    dish_query: &Query<&Dish>,
+    registry: &GameModelRegistry,
+    ordering_config: &OrderingConfig,
+    feedback_messages: &mut MessageWriter<FeedbackMessage>,
+) {
+    const RE_EVALUATION_PROBABILITY: f64 = 0.1;
+    const RE_EVALUATION_COOLDOWN: f32 = 5.0;
+
+    // Check cooldown and probability
+    if goal.timer <= RE_EVALUATION_COOLDOWN || !rng.random_bool(RE_EVALUATION_PROBABILITY) {
+        return;
+    }
+
+    let window_entity = targets.chosen_window.unwrap();
+
+    // Check if window still has dishes
+    let Some(window_dishes) = window_dishes_query.get(window_entity).ok() else {
+        return;
+    };
+
+    log::debug!(
+        target: "diner",
+        "diner {:?} re-evaluating order while waiting (ranking={})",
+        entity,
+        queue_member.ranking
+    );
+
+    // Re-evaluate order with current psychological state
+    let new_order = decide_order(
+        window_dishes,
+        dish_query,
+        personality,
+        psych_state,
+        dining_profile,
+        ltm,
+        stm,
+        registry,
+        ordering_config,
+        diner_state.meal_budget,
+        rng,
+    );
+
+    if new_order.is_empty() {
+        log::info!(
+            target: "diner",
+            "diner {:?} abandoning queue after re-evaluation: no valid order",
+            entity
+        );
+        apply_abandon_after_reevaluation_penalties(entity, psych_state, rng, feedback_messages);
+        commands.entity(entity).remove::<QueueMember>();
+        goal.update(DinerGoal::Leave);
+        return;
+    }
+
+    // Update tentative order and reset cooldown
+    targets.tentative_order = new_order;
+    goal.reset_timer();
+}
+
+/// Validate tentative order against current window dishes
+fn validate_tentative_order(
+    window_dishes: &WindowDishes,
+    dish_query: &Query<&Dish>,
+    tentative_order: &[ServiceRequest],
+) -> Vec<ServiceRequest> {
+    let available_dish_ids: FxHashSet<_> = window_dishes
+        .collection()
+        .iter()
+        .filter_map(|&entity| dish_query.get(entity).ok().map(|d| d.model_id.clone()))
+        .collect();
+
+    tentative_order
+        .iter()
+        .filter(|req| available_dish_ids.contains(&req.dish_id))
+        .cloned()
+        .collect()
+}
+
+/// Apply penalties when diner has no tentative order
+fn apply_no_order_penalties(
+    entity: Entity,
+    psych_state: &mut PsychState,
+    rng: &mut EntityRng,
+    feedback_messages: &mut MessageWriter<FeedbackMessage>,
+) {
+    psych_state.mood = (psych_state.mood - 0.3).max(-1.0);
+    psych_state.trust = (psych_state.trust - 0.2).max(0.0);
+
+    feedback_messages.write(FeedbackMessage {
+        entity,
+        content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
+        trigger: Some(FeedbackTrigger::NoAppealingDish),
+    });
+}
+
+/// Apply penalties when dishes become unavailable
+fn apply_dishes_unavailable_penalties(
+    entity: Entity,
+    psych_state: &mut PsychState,
+    rng: &mut EntityRng,
+    feedback_messages: &mut MessageWriter<FeedbackMessage>,
+) {
+    psych_state.mood = (psych_state.mood - 0.3).max(-1.0);
+    psych_state.trust = (psych_state.trust - 0.15).max(0.0);
+
+    feedback_messages.write(FeedbackMessage {
+        entity,
+        content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
+        trigger: Some(FeedbackTrigger::NoAppealingDish),
+    });
+}
+
+/// Apply penalties when abandoning after re-evaluation
+fn apply_abandon_after_reevaluation_penalties(
+    entity: Entity,
+    psych_state: &mut PsychState,
+    rng: &mut EntityRng,
+    feedback_messages: &mut MessageWriter<FeedbackMessage>,
+) {
+    psych_state.mood = (psych_state.mood - 0.25).max(-1.0);
+    psych_state.trust = (psych_state.trust - 0.15).max(0.0);
+
+    feedback_messages.write(FeedbackMessage {
+        entity,
+        content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
+        trigger: Some(FeedbackTrigger::NoAppealingDish),
+    });
 }

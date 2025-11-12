@@ -1,6 +1,9 @@
 use dishaster_models::*;
 
-use crate::{components::Movement, prelude::*};
+use crate::{
+    components::{Movement, ServiceRequest},
+    prelude::*,
+};
 
 #[allow(missing_docs)]
 #[derive(Bundle)]
@@ -156,6 +159,9 @@ pub struct DinerTargets {
     pub observing_window: Option<Entity>,
     /// Currently chosen window entity
     pub chosen_window: Option<Entity>,
+    /// Tentative order made during window selection (before queueing)
+    /// This represents the diner's initial intention and is used to decide whether to queue
+    pub tentative_order: Vec<ServiceRequest>,
     /// Currently chosen tray dispenser entity
     pub tray_target: Option<Entity>,
     /// Currently chosen chopstick dispenser entity

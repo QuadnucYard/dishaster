@@ -1,7 +1,7 @@
 use dishaster_views::Feedback;
 use rand_distr::Normal;
 
-use super::{feedback::*, ordering::*, prelude::*};
+use super::{feedback::*, prelude::*};
 
 /// Queue of delayed serving communication messages to simulate human interaction latency.
 #[derive(Resource, Default)]
@@ -298,47 +298,17 @@ fn staff_alignment_target(
 
 /// Progress service sessions by allocating staff and queuing conversation beats.
 pub fn drive_serving_sessions(
-    mut diner_query: Query<
-        (
-            Entity,
-            &mut ServiceSession,
-            &mut DinerState,
-            &Movement,
-            &mut EntityRng,
-            &DinerPersonality,
-            &DinerPsychState,
-            &DinerDiningProfile,
-            &DinerLongTermMemory,
-            &mut DinerShortTermMemory,
-        ),
-        With<Diner>,
-    >,
+    mut diner_query: Query<(Entity, &mut ServiceSession, &Movement, &mut EntityRng), With<Diner>>,
     mut staff_query: Query<(&ServingStaff, &mut ServingStaffState, &mut Movement), Without<Diner>>,
-    window_query: Query<&WindowDishes>,
-    dish_query: Query<&Dish>,
     lane_query: Query<(&StaffForLane,)>,
     windows: Query<&Window>,
-    registry: Res<GameModelRegistryRes>,
     mut comms: ResMut<ServingCommsQueue>,
     time: Res<Time>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
-    ordering_config: Res<OrderingConfig>,
 ) {
     let now = time.current_time;
 
-    for (
-        diner,
-        mut session,
-        mut diner_state,
-        diner_movement,
-        mut rng,
-        personality,
-        psych_state,
-        dining_profile,
-        ltm,
-        mut stm,
-    ) in diner_query.iter_mut()
-    {
+    for (diner, mut session, diner_movement, mut rng) in diner_query.iter_mut() {
         // Each phase of the service state machine either allocates resources,
         // waits on delayed conversation steps, or concludes the interaction.
         match session.stage {
@@ -359,42 +329,8 @@ pub fn drive_serving_sessions(
                     continue;
                 };
 
-                // Decide the full order if not already planned
-                if session.planned_order.is_empty() {
-                    let Some(window_dishes) = window_query.get(session.window).ok() else {
-                        // Diner is misconfigured without a window snapshot.
-                        continue;
-                    };
-
-                    // Budget and spending are already initialized at spawn time
-                    // Just reset the spending counter for this meal
-                    diner_state.total_spent = 0.0;
-
-                    // Call the ordering decision system to plan the full order
-                    let planned_order = decide_order(
-                        window_dishes,
-                        &dish_query,
-                        personality,
-                        psych_state,
-                        dining_profile,
-                        ltm,
-                        &mut stm,
-                        &registry,
-                        &ordering_config,
-                        diner_state.meal_budget,
-                        &mut rng,
-                    );
-
-                    if planned_order.is_empty() {
-                        // No dishes available or no suitable dishes; complete session
-                        staff_state.reset(now);
-                        session.stage = ServiceStage::Completed;
-                        continue;
-                    }
-
-                    session.planned_order = planned_order;
-                    session.current_dish_index = 0;
-                }
+                // Order is already planned before session creation
+                debug_assert!(!session.planned_order.is_empty());
 
                 // Get the next dish from the planned order
                 if session.request.is_none() {

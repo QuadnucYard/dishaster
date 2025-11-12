@@ -1,6 +1,5 @@
 //! Bevy ECS systems for game logic processing
 
-mod decision;
 mod dining;
 mod feedback;
 mod hint;
@@ -8,7 +7,6 @@ mod lifecycle;
 mod management;
 mod monitor;
 mod navigation;
-mod ordering;
 mod persist;
 mod queueing;
 mod refill;
@@ -21,7 +19,6 @@ pub use lifecycle::*;
 pub use management::*;
 pub use monitor::*;
 pub use navigation::*;
-pub use ordering::*;
 pub use persist::*;
 pub use queueing::*;
 pub use refill::*;
