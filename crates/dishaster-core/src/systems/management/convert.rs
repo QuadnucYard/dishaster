@@ -40,6 +40,10 @@ impl TemplateRealize for ManagementDecisionTemplateDef {
             OpenWindow,
             CloseWindow,
             ChangeWindowService,
+            PlayMusic,
+            AdvertiseCampaign,
+            AddMotivationalSlogan,
+            AddLuxuryDish,
         )
     }
 }
@@ -61,6 +65,10 @@ impl ViewParams for ManagementDecisionModel {
             OpenWindow,
             CloseWindow,
             ChangeWindowService,
+            PlayMusic,
+            AdvertiseCampaign,
+            AddMotivationalSlogan,
+            AddLuxuryDish,
         )
     }
 }
@@ -155,6 +163,124 @@ impl TemplateRealize for ChangeWindowServiceTemplate {
 impl ViewParams for ChangeWindowServiceModel {
     fn params(&self) -> ParamsMap {
         params! {}
+    }
+}
+
+impl TemplateRealize for PlayMusicTemplate {
+    type Model = PlayMusicModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        let eating_time_multiplier = ctx
+            .rng
+            .random_range(self.eating_time_multiplier_range.clone());
+        let satisfaction_change = ctx.rng.random_range(self.satisfaction_change_range.clone());
+        Self::Model {
+            eating_time_multiplier,
+            satisfaction_change,
+        }
+    }
+}
+
+impl ViewParams for PlayMusicModel {
+    fn params(&self) -> ParamsMap {
+        // Calculate percentage change for display
+        let speed_change = ((1.0 / self.eating_time_multiplier - 1.0) * 100.0).round() as i32;
+        let satisfaction_change = (self.satisfaction_change * 100.0).round() as i32;
+
+        params! {
+            speed_change => speed_change.abs(),
+            satisfaction_change => if satisfaction_change >= 0 {
+                eco_format!("+{}", satisfaction_change)
+            } else {
+                eco_format!("{}", satisfaction_change)
+            },
+        }
+    }
+}
+
+impl TemplateRealize for AdvertiseCampaignTemplate {
+    type Model = AdvertiseCampaignModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        let attraction_boost = ctx.rng.random_range(self.attraction_boost_range.clone());
+        // Target window will be randomly selected when applying the decision
+        Self::Model {
+            target: self.target.clone(),
+            attraction_boost,
+            days_remaining: self.duration_days,
+            decay_rate: self.decay_rate,
+            target_window: None,
+        }
+    }
+}
+
+impl ViewParams for AdvertiseCampaignModel {
+    fn params(&self) -> ParamsMap {
+        // Calculate percentage values for display
+        let boost_percent = ((self.attraction_boost - 1.0) * 100.0).round() as i32;
+        let decay_percent = (self.decay_rate * 100.0).round() as i32;
+
+        params! {
+            target => match &self.target {
+                DecisionCampaignTarget::Canteen => "canteen",
+                DecisionCampaignTarget::Window => "window",
+            },
+            boost => boost_percent,
+            days => self.days_remaining,
+            decay => decay_percent,
+        }
+    }
+}
+
+impl TemplateRealize for AddMotivationalSloganTemplate {
+    type Model = AddMotivationalSloganModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        let trust_threshold = ctx.rng.random_range(self.trust_threshold_range.clone());
+        let satisfaction_boost = ctx.rng.random_range(self.satisfaction_boost_range.clone());
+        let satisfaction_penalty = ctx
+            .rng
+            .random_range(self.satisfaction_penalty_range.clone());
+        Self::Model {
+            trust_threshold,
+            satisfaction_boost,
+            satisfaction_penalty,
+        }
+    }
+}
+
+impl ViewParams for AddMotivationalSloganModel {
+    fn params(&self) -> ParamsMap {
+        // Convert to percentage and format
+        let threshold_percent = (self.trust_threshold * 100.0).round() as i32;
+        let boost_percent = (self.satisfaction_boost * 100.0).round() as i32;
+        let penalty_percent = (self.satisfaction_penalty * 100.0).round() as i32;
+
+        params! {
+            threshold => threshold_percent,
+            boost => eco_format!("+{}", boost_percent),
+            penalty => eco_format!("{}", penalty_percent),
+        }
+    }
+}
+
+impl TemplateRealize for AddLuxuryDishTemplate {
+    type Model = AddLuxuryDishModel;
+
+    fn realize(&self, _ctx: RealizationContext) -> Self::Model {
+        Self::Model {
+            dish_id: self.dish_id.clone(),
+            applied: false,
+        }
+    }
+}
+
+impl ViewParams for AddLuxuryDishModel {
+    fn params(&self) -> ParamsMap {
+        params! {
+            dish_id => self.dish_id.clone().to_string(),
+            applied => if self.applied { 1 } else { 0 },
+        }
     }
 }
 

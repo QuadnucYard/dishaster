@@ -98,6 +98,7 @@ impl<Store: PersistentStorage> PlayerService<Store> {
             day: self.profile.progress.current_day,
             seed: self.profile.progress.rng_seed,
             diner_pool: self.profile.diner_pool.profiles.clone(),
+            permanent_effects: self.profile.permanent_effects.clone(),
         };
         Ok(level)
     }
@@ -112,6 +113,8 @@ impl<Store: PersistentStorage> PlayerService<Store> {
         self.profile.layout.window_configurations = profile.window_configurations;
         self.profile.layout.placement = profile.placement;
         self.profile.diner_pool.profiles = profile.diner_profiles;
+
+        self.profile.permanent_effects = profile.permanent_effects;
 
         self.inner.save_progress(&self.profile)?;
         Ok(())
@@ -173,6 +176,7 @@ fn new_profile(default_level: &LevelConfig) -> PlayerProfile {
             },
         },
         diner_pool: Default::default(),
+        permanent_effects: Default::default(),
     }
 }
 

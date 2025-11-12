@@ -3,11 +3,13 @@
 mod cosmetic;
 mod diner_pool;
 mod level;
+mod perma_effects;
 mod player;
 
 pub use cosmetic::*;
 pub use diner_pool::*;
 pub use level::*;
+pub use perma_effects::*;
 pub use player::*;
 
 mod prelude {
@@ -52,4 +54,7 @@ pub struct SimProfile {
 
     /// Persistent diner pool
     pub diner_profiles: Vec<DinerProfile>,
+
+    /// Permanent management decision effects
+    pub permanent_effects: PermanentEffects,
 }

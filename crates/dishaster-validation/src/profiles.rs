@@ -29,6 +29,9 @@ pub fn validate_player_profile(
         validate_diner_profile(diner, registry, idx)?;
     }
 
+    // Validate permanent effects
+    validate_permanent_effects(&profile.permanent_effects, registry)?;
+
     Ok(())
 }
 
@@ -126,6 +129,38 @@ fn validate_diner_profile(
                     "diner_pool.profiles[{}].long_term_memory.dish_experience",
                     index
                 ),
+            });
+        }
+    }
+
+    Ok(())
+}
+
+/// Validates permanent effects model references
+fn validate_permanent_effects(
+    effects: &dishaster_save_models::PermanentEffects,
+    registry: &GameModelRegistry,
+) -> ValidationResult {
+    // Validate luxury dish references
+    for dish_id in &effects.luxury_dishes {
+        if !registry.dishes.contains_id(dish_id) {
+            return Err(ValidationError::MissingReference {
+                model_type: "dish",
+                id: dish_id.clone(),
+                context: "permanent_effects.luxury_dishes".to_string(),
+            });
+        }
+    }
+
+    // Validate campaign window references
+    for (idx, campaign) in effects.campaigns.iter().enumerate() {
+        if let dishaster_save_models::CampaignTarget::Window(window_id) = &campaign.target
+            && !registry.window_services.contains_id(window_id)
+        {
+            return Err(ValidationError::MissingReference {
+                model_type: "window_service",
+                id: window_id.clone(),
+                context: format!("permanent_effects.campaigns[{}].target", idx),
             });
         }
     }

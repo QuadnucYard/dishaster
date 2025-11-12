@@ -1,10 +1,13 @@
-use crate::systems::prelude::*;
+use dishaster_save_models::PermanentEffects;
+
+use crate::{resources::PermanentEffectsRes, systems::prelude::*};
 
 pub fn set_daily_schedule(
     mut commands: Commands,
     registry: Res<GameModelRegistryRes>,
     level: Res<ResWrapper<LevelSetupState>>,
     day_status: Res<DayStatus>,
+    perma_effects: Res<PermanentEffectsRes>,
     mut pool: ResMut<ResWrapper<DinerPool>>,
     mut rng: ResMut<WorldRng>,
 ) {
@@ -12,8 +15,13 @@ pub fn set_daily_schedule(
         .levels
         .get_by_id(&level.level_id)
         .expect("LevelConfig not found in registry");
-    let schedule =
-        generate_daily_schedule(level_config, &day_status, &mut pool, &mut rng.derive_prng());
+    let schedule = generate_daily_schedule(
+        level_config,
+        &day_status,
+        &perma_effects,
+        &mut pool,
+        &mut rng.derive_prng(),
+    );
     commands.insert_resource(schedule);
 }
 
@@ -24,9 +32,11 @@ pub fn set_daily_schedule(
 /// - Iterate persistent pool from level config
 /// - Decide visits based on satisfaction memory
 /// - Assign arrival times from preferred ranges
+/// - Apply campaign attraction boosts to visit probability
 fn generate_daily_schedule(
     level_config: &LevelConfig,
     day_status: &DayStatus,
+    perma_effects: &PermanentEffects,
     pool: &mut DinerPool,
     rng: &mut impl Rng,
 ) -> DailyDinerSchedule {
@@ -35,12 +45,20 @@ fn generate_daily_schedule(
     // Current "day" approximation (use level.day if available)
     let current_day = day_status.current_day;
 
+    // Get canteen attraction boost from campaigns
+    let canteen_attraction_boost = perma_effects.get_canteen_attraction_boost();
+
     // Decide which existing diners visit today
     for profile in &mut pool.profiles {
         apply_memory_decay(profile, &level_config.diner_pool, current_day);
 
-        // Roll dice
-        if !roll_day_visit(profile, &level_config.diner_pool, rng) {
+        // Roll dice with campaign boost
+        if !roll_day_visit(
+            profile,
+            &level_config.diner_pool,
+            canteen_attraction_boost,
+            rng,
+        ) {
             continue;
         }
 
@@ -105,7 +123,12 @@ fn apply_memory_decay(profile: &mut DinerProfile, config: &DinerPoolConfig, curr
     }
 }
 
-fn roll_day_visit(profile: &DinerProfile, config: &DinerPoolConfig, rng: &mut impl Rng) -> bool {
+fn roll_day_visit(
+    profile: &DinerProfile,
+    config: &DinerPoolConfig,
+    attraction_boost: f32,
+    rng: &mut impl Rng,
+) -> bool {
     // Calculate visit probability based on satisfaction
     let base_prob = if profile.long_term_memory.overall_like >= 0.0 {
         config.high_satisfaction_visit_rate
@@ -115,7 +138,9 @@ fn roll_day_visit(profile: &DinerProfile, config: &DinerPoolConfig, rng: &mut im
 
     // Additional modifiers (e.g., frequency bonus for regulars)
     let frequency_bonus = (profile.total_visits as f32 * 0.05).min(0.2);
-    let visit_prob = (base_prob + frequency_bonus).min(1.0);
+
+    // Apply campaign attraction boost (1.0 = no effect, >1.0 = increased visits)
+    let visit_prob = ((base_prob + frequency_bonus) * attraction_boost).min(1.0);
 
     rng.random_bool(visit_prob as f64)
 }

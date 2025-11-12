@@ -60,8 +60,12 @@ fn on_run_ended(
 fn on_advance_day(
     _event: On<AdvanceDay>,
     mut day_status: ResMut<DayStatus>,
+    mut perma_effects: ResMut<PermanentEffectsRes>,
     mut events: ResMut<EventQueue>,
 ) {
+    // Apply daily decay to campaign effects
+    perma_effects.apply_daily_decay();
+
     // Update day status for next day. This will be used when persisting progress.
     day_status.current_day.0 += 1;
     day_status.seed = advance_seed(day_status.seed);

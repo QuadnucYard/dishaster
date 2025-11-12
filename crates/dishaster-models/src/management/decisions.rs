@@ -73,3 +73,100 @@ pub struct ChangeWindowServiceTemplate {}
 /// Model for changing window service decision
 #[derive(Debug, Clone)]
 pub struct ChangeWindowServiceModel {}
+
+/// Template for playing music decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "PlayMusic")]
+pub struct PlayMusicTemplate {
+    /// Range of eating time multiplier (e.g., 0.8..1.2 means -20% to +20%)
+    pub eating_time_multiplier_range: RangeInclusive<f32>,
+    /// Range of satisfaction change
+    pub satisfaction_change_range: RangeInclusive<f32>,
+}
+
+/// Model for playing music decision
+#[derive(Debug, Clone)]
+pub struct PlayMusicModel {
+    /// Multiplier for eating time (e.g., 0.9 means 10% faster)
+    pub eating_time_multiplier: f32,
+    /// Change to satisfaction (can be positive or negative)
+    pub satisfaction_change: f32,
+}
+
+/// Campaign target type for decisions
+#[derive(Debug, Clone, Deserialize)]
+pub enum DecisionCampaignTarget {
+    /// Advertise for the entire canteen
+    Canteen,
+    /// Advertise for a specific window service (will be randomly selected)
+    Window,
+}
+
+/// Template for advertising campaign decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "AdvertiseCampaign")]
+pub struct AdvertiseCampaignTemplate {
+    /// Target of the campaign
+    pub target: DecisionCampaignTarget,
+    /// Range of attraction boost multiplier (e.g., 1.2..1.5 means +20% to +50%)
+    pub attraction_boost_range: RangeInclusive<f32>,
+    /// Number of days the effect lasts
+    pub duration_days: u32,
+    /// Decay rate per day (0..1, e.g., 0.2 means loses 20% effectiveness per day)
+    pub decay_rate: f32,
+}
+
+/// Model for advertising campaign decision
+#[derive(Debug, Clone)]
+pub struct AdvertiseCampaignModel {
+    /// Target of the campaign
+    pub target: DecisionCampaignTarget,
+    /// Initial attraction boost multiplier
+    pub attraction_boost: f32,
+    /// Number of days remaining
+    pub days_remaining: u32,
+    /// Decay rate per day
+    pub decay_rate: f32,
+    /// Target window service ID (only used when target is Window)
+    pub target_window: Option<ModelId>,
+}
+
+/// Template for motivational slogan decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "AddMotivationalSlogan")]
+pub struct AddMotivationalSloganTemplate {
+    /// Range of trust threshold (diners with trust below this will be unhappy)
+    pub trust_threshold_range: RangeInclusive<f32>,
+    /// Satisfaction boost for trusting diners
+    pub satisfaction_boost_range: RangeInclusive<f32>,
+    /// Satisfaction penalty for distrusting diners
+    pub satisfaction_penalty_range: RangeInclusive<f32>,
+}
+
+/// Model for motivational slogan decision
+#[derive(Debug, Clone)]
+pub struct AddMotivationalSloganModel {
+    /// Trust threshold (diners with trust below this will be unhappy)
+    pub trust_threshold: f32,
+    /// Satisfaction boost for trusting diners
+    pub satisfaction_boost: f32,
+    /// Satisfaction penalty for distrusting diners
+    pub satisfaction_penalty: f32,
+}
+
+/// Template for adding luxury dish decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "AddLuxuryDish")]
+pub struct AddLuxuryDishTemplate {
+    /// The luxury dish to add (e.g., "king_crab")
+    pub dish_id: ModelId,
+}
+
+/// Model for adding luxury dish decision
+#[derive(Debug, Clone)]
+pub struct AddLuxuryDishModel {
+    /// The luxury dish that was added
+    pub dish_id: ModelId,
+    /// Whether this decision has been applied
+    pub applied: bool,
+}

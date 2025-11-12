@@ -1,5 +1,8 @@
+use dishaster_save_models::{CampaignEffect, CampaignTarget, MusicEffect, SloganEffect};
+
 use crate::{
     events::DispatchManagement,
+    resources::PermanentEffectsRes,
     systems::{prelude::*, spawn_table},
 };
 
@@ -17,6 +20,9 @@ pub fn register_management_decision_systems(world: &mut World) {
         apply_open_window,
         apply_close_window,
         apply_change_window_service,
+        apply_play_music,
+        apply_advertise_campaign,
+        apply_add_motivational_slogan,
     );
 }
 
@@ -153,4 +159,88 @@ fn apply_change_window_service(
         .expect("No window models in registry");
 
     window.service_template = service_handle;
+}
+
+/// Apply music effect (replaces previous music)
+fn apply_play_music(
+    event: On<DispatchManagement<PlayMusicModel>>,
+    mut permanent_effects: ResMut<PermanentEffectsRes>,
+) {
+    let model = &event.0;
+
+    log::info!(
+        "Applying music effect: eating_time_multiplier={:.2}, satisfaction_change={:.2}",
+        model.eating_time_multiplier,
+        model.satisfaction_change
+    );
+
+    // Replace previous music effect
+    permanent_effects.music = Some(MusicEffect {
+        eating_time_multiplier: model.eating_time_multiplier,
+        satisfaction_change: model.satisfaction_change,
+    });
+}
+
+/// Apply advertising campaign effect
+fn apply_advertise_campaign(
+    event: On<DispatchManagement<AdvertiseCampaignModel>>,
+    mut permanent_effects: ResMut<PermanentEffectsRes>,
+    window_query: Query<&Window>,
+    registry: Res<GameModelRegistryRes>,
+    mut rng: ResMut<WorldRng>,
+) {
+    let model = &event.0;
+
+    // Determine campaign target
+    let target = match &model.target {
+        DecisionCampaignTarget::Canteen => CampaignTarget::Canteen,
+        DecisionCampaignTarget::Window => {
+            // Randomly select a window
+            if let Some(window) = window_query.iter().choose(&mut rng) {
+                let service = registry.window_services.get(window.service_template);
+                CampaignTarget::Window(service.id.clone())
+            } else {
+                log::warn!("No windows available for campaign, falling back to canteen-wide");
+                CampaignTarget::Canteen
+            }
+        }
+    };
+
+    log::info!(
+        "Applying campaign effect: target={:?}, boost={:.2}, days={}, decay={:.2}",
+        target,
+        model.attraction_boost,
+        model.days_remaining,
+        model.decay_rate
+    );
+
+    // Add campaign effect (can stack)
+    permanent_effects.campaigns.push(CampaignEffect {
+        target,
+        current_boost: model.attraction_boost,
+        days_remaining: model.days_remaining,
+        decay_rate: model.decay_rate,
+    });
+}
+
+/// Apply motivational slogan effect
+fn apply_add_motivational_slogan(
+    event: On<DispatchManagement<AddMotivationalSloganModel>>,
+    mut permanent_effects: ResMut<PermanentEffectsRes>,
+) {
+    let model = &event.0;
+
+    log::info!(
+        "Applying slogan effect: threshold={:.2}, boost={:.2}, penalty={:.2}",
+        model.trust_threshold,
+        model.satisfaction_boost,
+        model.satisfaction_penalty
+    );
+
+    // Add slogan effect (can stack)
+    permanent_effects.slogans.push(SloganEffect {
+        trust_threshold: model.trust_threshold,
+        satisfaction_boost: model.satisfaction_boost,
+        satisfaction_penalty: model.satisfaction_penalty,
+    });
 }

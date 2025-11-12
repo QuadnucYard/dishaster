@@ -83,6 +83,10 @@ pub fn apply_management_decision(
         OpenWindow,
         CloseWindow,
         ChangeWindowService,
+        PlayMusic,
+        AdvertiseCampaign,
+        AddMotivationalSlogan,
+        AddLuxuryDish,
     );
 
     // Remove decisions after applying

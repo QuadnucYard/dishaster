@@ -25,6 +25,10 @@ pub struct PlayerProfile {
     /// Aggregated memory about diners to drive future generation.
     #[serde(default)]
     pub diner_pool: DinerPool,
+
+    /// Permanent effects from management decisions.
+    #[serde(default)]
+    pub permanent_effects: crate::PermanentEffects,
 }
 
 /// Metadata stored alongside the progress payload.

@@ -5,6 +5,7 @@ use dishaster_navigation::NavigationGrid;
 use ordered_float::NotNan;
 
 use super::{decision::*, feedback::*, hint::*, prelude::*};
+use crate::resources::PermanentEffectsRes;
 
 /// Collection of schedules dining systems
 pub fn dining_systems() -> ScheduleConfigs<Box<dyn System<In = (), Out = ()> + 'static>> {
@@ -917,6 +918,7 @@ fn handle_eat_goal(
     )>,
     mut table_query: Query<(Entity, &mut DiningTable)>,
     registry: Res<GameModelRegistryRes>,
+    perma_effects: Res<PermanentEffectsRes>,
     time: Res<Time>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
@@ -996,8 +998,12 @@ fn handle_eat_goal(
             // Calculate eating rate: kg/second
             // eating_speed is a multiplier (0.5 = slow, 1.0 = normal, 1.5 = fast)
             // eating_time_per_kg is seconds/kg (200 s/kg typical)
-            // eating_rate = eating_speed / eating_time_per_kg
-            let eating_rate = dining_profile.eating_speed / eating_time_per_kg;
+            // Apply music effect multiplier from permanent effects
+            let eating_time_multiplier = perma_effects.get_eating_time_multiplier();
+            // eating_rate = eating_speed / (eating_time_per_kg * multiplier)
+            // Lower multiplier = faster eating (less time per kg)
+            let eating_rate =
+                dining_profile.eating_speed / (eating_time_per_kg * eating_time_multiplier);
 
             // Expected consumption this tick
             let expected_consumption = eating_rate * dt;
@@ -1056,6 +1062,10 @@ fn handle_eat_goal(
             // Record hunger before eating
             let hunger_before = psych_state.hunger;
 
+            // Get slogan satisfaction adjustment based on diner trust
+            let slogan_adjustment =
+                perma_effects.get_slogan_satisfaction_adjustment(psych_state.trust);
+
             // Calculate satisfaction for feedback
             let satisfaction = compute_satisfaction(
                 dish_tags,
@@ -1065,6 +1075,8 @@ fn handle_eat_goal(
                 served_dish.served_quality,
                 served_dish.contamination_level,
                 hunger_before,
+                psych_state.trust,
+                slogan_adjustment,
                 &ltm,
                 &satisfaction_weights,
             );
@@ -1078,6 +1090,8 @@ fn handle_eat_goal(
                 served_dish.served_quality,
                 served_dish.contamination_level,
                 time.current_time as f32,
+                psych_state.trust,
+                slogan_adjustment,
                 &mut psych_state,
                 &mut ltm,
                 &satisfaction_weights,

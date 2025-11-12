@@ -1,4 +1,4 @@
-use crate::{DinerProfile, Seed, prelude::*};
+use crate::{DinerProfile, PermanentEffects, Seed, prelude::*};
 
 /// Day index wrapper
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -22,6 +22,9 @@ pub struct LevelSetupState {
     /// Persistent diner pool (accumulated across days)
     /// This field is populated at runtime from persistence layer
     pub diner_pool: Vec<DinerProfile>,
+
+    /// Permanent management decision effects
+    pub permanent_effects: PermanentEffects,
 }
 
 /// Player-customized canteen layout and configurations

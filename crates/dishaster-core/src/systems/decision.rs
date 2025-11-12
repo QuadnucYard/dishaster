@@ -204,6 +204,8 @@ pub fn compute_satisfaction(
     quality: f32,
     contamination_level: f32,
     hunger_before: f32,
+    _diner_trust: f32,
+    slogan_adjustment: f32,
     ltm: &LongTermMemory,
     weights: &SatisfactionWeights,
 ) -> f32 {
@@ -231,7 +233,8 @@ pub fn compute_satisfaction(
     let satisfaction = weights.taste * taste_component + weights.quality * quality_component
         - weights.price * price_pain
         + weights.hunger * hunger_factor
-        + safety_penalty;
+        + safety_penalty
+        + slogan_adjustment; // Apply motivational slogan effect based on diner trust
 
     // Clamp to -1..1
     satisfaction.clamp(-1.0, 1.0)
@@ -248,6 +251,8 @@ pub fn update_after_eating(
     quality: f32,
     contamination_level: f32,
     current_time: f32,
+    diner_trust: f32,
+    slogan_adjustment: f32,
     psych_state: &mut PsychState,
     ltm: &mut LongTermMemory,
     weights: &SatisfactionWeights,
@@ -263,6 +268,8 @@ pub fn update_after_eating(
         quality,
         contamination_level,
         hunger_before,
+        diner_trust,
+        slogan_adjustment,
         ltm,
         weights,
     );

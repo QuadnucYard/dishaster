@@ -5,9 +5,9 @@ mod time;
 
 use std::{collections::VecDeque, sync::Arc};
 
-pub use buffers::*;
-pub use time::Time;
+use dishaster_save_models::PermanentEffects;
 
+pub use self::{buffers::*, time::Time};
 use crate::{components::*, models::*, prelude::*};
 
 #[allow(missing_docs)]
@@ -64,6 +64,9 @@ pub struct DayStatus {
 
 /// Resource wrapper for Arc<GameModelRegistry>
 pub type GameModelRegistryRes = ResWrapper<Arc<GameModelRegistry>>;
+
+/// Permanent effects from management decisions stored in player profile
+pub type PermanentEffectsRes = ResWrapper<PermanentEffects>;
 
 /// Daily scheduling state (generated each day from PersistentDinerPool)
 ///

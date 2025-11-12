@@ -76,4 +76,8 @@ define_sum_model!(ManagementDecision {
     OpenWindow,
     CloseWindow,
     ChangeWindowService,
+    PlayMusic,
+    AdvertiseCampaign,
+    AddMotivationalSlogan,
+    AddLuxuryDish,
 });

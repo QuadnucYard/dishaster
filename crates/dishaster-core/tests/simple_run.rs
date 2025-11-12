@@ -69,6 +69,7 @@ fn create_test_level() -> LevelSetupState {
         seed: Default::default(),
         canteen: Default::default(),
         diner_pool: Default::default(),
+        permanent_effects: Default::default(),
     }
 }
 

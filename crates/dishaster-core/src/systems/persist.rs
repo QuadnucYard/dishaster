@@ -8,6 +8,7 @@ pub fn persist_system(
     collector_query: Query<&DishCollector>,
     day_status: Res<DayStatus>,
     diner_pool: Res<ResWrapper<DinerPool>>,
+    perma_effects: Res<PermanentEffectsRes>,
     registry: Res<GameModelRegistryRes>,
 ) -> SimProfile {
     let window_configurations = window_query
@@ -79,5 +80,6 @@ pub fn persist_system(
         window_configurations,
         placement,
         diner_profiles,
+        permanent_effects: (**perma_effects).clone(),
     }
 }
