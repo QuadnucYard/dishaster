@@ -124,4 +124,11 @@ pub struct StatsView {
 
     pub current_diners: usize,
     pub total_visits: usize,
+    /// Number of diners who completed their meal today
+    pub completed_diners: usize,
+
+    /// Total revenue collected today
+    pub revenue: f32,
+    /// Total food consumed today in kilograms
+    pub consumption_kg: f32,
 }

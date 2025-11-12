@@ -19,6 +19,10 @@ pub struct PlayerProfile {
     #[serde(default)]
     pub aggregates: AggregateStats,
 
+    /// Day-by-day statistics history.
+    #[serde(default)]
+    pub daily_history: Vec<DayStats>,
+
     /// Customized canteen layout modifications.
     pub layout: CanteenLayoutState,
 
@@ -73,4 +77,23 @@ pub struct AggregateStats {
     pub safety_incidents: u32,
     /// Average satisfaction of the most recent day.
     pub last_day_avg_satisfaction: f32,
+    /// Total revenue collected across all days.
+    pub lifetime_revenue: f64,
+    /// Total food consumed across all days in kilograms.
+    pub lifetime_consumption_kg: f64,
+}
+
+/// Per-day statistics history for tracking performance over time.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct DayStats {
+    /// Day index when these stats were recorded.
+    pub day: Day,
+    /// Total number of diner visits.
+    pub total_visits: usize,
+    /// Number of diners who completed their meal.
+    pub completed_diners: usize,
+    /// Total revenue collected.
+    pub revenue: f32,
+    /// Total food consumed in kilograms.
+    pub consumption_kg: f32,
 }

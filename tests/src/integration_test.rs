@@ -134,6 +134,17 @@ fn main() -> Result<()> {
     println!("Persisted profile");
     assert_eq!(persisted.current_day, Day(start_day.0 + 1)); // Day should have advanced
 
+    // Print first day stats
+    let day_stats = &persisted.day_stats;
+    println!("Day 0 stats:");
+    println!(
+        "  Consumption: {:.2} kg, Revenue: ¥{:.2}, Completed: {} / {}",
+        day_stats.consumption_kg,
+        day_stats.revenue,
+        day_stats.completed_diners,
+        day_stats.total_visits
+    );
+
     service.save_profile(persisted)?;
     std::mem::drop(sim);
 
@@ -172,7 +183,34 @@ fn main() -> Result<()> {
         service.save_profile(persisted)?;
     }
 
-    println!("Test completed successfully.");
+    // Print aggregate stats at the end
+    let profile = service.profile();
+    println!("\n=== Final Statistics ===");
+    println!(
+        "Total consumption: {:.2} kg",
+        profile.aggregates.lifetime_consumption_kg
+    );
+    println!("Total revenue: ¥{:.2}", profile.aggregates.lifetime_revenue);
+    println!(
+        "Total served: {} diners",
+        profile.aggregates.lifetime_served
+    );
+    println!("Days of history: {}", profile.daily_history.len());
+
+    // Show last 5 days stats
+    println!("\nLast 5 days:");
+    for day_stats in profile.daily_history.iter().rev().take(5).rev() {
+        println!(
+            "  Day {}: {:.2}kg, ¥{:.0}, {}/{} completed",
+            day_stats.day.0,
+            day_stats.consumption_kg,
+            day_stats.revenue,
+            day_stats.completed_diners,
+            day_stats.total_visits
+        );
+    }
+
+    println!("\nTest completed successfully.");
 
     Ok(())
 }

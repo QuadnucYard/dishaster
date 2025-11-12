@@ -7,6 +7,7 @@ pub fn persist_system(
     dispenser_query: Query<&Dispenser>,
     collector_query: Query<&DishCollector>,
     day_status: Res<DayStatus>,
+    daily_stats: Res<DailyStats>,
     diner_pool: Res<ResWrapper<DinerPool>>,
     perma_effects: Res<PermanentEffectsRes>,
     registry: Res<GameModelRegistryRes>,
@@ -74,6 +75,15 @@ pub fn persist_system(
 
     let diner_profiles = diner_pool.profiles.clone();
 
+    // Prepare daily stats from the current day
+    let day_stats = DayStats {
+        day: day_status.current_day,
+        total_visits: daily_stats.total_visits,
+        completed_diners: daily_stats.completed_diners,
+        revenue: daily_stats.total_revenue,
+        consumption_kg: daily_stats.total_consumption_kg,
+    };
+
     SimProfile {
         current_day: day_status.current_day,
         rng_seed: day_status.seed,
@@ -81,5 +91,6 @@ pub fn persist_system(
         placement,
         diner_profiles,
         permanent_effects: (**perma_effects).clone(),
+        day_stats,
     }
 }

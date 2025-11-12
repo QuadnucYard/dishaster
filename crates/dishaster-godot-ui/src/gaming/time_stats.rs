@@ -35,8 +35,17 @@ impl TimeStatsGui {
         self.perf_label.set_text(&text);
     }
 
-    pub fn update_diner_stats(&mut self, current_diners: usize, total_visits: usize) {
-        let text = format!("Diners: {current_diners} / {total_visits}");
+    pub fn update_diner_stats(
+        &mut self,
+        current_diners: usize,
+        total_visits: usize,
+        completed_diners: usize,
+        revenue: f32,
+        consumption_kg: f32,
+    ) {
+        let text = format!(
+            "Diners: {current_diners} / {total_visits}\nCompleted: {completed_diners}\nConsumed: {consumption_kg:.1}kg\nRevenue: ¥{revenue:.1}"
+        );
 
         self.diner_stats_label.set_text(&text);
     }

@@ -54,6 +54,7 @@ pub fn process_serving_messages(
     dish_query: Query<&Dish>,
     mut queue: ResMut<ServingCommsQueue>,
     time: Res<Time>,
+    mut daily_stats: ResMut<DailyStats>,
     mut rng: ResMut<ServingRng>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     registry: Res<GameModelRegistryRes>,
@@ -257,6 +258,9 @@ pub fn process_serving_messages(
 
                     // Update total spent
                     diner_state.total_spent += price_paid;
+
+                    // Track revenue in daily stats
+                    daily_stats.total_revenue += price_paid;
                 } else {
                     log::warn!(
                         target: "serving",

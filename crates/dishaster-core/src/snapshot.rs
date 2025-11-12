@@ -7,12 +7,16 @@ impl Simulation {
     pub(crate) fn snapshot_stats(&mut self) -> DayStats {
         let time = self.world.resource::<Time>();
         let day_status = self.world.resource::<DayStatus>();
+        let daily_stats = self.world.resource::<DailyStats>();
 
         DayStats {
             time_seconds: time.current_time,
             tick: time.total_ticks,
             live_diners: day_status.live_diner_count,
-            total_visits: day_status.total_visits,
+            total_visits: daily_stats.total_visits,
+            completed_diners: daily_stats.completed_diners,
+            revenue: daily_stats.total_revenue,
+            consumption_kg: daily_stats.total_consumption_kg,
         }
     }
 

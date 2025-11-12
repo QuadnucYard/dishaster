@@ -59,6 +59,12 @@ struct DayTelemetry {
     live_diners: usize,
     /// Total number of diners that have visited this day
     total_visits: usize,
+    /// Number of diners who completed their meal today
+    completed_diners: usize,
+    /// Total revenue collected today
+    revenue: f32,
+    /// Total food consumed today in kilograms
+    consumption_kg: f32,
 }
 
 pub struct Game {
@@ -202,6 +208,9 @@ impl Game {
             self.telemetry.seconds = snapshot.stats.time_seconds;
             self.telemetry.live_diners = snapshot.stats.live_diners;
             self.telemetry.total_visits = snapshot.stats.total_visits;
+            self.telemetry.consumption_kg = snapshot.stats.consumption_kg;
+            self.telemetry.revenue = snapshot.stats.revenue;
+            self.telemetry.completed_diners = snapshot.stats.completed_diners;
         }
 
         self.process_display(delta);
@@ -280,6 +289,9 @@ impl Game {
             ups: self.perf_tracker.last_ups,
             current_diners: self.telemetry.live_diners,
             total_visits: self.telemetry.total_visits,
+            consumption_kg: self.telemetry.consumption_kg,
+            revenue: self.telemetry.revenue,
+            completed_diners: self.telemetry.completed_diners,
         }));
     }
 }

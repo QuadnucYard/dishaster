@@ -116,8 +116,19 @@ impl<Store: PersistentStorage> PlayerService<Store> {
 
         self.profile.permanent_effects = profile.permanent_effects;
 
-        self.inner.save_progress(&self.profile)?;
-        Ok(())
+        // Update daily history and aggregate stats
+        let day_stats = &profile.day_stats;
+
+        // Add to daily history
+        self.profile.daily_history.push(day_stats.clone());
+
+        // Update aggregate stats
+        self.profile.aggregates.lifetime_consumption_kg += day_stats.consumption_kg as f64;
+        self.profile.aggregates.lifetime_revenue += day_stats.revenue as f64;
+        self.profile.aggregates.lifetime_served += day_stats.completed_diners as u64;
+        self.profile.aggregates.lifetime_profit += day_stats.revenue as f64; // Revenue as profit (no costs yet)
+
+        self.inner.save_progress(&self.profile)
     }
 
     /// Update shown hints in progress
@@ -166,6 +177,7 @@ fn new_profile(default_level: &LevelConfig) -> PlayerProfile {
             seen_hints: Default::default(),
         },
         aggregates: Default::default(),
+        daily_history: Vec::new(),
         layout: CanteenLayoutState {
             window_configurations: default_level.window_configurations.clone(),
             placement: CanteenPlacements {

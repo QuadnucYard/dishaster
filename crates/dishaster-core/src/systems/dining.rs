@@ -914,6 +914,7 @@ fn handle_eat_goal(
     registry: Res<GameModelRegistryRes>,
     perma_effects: Res<PermanentEffectsRes>,
     time: Res<Time>,
+    mut daily_stats: ResMut<DailyStats>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
@@ -1010,6 +1011,9 @@ fn handle_eat_goal(
             // Consume food (don't go below 0)
             let consumed = actual_consumption.min(served_dish.remaining_weight);
             served_dish.remaining_weight -= consumed;
+
+            // Track consumption in daily stats
+            daily_stats.total_consumption_kg += consumed;
 
             log::trace!(
                 target: "diner",
@@ -1146,6 +1150,9 @@ fn handle_eat_goal(
             entity: entity.to_entity_id(),
             change: DinerItemsChange::FinishEating,
         });
+
+        // Track completed diner in daily stats
+        daily_stats.completed_diners += 1;
 
         goal.update(DinerGoal::ReturnDishes);
     }

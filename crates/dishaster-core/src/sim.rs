@@ -133,6 +133,7 @@ impl Simulation {
             start_day: level_config.start_day,
             ..Default::default()
         });
+        self.world.insert_resource(DailyStats::default());
         self.world
             .insert_resource(TrialSession::new(world_rng.derive_seed()));
         self.world
@@ -171,8 +172,8 @@ impl Simulation {
             },
         );
         self.world.add_observer(
-            |_event: On<Add, Diner>, mut day_status: ResMut<DayStatus>| {
-                day_status.total_visits += 1; // Increment total visits on diner spawn
+            |_event: On<Add, Diner>, mut daily_stats: ResMut<DailyStats>| {
+                daily_stats.total_visits += 1; // Increment total visits on diner spawn
             },
         );
 

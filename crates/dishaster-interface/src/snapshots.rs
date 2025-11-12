@@ -23,6 +23,13 @@ pub struct DayStats {
     pub live_diners: usize,
     /// Total diner visits since start of day.
     pub total_visits: usize,
+    /// Number of diners who completed their meal today.
+    pub completed_diners: usize,
+
+    /// Total revenue collected today.
+    pub revenue: f32,
+    /// Total food consumed today in kilograms.
+    pub consumption_kg: f32,
 }
 
 /// Feature gates controlling which debug payloads are exported.

@@ -38,7 +38,7 @@ impl Seed {
 }
 
 /// Persistent simulation profile data to be saved between runs
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct SimProfile {
     /// Day index (1-based). Increment on new day/run.
     pub current_day: Day,
@@ -57,4 +57,7 @@ pub struct SimProfile {
 
     /// Permanent management decision effects
     pub permanent_effects: PermanentEffects,
+
+    /// Daily statistics for the completed day
+    pub day_stats: DayStats,
 }

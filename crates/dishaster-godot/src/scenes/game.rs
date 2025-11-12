@@ -207,7 +207,13 @@ impl GameScene {
                 let stats_gui = ctx.gui.get_mut::<TimeStatsGui>();
                 stats_gui.update_time(view.sim_tick, view.sim_time);
                 stats_gui.update_perf(view.fps, view.ups);
-                stats_gui.update_diner_stats(view.current_diners, view.total_visits);
+                stats_gui.update_diner_stats(
+                    view.current_diners,
+                    view.total_visits,
+                    view.completed_diners,
+                    view.revenue,
+                    view.consumption_kg,
+                );
             }
 
             UiCommand::OpenDishPriceEditor(ref view) => {
