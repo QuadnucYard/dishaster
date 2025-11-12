@@ -34,12 +34,38 @@ impl PersistentStorage for MemoryStorage {
 /// Extension trait to run multiple simulation steps.
 trait RunSteps {
     fn run_steps(&mut self, steps: u32);
+
+    fn run_steps_with_monitor(
+        &mut self,
+        steps: u32,
+        monitor: impl FnMut(SimEvent, &mut Simulation),
+    );
 }
 
 impl RunSteps for Simulation {
     fn run_steps(&mut self, steps: u32) {
-        for _ in 0..steps {
+        for i in 0..steps {
+            if i > 0 && i % 1000 == 0 {
+                println!("=== Step {} ===", i);
+            }
             self.tick();
+        }
+    }
+
+    fn run_steps_with_monitor(
+        &mut self,
+        steps: u32,
+        mut monitor: impl FnMut(SimEvent, &mut Simulation),
+    ) {
+        for i in 0..steps {
+            if i > 0 && i % 1000 == 0 {
+                println!("=== Step {} ===", i);
+            }
+            self.tick();
+            let events = self.poll_events();
+            for event in events {
+                monitor(event, self);
+            }
         }
     }
 }
@@ -69,7 +95,20 @@ fn main() -> Result<()> {
 
     // Start the run
     sim.command(SimCommand::StartRun);
-    sim.run_steps(10000);
+
+    // Run with event monitoring to refill empty dispensers
+    sim.run_steps_with_monitor(20000, |event, sim| {
+        if let SimEvent::DispenserStockChanged {
+            entity,
+            current_stock,
+            ..
+        } = event
+            && current_stock == 0
+        {
+            println!("Dispenser {:?} is empty, sending refill command", entity);
+            sim.command(SimCommand::RefillDispenser(entity));
+        }
+    });
 
     // End the run and check for completion events
     sim.command(SimCommand::EndRun);

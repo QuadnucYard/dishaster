@@ -166,6 +166,8 @@ pub struct DinerTargets {
     pub collector_target: Option<Entity>,
     /// Exit target position to leave the canteen
     pub exit_target: Option<()>,
+    /// Last time dispenser target was reset due to empty stock (for rate limiting)
+    pub last_dispenser_retry_time: f32,
 }
 
 /// Wrapper component for Personality

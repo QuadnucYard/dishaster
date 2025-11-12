@@ -58,6 +58,7 @@ impl Simulation {
                 dining_systems(),
                 // Allocate staff and schedule service events
                 drive_serving_sessions,
+                detect_dispenser_stock_change,
                 handle_refill_request,
                 handle_refill_staff,
                 // Update queue ordering and slot targets before movement

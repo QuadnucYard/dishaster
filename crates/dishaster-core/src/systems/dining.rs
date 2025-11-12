@@ -4,7 +4,7 @@ use bevy_ecs::schedule::ScheduleConfigs;
 use dishaster_navigation::NavigationGrid;
 use ordered_float::NotNan;
 
-use super::{decision::*, feedback::*, hint::*, prelude::*};
+use super::{decision::*, feedback::*, prelude::*};
 use crate::resources::PermanentEffectsRes;
 
 /// Collection of schedules dining systems
@@ -271,11 +271,14 @@ fn handle_pick_tray_goal(
         &DinerPersonality,
         &mut EntityRng,
     )>,
-    mut dispenser_query: Query<(Entity, &mut Dispenser)>,
+    mut dispenser_query: Query<(Entity, &Dispenser, &mut Stock)>,
     registry: Res<GameModelRegistryRes>,
+    time: Res<Time>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
+    const DISPENSER_RETRY_COOLDOWN: f32 = 5.0; // Retry every 5 seconds instead of every frame
+
     for (
         entity,
         mut state,
@@ -292,27 +295,36 @@ fn handle_pick_tray_goal(
         }
 
         if targets.tray_target.is_none() {
+            // Rate limit: only search for new dispenser after cooldown
+            let current_time = time.current_time as f32;
+            if current_time - targets.last_dispenser_retry_time < DISPENSER_RETRY_COOLDOWN {
+                continue;
+            }
+
             // Choose the closest tray dispenser with stock
-            let Some((dispenser_entity, dispenser)) = dispenser_query
+            let Some((dispenser_entity, dispenser, stock)) = dispenser_query
                 .iter()
-                .filter(|(_, d)| {
+                .filter(|(_, d, s)| {
                     d.dispenser_type == DispenserType::Tray
-                        && (!d.center_pos.close_to(movement.pos, 3.0) || d.current_stock > 0)
+                        && (!d.center_pos.close_to(movement.pos, 3.0) || s.current > 0)
                 })
-                .min_by_key(|(_, d)| {
+                .min_by_key(|(_, d, _)| {
                     let distance = movement.pos.distance_squared(d.center_pos);
                     NotNan::new(distance).unwrap()
                 })
             else {
-                // No dispensers available - emit feedback and wander
-                log::warn!(
+                // No dispensers available - emit feedback and wait for cooldown
+                log::info!(
                     target: "diner",
-                    "diner {:?} cannot find tray, wandering to retry",
+                    "diner {:?} cannot find tray with stock, waiting for cooldown",
                     entity
                 );
 
+                // Update last retry time
+                targets.last_dispenser_retry_time = current_time;
+
                 // Apply mood penalty (but not trust - this could be temporary)
-                psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
+                psych_state.mood = (psych_state.mood - 0.05).max(-1.0);
 
                 // Emit complaint feedback
                 if goal.timer > 10.0 {
@@ -329,9 +341,11 @@ fn handle_pick_tray_goal(
                 continue;
             };
             targets.tray_target = Some(dispenser_entity);
+            targets.last_dispenser_retry_time = current_time;
             log::debug!(
                 target: "diner",
-                "picking_tray: target={dispenser_entity:?}"
+                "picking_tray: target={dispenser_entity:?}, stock={}",
+                stock.current
             );
             movement.request_path_to_rect(dispenser.reception_area);
             continue;
@@ -345,43 +359,26 @@ fn handle_pick_tray_goal(
         let Some(tray_dispenser_entity) = targets.tray_target else {
             continue;
         };
-        let Ok((_, mut dispenser)) = dispenser_query.get_mut(tray_dispenser_entity) else {
+        let Ok((_, dispenser, mut stock)) = dispenser_query.get_mut(tray_dispenser_entity) else {
             continue;
         };
 
         // Check if dispenser still has stock
-        if dispenser.current_stock == 0 {
+        if stock.current == 0 {
             log::warn!(
                 target: "diner",
                 "tray_dispenser_empty: entity={entity:?}, dispenser={tray_dispenser_entity:?}"
             );
-            // Dispenser is empty, find another one
+            // Dispenser is empty, find another one with rate limiting
             targets.tray_target = None;
+            targets.last_dispenser_retry_time = time.current_time as f32;
             continue;
         }
 
         // Deduct stock
-        dispenser.current_stock = dispenser.current_stock.saturating_sub(1);
+        stock.current -= 1;
 
         let dispenser_model = registry.dispensers.get(dispenser.model);
-
-        log::debug!(
-            target: "diner",
-            "picked_tray: entity={entity:?}, remaining_stock={}",
-            dispenser.current_stock
-        );
-
-        // Emit stock changed event
-        events.push(SimEvent::DispenserStockChanged {
-            entity: tray_dispenser_entity.to_entity_id(),
-            current_stock: dispenser.current_stock,
-            capacity: dispenser_model.capacity,
-        });
-
-        // Emit hint for first-time out-of-stock
-        if dispenser.current_stock == 0 {
-            events.emit_hint(hints::DISPENSER_OUT_OF_STOCK);
-        }
 
         // Spawn the tray item
         let tray_res = dispenser_model.item_display.res.clone();
@@ -424,11 +421,14 @@ fn handle_pick_chopsticks_goal(
         &mut DinerPsychState,
         &mut EntityRng,
     )>,
-    mut dispenser_query: Query<(Entity, &mut Dispenser)>,
+    mut dispenser_query: Query<(Entity, &Dispenser, &mut Stock)>,
     registry: Res<GameModelRegistryRes>,
+    time: Res<Time>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
+    const DISPENSER_RETRY_COOLDOWN: f32 = 5.0; // Retry every 5 seconds instead of every frame
+
     for (entity, mut state, mut goal, mut targets, mut movement, mut psych_state, mut rng) in
         diner_query
     {
@@ -437,27 +437,36 @@ fn handle_pick_chopsticks_goal(
         }
 
         if targets.chopstick_target.is_none() {
+            // Rate limit: only search for new dispenser after cooldown
+            let current_time = time.current_time as f32;
+            if current_time - targets.last_dispenser_retry_time < DISPENSER_RETRY_COOLDOWN {
+                continue;
+            }
+
             // Choose the closest chopstick dispenser with stock
-            let Some((dispenser_entity, dispenser)) = dispenser_query
+            let Some((dispenser_entity, dispenser, stock)) = dispenser_query
                 .iter()
-                .filter(|(_, d)| {
+                .filter(|(_, d, s)| {
                     d.dispenser_type == DispenserType::Chopstick
-                        && (!d.center_pos.close_to(movement.pos, 3.0) || d.current_stock > 0)
+                        && (!d.center_pos.close_to(movement.pos, 3.0) || s.current > 0)
                 })
-                .min_by_key(|(_, d)| {
+                .min_by_key(|(_, d, _)| {
                     let distance = movement.pos.distance_squared(d.center_pos);
                     NotNan::new(distance).unwrap()
                 })
             else {
-                // No dispensers available - emit feedback and wander
-                log::warn!(
+                // No dispensers available - wait for cooldown
+                log::info!(
                     target: "diner",
-                    "diner {:?} cannot find chopsticks, wandering to retry",
+                    "diner {:?} cannot find chopsticks with stock, waiting for cooldown",
                     entity
                 );
 
+                // Update last retry time
+                targets.last_dispenser_retry_time = current_time;
+
                 // Apply mood penalty (but not trust - this could be temporary)
-                psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
+                psych_state.mood = (psych_state.mood - 0.05).max(-1.0);
 
                 // Emit complaint feedback
                 if goal.timer > 10.0 {
@@ -474,10 +483,11 @@ fn handle_pick_chopsticks_goal(
                 continue;
             };
             targets.chopstick_target = Some(dispenser_entity);
+            targets.last_dispenser_retry_time = current_time;
             log::debug!(
                 target: "diner",
                 "pick_chopsticks_target: target={dispenser_entity:?}, stock={}",
-                dispenser.current_stock
+                stock.current
             );
             movement.request_path_to_rect(dispenser.reception_area);
             continue;
@@ -492,43 +502,27 @@ fn handle_pick_chopsticks_goal(
             continue;
         };
 
-        let Ok((_, mut dispenser)) = dispenser_query.get_mut(chopstick_dispenser_entity) else {
+        let Ok((_, dispenser, mut stock)) = dispenser_query.get_mut(chopstick_dispenser_entity)
+        else {
             continue;
         };
 
         // Check if dispenser still has stock
-        if dispenser.current_stock == 0 {
+        if stock.current == 0 {
             log::warn!(
                 target: "diner",
                 "chopstick_dispenser_empty: entity={entity:?}, dispenser={chopstick_dispenser_entity:?}"
             );
-            // Dispenser is empty, find another one
+            // Dispenser is empty, find another one with rate limiting
             targets.chopstick_target = None;
+            targets.last_dispenser_retry_time = time.current_time as f32;
             continue;
         }
 
         // Deduct stock
-        dispenser.current_stock = dispenser.current_stock.saturating_sub(1);
+        stock.current -= 1;
 
         let dispenser_model = registry.dispensers.get(dispenser.model);
-
-        log::debug!(
-            target: "diner",
-            "picked_chopsticks: entity={entity:?}, remaining_stock={}",
-            dispenser.current_stock
-        );
-
-        // Emit stock changed event
-        events.push(SimEvent::DispenserStockChanged {
-            entity: chopstick_dispenser_entity.to_entity_id(),
-            current_stock: dispenser.current_stock,
-            capacity: dispenser_model.capacity,
-        });
-
-        // Emit hint for first-time out-of-stock
-        if dispenser.current_stock == 0 {
-            events.emit_hint(hints::DISPENSER_OUT_OF_STOCK);
-        }
 
         // Spawn the chopsticks item
         let chopsticks_res = dispenser_model.item_display.res.clone();
@@ -554,7 +548,7 @@ fn handle_pick_chopsticks_goal(
         goal.update(if !state.served_dishes.is_empty() {
             DinerGoal::FindSeat
         } else {
-            println!("Chopsticks picked before being served!");
+            log::debug!("Chopsticks picked before being served!");
             DinerGoal::QueueForWindow
         });
     }

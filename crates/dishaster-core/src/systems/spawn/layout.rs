@@ -336,9 +336,11 @@ fn spawn_dispenser(
                 placement.center_pos + model.reception_area.center(),
                 model.reception_area.size(),
             ),
-            current_stock: model.initial_stock,
             dispenser_type,
-            refill_pending: false,
+        },
+        Stock {
+            current: model.initial_stock,
+            capacity: model.capacity,
         },
         BoxCollider::from_center_size(placement.center_pos, model.size.as_vec2()).into_comp(),
         DisplayState {

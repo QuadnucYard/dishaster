@@ -1,16 +1,42 @@
 use super::prelude::*;
+use crate::systems::hint::{HintEmitter, hints};
+
+pub fn detect_dispenser_stock_change(
+    dispenser_query: Query<(Entity, &Stock), Changed<Stock>>,
+    mut events: ResMut<EventQueue>,
+) {
+    for (entity, stock) in dispenser_query {
+        log::debug!(
+            target: "refill",
+            "dispenser stock change: entity={entity:?}, stock={}/{}",
+            stock.current, stock.capacity
+        );
+
+        // Emit stock changed event
+        events.push(SimEvent::DispenserStockChanged {
+            entity: entity.to_entity_id(),
+            current_stock: stock.current,
+            capacity: stock.capacity,
+        });
+
+        // Emit hint for first-time out-of-stock
+        if stock.current == 0 {
+            events.emit_hint(hints::DISPENSER_OUT_OF_STOCK);
+        }
+    }
+}
 
 /// Spawn refill staff for the requested dispenser
 pub fn handle_refill_request(
     mut commands: Commands,
     mut messages: MessageReader<RefillDispenser>,
-    mut dispenser_query: Query<&mut Dispenser>,
+    dispenser_query: Query<&Stock, Without<RefillPending>>,
     canteen: Res<Canteen>,
     display_root: Res<DisplayRoot>,
 ) {
     for message in messages.read() {
         let dispenser_entity = message.0;
-        let Ok(mut dispenser) = dispenser_query.get_mut(dispenser_entity) else {
+        let Ok(_dispenser) = dispenser_query.get(dispenser_entity) else {
             log::warn!(
                 target: "refill",
                 "Dispenser not found: {dispenser_entity:?}"
@@ -18,16 +44,12 @@ pub fn handle_refill_request(
             continue;
         };
 
-        if dispenser.refill_pending {
-            log::debug!(
-                target: "refill",
-                "Refill already pending for dispenser: {dispenser_entity:?}"
-            );
-            continue;
-        };
-
         // Mark as pending
-        dispenser.refill_pending = true;
+        commands.entity(dispenser_entity).insert(RefillPending);
+        log::info!(
+            target: "refill",
+            "Refill request received for dispenser: {dispenser_entity:?}"
+        );
 
         // Spawn refill staff at corner of canteen (entrance area)
         let spawn_pos = vec2(1., canteen.model.entrances_y + 1.);
@@ -88,10 +110,8 @@ pub fn handle_refill_request(
 pub fn handle_refill_staff(
     mut commands: Commands,
     mut staff_query: Query<(Entity, &RefillStaff, &mut RefillStaffState, &mut Movement)>,
-    mut dispenser_query: Query<&mut Dispenser>,
-    registry: Res<GameModelRegistryRes>,
+    mut dispenser_query: Query<(&Dispenser, &mut Stock)>,
     time: Res<Time>,
-    mut events: ResMut<EventQueue>,
 ) {
     let delta = time.tick_duration as f32;
     for (entity, staff, mut state, mut movement) in staff_query.iter_mut() {
@@ -99,7 +119,7 @@ pub fn handle_refill_staff(
             RefillStaffStatus::MovingToDispenser => {
                 // Request path to dispenser if not already moving
                 if !movement.has_path() && !movement.target_reached {
-                    if let Ok(dispenser) = dispenser_query.get(staff.target_dispenser) {
+                    if let Ok((dispenser, _)) = dispenser_query.get(staff.target_dispenser) {
                         movement.request_path_to_rect(dispenser.reception_area);
                         log::debug!(
                             target: "refill_staff",
@@ -134,24 +154,18 @@ pub fn handle_refill_staff(
 
                 if state.activity_timer <= 0.0 {
                     // Refill complete - restore stock to full capacity
-                    if let Ok(mut dispenser) = dispenser_query.get_mut(staff.target_dispenser) {
-                        let model = registry.dispensers.get(dispenser.model);
-                        dispenser.current_stock = model.capacity;
-                        dispenser.refill_pending = false;
+                    if let Ok((_, mut stock)) = dispenser_query.get_mut(staff.target_dispenser) {
+                        stock.current = stock.capacity;
+                        commands
+                            .entity(staff.target_dispenser)
+                            .remove::<RefillPending>();
 
                         log::info!(
                             target: "refill_staff",
                             "staff={entity:?} refilled dispenser={:?} to capacity={}",
                             staff.target_dispenser,
-                            model.capacity
+                            stock.capacity
                         );
-
-                        // Emit stock changed event
-                        events.push(SimEvent::DispenserStockChanged {
-                            entity: staff.target_dispenser.to_entity_id(),
-                            current_stock: model.capacity,
-                            capacity: model.capacity,
-                        });
                     }
 
                     // Start returning

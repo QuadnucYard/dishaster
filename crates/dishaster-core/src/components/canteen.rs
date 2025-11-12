@@ -39,13 +39,22 @@ pub struct Dispenser {
     pub center_pos: Vec2,
     /// Area in front of the dispenser where diners can receive items
     pub reception_area: Rect,
-    /// Current number of items in stock
-    pub current_stock: u32,
     /// What type of items this dispenser provides
     pub dispenser_type: DispenserType,
-    /// Whether a refill request is pending
-    pub refill_pending: bool,
 }
+
+/// Current stock state of a dispenser
+#[derive(Component)]
+pub struct Stock {
+    /// Current number of items in stock
+    pub current: u32,
+    /// Maximum capacity of the dispenser
+    pub capacity: u32,
+}
+
+/// Marker component indicating a dispenser is awaiting refill
+#[derive(Component)]
+pub struct RefillPending;
 
 /// Dish collection point component for used plates and trays
 #[derive(Component)]
