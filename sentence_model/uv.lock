@@ -602,6 +602,7 @@ dependencies = [
     { name = "markupsafe" },
     { name = "sentence-transformers" },
     { name = "tqdm" },
+    { name = "transformers" },
 ]
 
 [package.metadata]
@@ -609,6 +610,7 @@ requires-dist = [
     { name = "markupsafe", specifier = "<3" },
     { name = "sentence-transformers", specifier = ">=5.1.2" },
     { name = "tqdm", specifier = ">=4.66.5" },
+    { name = "transformers", specifier = ">=4.57.1" },
 ]
 
 [[package]]

@@ -140,7 +140,9 @@ impl DataLoader {
                 responses
             },
             qa_ranks: trial_rank::parse_qa_ranks(&self.load_string("trial/ranks_qa.txt")?)?,
-            aq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_aq.txt")?)?,
+            aq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_aq.txt")?, "AQ")?,
+            qq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_qq.txt")?, "QQ")?,
+            rr_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_rr.txt")?, "RR")?,
         };
 
         let opening_config = self

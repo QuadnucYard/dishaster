@@ -14,6 +14,10 @@ pub struct TrialCorpus {
     pub qa_ranks: Vec<Vec<Vec<TrialQARank>>>,
     /// Answer->Question ranks for trial speeches.
     pub aq_ranks: Vec<Vec<TrialQARank>>,
+    /// Question->Question continuation ranks (for multi-turn diner speeches).
+    pub qq_ranks: Vec<Vec<TrialQARank>>,
+    /// Response->Response continuation ranks (for multi-turn player responses).
+    pub rr_ranks: Vec<Vec<TrialQARank>>,
 }
 
 /// A single speech made by a trial participant.

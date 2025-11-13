@@ -25,7 +25,7 @@ impl Simulation {
         let (registry, mut trial_session) = system_state.get_mut(&mut self.world);
 
         let speech_index = select_next_question(&registry.trial, &mut trial_session);
-        println!("Selected diner speech index: {}", speech_index);
+        log::info!("Selected diner speech index: {}", speech_index);
 
         create_diner_statement_with_speech(speech_index, &registry.trial, &mut trial_session)
     }
@@ -72,54 +72,95 @@ fn random_appearance(rng: &mut impl Rng) -> views::TrialParticipantAppearance {
     }
 }
 
-/// Select the next question to ask based on previous response (if any) using AQ ranks
+/// Select the next question to ask based on previous interactions
 ///
 /// This creates a coherent dialogue flow by:
-/// 1. Using AQ ranks (answer → question) to select questions related to the player's last response
-/// 2. Filtering out already-asked questions to avoid repetition
-/// 3. Applying temperature-weighted sampling for variety while maintaining relevance
-/// 4. Falling back to random selection if no response history or ranks available
-fn select_next_question(trial_registry: &TrialCorpus, trial_session: &mut TrialSession) -> usize {
-    // If there's a previous response, use AQ ranks to select related question
-    if let Some(last_response_idx) = trial_session.last_response_index
-        && let Some(aq_rank) = trial_registry.aq_ranks.get(last_response_idx)
+/// 1. First checking QQ ranks (question → question) for diner multi-turn continuations
+/// 2. Using continuation probability based on semantic similarity scores
+/// 3. Then using AQ ranks (answer → question) to select questions related to player's last response
+/// 4. Filtering out already-asked questions to avoid repetition
+/// 5. Applying temperature-weighted sampling for variety while maintaining relevance
+/// 6. Falling back to random selection if no history or ranks available
+fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usize {
+    // First, check if diner should continue speaking (multi-turn dialogue)
+    // This happens when there's a previous diner speech and QQ ranks suggest good continuation
+    if let Some(last_speech_idx) = session.last_diner_speech_index
+        && let Some(qq_rank) = corpus.qq_ranks.get(last_speech_idx)
+        && !qq_rank.is_empty()
+    {
+        // Filter available continuations (not yet asked)
+        let available_ranks: Vec<_> = qq_rank
+            .iter()
+            .filter(|rank| !session.has_asked(rank.answer_index))
+            .cloned()
+            .collect();
+
+        if !available_ranks.is_empty() {
+            let best_score = available_ranks[0].score; // QQ ranks are pre-sorted by score
+
+            // Use score as probability: higher similarity = more likely to continue
+            if session.should_continue(best_score) {
+                // Sample a continuation from available QQ ranks
+                let selected = sample_weighted_indices(
+                    &available_ranks,
+                    session.temperature,
+                    1,
+                    &mut session.rng,
+                );
+
+                if let Some(&question_idx) = selected.first() {
+                    session.increment_continuation();
+                    session.mark_asked(question_idx);
+                    println!(
+                        "QQ continuation: {} → {} (score: {:.3}, depth: {})",
+                        last_speech_idx, question_idx, best_score, session.continuation_depth
+                    );
+                    return question_idx;
+                }
+            }
+        }
+    }
+
+    // No continuation, reset depth and alternate to player response
+    session.reset_continuation();
+
+    // If there's a previous player response, use AQ ranks to select related question
+    if let Some(last_response_idx) = session.last_response_index
+        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_idx)
     {
         // Filter available questions (not yet asked)
         let available_ranks: Vec<_> = aq_rank
             .iter()
-            .filter(|rank| !trial_session.has_asked(rank.answer_index))
+            .filter(|rank| !session.has_asked(rank.answer_index))
             .cloned()
             .collect();
 
         if !available_ranks.is_empty() {
             // Use weighted sampling based on AQ ranks
-            let selected = sample_weighted_indices(
-                &available_ranks,
-                trial_session.temperature,
-                1,
-                &mut trial_session.rng,
-            );
+            let selected =
+                sample_weighted_indices(&available_ranks, session.temperature, 1, &mut session.rng);
 
             if let Some(&question_idx) = selected.first() {
+                session.mark_asked(question_idx);
                 return question_idx;
             }
         }
     }
 
     // Fallback: random available question
-    let num_questions = trial_registry.diner_speeches.len();
+    let num_questions = corpus.diner_speeches.len();
     let available_questions = (0..num_questions)
-        .filter(|&idx| !trial_session.has_asked(idx))
+        .filter(|&idx| !session.has_asked(idx))
         .collect::<Vec<_>>();
 
     // Pick a random available question.
     // If all questions asked, pick any random one
     let speech_index = available_questions
-        .choose(&mut trial_session.rng)
+        .choose(&mut session.rng)
         .cloned()
-        .unwrap_or_else(|| trial_session.rng.random_range(0..num_questions));
+        .unwrap_or_else(|| session.rng.random_range(0..num_questions));
 
-    trial_session.mark_asked(speech_index);
+    session.mark_asked(speech_index);
 
     speech_index
 }
@@ -129,6 +170,9 @@ fn create_diner_statement_with_speech(
     trial_registry: &TrialCorpus,
     trial_session: &mut TrialSession,
 ) -> TrialStatement {
+    // Record this as the last diner speech for future continuations
+    trial_session.set_last_diner_speech(speech_index);
+
     let speech = trial_registry.diner_speeches[speech_index].to_view();
     let temperature = trial_session.temperature;
 

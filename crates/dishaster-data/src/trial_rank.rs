@@ -30,15 +30,15 @@ pub fn parse_qa_ranks(text: &str) -> Result<Vec<Vec<Vec<TrialQARank>>>> {
     Ok(all_ranks)
 }
 
-/// Parse answer-to-question ranks from the ranks_r.txt format.
-/// Each line is a single answer's ranks to questions.
-pub fn parse_aq_ranks(text: &str) -> Result<Vec<Vec<TrialQARank>>> {
+/// Parse ranks from the ranks_r.txt format.
+/// Each line is a single item's ranks to continued items.
+pub fn parse_aq_ranks(text: &str, kind: &str) -> Result<Vec<Vec<TrialQARank>>> {
     text.lines()
         .enumerate()
         .filter(|(_, line)| !line.trim().is_empty())
         .map(|(line_num, line)| {
             parse_rank_line(line.trim())
-                .with_context(|| format!("Failed to parse AQ rank line {}", line_num + 1))
+                .with_context(|| format!("Failed to parse {kind} rank line {}", line_num + 1))
         })
         .collect()
 }
@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn test_parse_aq_ranks() {
         let text = "3:0.229003,2:0.122926,0:0.109921\n9:0.027912,12:0.002898,3:0.001904\n";
-        let all_ranks = parse_aq_ranks(text).unwrap();
+        let all_ranks = parse_aq_ranks(text, "AQ").unwrap();
 
         assert_eq!(all_ranks.len(), 2);
         assert_eq!(all_ranks[0].len(), 3);

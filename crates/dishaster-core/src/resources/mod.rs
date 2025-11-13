@@ -155,6 +155,12 @@ pub struct TrialSession {
     asked_questions: Vec<usize>,
     /// The most recent response corpus index selected by the player
     pub last_response_index: Option<usize>,
+    /// The most recent diner speech index
+    pub last_diner_speech_index: Option<usize>,
+    /// Current continuation depth (consecutive speeches by same speaker)
+    pub continuation_depth: u32,
+    /// Maximum allowed continuation depth before forcing speaker alternation
+    max_continuation_depth: u32,
     /// Temperature parameter for sampling (higher = more random, lower = more deterministic)
     pub temperature: f32,
 }
@@ -166,6 +172,9 @@ impl TrialSession {
             rng: Prng::new(seed),
             asked_questions: Vec::new(),
             last_response_index: None,
+            last_diner_speech_index: None,
+            continuation_depth: 0,
+            max_continuation_depth: 3,
             temperature: 0.8,
         }
     }
@@ -174,6 +183,8 @@ impl TrialSession {
     pub fn reset(&mut self) {
         self.asked_questions.clear();
         self.last_response_index = None;
+        self.last_diner_speech_index = None;
+        self.continuation_depth = 0;
     }
 
     /// Check if a question has been asked
@@ -191,6 +202,41 @@ impl TrialSession {
     /// Record the player's response choice
     pub fn set_last_response(&mut self, response_index: usize) {
         self.last_response_index = Some(response_index);
+        // Reset continuation depth when speaker alternates
+        self.continuation_depth = 0;
+    }
+
+    /// Record a diner speech
+    pub fn set_last_diner_speech(&mut self, speech_index: usize) {
+        self.last_diner_speech_index = Some(speech_index);
+    }
+
+    /// Increment continuation depth
+    pub fn increment_continuation(&mut self) {
+        self.continuation_depth += 1;
+    }
+
+    /// Check if continuation is allowed (not at max depth)
+    pub fn can_continue(&self) -> bool {
+        self.continuation_depth < self.max_continuation_depth
+    }
+
+    /// Reset continuation depth (when alternating speakers)
+    pub fn reset_continuation(&mut self) {
+        self.continuation_depth = 0;
+    }
+
+    /// Decide whether to continue based on best continuation score
+    /// Uses the score as probability (higher score = more likely to continue)
+    pub fn should_continue(&mut self, best_score: f32) -> bool {
+        if !self.can_continue() {
+            return false;
+        }
+
+        // Use score directly as probability (already normalized 0-1 from embedding similarity)
+        // Low scores (<0.3) rarely continue, high scores (>0.7) usually continue
+        let prob = best_score.clamp(0.0, 1.0);
+        self.rng.random::<f32>() < prob
     }
 }
 
