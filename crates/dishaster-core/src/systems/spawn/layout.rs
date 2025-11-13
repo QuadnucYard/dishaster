@@ -16,6 +16,7 @@ pub fn spawn_static_objects(
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
     mut rng: ResMut<WorldRng>,
+    reputation_state: Res<ReputationStateRes>,
     mut events: ResMut<EventQueue>,
 ) {
     spawn_windows(
@@ -25,6 +26,7 @@ pub fn spawn_static_objects(
         &registry,
         &display_root,
         &mut rng.derive_prng(),
+        reputation_state.food_quality,
         &mut events,
     );
     spawn_tables(
@@ -55,6 +57,7 @@ fn spawn_windows(
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
     rng: &mut Prng,
+    food_quality: f32,
     events: &mut ResMut<EventQueue>,
 ) {
     let mut last_window_x = 0.0;
@@ -118,6 +121,7 @@ fn spawn_windows(
             service_model,
             registry,
             events,
+            food_quality,
         );
 
         // Fill spaces between windows with colliders
@@ -167,6 +171,7 @@ fn spawn_dishes(
     service_model: &WindowServiceModel,
     registry: &GameModelRegistry,
     events: &mut ResMut<EventQueue>,
+    food_quality: f32,
 ) {
     let layout = &service_model.layout;
 
@@ -179,6 +184,14 @@ fn spawn_dishes(
             .expect("Dish not found in registry");
         let dish_model = registry.dishes.get(dish_handle);
 
+        // Scale quality based on global food_quality (0-100 mapped to 0-1)
+        // food_quality=60 means dishes spawn at 60% of their potential
+        // TODO: should be random
+        let quality_multiplier = (food_quality / 100.0).clamp(0.0, 1.0);
+        let quality_range = dish_model.characteristics.quality_range;
+        let base_quality =
+            quality_range.min + (quality_range.max - quality_range.min) * quality_multiplier;
+
         // Wrapper entity to hold dish and label
         let wrapper_entity = commands
             .spawn((
@@ -187,7 +200,7 @@ fn spawn_dishes(
                     pricing: assignment.pricing,
                     state: DishRuntimeState {
                         current_quantity: DEFAULT_DISH_QUANTITY,
-                        current_quality: DEFAULT_DISH_QUALITY,
+                        current_quality: base_quality,
                         contamination_level: DEFAULT_DISH_CONTAMINATION,
                         // last_restocked: DEFAULT_DISH_LAST_RESTOCKED_S,
                         // service_count: 0,

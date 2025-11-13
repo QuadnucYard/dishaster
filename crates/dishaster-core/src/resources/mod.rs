@@ -235,3 +235,12 @@ impl Default for OrderingConfig {
         }
     }
 }
+
+/// Reputation and food safety state tracking
+///
+/// Tracks canteen reputation, food safety risk index, and food quality.
+/// Updated daily based on feedback and management decisions.
+pub type ReputationStateRes = ResWrapper<ReputationState>;
+
+/// Reputation system configuration
+pub type ReputationConfigRes = ResWrapper<ReputationConfig>;

@@ -21,6 +21,10 @@ fn on_run_started(
     _event: On<RunStarted>,
     mut commands: Commands,
     mut day_status: ResMut<DayStatus>,
+    reputation_state: Res<ReputationStateRes>,
+    reputation_config: Res<ReputationConfigRes>,
+    mut rng: ResMut<WorldRng>,
+    mut events: ResMut<EventQueue>,
 ) {
     day_status.started = true;
 
@@ -29,6 +33,20 @@ fn on_run_started(
         day_status.current_day.0,
         day_status.start_day.0
     );
+
+    // Check for FSRI-based incident (food safety shutdown)
+    let incident_prob = reputation_state.incident_probability(&reputation_config);
+    if rng.random_bool(incident_prob as f64) {
+        log::error!(
+            "Food safety incident triggered! FSRI: {:.1}, probability: {:.3}",
+            reputation_state.fsri,
+            incident_prob
+        );
+        events.push(SimEvent::ShowHint("food_safety_shutdown".into()));
+        // TODO: Trigger actual ending through proper ending system
+        return; // Don't roll regular incidents if shutdown occurs
+    }
+
     if day_status.current_day != day_status.start_day {
         // emit incident for new day
         commands.trigger(RollManagementIncident);
@@ -61,10 +79,34 @@ fn on_advance_day(
     _event: On<AdvanceDay>,
     mut day_status: ResMut<DayStatus>,
     mut perma_effects: ResMut<PermanentEffectsRes>,
+    mut reputation_state: ResMut<ReputationStateRes>,
+    reputation_config: Res<ReputationConfigRes>,
     mut events: ResMut<EventQueue>,
 ) {
     // Apply daily decay to campaign effects
     perma_effects.apply_daily_decay();
+
+    // Apply accumulated reputation changes for the day
+    reputation_state.apply_daily_update(&reputation_config);
+
+    log::info!(
+        "Day {} completed. Reputation: {:.1}, FSRI: {:.1}, Quality: {:.1}",
+        day_status.current_day.0,
+        reputation_state.reputation,
+        reputation_state.fsri,
+        reputation_state.food_quality
+    );
+
+    // Check for reputation-based endings
+    if reputation_state.reputation <= 0.0 {
+        log::info!("Reputation dropped to 0 - triggering bad ending");
+        events.push(SimEvent::ShowHint("reputation_zero".into()));
+        // TODO: Trigger actual ending through proper ending system
+    } else if reputation_state.reputation >= 100.0 {
+        log::info!("Reputation reached 100 - potential good ending");
+        events.push(SimEvent::ShowHint("reputation_max".into()));
+        // TODO: Offer good ending option
+    }
 
     // Update day status for next day. This will be used when persisting progress.
     day_status.current_day.0 += 1;

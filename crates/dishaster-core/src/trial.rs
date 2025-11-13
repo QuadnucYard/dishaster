@@ -35,11 +35,29 @@ impl Simulation {
         let mut trial_session = self.world.resource_mut::<TrialSession>();
         trial_session.set_last_response(resp_corpus_index);
 
-        // Respond with the selected speech
+        // Get response and extract needed values
         let registry = self.world.resource::<GameModelRegistryRes>();
-        registry.trial.responses[resp_corpus_index]
+        let response_score = registry.trial.responses[resp_corpus_index].response_score;
+        let speech = registry.trial.responses[resp_corpus_index]
             .content
-            .to_view()
+            .to_view();
+
+        // Apply reputation impact using SystemState
+        {
+            let mut system_state: SystemState<(
+                ResMut<ReputationStateRes>,
+                Res<ReputationConfigRes>,
+            )> = SystemState::new(&mut self.world);
+            let (mut reputation_state, reputation_config) = system_state.get_mut(&mut self.world);
+
+            // Apply a moderate base impact modified by response score
+            // Using quality topic (-4.0) as a representative negative feedback
+            // TODO
+            let base_impact = reputation_config.base_impacts.quality;
+            reputation_state.apply_feedback_impact(base_impact, response_score, &reputation_config);
+        }
+
+        speech
     }
 }
 

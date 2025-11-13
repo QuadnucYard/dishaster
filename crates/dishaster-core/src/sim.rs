@@ -131,6 +131,10 @@ impl Simulation {
 
         self.world.insert_resource(ServingCommsQueue::default());
         self.world.insert_resource(OrderingConfig::default());
+        self.world
+            .insert_resource(ReputationConfig::default().into_res());
+        self.world
+            .insert_resource(ReputationState::default().into_res());
         self.world.insert_resource(DayStatus {
             seed: level.seed,
             current_day: level.day,

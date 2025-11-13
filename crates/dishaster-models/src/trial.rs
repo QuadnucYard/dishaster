@@ -59,6 +59,12 @@ pub struct TrialResponse {
     /// The content of the response.
     #[serde(flatten)]
     pub content: TrialSpeech,
+    /// Quality score of this response [-1.0, 1.0]
+    /// Positive values indicate helpful/diplomatic responses
+    /// Negative values indicate confrontational/poor responses
+    /// Used to modify reputation impact from feedback
+    #[serde(default)]
+    pub response_score: f32,
 }
 
 /// The kind of trial response.

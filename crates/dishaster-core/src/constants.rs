@@ -34,7 +34,5 @@ pub const TABLE_SEAT_ARRIVAL_EPS: Meters = 0.2;
 
 /// Default runtime dish values
 pub const DEFAULT_DISH_QUANTITY: f32 = 100.0;
-/// Quality in [0,1], where 1 is perfect and 0 is inedible
-pub const DEFAULT_DISH_QUALITY: f32 = 0.8;
 /// Contamination level in [0,1], where 0 is clean and 1 is hazardous
 pub const DEFAULT_DISH_CONTAMINATION: f32 = 0.0;

@@ -31,11 +31,21 @@ pub fn choose_feedback(rng: &mut impl Rng, pool: &[&str]) -> Feedback {
 pub fn feedback_present_system(
     mut feedback_messages: MessageReader<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
+    mut reputation_state: ResMut<ReputationStateRes>,
+    reputation_config: Res<ReputationConfigRes>,
 ) {
     for msg in feedback_messages.read() {
         events.push(SimEvent::Feedback(FeedbackView {
             entity: msg.entity.to_entity_id(),
             content: msg.content.clone(),
         }));
+
+        // Apply reputation impact if feedback has a topic
+        if let Some(topic) = msg.trigger {
+            let base_impact = reputation_config.base_impacts.get(topic);
+            // Use 0.0 response_score for non-trial feedback (neutral player response)
+            // Trial system will handle response scoring separately
+            reputation_state.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+        }
     }
 }
