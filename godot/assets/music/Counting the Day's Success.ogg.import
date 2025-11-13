@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c44me2sc8gwv6"
+path="res://.godot/imported/Counting the Day's Success.ogg-88458c2535d72a8113d8a3ab57fdae6e.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/music/Counting the Day's Success.ogg"
+dest_files=["res://.godot/imported/Counting the Day's Success.ogg-88458c2535d72a8113d8a3ab57fdae6e.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

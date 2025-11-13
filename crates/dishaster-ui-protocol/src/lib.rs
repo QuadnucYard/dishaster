@@ -112,6 +112,24 @@ pub enum UiCommand {
         /// Localized hint message.
         message: String,
     },
+
+    /// Audio command: Play phase-specific background music with cross-fade.
+    PlayPhaseMusic(PhaseMusic),
+    /// Audio command: Pause current BGM and play trial music.
+    EnterTrialMusic,
+    /// Audio command: Stop trial music and resume paused BGM.
+    ExitTrialMusic,
+}
+
+/// Phase-specific background music identifier.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PhaseMusic {
+    /// Preparation phase music.
+    Preparation,
+    /// Running phase music.
+    Running,
+    /// Settlement phase music.
+    Settlement,
 }
 
 #[allow(missing_docs)]

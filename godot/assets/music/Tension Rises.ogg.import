@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://buywuf566m21b"
+path="res://.godot/imported/Tension Rises.ogg-6566675a76034d006b981805cfb1c5e0.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/music/Tension Rises.ogg"
+dest_files=["res://.godot/imported/Tension Rises.ogg-6566675a76034d006b981805cfb1c5e0.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

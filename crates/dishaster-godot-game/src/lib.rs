@@ -13,7 +13,7 @@ use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelSetupState};
 use dishaster_persistence::PlayerService;
-use dishaster_ui_protocol::{StatsView, UiCommand};
+use dishaster_ui_protocol::{PhaseMusic, StatsView, UiCommand};
 use dishaster_views::DayHudState;
 use dishrupt_asset::AssetCatalog;
 use dishrupt_core::prelude::*;
@@ -42,7 +42,7 @@ pub fn progress_service() -> MutexGuard<'static, PlayerService<GodotUserStorage>
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum DayPhase {
+pub(crate) enum DayPhase {
     Preparation,
     Running,
     Settlement,
@@ -152,7 +152,7 @@ impl Game {
         let display_ctx = DisplayContext2D {
             view_scale: Vec3::new(60.0, 50.0, 50.0),
         };
-        let mut stage = Stage::new(display_ctx, asset_catalog);
+        let mut stage = Stage::new(display_ctx, asset_catalog.clone());
         stage.set_root(root_entity, GdNode2D::new(display_root_node));
 
         // Set up debug visualization
@@ -233,6 +233,10 @@ impl Game {
 
     /// Called just after construction
     pub fn start_day(&mut self) {
+        // Emit command to start preparation music
+        self.ui_commands
+            .push(UiCommand::PlayPhaseMusic(PhaseMusic::Preparation));
+
         self.ui_commands.push(UiCommand::UpdateDayHud(
             DayHudState {
                 day_label: tr!("day-display.label", "day" = self.telemetry.day),
@@ -256,6 +260,10 @@ impl Game {
             return;
         }
         self.phase = DayPhase::Running;
+
+        // Emit command to transition to running phase music
+        self.ui_commands
+            .push(UiCommand::PlayPhaseMusic(PhaseMusic::Running));
 
         self.send_sim_command(SimCommand::StartRun);
     }

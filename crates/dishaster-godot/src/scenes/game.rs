@@ -3,7 +3,8 @@ use std::any::Any;
 use dishaster_core::{interface::SimCommand, models::LevelSetupState, sim::Simulation};
 use dishaster_godot_game::Game;
 use dishaster_godot_ui::*;
-use dishaster_ui_protocol::{AppRequest, GameRequest, UiCommand};
+use dishaster_ui_protocol::{AppRequest, GameRequest, PhaseMusic, UiCommand};
+use dishrupt_core::asset::AudioRef;
 use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_scene::*;
 use dishrupt_godot_ui::UITree;
@@ -269,6 +270,29 @@ impl GameScene {
 
             UiCommand::ShowHint { message } => {
                 ctx.gui.get_mut::<HintNotification>().show_hint(&message);
+            }
+
+            // Audio commands - execute music playback via the scene's audio manager
+            UiCommand::PlayPhaseMusic(phase) => {
+                /// Cross-fade duration in seconds
+                const FADE_DURATION: f32 = 2.0;
+
+                let track = match phase {
+                    PhaseMusic::Preparation => "canteen_preparation_theme",
+                    PhaseMusic::Running => "canteen_running_theme",
+                    PhaseMusic::Settlement => "canteen_settlement_theme",
+                };
+
+                ctx.audio
+                    .play_music_crossfade(&AudioRef::new(track), FADE_DURATION);
+            }
+            UiCommand::EnterTrialMusic => {
+                ctx.audio.pause_music();
+                ctx.audio.play_music_loop(&AudioRef::new("trial_theme"));
+            }
+            UiCommand::ExitTrialMusic => {
+                ctx.audio.stop_music();
+                ctx.audio.resume_music();
             }
         }
     }

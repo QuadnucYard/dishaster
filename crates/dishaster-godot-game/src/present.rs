@@ -5,7 +5,7 @@ mod dispenser;
 mod feedback;
 
 use dishaster_interface::{snapshots::*, *};
-use dishaster_ui_protocol::UiCommand;
+use dishaster_ui_protocol::{PhaseMusic, UiCommand};
 use dishrupt_l10n::tr;
 use godot::global::godot_print;
 
@@ -32,6 +32,10 @@ impl Game {
                     godot_print!("Process SimEvent: RunCompleted");
 
                     self.phase = DayPhase::Settlement;
+
+                    // Emit command to transition to settlement music
+                    self.ui_commands
+                        .push(UiCommand::PlayPhaseMusic(PhaseMusic::Settlement));
 
                     self.ui_commands.push(UiCommand::FinishRun);
                 }
@@ -120,6 +124,9 @@ impl Game {
                     self.suspended_sim_speed = Some(self.sim_runner.tps());
                     self.sim_runner.set_tps(TRIAL_FIXED_SIM_TPS);
 
+                    // Emit command to enter trial music
+                    self.ui_commands.push(UiCommand::EnterTrialMusic);
+
                     self.ui_commands.push(UiCommand::TrialIntro(intro));
                 }
                 SimEvent::TrialLeftSpeak(statement) => {
@@ -139,6 +146,9 @@ impl Game {
                     if let Some(speed) = self.suspended_sim_speed.take() {
                         self.sim_runner.set_tps(speed);
                     }
+
+                    // Emit command to exit trial music
+                    self.ui_commands.push(UiCommand::ExitTrialMusic);
 
                     self.ui_commands.push(UiCommand::TrialEnd);
                 }
