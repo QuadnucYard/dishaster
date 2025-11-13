@@ -1,6 +1,7 @@
 use dishaster_navigation::*;
 
 use super::prelude::*;
+use crate::utils::ema_alpha_from_dt_tau;
 
 /// System to update the global collision grid
 pub fn build_collision_grid(
@@ -16,30 +17,172 @@ pub fn build_collision_grid(
 
 /// Rebuild crowd cost field from current diner positions
 pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<NavigationGrid>>) {
+    // Per-agent contribution caps / scaling
+    const MIN_SIGMA_FACTOR: f32 = 0.15; // sigma = max(min, influence_radius * factor)
+    const MAX_TILE_CONTRIB: f32 = 50.0; // cap per-agent contribution to a single tile
+    const EPSILON: f32 = 0.0001; // avoid div-by-zero & extreme values
+
     grid.crowd.clear();
 
     for movement in query.iter() {
         let center = movement.pos;
-        let influence_radius = movement.radius * 4.;
-        let r2 = influence_radius.squared();
-        let max_extra = movement.radius * 10.0; // todo: improve model
+        let base_weight =
+            (movement.radius.max(0.2) * 0.5) + (movement.current_speed.max(0.0) * 0.1);
 
-        // Compute bounding tiles
+        let influence_radius = movement.radius * 5.;
+        let r2 = influence_radius.squared();
+
+        // Choose sigma for Gaussian falloff; sigma ~ influence_radius * factor
+        // Ensure sigma not too small:
+        let sigma = (influence_radius * 0.5).max(influence_radius * MIN_SIGMA_FACTOR);
+        let inv_two_sigma2 = 1.0 / (2.0 * sigma * sigma + EPSILON);
+
+        // Compute bounding tile region (integer tile coords)
         let tile_radius = world_to_tile_dist(influence_radius, grid.cell_size()).ceil() as i32;
         let center_tile = grid.world_to_igrid(center);
-        for dx in -tile_radius..=tile_radius {
-            for dy in -tile_radius..=tile_radius {
-                let Some(t) = grid.bound_tile(center_tile + IVec2::new(dx, dy)) else {
+
+        for tx in (center_tile.x - tile_radius)..=(center_tile.x + tile_radius) {
+            for ty in (center_tile.y - tile_radius)..=(center_tile.y + tile_radius) {
+                let Some(tile_idx) = grid.bound_tile(ivec2(tx, ty)) else {
                     continue;
                 };
-                let d2 = center.distance_squared(grid.tile_to_world(t));
-                if d2 <= influence_radius.squared() {
-                    // Smooth decay: extra = m * (r^2 / (d^2 + e))
-                    let extra = max_extra * (r2 / (d2 + 0.1));
-                    grid.crowd.add_cost(t, extra);
+                // compute squared distance from agent center to tile center (no sqrt)
+                let tile_world = grid.tile_to_world(tile_idx);
+                let d2 = center.distance_squared(tile_world);
+
+                // early skip if outside circle
+                if d2 > r2 {
+                    continue;
                 }
+
+                // Gaussian falloff: contrib = base_weight * exp(-d2 / (2*sigma^2))
+                // Scale magnitude with movement.radius (or explicit weight)
+                let gauss = (-d2 * inv_two_sigma2).exp();
+                let mut extra = base_weight * gauss * 10.0; // scale factor for game tuning
+
+                // Bound contribution to avoid catastrophic values near d2->0
+                if extra.is_nan() || extra.is_infinite() || extra > MAX_TILE_CONTRIB {
+                    extra = MAX_TILE_CONTRIB;
+                }
+                grid.crowd.add_cost(tile_idx, extra);
             }
         }
+    }
+
+    // In the current implementation, the typical max cost is around 4.
+}
+
+/// Update movement speeds dynamically based on multiple factors.
+///
+/// **Algorithm Overview:**
+/// This system implements a multiplicative speed model where an agent's speed is affected by:
+/// 1. Personal factors: base speed × mobility (physical capability)
+/// 2. Psychological factor: urgency (impatience/hurry level)
+/// 3. Environmental factor: crowd density (slower in crowded areas)
+/// 4. Physical load: carry weight (slower when carrying heavy trays)
+///
+/// **Formula:**
+/// ```ignore
+/// target_speed = clamp(
+///     base_speed × mobility × (1 + u_gain×urgency)
+///     × 1/(1 + crowd_sensitivity×density)
+///     × 1/(1 + carry_sensitivity×weight),
+///     min_speed, max_speed
+/// )
+/// ```
+///
+/// **Performance Optimization:**
+/// - Updates are periodic (every 0.3s), not every frame, to reduce CPU cost
+/// - Each agent updates at slightly different times (natural jitter from simulation timing)
+/// - Uses exponential moving average (EMA) for smooth transitions, avoiding jarring speed changes
+pub fn update_movement_speeds(
+    mut query: Query<(&mut Movement, Option<&DinerState>)>,
+    nav_grid: Res<ResWrapper<NavigationGrid>>,
+    time: Res<Time>,
+) {
+    // Urgency gain: urgency=1.0 increases speed by 35%
+    // Example: impatient diner at urgency=1.0 moves 35% faster than baseline
+    const U_GAIN: f32 = 0.35;
+
+    // Crowd sensitivity: controls how much crowd slows agents down
+    // At density=0.4, crowd_factor = 1/(1+2.5×0.4) = 0.5 (50% speed)
+    const CROWD_SENSITIVITY: f32 = 2.5;
+
+    // Carry sensitivity: weight penalty coefficient
+    // At 2kg, carry_factor = 1/(1+0.25×2) = 0.67 (33% slower)
+    const CARRY_SENSITIVITY: f32 = 0.5;
+
+    // Speed limits to prevent unrealistic movement
+    const MIN_SPEED: f32 = 0.3; // m/s - minimum crawl speed in extreme congestion
+    const MAX_SPEED: f32 = 2.0; // m/s - maximum sprint speed
+
+    // Periodic update interval: recalculate target speed every 0.3s
+    // Reduces computation and prevents jitter from rapid crowd changes
+    const UPDATE_INTERVAL: f32 = 0.3; // seconds
+
+    // EMA time constant: controls smoothing strength
+    // Smaller tau = faster response, larger tau = smoother but slower adaptation
+    const TAU: f32 = 0.3; // seconds
+
+    // Calculate EMA smoothing factor: alpha = dt/tau (clamped to prevent overshoot)
+    // This makes speed changes feel natural rather than instantaneous
+    let dt = time.tick_duration as f32;
+    let current_time = time.current_time as f32;
+    let alpha = ema_alpha_from_dt_tau(dt, TAU); // EMA: new_value += (target - new_value) × alpha
+
+    for (mut movement, diner_state) in query.iter_mut() {
+        // ===== Staggered Update Strategy =====
+        // Skip agents whose update interval hasn't elapsed yet
+        // This distributes CPU load over multiple frames and prevents synchronized jitter
+        if current_time - movement.last_speed_update < UPDATE_INTERVAL {
+            continue;
+        }
+        movement.last_speed_update = current_time;
+
+        // ===== Factor 1: Base Speed × Mobility =====
+        // base_speed: agent's natural walking speed (e.g., 1.3 m/s for average adult)
+        // mobility: physical capability modifier (0.7-1.2), accounts for age/fitness/disability
+        let base_speed = movement.walking_speed;
+        let mobility = movement.speed_factor;
+
+        // ===== Factor 2: Urgency Boost =====
+        // Maps psychological impatience [0,1] to speed multiplier [1.0, 1.35]
+        // urgency=0 (relaxed) → no change, urgency=1 (very hurried) → +35% speed
+        let urgency = movement.impatience.clamp(0.0, 1.0);
+        let urgency_factor = 1.0 + U_GAIN * urgency;
+
+        // ===== Factor 3: Crowd Density Penalty =====
+        // Sample normalized crowd density [0,1] from grid at agent's position
+        // Uses reciprocal formula to ensure smooth slowdown without division by zero
+        // density=0 → factor=1.0 (no penalty), density=0.5 → factor=0.29 (71% slower)
+        let tile = nav_grid.world_to_grid(movement.pos);
+        let crowd_density = nav_grid.crowd.sample_normalized(tile);
+        let crowd_factor = 1.0 / (1.0 + CROWD_SENSITIVITY * crowd_density);
+
+        // ===== Factor 4: Carry Weight Penalty =====
+        // Calculate total weight from tray + served dishes (only for diners)
+        // Staff and other agents have weight=0 (no penalty)
+        // Uses same reciprocal formula as crowd for consistency
+        // weight=0 → factor=1.0, weight=2kg → factor=0.67 (33% slower)
+        let carry_weight = diner_state
+            .map(|state| state.total_carry_weight())
+            .unwrap_or(0.0);
+        let carry_factor = 1.0 / (1.0 + CARRY_SENSITIVITY * carry_weight);
+
+        // ===== Compute Target Speed =====
+        // Multiply all factors together and clamp to realistic bounds
+        // Example: base=1.3, mobility=1.0, urgency=0.5 → urgency_factor=1.175
+        //          crowd_density=0.3 → crowd_factor=0.57, carry=1kg → carry_factor=0.8
+        //          target = 1.3 × 1.0 × 1.175 × 0.57 × 0.8 ≈ 0.70 m/s
+        let target_speed = (base_speed * mobility * urgency_factor * crowd_factor * carry_factor)
+            .clamp(MIN_SPEED, MAX_SPEED);
+
+        // ===== EMA Smoothing =====
+        // Gradually adjust current_speed toward target_speed using exponential moving average
+        // This prevents sudden jerky movements when conditions change
+        // Formula: current += (target - current) × alpha
+        // With tau=0.3s, reaches ~95% of target within 1 second
+        movement.current_speed += (target_speed - movement.current_speed) * alpha;
     }
 }
 
@@ -151,7 +294,7 @@ pub fn run_path_requests(
 /// This system advances Movement.pos using velocity-based steering for smoother
 /// movement and turns. Agents accelerate towards desired velocity, clamped to max speed.
 pub fn update_agent_movement(
-    mut query: Query<&mut Movement>,
+    mut query: Query<(Entity, &mut Movement)>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
     time: Res<Time>,
     mut rng: ResMut<NavigationRng>,
@@ -173,38 +316,53 @@ pub fn update_agent_movement(
             return Vec2::ZERO;
         }
 
-        // Determine desired velocity
+        // Determine desired velocity using dynamic current_speed
         let dir = if let Some(next) = movement.path.next() {
             (next - movement.pos).normalize_or_zero()
         } else {
             displacement.normalize_or_zero()
         };
-        let max_speed = movement.walking_speed * movement.speed_factor;
+        let max_speed = movement.current_speed; // Use dynamically calculated speed
         let desired_velocity = dir * max_speed;
 
         desired_velocity.clamp_length_max(max_speed)
     };
 
-    let nav_agents = query
-        .iter()
-        .map(|m| dishaster_navigation::Agent {
+    // ===== Build Avoidance Agent List =====
+    // **Algorithm:**
+    // 1. Iterate through all agents
+    // 2. Skip agents with empty paths (they're done moving)
+    // 3. Build nav_agents list with only active movers
+    // 4. Track entity IDs to map results back later
+    let mut nav_agents = Vec::new();
+    let mut entities = Vec::new(); // Maps nav_agent index -> entity
+
+    for (entity, m) in query.iter() {
+        if m.path.is_empty() {
+            // Skip agents without paths - they shouldn't participate in avoidance
+            // This is the key fix for the head-on circling bug
+            continue;
+        }
+
+        nav_agents.push(dishaster_navigation::Agent {
             position: m.pos,
             velocity: get_next_velocity(m),
             goal: m.path.next().unwrap_or(m.pos),
             radius: m.radius,
-            max_velocity: m.walking_speed * m.speed_factor,
+            max_velocity: m.current_speed, // Use dynamically calculated speed
             avoidance_responsibility: m.avoidance_responsibility,
-        })
-        .collect::<Vec<_>>();
+        });
+        entities.push(entity);
+    }
 
     let new_velocities = nav_grid.get_updated_velocities(&nav_agents, dt);
 
-    // Apply new velocities and update positions
-    for (mut movement, velocity) in query.iter_mut().zip(new_velocities) {
-        if movement.path.is_empty() {
-            movement.velocity = Vec2::ZERO;
+    // Apply new velocities only to agents with active paths
+    for (nav_idx, entity) in entities.iter().enumerate() {
+        let Ok((_entity, mut movement)) = query.get_mut(*entity) else {
             continue;
-        }
+        };
+        let velocity = new_velocities[nav_idx];
 
         // Steering: adjust velocity towards desired
         let steer = velocity - movement.velocity;

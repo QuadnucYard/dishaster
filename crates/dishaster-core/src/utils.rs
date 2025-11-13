@@ -1,8 +1,22 @@
 use dishrupt_rng::prelude::Rng;
 
 /// Sigmoid function for mapping unbounded values to 0..1
+#[inline]
 pub fn sigmoid(x: f32) -> f32 {
     1.0 / (1.0 + (-x).exp())
+}
+
+/// Compute alpha = 1 - exp(-dt / tau) in a numerically stable way.
+/// - `dt`: elapsed seconds
+/// - `tau`: time constant in seconds (> 0)
+#[inline]
+pub fn ema_alpha_from_dt_tau(dt: f32, tau: f32) -> f32 {
+    if tau <= 0.0 {
+        return 1.0; // immediate
+    }
+    // avoid underflow/overflow for extreme dt/tau
+    let x = (-dt / tau).max(-20.0); // clamp exponent (e^-20 ~ 2e-9)
+    1.0 - x.exp()
 }
 
 /// Softmax sampling from scores

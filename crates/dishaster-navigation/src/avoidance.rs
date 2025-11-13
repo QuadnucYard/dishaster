@@ -100,9 +100,37 @@ impl NavigationGrid {
                 }
             }
 
-            let preferred_velocity = (agents[i].goal.into_dodgy() - agent.position)
-                .normalize_or_zero()
-                * agent.max_velocity;
+            // ===== Goal Approach Speed Reduction (Prevents Overshooting) =====
+            // Calculate vector and distance to goal
+            let to_goal = agents[i].goal.into_dodgy() - agent.position;
+            let distance_to_goal = to_goal.length();
+
+            // **Algorithm: Linear Speed Ramp-Down Near Goal**
+            // Problem: Agents moving at full speed toward goals can overshoot and circle
+            // Solution: Gradually reduce speed as agent approaches goal
+            //
+            // Slowdown zone: Starts at (agent.radius × 2) from goal
+            // - Outside zone: speed_factor = 1.0 (full speed)
+            // - Inside zone: speed_factor = distance/slowdown_start (linear decay)
+            // - Very close: minimum 10% speed to avoid complete stalls
+            //
+            // Example: agent.radius=0.3m, slowdown_start=0.6m
+            //   distance=0.6m → factor=1.0 (full speed)
+            //   distance=0.3m → factor=0.5 (half speed)
+            //   distance=0.06m → factor=0.1 (10% speed, minimum)
+            //
+            // This enables smooth arrival without oscillation or circling
+            const SLOWDOWN_DISTANCE_FACTOR: f32 = 2.0;
+            let slowdown_start = agent.radius * SLOWDOWN_DISTANCE_FACTOR;
+            let speed_factor = if distance_to_goal < slowdown_start {
+                (distance_to_goal / slowdown_start).max(0.1) // Min 10% speed near goal
+            } else {
+                1.0
+            };
+
+            // Apply speed reduction to preferred velocity
+            let preferred_velocity =
+                to_goal.normalize_or_zero() * (agent.max_velocity * speed_factor);
 
             nearby_obstacles.clear();
             for obstacle in self.obstacles() {

@@ -50,6 +50,8 @@ impl Simulation {
             (
                 // Recompute soft crowd costs for pathfinding
                 update_crowd_field,
+                // Update movement speeds dynamically based on crowd, urgency, carry weight
+                update_movement_speeds,
                 // Spawn logic may add diners
                 update_diner_spawner,
                 // Deliver delayed serving communications before state updates

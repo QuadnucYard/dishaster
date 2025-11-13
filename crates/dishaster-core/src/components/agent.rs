@@ -16,9 +16,16 @@ pub struct Movement {
     /// The radius of the agent for collision avoidance.
     pub radius: f32,
     /// How impatient the agent is (0.0 = patient, 1.0 = very impatient).
+    /// This also maps to urgency for speed calculations.
     pub impatience: f32,
     /// The amount of responsibility an agent has to avoid other agents.
     pub avoidance_responsibility: f32,
+
+    // Dynamic speed system fields
+    /// Current actual speed after all factors (used with EMA smoothing).
+    pub current_speed: f32,
+    /// Last time the target speed was updated (for periodic recalculation).
+    pub last_speed_update: f32,
 
     /// Current position in the canteen
     pub pos: Vec2,
@@ -44,6 +51,8 @@ impl Default for Movement {
             radius: 0.0,
             impatience: 1.0,
             avoidance_responsibility: 1.0,
+            current_speed: 1.0, // Initialize to base speed
+            last_speed_update: 0.0,
 
             pos: Vec2::ZERO,
             velocity: Vec2::ZERO,

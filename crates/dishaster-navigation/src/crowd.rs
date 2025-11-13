@@ -43,7 +43,10 @@ impl CrowdCostField {
         self.grid.fill(Cost::default());
     }
 
-    /// Add cost to a tile (accumulated)
+    /// Add cost to a tile (accumulated).
+    ///
+    /// Each agent contributes cost to nearby tiles based on distance.
+    /// Multiple agents' costs accumulate, creating a continuous density field.
     pub fn add_cost(&mut self, tile: Tile, extra: Cost) {
         if extra <= 0.0 {
             return;
@@ -53,11 +56,49 @@ impl CrowdCostField {
         }
     }
 
-    /// Sample cost at a tile (0 if none)
+    /// Sample raw cost at a tile (0 if none).
+    ///
+    /// Returns unnormalized cost value. Use `sample_normalized()` for
+    /// density values suitable for speed calculations.
     pub fn sample(&self, tile: Tile) -> Cost {
         self.index(tile)
             .map(|idx| self.grid[idx])
             .unwrap_or_default()
+    }
+
+    /// Get normalized crowd density at a tile in range [0, 1].
+    ///
+    /// **Algorithm: Fixed Reference Normalization**
+    /// - Uses a fixed reference value representing "moderate congestion"
+    /// - cost=0 → density=0.0 (empty)
+    /// - cost=expected_moderate → density≈0.5 (moderate)
+    /// - cost>>expected → density→1.0 (saturates at very high density)
+    ///
+    /// Formula: density = cost / (cost + reference)
+    /// This creates a smooth curve that:
+    /// - Responds sensitively to low/medium densities
+    /// - Saturates gracefully at high densities (no unbounded values)
+    /// - Doesn't depend on the current maximum (stable across different crowd sizes)
+    ///
+    /// **Example with reference=5.0:**
+    /// - cost=0 → 0/(0+5) = 0.0 (empty)
+    /// - cost=2.5 → 2.5/7.5 = 0.33 (light crowd)
+    /// - cost=5.0 → 5.0/10 = 0.5 (moderate)
+    /// - cost=15.0 → 15/20 = 0.75 (heavy)
+    /// - cost=45.0 → 45/50 = 0.9 (very dense)
+    pub fn sample_normalized(&self, tile: Tile) -> f32 {
+        // Reference cost representing "moderate congestion" level
+        // This is based on typical agent influence: radius=0.3m, max_extra=3.0
+        // At moderate distance, an agent contributes ~5.0 cost to nearby tiles
+        const REFERENCE_COST: f32 = 5.0;
+
+        let cost = self.sample(tile);
+        cost / (cost + REFERENCE_COST)
+    }
+
+    /// Get the maximum cost value in the grid
+    pub fn max_value(&self) -> f32 {
+        self.grid.iter().cloned().fold(0.0, f32::max)
     }
 
     /// Get the grid cell size in world units

@@ -48,6 +48,37 @@ pub struct DinerState {
     pub meal_budget: f32,
 }
 
+impl DinerState {
+    /// Calculate total carry weight from served dishes (kg).
+    ///
+    /// This method computes the total weight a diner is carrying, which affects
+    /// their movement speed through the carry_factor in the speed system.
+    ///
+    /// **Components:**
+    /// 1. **Tray weight** (~0.5 kg): Standard cafeteria tray
+    /// 2. **Food weight**: Sum of remaining_weight from all served dishes
+    pub fn total_carry_weight(&self) -> f32 {
+        const TRAY_WEIGHT: f32 = 0.5; // kg - standard cafeteria tray
+        const BOWL_WEIGHT: f32 = 0.3; // kg - standard bowl weight
+
+        // Add tray weight if diner is holding one
+        let tray_weight = if self.tray.is_some() {
+            TRAY_WEIGHT
+        } else {
+            0.0
+        };
+
+        // Sum remaining food weight from all dishes on tray
+        let food_weight: f32 = self
+            .served_dishes
+            .iter()
+            .map(|dish| dish.remaining_weight + BOWL_WEIGHT)
+            .sum();
+
+        tray_weight + food_weight
+    }
+}
+
 /// What gets served to a diner
 #[derive(Debug)]
 pub struct ServedDish {
