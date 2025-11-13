@@ -223,7 +223,7 @@ fn spawn_dishes(
         // Price label
         commands.spawn((
             DisplayState {
-                proto: PrefabReference::new(PRICE_LABEL_PREFAB),
+                proto: PrefabRef::new(PRICE_LABEL_PREFAB),
                 name: Some("Price".into()), // required for referencing in scripts
             },
             Transform {

@@ -1,6 +1,6 @@
 //! Resources for opening animation simulation
 
-use dishrupt_core::asset::PrefabReference;
+use dishrupt_core::asset::PrefabRef;
 use serde::{Deserialize, Serialize};
 
 use crate::{prelude::*, protocol::SimEvent};
@@ -46,11 +46,11 @@ impl Default for OpeningConfig {
 #[derive(Resource, Debug, Serialize, Deserialize)]
 pub struct OpeningAssets {
     /// Universal prefab for all foods (presenter will adjust appearance later)
-    pub food_prefab: PrefabReference,
+    pub food_prefab: PrefabRef,
     /// Universal prefab for all faces (presenter will adjust appearance later)
-    pub face_prefab: PrefabReference,
+    pub face_prefab: PrefabRef,
     /// Prefab used for review text display (label prefab)
-    pub text_prefab: PrefabReference,
+    pub text_prefab: PrefabRef,
     /// Number of food sprite variants available
     pub food_variant_count: u8,
     /// Number of face sprite variants available
@@ -62,9 +62,9 @@ pub struct OpeningAssets {
 impl Default for OpeningAssets {
     fn default() -> Self {
         Self {
-            food_prefab: PrefabReference::new("opening/food"),
-            face_prefab: PrefabReference::new("opening/face"),
-            text_prefab: PrefabReference::new("opening/text"),
+            food_prefab: PrefabRef::new("opening/food"),
+            face_prefab: PrefabRef::new("opening/face"),
+            text_prefab: PrefabRef::new("opening/text"),
             food_variant_count: 110,
             face_variant_count: 63,
             review_texts: vec![

@@ -3,7 +3,7 @@
 use std::collections::VecDeque;
 
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
-use dishrupt_core::asset::{PrefabReference, SpriteReference};
+use dishrupt_core::asset::{PrefabRef, SpriteRef};
 use godot::{
     classes::{Marker2D, Node2D, PackedScene, ResourceLoader, Sprite2D, Texture2D},
     prelude::*,
@@ -89,7 +89,7 @@ impl Drop for FactoryItem {
 /// Factory for creating and pooling display nodes.
 pub struct DisplayFactory {
     catalog: AssetCatalog,
-    res_registry: FxHashMap<PrefabReference, PrefabIndex>,
+    res_registry: FxHashMap<PrefabRef, PrefabIndex>,
     items: Vec<FactoryItem>,
     active: Vec<ActiveNode>,
     last_decay_time: u32,
@@ -130,13 +130,13 @@ impl DisplayFactory {
     }
 
     fn intern_dummy_prefab(&mut self, name: &str) {
-        let dummy_prefab = PrefabReference::new(name);
+        let dummy_prefab = PrefabRef::new(name);
         let next_index = self.items.len() as PrefabIndex;
         self.res_registry.insert(dummy_prefab.clone(), next_index);
     }
 
     /// Create a new display node from the given prefab.
-    pub fn create(&mut self, prefab: &PrefabReference) -> GdNode2D {
+    pub fn create(&mut self, prefab: &PrefabRef) -> GdNode2D {
         let item_index = *self.res_registry.entry(prefab.clone()).or_insert_with(|| {
             let next_index = self.items.len() as PrefabIndex;
             self.items
@@ -204,7 +204,7 @@ impl DisplayFactory {
 }
 
 /// Load the given prefab from godot resources.
-pub fn load_prefab_sync(prefab: &PrefabReference, catalog: &AssetCatalog) -> Gd<PackedScene> {
+pub fn load_prefab_sync(prefab: &PrefabRef, catalog: &AssetCatalog) -> Gd<PackedScene> {
     let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Prefab, prefab.path()) else {
         panic!("failed to resolve prefab: {}", prefab.path());
     };
@@ -213,10 +213,7 @@ pub fn load_prefab_sync(prefab: &PrefabReference, catalog: &AssetCatalog) -> Gd<
 
 /// Load the given prefab from godot resources.
 /// If it not exists, assume it is a sprite.
-pub fn load_or_make_prefab_sync(
-    prefab: &PrefabReference,
-    catalog: &AssetCatalog,
-) -> Gd<PackedScene> {
+pub fn load_or_make_prefab_sync(prefab: &PrefabRef, catalog: &AssetCatalog) -> Gd<PackedScene> {
     // Try loading prefab. We do not use `try_load` to avoid unnecessary debugger error.
     let Ok(ResourceLocator::Uri(prefab_path)) = catalog.resolve(AssetKind::Prefab, prefab.path())
     else {
@@ -229,7 +226,7 @@ pub fn load_or_make_prefab_sync(
     godot_warn!("Prefab `{prefab_path}` not found. Try to load as sprite.");
     let mut scene = PackedScene::new_gd();
     let mut sprite = Sprite2D::new_alloc();
-    if let Some(texture) = try_load_texture_sync(&SpriteReference::new(prefab.path()), catalog) {
+    if let Some(texture) = try_load_texture_sync(&SpriteRef::new(prefab.path()), catalog) {
         sprite.set_texture(&texture);
     }
     scene.pack(&sprite);
@@ -237,7 +234,7 @@ pub fn load_or_make_prefab_sync(
 }
 
 /// Load the texture for the given sprite reference.
-pub fn load_texture_sync(sprite: &SpriteReference, catalog: &AssetCatalog) -> Gd<Texture2D> {
+pub fn load_texture_sync(sprite: &SpriteRef, catalog: &AssetCatalog) -> Gd<Texture2D> {
     let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Texture, sprite.path()) else {
         panic!("failed to resolve texture: {}", sprite.path());
     };
@@ -245,10 +242,7 @@ pub fn load_texture_sync(sprite: &SpriteReference, catalog: &AssetCatalog) -> Gd
 }
 
 /// Try to load the texture for the given sprite reference.
-pub fn try_load_texture_sync(
-    sprite: &SpriteReference,
-    catalog: &AssetCatalog,
-) -> Option<Gd<Texture2D>> {
+pub fn try_load_texture_sync(sprite: &SpriteRef, catalog: &AssetCatalog) -> Option<Gd<Texture2D>> {
     let Ok(ResourceLocator::Uri(uri)) = catalog.resolve(AssetKind::Texture, sprite.path()) else {
         panic!("failed to resolve texture: {}", sprite.path());
     };

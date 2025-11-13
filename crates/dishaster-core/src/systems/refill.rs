@@ -54,7 +54,7 @@ pub fn handle_refill_request(
         // Spawn refill staff at corner of canteen (entrance area)
         let spawn_pos = vec2(1., canteen.model.entrances_y + 1.);
 
-        let display_res = PrefabReference::new("staffs/sample_staff");
+        let display_res = PrefabRef::new("staffs/sample_staff");
         let wrapper = commands.spawn((
             AgentTag,
             RefillStaffBundle {

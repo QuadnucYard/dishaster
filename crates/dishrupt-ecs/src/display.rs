@@ -12,7 +12,7 @@ pub struct DisplayRoot(pub Entity);
 #[derive(Component, Default)]
 pub struct DisplayState {
     /// Reference to the prefab resource
-    pub proto: PrefabReference,
+    pub proto: PrefabRef,
     /// Optional name override for the node.
     pub name: Option<EcoString>,
 }

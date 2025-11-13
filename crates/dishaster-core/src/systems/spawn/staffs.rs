@@ -19,7 +19,7 @@ pub fn spawn_serving_staffs(
             let pos_x = window.location.x_min + offset_x;
             let staff_pos = vec2(pos_x, staff_y);
 
-            let display_res = PrefabReference::new("staffs/sample_staff"); // placeholder
+            let display_res = PrefabRef::new("staffs/sample_staff"); // placeholder
             let staff_cmd = commands.spawn((
                 AgentTag,
                 ServingStaffBundle {
@@ -60,7 +60,7 @@ pub fn spawn_serving_staffs(
 
             let _feedback_cmd = commands.spawn((
                 DisplayState {
-                    proto: PrefabReference::new("feedback_balloon"),
+                    proto: PrefabRef::new("feedback_balloon"),
                     name: Some("Feedback".into()),
                 },
                 Transform {

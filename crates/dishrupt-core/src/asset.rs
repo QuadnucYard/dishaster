@@ -8,9 +8,9 @@ use serde::{Deserialize, Serialize};
 /// The path is relative to `res://assets/{prefabs}/` in Godot.
 /// It does not include file extension.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Deserialize, Serialize)]
-pub struct PrefabReference(EcoString);
+pub struct PrefabRef(EcoString);
 
-impl PrefabReference {
+impl PrefabRef {
     /// Create a new prefab reference
     pub fn new(path: impl Into<EcoString>) -> Self {
         Self(path.into())
@@ -22,7 +22,7 @@ impl PrefabReference {
     }
 }
 
-impl fmt::Display for PrefabReference {
+impl fmt::Display for PrefabRef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
     }
@@ -30,9 +30,9 @@ impl fmt::Display for PrefabReference {
 
 /// Reference to a sprite resource
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Deserialize)]
-pub struct SpriteReference(EcoString);
+pub struct SpriteRef(EcoString);
 
-impl SpriteReference {
+impl SpriteRef {
     /// Create a new sprite reference
     pub fn new(path: impl Into<EcoString>) -> Self {
         Self(path.into())
@@ -44,7 +44,7 @@ impl SpriteReference {
     }
 }
 
-impl fmt::Display for SpriteReference {
+impl fmt::Display for SpriteRef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
     }

@@ -51,7 +51,7 @@ fn spawn_scheduled_diner(
         pos,
     );
 
-    let display_res = PrefabReference::new("diners/sample_diner");
+    let display_res = PrefabRef::new("diners/sample_diner");
 
     let wrapper = commands.spawn((
         AgentTag,
@@ -106,10 +106,9 @@ fn spawn_scheduled_diner(
         ChildOf(wrapper_entity),
     ));
 
-    static FEEDBACK_PROTO: LazyLock<PrefabReference> =
-        LazyLock::new(|| PrefabReference::new("feedback_balloon"));
-    static DEBUG_PROTO: LazyLock<PrefabReference> =
-        LazyLock::new(|| PrefabReference::new("agent_debug"));
+    static FEEDBACK_PROTO: LazyLock<PrefabRef> =
+        LazyLock::new(|| PrefabRef::new("feedback_balloon"));
+    static DEBUG_PROTO: LazyLock<PrefabRef> = LazyLock::new(|| PrefabRef::new("agent_debug"));
 
     let _feedback = commands.spawn((
         DisplayState {

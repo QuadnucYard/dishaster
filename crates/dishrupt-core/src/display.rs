@@ -6,7 +6,7 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DisplayModel {
-    pub res: PrefabReference,
+    pub res: PrefabRef,
 
     #[serde(default)]
     pub scale: f32,
@@ -24,12 +24,12 @@ impl Default for DisplayModel {
 impl DisplayModel {
     pub fn simple(res: impl Into<EcoString>) -> Self {
         Self {
-            res: PrefabReference::new(res),
+            res: PrefabRef::new(res),
             scale: 1.0,
         }
     }
 
-    pub fn referred(res: PrefabReference) -> Self {
+    pub fn referred(res: PrefabRef) -> Self {
         Self { res, scale: 1.0 }
     }
 }
@@ -51,7 +51,7 @@ pub struct TransformSnapshot {
 #[derive(Debug)]
 pub struct DisplaySnapshot {
     pub core_id: EntityId,
-    pub proto: PrefabReference,
+    pub proto: PrefabRef,
     pub name: Option<EcoString>,
     // pub display: DisplayState,
     pub transform: TransformSnapshot,
