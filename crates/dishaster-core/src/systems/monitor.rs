@@ -1,5 +1,6 @@
-use super::prelude::*;
-use crate::events::RunEnded;
+use dishaster_views::ReputationView;
+
+use crate::{events::RunEnded, systems::prelude::*};
 
 /// System to update the current diner count
 pub fn check_day_completion(
@@ -23,4 +24,17 @@ pub fn check_day_completion(
         day_status.completion_emitted = true;
         commands.trigger(RunEnded);
     }
+}
+
+/// Emit reputation update event if there are changes
+pub fn monitor_reputation_changes(
+    reputation: Res<ReputationStateRes>,
+    mut events: ResMut<EventQueue>,
+) {
+    events.push(SimEvent::ReputationUpdate(Box::new(ReputationView {
+        reputation: reputation.reputation + reputation.daily_accumulated,
+        reputation_delta: reputation.daily_accumulated,
+        fsri: reputation.fsri,
+        food_quality: reputation.food_quality,
+    })));
 }

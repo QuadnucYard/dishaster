@@ -17,6 +17,9 @@ pub enum SimEvent {
     /// The current day has completed (decision made).
     DayCompleted,
 
+    /// Reputation system state has been updated.
+    ReputationUpdate(Box<ReputationView>),
+
     /// A dispenser has spawned.
     DispenserSpawned(EntityId),
     /// Dispenser stock has changed.
@@ -70,9 +73,6 @@ pub enum SimEvent {
     ShowManagementDecisions(Box<ManagementDecisionsView>),
     /// Show incident notification at day start.
     ShowManagementIncident(Box<ManagementIncidentView>),
-
-    /// Reputation system state has been updated.
-    ReputationUpdate(Box<ReputationView>),
 
     /// Show a hint to the player for first-time events.
     ShowHint(EcoString),

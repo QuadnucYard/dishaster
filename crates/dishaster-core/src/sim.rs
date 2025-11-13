@@ -75,6 +75,7 @@ impl Simulation {
                 check_day_completion,
                 // Presentation related systems
                 feedback_present_system,
+                monitor_reputation_changes.run_if(resource_changed::<ReputationStateRes>),
             )
                 .chain(),
         );

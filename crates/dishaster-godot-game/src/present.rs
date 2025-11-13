@@ -46,6 +46,10 @@ impl Game {
                     self.ui_commands.push(UiCommand::FinishDay);
                 }
 
+                SimEvent::ReputationUpdate(view) => {
+                    self.ui_commands.push(UiCommand::UpdateReputation(view));
+                }
+
                 SimEvent::DispenserSpawned(entity) => {
                     let presenter = DispenserPresenter::new(
                         entity,
@@ -174,17 +178,6 @@ impl Game {
                         svc.update_seen_hint(hint_id);
                         let _ = svc.save(); // Ignore errors for hint saving
                     }
-                }
-
-                SimEvent::ReputationUpdate(view) => {
-                    // TODO: Update reputation UI component when it's implemented
-                    godot_print!(
-                        "Reputation Update: {} ({:+.2}) | FSRI: {:.2} | Quality: {:.2}",
-                        view.reputation,
-                        view.reputation_delta,
-                        view.fsri,
-                        view.food_quality
-                    );
                 }
             }
         }

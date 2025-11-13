@@ -83,6 +83,8 @@ pub enum UiCommand {
     UpdateDayHud(Box<DayHudState>),
     /// Update the stats display.
     UpdateStats(Box<StatsView>),
+    /// Update reputation display with current values.
+    UpdateReputation(Box<ReputationView>),
 
     /// Request opening the dish price editor for a given dish entity.
     OpenDishPriceEditor(DishPriceView),

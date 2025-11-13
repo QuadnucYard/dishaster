@@ -1,8 +1,6 @@
 //! The trial system. It works outside the ECS loop.
 
 use bevy_ecs::system::SystemState;
-use dishaster_interface::SimEvent;
-use dishaster_views::ReputationView;
 
 use crate::{
     models::{TrialCorpus, TrialQARank},
@@ -44,34 +42,15 @@ impl Simulation {
             .content
             .to_view();
 
-        // Apply reputation impact using SystemState
-        let view = {
-            let mut system_state: SystemState<(
-                ResMut<ReputationStateRes>,
-                Res<ReputationConfigRes>,
-            )> = SystemState::new(&mut self.world);
-            let (mut reputation_state, reputation_config) = system_state.get_mut(&mut self.world);
+        // Apply reputation impact
+        let mut system_state: SystemState<(ResMut<ReputationStateRes>, Res<ReputationConfigRes>)> =
+            SystemState::new(&mut self.world);
+        let (mut reputation, reputation_config) = system_state.get_mut(&mut self.world);
 
-            // Apply a moderate base impact modified by response score
-            // Using quality topic (-4.0) as a representative negative feedback
-            let base_impact = reputation_config.base_impacts.quality;
-            let delta = reputation_state.apply_feedback_impact(
-                base_impact,
-                response_score,
-                &reputation_config,
-            );
-
-            ReputationView {
-                reputation: reputation_state.reputation,
-                reputation_delta: delta,
-                fsri: reputation_state.fsri,
-                food_quality: reputation_state.food_quality,
-            }
-        };
-
-        // Emit reputation update event
-        let mut events = self.world.resource_mut::<EventQueue>();
-        events.push(SimEvent::ReputationUpdate(Box::new(view)));
+        // Apply a moderate base impact modified by response score
+        // Using quality topic (-4.0) as a representative negative feedback
+        let base_impact = reputation_config.base_impacts.quality;
+        reputation.apply_feedback_impact(base_impact, response_score, &reputation_config);
 
         speech
     }

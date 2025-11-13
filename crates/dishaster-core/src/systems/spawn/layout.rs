@@ -16,7 +16,7 @@ pub fn spawn_static_objects(
     registry: Res<GameModelRegistryRes>,
     display_root: Res<DisplayRoot>,
     mut rng: ResMut<WorldRng>,
-    reputation_state: Res<ReputationStateRes>,
+    reputation: Res<ReputationStateRes>,
     mut events: ResMut<EventQueue>,
 ) {
     spawn_windows(
@@ -26,7 +26,7 @@ pub fn spawn_static_objects(
         &registry,
         &display_root,
         &mut rng.derive_prng(),
-        reputation_state.food_quality,
+        reputation.food_quality,
         &mut events,
     );
     spawn_tables(

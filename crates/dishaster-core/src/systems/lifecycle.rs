@@ -1,6 +1,5 @@
 use dishaster_interface::SimEvent;
 use dishaster_models::Seed;
-use dishaster_views::ReputationView;
 
 use crate::{components::Diner, events::*, prelude::*, resources::*, systems};
 
@@ -22,7 +21,7 @@ fn on_run_started(
     _event: On<RunStarted>,
     mut commands: Commands,
     mut day_status: ResMut<DayStatus>,
-    reputation_state: Res<ReputationStateRes>,
+    reputation: Res<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
     mut rng: ResMut<WorldRng>,
     mut events: ResMut<EventQueue>,
@@ -36,11 +35,11 @@ fn on_run_started(
     );
 
     // Check for FSRI-based incident (food safety shutdown)
-    let incident_prob = reputation_state.incident_probability(&reputation_config);
+    let incident_prob = reputation.incident_probability(&reputation_config);
     if rng.random_bool(incident_prob as f64) {
         log::error!(
             "Food safety incident triggered! FSRI: {:.1}, probability: {:.3}",
-            reputation_state.fsri,
+            reputation.fsri,
             incident_prob
         );
         events.push(SimEvent::ShowHint("food_safety_shutdown".into()));
@@ -80,41 +79,30 @@ fn on_advance_day(
     _event: On<AdvanceDay>,
     mut day_status: ResMut<DayStatus>,
     mut perma_effects: ResMut<PermanentEffectsRes>,
-    mut reputation_state: ResMut<ReputationStateRes>,
+    mut reputation: ResMut<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
     mut events: ResMut<EventQueue>,
 ) {
     // Apply daily decay to campaign effects
     perma_effects.apply_daily_decay();
 
-    // Capture daily reputation delta before applying
-    let daily_delta = reputation_state.daily_accumulated;
-
     // Apply accumulated reputation changes for the day
-    reputation_state.apply_daily_update(&reputation_config);
+    reputation.apply_daily_update(&reputation_config);
 
     log::info!(
         "Day {} completed. Reputation: {:.1}, FSRI: {:.1}, Quality: {:.1}",
         day_status.current_day.0,
-        reputation_state.reputation,
-        reputation_state.fsri,
-        reputation_state.food_quality
+        reputation.reputation,
+        reputation.fsri,
+        reputation.food_quality
     );
 
-    // Emit daily reputation update event
-    events.push(SimEvent::ReputationUpdate(Box::new(ReputationView {
-        reputation: reputation_state.reputation,
-        reputation_delta: daily_delta,
-        fsri: reputation_state.fsri,
-        food_quality: reputation_state.food_quality,
-    })));
-
     // Check for reputation-based endings
-    if reputation_state.reputation <= 0.0 {
+    if reputation.reputation <= 0.0 {
         log::info!("Reputation dropped to 0 - triggering bad ending");
         events.push(SimEvent::ShowHint("reputation_zero".into()));
         // TODO: Trigger actual ending through proper ending system
-    } else if reputation_state.reputation >= 100.0 {
+    } else if reputation.reputation >= 100.0 {
         log::info!("Reputation reached 100 - potential good ending");
         events.push(SimEvent::ShowHint("reputation_max".into()));
         // TODO: Offer good ending option

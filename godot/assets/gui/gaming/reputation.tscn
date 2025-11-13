@@ -1,0 +1,88 @@
+[gd_scene format=3 uid="uid://b3n4dev05ifwq"]
+
+[node name="Reputation" type="Control"]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -160.0
+offset_right = 280.0
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Reputation"
+horizontal_alignment = 1
+
+[node name="ReputationRow" type="HBoxContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/ReputationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Reputation:"
+
+[node name="Delta" type="Label" parent="Panel/VBox/ReputationRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "+0.0"
+horizontal_alignment = 2
+
+[node name="Value" type="Label" parent="Panel/VBox/ReputationRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "00.0"
+horizontal_alignment = 2
+
+[node name="ReputationBar" type="ProgressBar" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+value = 75.0
+show_percentage = false
+
+[node name="FSRIRow" type="HBoxContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/FSRIRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "FSRI:"
+
+[node name="Value" type="Label" parent="Panel/VBox/FSRIRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "00.0"
+horizontal_alignment = 2
+
+[node name="FoodQualityRow" type="HBoxContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/FoodQualityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Food Quality:"
+
+[node name="Value" type="Label" parent="Panel/VBox/FoodQualityRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "00.0"
+horizontal_alignment = 2

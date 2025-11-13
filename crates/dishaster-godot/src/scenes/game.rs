@@ -127,6 +127,7 @@ impl GameScene {
             GameRequest::StartRun => {
                 game.begin_run();
                 ctx.gui.get_mut::<DishPricePopup>().enabled = false;
+                ctx.gui.show::<ReputationGui>();
             }
             GameRequest::EndRun => {
                 game.force_finish_day();
@@ -274,6 +275,10 @@ impl GameScene {
 
             UiCommand::ShowHint { message } => {
                 ctx.gui.get_mut::<HintNotification>().show_hint(&message);
+            }
+
+            UiCommand::UpdateReputation(view) => {
+                ctx.gui.get_mut::<ReputationGui>().update(&view);
             }
 
             // Audio commands - execute music playback via the scene's audio manager
