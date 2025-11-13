@@ -3,11 +3,11 @@
 use bevy_ecs::system::SystemState;
 
 use crate::{
-    models::{TrialCorpus, TrialQARank},
+    models::{TrialCorpus, TrialQARank, TrialSpeechItem},
     prelude::*,
     resources::*,
     sim::Simulation,
-    views::{self, TrialIntro, TrialResponseOption, TrialSpeechItem, TrialStatement},
+    views::{self, TrialIntro, TrialResponseOption, TrialStatement},
 };
 
 impl Simulation {
@@ -24,35 +24,91 @@ impl Simulation {
             SystemState::new(&mut self.world);
         let (registry, mut trial_session) = system_state.get_mut(&mut self.world);
 
-        let speech_index = select_next_question(&registry.trial, &mut trial_session);
-        log::info!("Selected diner speech index: {}", speech_index);
+        // Generate a sequence of related speeches (topic-centered)
+        let speech_sequence = generate_speech_sequence(&registry.trial, &mut trial_session);
 
-        create_diner_statement_with_speech(speech_index, &registry.trial, &mut trial_session)
+        log::info!("Generated speech sequence: {:?}", speech_sequence);
+
+        create_diner_statement_with_sequence(speech_sequence, &registry.trial, &mut trial_session)
     }
 
     pub(super) fn trial_respond(&mut self, resp_corpus_index: usize) -> views::TrialSpeech {
+        // Get current question index and response data first
+        let (current_question_idx, mut response_score, speech) = {
+            let trial_session = self.world.resource::<TrialSession>();
+            let registry = self.world.resource::<GameModelRegistryRes>();
+
+            let current_question_idx = trial_session.current_question_index;
+            let response = &registry.trial.responses[resp_corpus_index];
+            let response_score = response.response_score;
+            let speech = response.content.to_view();
+
+            (current_question_idx, response_score, speech)
+        };
+
         // Record the player's response choice
         let mut trial_session = self.world.resource_mut::<TrialSession>();
         trial_session.set_last_response(resp_corpus_index);
 
-        // Get response and extract needed values
-        let registry = self.world.resource::<GameModelRegistryRes>();
-        let response_score = registry.trial.responses[resp_corpus_index].response_score;
-        let speech = registry.trial.responses[resp_corpus_index]
-            .content
-            .to_view();
+        // Contextual evaluation: check if response is relevant to the current question
+        // Use QA ranks to measure relevance (higher rank = more relevant)
+        if let Some(question_idx) = current_question_idx {
+            let registry = self.world.resource::<GameModelRegistryRes>();
+            let relevance_penalty =
+                calculate_relevance_penalty(question_idx, resp_corpus_index, &registry.trial);
+
+            if relevance_penalty < 0.0 {
+                log::info!(
+                    "Response {} to question {} is irrelevant (penalty: {:.3})",
+                    resp_corpus_index,
+                    question_idx,
+                    relevance_penalty
+                );
+                response_score += relevance_penalty; // Apply penalty
+            }
+        }
 
         // Apply reputation impact
         let mut system_state: SystemState<(ResMut<ReputationStateRes>, Res<ReputationConfigRes>)> =
             SystemState::new(&mut self.world);
         let (mut reputation, reputation_config) = system_state.get_mut(&mut self.world);
 
-        // Apply a moderate base impact modified by response score
+        // Apply a moderate base impact modified by response score (including relevance penalty)
         // Using quality topic (-4.0) as a representative negative feedback
         let base_impact = reputation_config.base_impacts.quality;
         reputation.apply_feedback_impact(base_impact, response_score, &reputation_config);
 
         speech
+    }
+
+    /// After player responds, check if diner should continue with new topic.
+    /// This uses AQ ranks to select questions related to the player's last response.
+    pub(super) fn trial_should_continue(&mut self) -> bool {
+        let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
+            SystemState::new(&mut self.world);
+        let (registry, mut trial_session) = system_state.get_mut(&mut self.world);
+
+        // Check if there are available follow-up questions based on player's response
+        if let Some(last_response_idx) = trial_session.last_response_index
+            && let Some(aq_rank) = registry.trial.aq_ranks.get(last_response_idx)
+        {
+            // Filter available questions (not yet asked)
+            let available_ranks: Vec<_> = aq_rank
+                .iter()
+                .filter(|rank| !trial_session.has_asked(rank.answer_index))
+                .cloned()
+                .collect();
+
+            if available_ranks.is_empty() {
+                return false;
+            }
+            // Use best score as probability to continue
+            let best_score = available_ranks[0].score;
+            trial_session.should_continue(best_score)
+        } else {
+            // No response history or ranks - randomly decide
+            trial_session.rng.random_bool(0.3)
+        }
     }
 }
 
@@ -72,56 +128,133 @@ fn random_appearance(rng: &mut impl Rng) -> views::TrialParticipantAppearance {
     }
 }
 
-/// Select the next question to ask based on previous interactions
+/// Generate a sequence of related speeches using QQ ranks for topic coherence
 ///
-/// This creates a coherent dialogue flow by:
-/// 1. First checking QQ ranks (question → question) for diner multi-turn continuations
-/// 2. Using continuation probability based on semantic similarity scores
-/// 3. Then using AQ ranks (answer → question) to select questions related to player's last response
-/// 4. Filtering out already-asked questions to avoid repetition
-/// 5. Applying temperature-weighted sampling for variety while maintaining relevance
-/// 6. Falling back to random selection if no history or ranks available
-fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usize {
-    // First, check if diner should continue speaking (multi-turn dialogue)
-    // This happens when there's a previous diner speech and QQ ranks suggest good continuation
-    if let Some(last_speech_idx) = session.last_diner_speech_index
-        && let Some(qq_rank) = corpus.qq_ranks.get(last_speech_idx)
-        && !qq_rank.is_empty()
-    {
-        // Filter available continuations (not yet asked)
-        let available_ranks: Vec<_> = qq_rank
-            .iter()
-            .filter(|rank| !session.has_asked(rank.answer_index))
-            .cloned()
-            .collect();
+/// This creates multi-turn diner dialogue by:
+/// 1. Selecting an initial question using AQ ranks or random selection
+/// 2. Following QQ continuation chains based on semantic similarity
+/// 3. Using probabilistic decision (score as probability) to continue or stop
+/// 4. Limiting sequence length to avoid overly long monologues
+fn generate_speech_sequence(corpus: &TrialCorpus, session: &mut TrialSession) -> Vec<usize> {
+    let mut sequence = Vec::new();
 
-        if !available_ranks.is_empty() {
-            let best_score = available_ranks[0].score; // QQ ranks are pre-sorted by score
+    // Select initial question
+    let first_speech = select_next_question(corpus, session);
+    sequence.push(first_speech);
 
-            // Use score as probability: higher similarity = more likely to continue
-            if session.should_continue(best_score) {
-                // Sample a continuation from available QQ ranks
-                let selected = sample_weighted_indices(
-                    &available_ranks,
-                    session.temperature,
-                    1,
-                    &mut session.rng,
-                );
+    // Generate continuation sequence using QQ ranks
+    let mut current_speech = first_speech;
 
-                if let Some(&question_idx) = selected.first() {
-                    session.increment_continuation();
-                    session.mark_asked(question_idx);
-                    println!(
-                        "QQ continuation: {} → {} (score: {:.3}, depth: {})",
-                        last_speech_idx, question_idx, best_score, session.continuation_depth
+    while sequence.len() < session.max_continuation_depth as usize + 1 {
+        if let Some(qq_rank) = corpus.qq_ranks.get(current_speech)
+            && !qq_rank.is_empty()
+        {
+            // Filter available continuations (not yet asked)
+            let available_ranks: Vec<_> = qq_rank
+                .iter()
+                .filter(|rank| !session.has_asked(rank.answer_index))
+                .cloned()
+                .collect();
+
+            if !available_ranks.is_empty() {
+                let best_score = available_ranks[0].score;
+
+                // Use score as probability: higher similarity = more likely to continue
+                if session.should_continue(best_score) {
+                    // Sample a continuation from available QQ ranks
+                    let selected = sample_weighted_indices(
+                        &available_ranks,
+                        session.temperature,
+                        1,
+                        &mut session.rng,
                     );
-                    return question_idx;
+
+                    if let Some(&next_speech) = selected.first() {
+                        session.mark_asked(next_speech);
+                        sequence.push(next_speech);
+                        current_speech = next_speech;
+                        log::info!(
+                            "QQ continuation in sequence: {} → {} (score: {:.3})",
+                            current_speech,
+                            next_speech,
+                            best_score
+                        );
+                        continue;
+                    }
                 }
             }
         }
+
+        // No more continuations
+        break;
     }
 
-    // No continuation, reset depth and alternate to player response
+    // Update session state
+    if let Some(&last_speech) = sequence.last() {
+        session.set_last_diner_speech(last_speech);
+        session.set_current_question(last_speech); // For contextual response evaluation
+    }
+
+    log::info!(
+        "Generated speech sequence of length {}: {:?}",
+        sequence.len(),
+        sequence
+    );
+    sequence
+}
+
+/// Calculate relevance penalty for response based on QA ranks
+///
+/// Checks if the player's response is relevant to the current question using QA ranks.
+/// Returns 0.0 if relevant, negative penalty if irrelevant.
+fn calculate_relevance_penalty(
+    question_idx: usize,
+    response_idx: usize,
+    corpus: &TrialCorpus,
+) -> f32 {
+    // Get QA ranks for this question
+    if let Some(question_ranks) = corpus.qa_ranks.get(question_idx) {
+        // Check all keywords in this question
+        for keyword_ranks in question_ranks {
+            // Check if response is in the top ranks for any keyword
+            if let Some(_rank) = keyword_ranks
+                .iter()
+                .find(|r| r.answer_index == response_idx)
+            {
+                // Found in ranks - check position
+                let position = keyword_ranks
+                    .iter()
+                    .position(|r| r.answer_index == response_idx)
+                    .unwrap();
+
+                if position < 5 {
+                    // Top 5 - highly relevant, no penalty
+                    return 0.0;
+                } else if position < 10 {
+                    // Top 10 - somewhat relevant, small penalty
+                    return -0.2;
+                }
+            }
+        }
+
+        // Response not found in top ranks for any keyword - irrelevant
+        // Apply significant penalty
+        return -0.5;
+    }
+
+    // No QA ranks available - can't evaluate relevance
+    0.0
+}
+
+/// Select the next question to ask based on previous interactions
+///
+/// This creates a coherent dialogue flow by:
+/// 1. Using AQ ranks (answer → question) to select questions related to player's last response
+/// 2. Filtering out already-asked questions to avoid repetition
+/// 3. Applying temperature-weighted sampling for variety while maintaining relevance
+/// 4. Falling back to random selection if no history or ranks available
+fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usize {
+    // Reset continuation depth for new topic
     session.reset_continuation();
 
     // If there's a previous player response, use AQ ranks to select related question
@@ -165,79 +298,86 @@ fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usi
     speech_index
 }
 
-fn create_diner_statement_with_speech(
-    speech_index: usize,
+fn create_diner_statement_with_sequence(
+    speech_indices: Vec<usize>,
     trial_registry: &TrialCorpus,
     trial_session: &mut TrialSession,
 ) -> TrialStatement {
-    // Record this as the last diner speech for future continuations
-    trial_session.set_last_diner_speech(speech_index);
-
-    let speech = trial_registry.diner_speeches[speech_index].to_view();
     let temperature = trial_session.temperature;
 
-    let mut options: Vec<Vec<TrialResponseOption>> = Vec::new();
-    let mut keyword_idx = 0;
+    // Generate response options for EACH speech in the sequence
+    // Player can interrupt and respond after any speech
+    let mut options_sequence: Vec<Vec<Vec<TrialResponseOption>>> = Vec::new();
 
-    println!("Creating diner statement for speech: {speech:?}");
+    for &speech_idx in &speech_indices {
+        let speech = &trial_registry.diner_speeches[speech_idx];
+        let mut speech_options: Vec<Vec<TrialResponseOption>> = Vec::new();
+        let mut keyword_idx = 0;
 
-    for item in &speech.items {
-        let TrialSpeechItem::Keyword(_) = item else {
-            continue;
-        };
-
-        let options_count = trial_session.rng.random_range(2..=4);
-        let selected = if let Some(question_ranks) = trial_registry.qa_ranks.get(speech_index)
-            && let Some(ranks) = question_ranks.get(keyword_idx)
-        {
-            println!(
-                "> Sampling response options for keyword {} using ranks: {:?}",
-                keyword_idx, ranks
-            );
-            // Sample responses using temperature-weighted scores
-            sample_weighted_indices(ranks, temperature, options_count, &mut trial_session.rng)
-        } else {
-            // Fallback: random sampling
-            (0..trial_registry.responses.len())
-                .choose_multiple(&mut trial_session.rng, options_count)
-        };
-
-        options.push(
-            selected
-                .into_iter()
-                .map(|idx| {
-                    let response = &trial_registry.responses[idx];
-                    TrialResponseOption {
-                        corpus_index: idx,
-                        kind: response.kind.to_view(),
-                        summary: response.summary.clone(),
-                    }
-                })
-                .collect(),
+        log::info!(
+            "Creating response options for speech {} in sequence",
+            speech_idx
         );
 
-        keyword_idx += 1;
+        for item in &speech.items {
+            let TrialSpeechItem::Keyword(_) = item else {
+                continue;
+            };
+
+            let options_count = trial_session.rng.random_range(2..=4);
+
+            let selected = if let Some(question_ranks) = trial_registry.qa_ranks.get(speech_idx)
+                && let Some(ranks) = question_ranks.get(keyword_idx)
+            {
+                log::debug!(
+                    "> Sampling response options for speech {} keyword {} using ranks",
+                    speech_idx,
+                    keyword_idx
+                );
+                // Sample responses using temperature-weighted scores
+                sample_weighted_indices(ranks, temperature, options_count, &mut trial_session.rng)
+            } else {
+                // Fallback: random sampling
+                (0..trial_registry.responses.len())
+                    .choose_multiple(&mut trial_session.rng, options_count)
+            };
+
+            speech_options.push(
+                selected
+                    .into_iter()
+                    .map(|idx| {
+                        let response = &trial_registry.responses[idx];
+                        TrialResponseOption {
+                            corpus_index: idx,
+                            kind: response.kind.to_view(),
+                            summary: response.summary.clone(),
+                        }
+                    })
+                    .collect(),
+            );
+
+            keyword_idx += 1;
+        }
+
+        options_sequence.push(speech_options);
     }
 
-    println!(
-        "> Generated response options: \n{}",
-        options
-            .iter()
-            .map(|options| options
-                .iter()
-                .map(|option| format!(
-                    "    [{:?}] {}: {}",
-                    option.kind,
-                    option.summary,
-                    trial_registry.responses[option.corpus_index].content.text
-                ))
-                .collect::<Vec<_>>()
-                .join("\n"))
-            .collect::<Vec<_>>()
-            .join("\n")
+    // Convert speech indices to view speeches
+    let speech_sequence: Vec<_> = speech_indices
+        .iter()
+        .map(|&idx| trial_registry.diner_speeches[idx].to_view())
+        .collect();
+
+    log::info!(
+        "Generated {} speeches with {} option sets",
+        speech_sequence.len(),
+        options_sequence.len()
     );
 
-    TrialStatement { speech, options }
+    TrialStatement {
+        speech_sequence,
+        options_sequence,
+    }
 }
 
 /// Sample indices from ranks using temperature-weighted softmax

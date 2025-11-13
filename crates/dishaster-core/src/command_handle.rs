@@ -75,13 +75,10 @@ impl Simulation {
                 events.push(SimEvent::TrialEnd);
             }
             SimCommand::TrialProceed => {
-                let should_continue = {
-                    let mut session = self.world.resource_mut::<TrialSession>();
-                    session.rng.random_bool(0.5)
-                };
+                let should_continue = self.trial_should_continue();
 
                 if should_continue {
-                    // here the logic is same as `TrialLaunch` for now
+                    // Generate new speech sequence on a related topic
                     let statement = self.create_diner_statement();
 
                     let mut events = self.world.resource_mut::<EventQueue>();

@@ -157,10 +157,12 @@ pub struct TrialSession {
     pub last_response_index: Option<usize>,
     /// The most recent diner speech index
     pub last_diner_speech_index: Option<usize>,
+    /// The most recent diner speech index that the player is responding to (for context evaluation)
+    pub current_question_index: Option<usize>,
     /// Current continuation depth (consecutive speeches by same speaker)
     pub continuation_depth: u32,
     /// Maximum allowed continuation depth before forcing speaker alternation
-    max_continuation_depth: u32,
+    pub max_continuation_depth: u32,
     /// Temperature parameter for sampling (higher = more random, lower = more deterministic)
     pub temperature: f32,
 }
@@ -173,6 +175,7 @@ impl TrialSession {
             asked_questions: Vec::new(),
             last_response_index: None,
             last_diner_speech_index: None,
+            current_question_index: None,
             continuation_depth: 0,
             max_continuation_depth: 3,
             temperature: 0.8,
@@ -184,6 +187,7 @@ impl TrialSession {
         self.asked_questions.clear();
         self.last_response_index = None;
         self.last_diner_speech_index = None;
+        self.current_question_index = None;
         self.continuation_depth = 0;
     }
 
@@ -211,7 +215,13 @@ impl TrialSession {
         self.last_diner_speech_index = Some(speech_index);
     }
 
+    /// Set the current question index (the question player is responding to)
+    pub fn set_current_question(&mut self, question_index: usize) {
+        self.current_question_index = Some(question_index);
+    }
+
     /// Increment continuation depth
+    #[allow(unused)]
     pub fn increment_continuation(&mut self) {
         self.continuation_depth += 1;
     }

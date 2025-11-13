@@ -16,6 +16,7 @@ struct State {
     pub phase: Phase,
     pub inner_speech_text: EcoString,
     pub fade_time: f32,
+    /// Current response options (for the currently displayed speech)
     pub options: Vec<Vec<TrialResponseOption>>,
 }
 
@@ -67,18 +68,33 @@ impl TrialGui {
     }
 
     pub fn left_speak(&mut self, statement: TrialStatement) {
-        let speech = statement.speech;
+        // Start with the first speech in the sequence
+        let speech_sequence = statement.speech_sequence;
+        let mut options_sequence = statement.options_sequence;
+
+        if speech_sequence.is_empty() {
+            panic!("Speech sequence should not be empty");
+        }
+
+        let first_speech = speech_sequence[0].clone();
+        let first_options = if !options_sequence.is_empty() {
+            options_sequence.remove(0)
+        } else {
+            Vec::new()
+        };
+
         // The speech may contain keywords for the left side.
-        let inner_text = speech_to_bbcode(&speech);
+        let inner_text = speech_to_bbcode(&first_speech);
         self.right.set_visible(false);
-        self.left.set_speech(&speech.appearance, &inner_text);
+        self.left.set_speech(&first_speech.appearance, &inner_text);
         self.left.set_visible(true);
+
         self.state = Some(State {
             phase: Phase::LeftSpeaking,
             time: 0.0,
             inner_speech_text: inner_text,
-            fade_time: estimate_fade_time(&speech.text),
-            options: statement.options,
+            fade_time: estimate_fade_time(&first_speech.text),
+            options: first_options,
         });
     }
 
