@@ -448,7 +448,7 @@ fn apply_no_order_penalties(
     feedback_messages.write(FeedbackMessage {
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
-        trigger: Some(FeedbackTrigger::NoAppealingDish),
+        trigger: Some(FeedbackTopic::Appeal),
     });
 }
 
@@ -465,7 +465,7 @@ fn apply_dishes_unavailable_penalties(
     feedback_messages.write(FeedbackMessage {
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
-        trigger: Some(FeedbackTrigger::NoAppealingDish),
+        trigger: Some(FeedbackTopic::Appeal),
     });
 }
 
@@ -482,6 +482,6 @@ fn apply_abandon_after_reevaluation_penalties(
     feedback_messages.write(FeedbackMessage {
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
-        trigger: Some(FeedbackTrigger::NoAppealingDish),
+        trigger: Some(FeedbackTopic::Appeal),
     });
 }

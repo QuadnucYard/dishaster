@@ -63,7 +63,7 @@ pub struct GameModelRegistry {
     pub dishes: ModelRegistry<DishModel>,
     /// Table models with seating and comfort properties
     pub tables: ModelRegistry<TableModel>,
-    /// Tray and utensil dispenser configurations
+    /// Tableware dispenser configurations
     pub dispensers: ModelRegistry<DispenserModel>,
     /// Dish collection point configurations
     pub collectors: ModelRegistry<CollectorModel>,

@@ -195,7 +195,7 @@ fn handle_no_suitable_window(
     feedback_messages.write(FeedbackMessage {
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
-        trigger: Some(FeedbackTrigger::NoAppealingDish),
+        trigger: Some(FeedbackTopic::Appeal),
     });
 
     goal.update(DinerGoal::Leave);
@@ -221,7 +221,7 @@ fn handle_empty_tentative_order(
     feedback_messages.write(FeedbackMessage {
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
-        trigger: Some(FeedbackTrigger::NoAppealingDish),
+        trigger: Some(FeedbackTopic::Appeal),
     });
 
     goal.update(DinerGoal::Leave);

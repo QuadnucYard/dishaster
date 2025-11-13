@@ -61,7 +61,7 @@ pub fn check_queue_patience(
             feedback_messages.write(FeedbackMessage {
                 entity,
                 content: choose_feedback(&mut rng, feedbacks::QUEUE_TOO_LONG),
-                trigger: Some(FeedbackTrigger::QueueTooLong),
+                trigger: Some(FeedbackTopic::Queue),
             });
 
             // Leave queue and exit canteen

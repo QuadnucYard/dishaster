@@ -65,7 +65,7 @@ pub fn handle_eat_goal(
                     feedback_messages.write(FeedbackMessage {
                         entity,
                         content: choose_feedback(&mut rng, feedbacks::CONTAMINATION),
-                        trigger: Some(FeedbackTrigger::Contamination),
+                        trigger: Some(FeedbackTopic::Hygiene),
                     });
 
                     // Stop eating immediately
@@ -211,7 +211,7 @@ pub fn handle_eat_goal(
                 feedback_messages.write(FeedbackMessage {
                     entity,
                     content: choose_feedback(&mut rng, feedbacks::BAD_TASTE),
-                    trigger: Some(FeedbackTrigger::BadTaste),
+                    trigger: Some(FeedbackTopic::Taste),
                 });
             }
 
@@ -228,7 +228,7 @@ pub fn handle_eat_goal(
                 feedback_messages.write(FeedbackMessage {
                     entity,
                     content: choose_feedback(&mut rng, feedbacks::STILL_HUNGRY),
-                    trigger: Some(FeedbackTrigger::StillHungry),
+                    trigger: Some(FeedbackTopic::Hunger),
                 });
             }
         }

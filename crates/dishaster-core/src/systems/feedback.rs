@@ -15,7 +15,7 @@ pub mod feedbacks {
     // Complaint feedbacks for different triggers
     pub const NO_APPEALING_DISH: &[&str] = &["😞", "😕", "🤷"];
     pub const QUEUE_TOO_LONG: &[&str] = &["😤", "⏰", "💢"];
-    pub const MISSING_UTENSILS: &[&str] = &["😠", "❓", "🤦"];
+    pub const MISSING_TABLEWARE: &[&str] = &["😠", "❓", "🤦"];
     // Reserved for appearance quality checking (not yet implemented)
     #[allow(dead_code)]
     pub const APPEARANCE_MISMATCH: &[&str] = &["🤨", "😟", "👎"];

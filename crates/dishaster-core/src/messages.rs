@@ -1,4 +1,4 @@
-use dishaster_models::{FeedbackTrigger, Seconds};
+use dishaster_models::{FeedbackTopic, Seconds};
 use dishaster_views::Feedback;
 
 use crate::prelude::*;
@@ -12,7 +12,7 @@ pub struct FeedbackMessage {
     pub content: Feedback,
     /// Optional trigger type for more specific feedback handling (for trial system)
     #[allow(dead_code)]
-    pub trigger: Option<FeedbackTrigger>,
+    pub trigger: Option<FeedbackTopic>,
 }
 
 /// Request to refill a dispenser entity.

@@ -72,8 +72,8 @@ pub fn handle_pick_tray_goal(
                     // Only emit feedback if we've been trying for a while
                     feedback_messages.write(FeedbackMessage {
                         entity,
-                        content: choose_feedback(&mut rng, feedbacks::MISSING_UTENSILS),
-                        trigger: Some(FeedbackTrigger::MissingUtensils),
+                        content: choose_feedback(&mut rng, feedbacks::MISSING_TABLEWARE),
+                        trigger: Some(FeedbackTopic::Tableware),
                     });
                     goal.reset_timer(); // Reset to avoid spamming feedback
                 }
@@ -214,8 +214,8 @@ pub fn handle_pick_chopsticks_goal(
                     // Only emit feedback if we've been trying for a while
                     feedback_messages.write(FeedbackMessage {
                         entity,
-                        content: choose_feedback(&mut rng, feedbacks::MISSING_UTENSILS),
-                        trigger: Some(FeedbackTrigger::MissingUtensils),
+                        content: choose_feedback(&mut rng, feedbacks::MISSING_TABLEWARE),
+                        trigger: Some(FeedbackTopic::Tableware),
                     });
                     goal.reset_timer(); // Reset to avoid spamming feedback
                 }

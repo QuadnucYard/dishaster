@@ -1,26 +1,28 @@
 use super::prelude::*;
 
-/// Type of feedback trigger that caused the complaint
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FeedbackTrigger {
+/// Different feedback topics that can be triggered
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+pub enum FeedbackTopic {
     /// No dishes appealed to the diner
-    NoAppealingDish,
+    Appeal,
     /// Queue too long / exceeded patience
-    QueueTooLong,
-    /// Missing utensils (tray or chopsticks)
-    MissingUtensils,
-    /// Dish appearance below expectation
-    AppearanceNotAsExpected,
-    /// Contamination detected
-    Contamination,
+    Queue,
+    /// Missing tableware (tray or chopsticks)
+    Tableware,
+    /// Dish below expectation
+    Quality,
+    /// Food hygiene issues encountered
+    Hygiene,
     /// Dish tastes bad
-    BadTaste,
+    Taste,
     /// Still hungry after meal
-    StillHungry,
+    Hunger,
+    /// Positive feedback
+    Praise,
 }
 
 /// Configuration thresholds for triggering feedback
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct FeedbackThresholds {
     /// Minimum dish score required during observation (below triggers NoAppealingDish)
     pub min_appealing_score: f32,
@@ -62,11 +64,11 @@ impl Default for FeedbackThresholds {
 ///
 /// These base probabilities are modified by diner personality
 /// (especially confrontational trait) to determine if a trial is triggered.
-/// TODO: unused
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// TODO: this is unused
+#[derive(Debug, Clone, Deserialize)]
 pub struct TrialTriggerProbabilities {
-    /// Base probability for missing utensils
-    pub missing_utensils: f32,
+    /// Base probability for missing tableware
+    pub missing_tableware: f32,
     /// Base probability for appearance not as expected
     pub appearance_mismatch: f32,
     /// Base probability for contamination
@@ -80,7 +82,7 @@ pub struct TrialTriggerProbabilities {
 impl Default for TrialTriggerProbabilities {
     fn default() -> Self {
         Self {
-            missing_utensils: 0.3,
+            missing_tableware: 0.3,
             appearance_mismatch: 0.2,
             contamination: 0.6,
             bad_taste: 0.3,
