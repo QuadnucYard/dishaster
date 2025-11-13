@@ -175,6 +175,17 @@ impl Game {
                         let _ = svc.save(); // Ignore errors for hint saving
                     }
                 }
+
+                SimEvent::ReputationUpdate(view) => {
+                    // TODO: Update reputation UI component when it's implemented
+                    godot_print!(
+                        "Reputation Update: {} ({:+.2}) | FSRI: {:.2} | Quality: {:.2}",
+                        view.reputation,
+                        view.reputation_delta,
+                        view.fsri,
+                        view.food_quality
+                    );
+                }
             }
         }
     }

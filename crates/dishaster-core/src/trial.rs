@@ -1,6 +1,8 @@
 //! The trial system. It works outside the ECS loop.
 
 use bevy_ecs::system::SystemState;
+use dishaster_interface::SimEvent;
+use dishaster_views::ReputationView;
 
 use crate::{
     models::{TrialCorpus, TrialQARank},
@@ -43,7 +45,7 @@ impl Simulation {
             .to_view();
 
         // Apply reputation impact using SystemState
-        {
+        let view = {
             let mut system_state: SystemState<(
                 ResMut<ReputationStateRes>,
                 Res<ReputationConfigRes>,
@@ -52,10 +54,24 @@ impl Simulation {
 
             // Apply a moderate base impact modified by response score
             // Using quality topic (-4.0) as a representative negative feedback
-            // TODO
             let base_impact = reputation_config.base_impacts.quality;
-            reputation_state.apply_feedback_impact(base_impact, response_score, &reputation_config);
-        }
+            let delta = reputation_state.apply_feedback_impact(
+                base_impact,
+                response_score,
+                &reputation_config,
+            );
+
+            ReputationView {
+                reputation: reputation_state.reputation,
+                reputation_delta: delta,
+                fsri: reputation_state.fsri,
+                food_quality: reputation_state.food_quality,
+            }
+        };
+
+        // Emit reputation update event
+        let mut events = self.world.resource_mut::<EventQueue>();
+        events.push(SimEvent::ReputationUpdate(Box::new(view)));
 
         speech
     }

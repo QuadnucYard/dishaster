@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use dishaster_views::{Feedback, FeedbackView};
+use dishaster_views::{Feedback, FeedbackView, ReputationView};
 
 use super::prelude::*;
 
@@ -34,6 +34,9 @@ pub fn feedback_present_system(
     mut reputation_state: ResMut<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
 ) {
+    let mut reputation_changed = false;
+    let mut total_delta = 0.0;
+
     for msg in feedback_messages.read() {
         events.push(SimEvent::Feedback(FeedbackView {
             entity: msg.entity.to_entity_id(),
@@ -45,7 +48,20 @@ pub fn feedback_present_system(
             let base_impact = reputation_config.base_impacts.get(topic);
             // Use 0.0 response_score for non-trial feedback (neutral player response)
             // Trial system will handle response scoring separately
-            reputation_state.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+            let delta =
+                reputation_state.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+            total_delta += delta;
+            reputation_changed = true;
         }
+    }
+
+    // Emit reputation update event if any feedback affected reputation
+    if reputation_changed {
+        events.push(SimEvent::ReputationUpdate(Box::new(ReputationView {
+            reputation: reputation_state.reputation,
+            reputation_delta: total_delta,
+            fsri: reputation_state.fsri,
+            food_quality: reputation_state.food_quality,
+        })));
     }
 }

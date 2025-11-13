@@ -1,5 +1,6 @@
 use dishaster_interface::SimEvent;
 use dishaster_models::Seed;
+use dishaster_views::ReputationView;
 
 use crate::{components::Diner, events::*, prelude::*, resources::*, systems};
 
@@ -86,6 +87,9 @@ fn on_advance_day(
     // Apply daily decay to campaign effects
     perma_effects.apply_daily_decay();
 
+    // Capture daily reputation delta before applying
+    let daily_delta = reputation_state.daily_accumulated;
+
     // Apply accumulated reputation changes for the day
     reputation_state.apply_daily_update(&reputation_config);
 
@@ -96,6 +100,14 @@ fn on_advance_day(
         reputation_state.fsri,
         reputation_state.food_quality
     );
+
+    // Emit daily reputation update event
+    events.push(SimEvent::ReputationUpdate(Box::new(ReputationView {
+        reputation: reputation_state.reputation,
+        reputation_delta: daily_delta,
+        fsri: reputation_state.fsri,
+        food_quality: reputation_state.food_quality,
+    })));
 
     // Check for reputation-based endings
     if reputation_state.reputation <= 0.0 {

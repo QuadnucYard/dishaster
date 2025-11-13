@@ -116,3 +116,16 @@ pub struct CreditSectionView {
     /// List of names/entries in this section
     pub entries: Vec<Vec<String>>,
 }
+
+/// Reputation system state update for UI display
+#[derive(Debug, Clone)]
+pub struct ReputationView {
+    /// Current reputation value [0, 100]
+    pub reputation: f32,
+    /// Reputation change in this update
+    pub reputation_delta: f32,
+    /// Food Safety Risk Index [0, 100]
+    pub fsri: f32,
+    /// Food quality level [0, 100]
+    pub food_quality: f32,
+}
