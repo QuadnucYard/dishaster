@@ -1,6 +1,7 @@
 use dishaster_views::{ManagementDecisionView, ManagementDecisionsView};
+use dishrupt_asset::AssetCatalog;
 
-use crate::prelude::*;
+use crate::{load::load_texture_sync, prelude::*};
 
 #[derive(UITree)]
 #[ui_tree]
@@ -26,13 +27,13 @@ impl Gui for ManageDecisionGui {
 }
 
 impl ManageDecisionGui {
-    pub fn set_view(&mut self, view: &ManagementDecisionsView) {
+    pub fn set_view(&mut self, view: &ManagementDecisionsView, catalog: &AssetCatalog) {
         // Clear existing cards
         self.options.clear();
 
         for (i, option) in view.options.iter().enumerate() {
             let item = self.options.get();
-            item.set_view(option);
+            item.set_view(option, catalog);
 
             let on_select_option_handle = self.on_select_option.get_emit_handle();
             item.select_btn.on_click.clear();
@@ -46,6 +47,8 @@ impl ManageDecisionGui {
 #[derive(UITree)]
 #[ui_tree]
 struct DecisionOptionItem {
+    #[child("%DecisionIcon")]
+    icon: TextureRectA,
     #[child("%TitleLabel")]
     title_label: LabelA,
     #[child("%DescLabel")]
@@ -62,7 +65,9 @@ struct DecisionOptionItem {
 impl UITree for DecisionOptionItem {}
 
 impl DecisionOptionItem {
-    pub fn set_view(&mut self, view: &ManagementDecisionView) {
+    pub fn set_view(&mut self, view: &ManagementDecisionView, catalog: &AssetCatalog) {
+        self.icon
+            .set_texture(load_texture_sync(&view.icon, catalog));
         self.title_label
             .set_text(&tr!("mgmt--{}.title", view.model_id));
         self.desc_label

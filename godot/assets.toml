@@ -13,7 +13,6 @@ default_ext = "tscn"
 
 [kinds.texture]
 prefix = "res://assets/sprites"
-default_ext = "tres"
 
 [kinds.music]
 prefix = "res://assets/music"

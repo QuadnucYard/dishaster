@@ -26,7 +26,8 @@ pub fn roll_management_decisions(
     let mut rng = rng.derive_prng();
     let templates = registry.mgmt_decisions.iter().collect::<Vec<_>>();
 
-    let mut decisions = vec![];
+    let mut models = vec![];
+    let mut views = vec![];
 
     // Roll new decisions
     for _ in 0..DECISION_ROLL_COUNT {
@@ -35,28 +36,26 @@ pub fn roll_management_decisions(
         };
 
         let ctx = RealizationContext { rng: &mut rng };
-        decisions.push((template.id.clone(), template.def.realize(ctx)));
+        let model = template.def.realize(ctx);
+        views.push(ManagementDecisionView {
+            model_id: template.id.clone(),
+            params: model.params(),
+            icon: template.icon.clone(),
+        });
+        models.push(model);
     }
 
     events.push(SimEvent::ShowManagementDecisions(
         ManagementDecisionsView {
             day: day_status.current_day.0,
-            options: decisions
-                .iter()
-                .map(|(id, model)| ManagementDecisionView {
-                    model_id: id.clone(),
-                    params: model.params(),
-                })
-                .collect(),
+            options: views,
         }
         .into(),
     ));
     // TODO: we may need to populate more data here for the view, such as options
 
     // Insert into resources
-    commands.insert_resource(ManagementDecisions {
-        available: decisions.into_iter().map(|(_, m)| m).collect(),
-    });
+    commands.insert_resource(ManagementDecisions { available: models });
 }
 
 /// Apply a selected management decision
@@ -120,6 +119,7 @@ pub fn roll_management_incident(
     events.push(SimEvent::ShowManagementIncident(
         ManagementIncidentView {
             model_id: template.id.clone(),
+            icon: template.icon.clone(),
             params: incident_model.params(),
         }
         .into(),

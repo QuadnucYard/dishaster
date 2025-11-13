@@ -2,6 +2,7 @@
     (
         id: "add_tables",
         weight: 200,
+        icon: "management/add_tables.png",
         def: AddTables(
             num_range: (start: 2, end: 5),
         ),
@@ -9,6 +10,7 @@
     (
         id: "remove_tables",
         weight: 150,
+        icon: "management/remove_tables.png",
         def: RemoveTables(
             num_range: (start: 1, end: 3),
         ),
@@ -16,6 +18,7 @@
     (
         id: "disarrange_tables",
         weight: 200,
+        icon: "management/disarrange_tables.png",
         def: DisarrangeTables(
             num_range: (start: 2, end: 4),
         ),
@@ -24,22 +27,26 @@
     (
         id: "open_window",
         weight: 100,
+        icon: "management/open_window.png",
         def: OpenWindow(),
     ),
     (
         id: "close_window",
         weight: 100,
+        icon: "management/close_window.png",
         def: CloseWindow(),
     ),
     (
         id: "change_window_service",
         weight: 100,
+        icon: "management/change_window_service.png",
         def: ChangeWindowService(),
     ),
 
     (
         id: "play_music_relaxing",
         weight: 120,
+        icon: "management/play_music.png",
         def: PlayMusic(
             // 舒缓音乐让人放慢节奏，吃得更慢但更满足
             eating_time_multiplier_range: (start: 1.05, end: 1.15),
@@ -49,6 +56,7 @@
     (
         id: "play_music_upbeat",
         weight: 120,
+        icon: "management/play_music.png",
         def: PlayMusic(
             // 快节奏音乐催促食客加快速度，效率提升但可能影响体验
             eating_time_multiplier_range: (start: 0.85, end: 0.95),
@@ -58,6 +66,7 @@
     (
         id: "play_music_anthem",
         weight: 100,
+        icon: "management/play_music.png",
         def: PlayMusic(
             // 校歌：激励人心但可能引起反感
             eating_time_multiplier_range: (start: 0.95, end: 1.05),
@@ -68,6 +77,7 @@
     (
         id: "advertise_canteen",
         weight: 80,
+        icon: "management/advertise_canteen.png",
         def: AdvertiseCampaign(
             target: Canteen,
             // 全食堂广告宣传，初期效果显著但快速衰减
@@ -79,6 +89,7 @@
     (
         id: "advertise_window",
         weight: 100,
+        icon: "management/advertise_canteen.png",
         def: AdvertiseCampaign(
             target: Window,
             // 窗口定向推广，效果中等但持续时间较长
@@ -91,6 +102,7 @@
     (
         id: "slogan_hardship",
         weight: 100,
+        icon: "management/slogan_hardship.png",
         def: AddMotivationalSlogan(
             // "嚼得菜根，做得大事" - 传统励志标语
             trust_threshold_range: (start: 0.65, end: 0.75),

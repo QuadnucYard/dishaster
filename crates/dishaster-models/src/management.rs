@@ -37,6 +37,8 @@ macro_rules! define_sum_model {
             pub id: ModelId,
             /// Weight for random selection
             pub weight: u32,
+            /// Icon representing the event
+            pub icon: SpriteRef,
             /// Definition of the specific event
             pub def: [<$name TemplateDef>],
         }

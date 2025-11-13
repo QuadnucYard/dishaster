@@ -28,6 +28,7 @@ grow_vertical = 2
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
 theme_override_constants/separation = 0
+alignment = 1
 
 [node name="Header" type="VBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
@@ -44,6 +45,8 @@ horizontal_alignment = 1
 [node name="SubtitleLabel" type="LocalizedLabel" parent="Panel/VBox/Header"]
 message_id = "manage-decision.subtitle"
 layout_mode = 2
+theme_override_colors/font_color = Color(0.87070644, 0.85264784, 0.6368833, 1)
+theme_override_colors/font_outline_color = Color(0.2882705, 0.33849618, 0.11264289, 1)
 theme_override_constants/outline_size = 16
 theme_override_font_sizes/font_size = 32
 text = "{选择一项决策来改善明天的运营}"

@@ -1,10 +1,13 @@
 use dishaster_views::ManagementIncidentView;
+use dishrupt_asset::AssetCatalog;
 
-use crate::prelude::*;
+use crate::{load::load_texture_sync, prelude::*};
 
 #[derive(UITree)]
 #[ui_tree]
 pub struct ManageIncidentGui {
+    #[child("%IncidentIcon")]
+    icon: TextureRectA,
     #[child("%TitleLabel")]
     title_label: LabelA,
     #[child("%DescLabel")]
@@ -31,7 +34,9 @@ impl Gui for ManageIncidentGui {
 
 impl ManageIncidentGui {
     /// Display active event intro
-    pub fn set_view(&mut self, view: &ManagementIncidentView) {
+    pub fn set_view(&mut self, view: &ManagementIncidentView, catalog: &AssetCatalog) {
+        self.icon
+            .set_texture(load_texture_sync(&view.icon, catalog));
         self.title_label
             .set_text(&tr!("mgmt--{}.title", view.model_id));
         self.desc_label

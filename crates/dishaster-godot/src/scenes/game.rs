@@ -252,12 +252,18 @@ impl GameScene {
             }
 
             UiCommand::ShowDecisionSelection(view) => {
-                ctx.gui.get_mut::<ManageDecisionGui>().set_view(&view);
+                let catalog = ASSET_CATALOG.get().unwrap();
+                ctx.gui
+                    .get_mut::<ManageDecisionGui>()
+                    .set_view(&view, catalog);
                 // this command is emitted just after day ends
                 // we defer showing the decision GUI until settlement is confirmed
             }
             UiCommand::ShowIncidentNotification(view) => {
-                ctx.gui.get_mut::<ManageIncidentGui>().set_view(&view);
+                let catalog = ASSET_CATALOG.get().unwrap();
+                ctx.gui
+                    .get_mut::<ManageIncidentGui>()
+                    .set_view(&view, catalog);
                 ctx.gui.get_mut::<ManageIncidentGui>().show();
             }
 

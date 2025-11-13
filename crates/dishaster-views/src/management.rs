@@ -16,10 +16,8 @@ pub struct ManagementDecisionsView {
 pub struct ManagementDecisionView {
     /// Decision identifier (used to look up l10n keys)
     pub model_id: ModelId,
-    // /// Icon identifier for visual representation
-    // pub icon: EcoString,
-    // /// List of effect descriptions to display (from l10n: `{decision_id}-effects`)
-    // pub effects: Vec<EcoString>,
+    /// Icon identifier for visual representation
+    pub icon: SpriteRef,
     // /// Theme hint for styling ("upgrade", "risk", "neutral")
     // pub theme: EcoString,
     /// Parameters for localization formatting
@@ -32,10 +30,8 @@ pub struct ManagementDecisionView {
 pub struct ManagementIncidentView {
     /// Incident identifier (used to look up l10n keys)
     pub model_id: ModelId,
-    // /// Icon identifier for visual representation
-    // pub icon: EcoString,
-    // /// List of effect descriptions to display (from l10n: `{incident_id}-effects`)
-    // pub effects: Vec<EcoString>,
+    /// Icon identifier for visual representation
+    pub icon: SpriteRef,
     // /// Theme hint for styling ("warning", "info", "challenge")
     // pub theme: EcoString,
     /// Parameters for localization formatting
