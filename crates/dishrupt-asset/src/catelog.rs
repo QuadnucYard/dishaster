@@ -118,11 +118,18 @@ impl AssetResolver {
             uri.push('/');
         }
         uri.push_str(id.strip_prefix('/').unwrap_or(id));
-        if let Some(suffix) = config.default_ext_for(kind)
-            && !uri.ends_with(suffix)
-        {
-            uri.push('.');
-            uri.push_str(suffix);
+
+        // Add default extension only if the path doesn't already have any extension
+        if let Some(suffix) = config.default_ext_for(kind) {
+            // Check if the path already has an extension (contains a dot after the last slash)
+            let has_extension = uri
+                .rsplit_once('/')
+                .map_or_else(|| uri.contains('.'), |(_, filename)| filename.contains('.'));
+
+            if !has_extension {
+                uri.push('.');
+                uri.push_str(suffix);
+            }
         }
 
         self.resolve_with_config(config, kind, &uri)
@@ -155,5 +162,236 @@ impl AssetCatalog {
         // use the pure resolver against the config
         let loc = self.resolver.resolve_with_config(&self.cfg, kind, id)?;
         Ok(loc)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    macro_rules! hash_map {
+        () => {{
+            rustc_hash::FxHashMap::default()
+        }};
+
+        ( $( $key:expr => $value:expr ),* $(,)? ) => {{
+            let mut map = rustc_hash::FxHashMap::default();
+            $( map.insert($key, $value); )*
+            map
+        }}
+    }
+
+    fn create_test_config() -> AssetPathConfig {
+        AssetPathConfig {
+            kinds: hash_map! {
+                AssetKind::Music => AssetKindConfig {
+                    prefix: "res://assets/music".to_string(),
+                    default_ext: None,
+                    aliases: hash_map! {
+                    "main_theme".to_string() => "main_theme.ogg".to_string(),
+                    "battle_theme".to_string() => "battle.ogg".to_string(),
+                },
+                },
+                AssetKind::Scene => AssetKindConfig {
+                    prefix: "res://assets/scenes".to_string(),
+                    default_ext: Some("tscn".to_string()),
+                    aliases: hash_map! {},
+                },
+                AssetKind::Texture => AssetKindConfig {
+                    prefix: "res://assets/sprites".to_string(),
+                    default_ext: None,
+                    aliases: hash_map! {},
+                },
+            },
+            global_aliases: hash_map! {},
+        }
+    }
+
+    fn create_test_catalog() -> AssetCatalog {
+        let config = create_test_config();
+        create_catalog(config)
+    }
+
+    fn create_catalog(config: AssetPathConfig) -> AssetCatalog {
+        let resolver = AssetResolver;
+        AssetCatalog::new(Arc::new(config), resolver)
+    }
+
+    #[test]
+    fn test_resolve_alias() {
+        let catalog = create_test_catalog();
+
+        // Test music alias resolution
+        let result = catalog.resolve(AssetKind::Music, "main_theme").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/music/main_theme.ogg".to_string())
+        );
+
+        let result = catalog.resolve(AssetKind::Music, "battle_theme").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/music/battle.ogg".to_string())
+        );
+    }
+
+    #[test]
+    fn test_resolve_with_absolute_uri() {
+        let catalog = create_test_catalog();
+
+        // Already a URI - should return as-is
+        let result = catalog
+            .resolve(AssetKind::Music, "res://assets/music/custom.ogg")
+            .unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/music/custom.ogg".to_string())
+        );
+    }
+
+    #[test]
+    fn test_resolve_with_default_extension() {
+        let catalog = create_test_catalog();
+
+        // Scene without extension - should add .tscn
+        let result = catalog.resolve(AssetKind::Scene, "main_menu").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/scenes/main_menu.tscn".to_string())
+        );
+
+        // Scene with extension already - should not double-add
+        let result = catalog.resolve(AssetKind::Scene, "game.tscn").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/scenes/game.tscn".to_string())
+        );
+
+        // Scene with different extension - should not add default extension
+        let result = catalog.resolve(AssetKind::Scene, "game.json").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/scenes/game.json".to_string())
+        );
+    }
+
+    #[test]
+    fn test_resolve_without_default_extension() {
+        let catalog = create_test_catalog();
+
+        // Texture has no default extension - should use as-is
+        let result = catalog.resolve(AssetKind::Texture, "player.png").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/sprites/player.png".to_string())
+        );
+    }
+
+    #[test]
+    fn test_resolve_relative_path() {
+        let catalog = create_test_catalog();
+
+        // Relative path joins with prefix
+        let result = catalog
+            .resolve(AssetKind::Texture, "characters/hero.png")
+            .unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/sprites/characters/hero.png".to_string())
+        );
+    }
+
+    #[test]
+    fn test_resolve_absolute_filesystem_path() {
+        let catalog = create_test_catalog();
+
+        // Absolute path starting with / - should return Fs
+        let result = catalog.resolve(AssetKind::Music, "/tmp/sound.ogg").unwrap();
+        assert_eq!(result, ResourceLocator::Fs(PathBuf::from("/tmp/sound.ogg")));
+    }
+
+    #[test]
+    fn test_resolve_no_prefix_error() {
+        let config = AssetPathConfig {
+            kinds: hash_map! {},
+            global_aliases: hash_map! {},
+        };
+        let catalog = create_catalog(config);
+
+        // Should error when kind has no prefix configured
+        let result = catalog.resolve(AssetKind::Music, "test.ogg");
+        assert!(matches!(result, Err(ResolveError::NoPrefix)));
+    }
+
+    #[test]
+    fn test_prefix_trailing_slash_normalization() {
+        let config = AssetPathConfig {
+            kinds: hash_map! {
+                AssetKind::Sound => AssetKindConfig {
+                    prefix: "res://sounds/".to_string(), // with trailing slash
+                    default_ext: Some("wav".to_string()),
+                    aliases: hash_map! {},
+                },
+            },
+            global_aliases: hash_map! {},
+        };
+        let catalog = create_catalog(config);
+
+        // Should handle trailing slash correctly - no double slash
+        let result = catalog.resolve(AssetKind::Sound, "jump").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://sounds/jump.wav".to_string())
+        );
+    }
+
+    #[test]
+    fn test_global_aliases() {
+        let config = AssetPathConfig {
+            kinds: hash_map! {
+                AssetKind::Texture => AssetKindConfig {
+                    prefix: "res://assets".to_string(),
+                    default_ext: None,
+                    aliases: hash_map! {},
+                },
+            },
+            global_aliases: hash_map! {
+                "common_icon".to_string() => "ui/icon.png".to_string(),
+            },
+        };
+        let catalog = create_catalog(config);
+
+        // Should resolve global alias
+        let result = catalog.resolve(AssetKind::Texture, "common_icon").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://assets/ui/icon.png".to_string())
+        );
+    }
+
+    #[test]
+    fn test_kind_alias_precedence_over_global() {
+        let config = AssetPathConfig {
+            kinds: hash_map! {
+                AssetKind::Music => AssetKindConfig {
+                    prefix: "res://audio".to_string(),
+                    default_ext: None,
+                    aliases: hash_map! {
+                        "theme".to_string() => "music_theme.ogg".to_string(),
+                    },
+                },
+            },
+            global_aliases: hash_map! {
+                "theme".to_string() => "global_theme.ogg".to_string(),
+            },
+        };
+        let catalog = create_catalog(config);
+
+        // Kind-specific alias should take precedence over global
+        let result = catalog.resolve(AssetKind::Music, "theme").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://audio/music_theme.ogg".to_string())
+        );
     }
 }

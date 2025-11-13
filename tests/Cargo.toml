@@ -11,7 +11,12 @@ name = "integration_test"
 path = "src/integration_test.rs"
 harness = false
 
+[[test]]
+name = "asset_validation"
+path = "src/asset_validation.rs"
+
 [dependencies]
+dishrupt-asset.workspace = true
 dishrupt-rng.workspace = true
 dishaster-core.workspace = true
 dishaster-data.workspace = true
