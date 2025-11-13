@@ -10,9 +10,9 @@ dishrupt-core.workspace = true
 dishrupt-ecs.workspace = true
 dishrupt-rng.workspace = true
 dishrupt-simulation.workspace = true
+dishaster-opening-models.workspace = true
 
 bevy_ecs.workspace = true
-serde.workspace = true
 
 [lints]
 workspace = true

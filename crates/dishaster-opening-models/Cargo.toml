@@ -1,0 +1,14 @@
+[package]
+name = "dishaster-opening-models"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-core.workspace = true
+
+serde.workspace = true
+
+[lints]
+workspace = true

@@ -5,9 +5,8 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow};
-use dishaster_core::models::{CreditsData, GameModelRegistry};
-use dishaster_data::{DataLoader, load_toml};
-use dishaster_godot_game::{GAME_DATA, PROGRESS_SERVICE, user_store::GodotUserStorage};
+use dishaster_data::{DataLoader, GameDataAssets, load_toml};
+use dishaster_godot_game::{PROGRESS_SERVICE, user_store::GodotUserStorage};
 use dishaster_godot_ui::register_guis;
 use dishaster_persistence::PlayerService;
 use dishrupt_asset::{AssetCatalog, AssetPathConfig, AssetResolver};
@@ -191,12 +190,10 @@ impl Inner {
 
 pub(crate) static ASSET_CATALOG: OnceLock<AssetCatalog> = OnceLock::new();
 
-pub(crate) static CREDITS: OnceLock<CreditsData> = OnceLock::new(); // placed here for now
+static GAME_DATA: OnceLock<GameDataAssets> = OnceLock::new();
 
-fn init_game_database(
-    loader: impl FnOnce() -> Arc<GameModelRegistry>,
-) -> &'static Arc<GameModelRegistry> {
-    GAME_DATA.get_or_init(loader)
+pub(crate) fn game_data() -> &'static GameDataAssets {
+    GAME_DATA.get().expect("game data not initialized")
 }
 
 fn init_game() -> Result<()> {
@@ -211,24 +208,17 @@ fn init_game() -> Result<()> {
         .set(catalog)
         .map_err(|_| anyhow!("failed to set global asset catalog"))?;
 
-    let data = DataLoader::new_with_fallback("data", "../assets/data")
+    let db = DataLoader::new_with_fallback("data", "../assets/data")
         .context("failed to create data loader")?
         .load_all_data()
         .context("failed to load game data")?;
-    let registry = init_game_database(|| {
-        let db = Arc::new(data.models);
-        log::info!("Loaded {} canteens", db.canteens.len());
-        db
-    });
-    CREDITS
-        .set(data.credits)
-        .map_err(|_| anyhow!("Credits data already initialized"))?;
+    let db = GAME_DATA.get_or_init(|| db);
 
-    let mut service = PlayerService::load_or_create(GodotUserStorage, registry, None)
+    let mut service = PlayerService::load_or_create(GodotUserStorage, &db.models, None)
         .context("failed to initialize progress service")?;
-    if dishaster_validation::validate_player_profile(service.profile(), registry).is_err() {
+    if dishaster_validation::validate_player_profile(service.profile(), &db.models).is_err() {
         log::warn!("Player profile validation failed, resetting to default profile");
-        service.recreate_profile(registry, None)?;
+        service.recreate_profile(&db.models, None)?;
     };
     PROGRESS_SERVICE
         .set(Mutex::new(service))

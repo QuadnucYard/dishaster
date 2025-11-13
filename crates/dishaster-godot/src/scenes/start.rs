@@ -10,7 +10,7 @@ use dishrupt_godot_utils::BindGodot;
 use godot::{classes::Node, global::godot_print, obj::Gd};
 
 use crate::{
-    game_main::{ASSET_CATALOG, CREDITS},
+    game_main::{ASSET_CATALOG, game_data},
     scenes::proc::EnterLevelProcedure,
 };
 
@@ -47,7 +47,8 @@ impl Scene for StartScene {
 
         if self.opening.is_none() {
             let catalog = ASSET_CATALOG.get().unwrap().clone();
-            let opening = Opening::new(self.gd.clone(), catalog);
+            let config = game_data().opening_config.clone();
+            let opening = Opening::new(self.gd.clone(), config, catalog);
             self.opening = Some(opening);
         }
 
@@ -81,7 +82,7 @@ impl StartScene {
                 ctx.schedule(EnterLevelProcedure);
             }
             AppRequest::ShowCredits => {
-                let credits_data = CREDITS.get().expect("Credits should be available");
+                let credits_data = &game_data().credits;
 
                 let credits_view = CreditsView {
                     sections: credits_data

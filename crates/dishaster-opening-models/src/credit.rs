@@ -1,8 +1,6 @@
 //! Data models for game credits.
-//!
-//! These are not used in gameplay, but for dependency, we place them here.
 
-use super::prelude::*;
+use crate::prelude::*;
 
 /// Complete credits data
 #[derive(Default, Deserialize)]

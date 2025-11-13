@@ -1,7 +1,6 @@
 //! Game model definitions and data structures
 
 mod canteen;
-mod credit;
 mod decision;
 mod diner_rand;
 mod dish;
@@ -12,7 +11,6 @@ mod misc;
 mod trial;
 
 pub use canteen::*;
-pub use credit::*;
 pub use decision::*;
 pub use diner_rand::*;
 pub use dish::*;

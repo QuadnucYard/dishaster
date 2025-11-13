@@ -4,24 +4,15 @@ use crate::prelude::*;
 
 /// Component for food icon entity
 #[derive(Component)]
-pub struct FoodObject {
-    /// Visual variant index (which sprite to use)
-    pub variant: u8,
-}
+pub struct FoodObject {}
 
 /// Component for face icon entity
 #[derive(Component)]
-pub struct FaceObject {
-    /// Visual variant index (which face sprite to use)
-    pub variant: u8,
-}
+pub struct FaceObject {}
 
 /// Component for review text entity
 #[derive(Component)]
-pub struct TextObject {
-    /// The text content
-    pub content: String,
-}
+pub struct TextObject {}
 
 /// Color modulation for tinting sprites
 #[derive(Component, Clone, Copy)]
@@ -41,15 +32,6 @@ impl ColorTint {
             r: 1.0,
             g: 1.0,
             b: 1.0,
-        }
-    }
-
-    /// Create from RGB values (0-255)
-    pub fn from_rgb(r: u8, g: u8, b: u8) -> Self {
-        Self {
-            r: r as f32 / 255.0,
-            g: g as f32 / 255.0,
-            b: b as f32 / 255.0,
         }
     }
 

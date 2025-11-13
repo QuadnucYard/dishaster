@@ -8,10 +8,12 @@ mod trial_speech;
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use anyhow::{Context, bail};
-use dishaster_models::{CreditsData, GameModelRegistry, TrialCorpus};
+use dishaster_models::{GameModelRegistry, TrialCorpus};
+use dishaster_opening_models::{CreditsData, OpeningConfig};
 use dishrupt_core::model_registry::*;
 use serde::Deserialize;
 use thiserror::Error;
@@ -19,10 +21,11 @@ use thiserror::Error;
 // === Data Structures ===
 
 /// Complete set of game data assets
-#[derive(Default)]
 pub struct GameDataAssets {
     /// Game model definitions used in the simulation
-    pub models: GameModelRegistry,
+    pub models: Arc<GameModelRegistry>,
+    /// Opening animation configuration
+    pub opening_config: OpeningConfig,
     /// Credits data
     pub credits: CreditsData,
 }
@@ -140,12 +143,17 @@ impl DataLoader {
             aq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_aq.txt")?)?,
         };
 
+        let opening_config = self
+            .load_ron_file(&self.assets_path.join("opening.ron"))
+            .with_context(|| "Loading opening configuration")?;
+
         let credits: CreditsData = self
             .load_ron_file(&self.assets_path.join("misc/credits.ron"))
             .with_context(|| "Loading credits data")?;
 
         Ok(GameDataAssets {
-            models: registry,
+            models: registry.into(),
+            opening_config,
             credits,
         })
     }

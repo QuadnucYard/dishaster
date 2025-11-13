@@ -496,6 +496,7 @@ dependencies = [
  "anyhow",
  "codespan-reporting",
  "dishaster-models",
+ "dishaster-opening-models",
  "dishaster-validation",
  "dishrupt-core",
  "log",
@@ -627,10 +628,18 @@ name = "dishaster-opening"
 version = "0.1.0"
 dependencies = [
  "bevy_ecs",
+ "dishaster-opening-models",
  "dishrupt-core",
  "dishrupt-ecs",
  "dishrupt-rng",
  "dishrupt-simulation",
+]
+
+[[package]]
+name = "dishaster-opening-models"
+version = "0.1.0"
+dependencies = [
+ "dishrupt-core",
  "serde",
 ]
 

@@ -1,6 +1,6 @@
 //! Systems for opening animation
 
-use crate::{prelude::*, protocol::SimEvent, resources::OpeningAssets};
+use crate::{prelude::*, protocol::SimEvent, resources::OpeningAssetsRes};
 
 /// Spawn food icons based on timer
 pub fn spawn_foods(
@@ -8,8 +8,8 @@ pub fn spawn_foods(
     mut timers: ResMut<SpawnTimers>,
     mut rng: ResMut<WorldRng>,
     mut events: ResMut<EventQueue>,
-    config: Res<OpeningConfig>,
-    assets: Res<OpeningAssets>,
+    config: Res<OpeningConfigRes>,
+    assets: Res<OpeningAssetsRes>,
     query: Query<&FoodObject>,
     time: Res<DeltaTime>,
 ) {
@@ -56,7 +56,7 @@ pub fn spawn_foods(
 
     let entity = commands
         .spawn((
-            FoodObject { variant },
+            FoodObject {},
             position,
             velocity,
             rotation,
@@ -82,8 +82,8 @@ pub fn spawn_faces(
     mut timers: ResMut<SpawnTimers>,
     mut rng: ResMut<WorldRng>,
     mut events: ResMut<EventQueue>,
-    config: Res<OpeningConfig>,
-    assets: Res<OpeningAssets>,
+    config: Res<OpeningConfigRes>,
+    assets: Res<OpeningAssetsRes>,
     query: Query<&FaceObject>,
     time: Res<DeltaTime>,
 ) {
@@ -109,7 +109,7 @@ pub fn spawn_faces(
 
     let entity = commands
         .spawn((
-            FaceObject { variant },
+            FaceObject {},
             position,
             velocity,
             rotation,
@@ -133,8 +133,8 @@ pub fn spawn_texts(
     mut timers: ResMut<SpawnTimers>,
     mut rng: ResMut<WorldRng>,
     mut events: ResMut<EventQueue>,
-    config: Res<OpeningConfig>,
-    assets: Res<OpeningAssets>,
+    config: Res<OpeningConfigRes>,
+    assets: Res<OpeningAssetsRes>,
     query: Query<&TextObject>,
     time: Res<DeltaTime>,
 ) {
@@ -163,9 +163,7 @@ pub fn spawn_texts(
 
     let entity = commands
         .spawn((
-            TextObject {
-                content: content.clone(),
-            },
+            TextObject {},
             position,
             speed,
             Alpha(0.0),
@@ -191,7 +189,7 @@ pub fn update_physics(
         &mut Rotation,
         Option<&RotationSpeed>,
     )>,
-    config: Res<OpeningConfig>,
+    config: Res<OpeningConfigRes>,
     time: Res<DeltaTime>,
 ) {
     let delta = time.delta;
@@ -211,7 +209,7 @@ pub fn update_physics(
 /// Update review text animation
 pub fn update_texts(
     query: Query<(&mut Position, &FallSpeed, &mut Alpha, &mut WavePhase), With<TextObject>>,
-    config: Res<OpeningConfig>,
+    config: Res<OpeningConfigRes>,
     time: Res<DeltaTime>,
 ) {
     let delta = time.delta;
@@ -246,7 +244,7 @@ pub fn despawn_out_of_bounds(
     mut commands: Commands,
     mut events: ResMut<EventQueue>,
     query: Query<(Entity, &Position)>,
-    config: Res<OpeningConfig>,
+    config: Res<OpeningConfigRes>,
 ) {
     // Use a margin of 2 meters to allow items to fully exit the screen before despawning
     let margin = 2.0;

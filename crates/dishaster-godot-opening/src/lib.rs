@@ -4,8 +4,8 @@ mod present;
 
 use dishaster_opening::{
     OpeningSimulationFeat, Simulation as OpeningSimulation,
+    models::OpeningConfig,
     protocol::{ItemType, ObjectSnapshot, SimEvent},
-    resources::OpeningConfig,
 };
 use dishrupt_asset::AssetCatalog;
 use dishrupt_core::{EntityId, prelude::*};
@@ -35,12 +35,10 @@ struct Presenters {
 
 impl Opening {
     /// Create a new opening presenter
-    pub fn new(root: Gd<Node>, asset_catalog: AssetCatalog) -> Self {
+    pub fn new(root: Gd<Node>, config: OpeningConfig, asset_catalog: AssetCatalog) -> Self {
         // Initialize simulation
-        let sim = Box::new(OpeningSimulation::new(
-            OpeningConfig::default(),
-            godot::global::randi() as u64,
-        ));
+        let seed = godot::global::randi() as u64;
+        let sim = Box::new(OpeningSimulation::new(config, seed));
         let root_entity = sim.root_entity();
         let sim_runner = Box::new(SyncSimulationRunner::new(sim, 60.0));
 

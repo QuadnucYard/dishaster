@@ -1,7 +1,5 @@
 //! Integration tests for Dishaster.
 
-use std::sync::Arc;
-
 use anyhow::Result;
 use dishaster_core::{
     interface::{SimCommand, SimEvent},
@@ -75,7 +73,7 @@ fn main() -> Result<()> {
 
     let mut loader = DataLoader::new("../assets/data")?;
     let data = loader.load_all_data()?;
-    let registry = Arc::new(data.models);
+    let registry = data.models;
 
     dishaster_validation::validate_registry(&registry)?;
     println!("✓ Data validation passed");

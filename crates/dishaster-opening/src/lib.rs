@@ -1,13 +1,18 @@
 //! Opening animation simulation with flying foods, faces, and review texts
 
-pub mod components;
+pub(crate) mod components;
 pub mod protocol;
-pub mod resources;
-pub mod sim;
+pub(crate) mod resources;
+pub(crate) mod sim;
 mod systems;
 
-pub use resources::{OpeningAssets, OpeningConfig};
+pub use resources::{OpeningAssetsRes, OpeningConfigRes};
 pub use sim::{OpeningSimulationFeat, Simulation};
+
+/// Re-export of dishaster_oepning_models
+pub mod models {
+    pub use dishaster_opening_models::*;
+}
 
 mod prelude {
     pub use dishrupt_core::prelude::*;

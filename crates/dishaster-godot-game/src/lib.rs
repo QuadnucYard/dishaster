@@ -30,7 +30,6 @@ use rustc_hash::FxHashMap;
 use self::{perf::PerfTracker, present::*};
 use crate::{dbgviz::*, hint::HintTracker, user_store::GodotUserStorage};
 
-pub static GAME_DATA: OnceLock<Arc<GameModelRegistry>> = OnceLock::new();
 pub static PROGRESS_SERVICE: OnceLock<Mutex<PlayerService<GodotUserStorage>>> = OnceLock::new();
 
 pub fn progress_service() -> MutexGuard<'static, PlayerService<GodotUserStorage>> {
@@ -101,15 +100,11 @@ impl Game {
     /// NOTE: the creator should START the simulation after construction
     pub fn new(
         gd: Gd<Node>,
+        db: Arc<GameModelRegistry>,
         asset_catalog: AssetCatalog,
         level: LevelSetupState,
-        sim_creator: impl FnOnce(
-            Arc<GameModelRegistry>,
-            LevelSetupState,
-        ) -> Box<dyn ISimulation<CoreSimulationFeat>>,
+        sim_creator: impl FnOnce(LevelSetupState) -> Box<dyn ISimulation<CoreSimulationFeat>>,
     ) -> Self {
-        let db = GAME_DATA.get().expect("game data not initialized");
-
         let telemetry = DayTelemetry {
             seed: level.seed.get(),
             day: level.day.0,
@@ -128,7 +123,7 @@ impl Game {
             .res;
 
         // Initialize simulation
-        let sim = sim_creator(db.clone(), level);
+        let sim = sim_creator(level);
         let root_entity = sim.root_entity();
         let default_tps = 60.0;
         let sim_runner = SyncSimulationRunner::new(sim, default_tps);

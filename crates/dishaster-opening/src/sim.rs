@@ -1,9 +1,10 @@
 //! Opening animation simulation
 
+use dishaster_opening_models::OpeningConfig;
 use dishrupt_ecs::display::DisplayRoot;
 use dishrupt_simulation::{ISimulation, SimulationFeature};
 
-use crate::{prelude::*, protocol::*, resources::OpeningAssets};
+use crate::{prelude::*, protocol::*, resources::OpeningAssetsRes};
 
 /// Opening animation simulation engine
 pub struct Simulation {
@@ -22,9 +23,10 @@ impl Simulation {
         let root_entity = world.spawn(Transform::default()).id();
         world.insert_resource(DisplayRoot(root_entity));
 
-        world.insert_resource(config);
-        // Insert configurable assets (food/face prefabs and review texts)
-        world.insert_resource(OpeningAssets::default());
+        // Add configuration resources
+        world.insert_resource(config.world.into_res());
+        world.insert_resource(config.assets.into_res());
+
         world.insert_resource(SpawnTimers::default());
         world.insert_resource(WorldRng::new(seed));
         world.insert_resource(DeltaTime::default());
@@ -93,7 +95,7 @@ impl Simulation {
             let core_id = entity.to_entity_id();
 
             // Determine prefab based on entity type. Prefer component proto when present.
-            let assets = world.resource::<OpeningAssets>();
+            let assets = world.resource::<OpeningAssetsRes>();
             let (proto, item_type) = if food.is_some() {
                 (assets.food_prefab.clone(), ItemType::Food)
             } else if face.is_some() {
