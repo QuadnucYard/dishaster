@@ -3,7 +3,7 @@
 use bevy_ecs::system::SystemState;
 
 use crate::{
-    models::{TrialCorpus, TrialQARank, TrialSpeechItem},
+    models::{TrialCorpus, TrialQARank},
     prelude::*,
     resources::*,
     sim::Simulation,
@@ -12,43 +12,59 @@ use crate::{
 
 impl Simulation {
     pub(super) fn create_trial_intro(&mut self) -> TrialIntro {
-        let mut trial_session = self.world.resource_mut::<TrialSession>();
+        let mut session = self.world.resource_mut::<TrialSession>();
         TrialIntro {
-            left: random_appearance(&mut trial_session.rng),
-            right: random_appearance(&mut trial_session.rng),
+            left: random_appearance(&mut session.rng),
+            right: random_appearance(&mut session.rng),
         }
     }
 
     pub(super) fn create_diner_statement(&mut self) -> TrialStatement {
         let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
             SystemState::new(&mut self.world);
-        let (registry, mut trial_session) = system_state.get_mut(&mut self.world);
+        let (registry, mut session) = system_state.get_mut(&mut self.world);
 
         // Generate a sequence of related speeches (topic-centered)
-        let speech_sequence = generate_speech_sequence(&registry.trial, &mut trial_session);
+        let speech_sequence = generate_speech_sequence(&registry.trial, &mut session);
 
         log::info!("Generated speech sequence: {:?}", speech_sequence);
 
-        create_diner_statement_with_sequence(speech_sequence, &registry.trial, &mut trial_session)
+        create_diner_statement_with_sequence(speech_sequence, &registry.trial, &mut session)
+    }
+
+    /// Generate response candidates for a specific question keyword (lazy loading).
+    ///
+    /// Called when player selects a keyword to respond to. Uses QA ranks to find
+    /// contextually relevant responses with temperature-weighted sampling.
+    pub(super) fn generate_trial_response_candidates(
+        &mut self,
+        speech_index: usize,
+        keyword_index: usize,
+    ) -> Vec<TrialResponseOption> {
+        let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
+            SystemState::new(&mut self.world);
+        let (registry, mut session) = system_state.get_mut(&mut self.world);
+
+        generate_response_options(speech_index, keyword_index, &registry.trial, &mut session)
     }
 
     pub(super) fn trial_respond(&mut self, resp_corpus_index: usize) -> views::TrialSpeech {
         // Get current question index and response data first
         let (current_question_idx, mut response_score, speech) = {
-            let trial_session = self.world.resource::<TrialSession>();
+            let session = self.world.resource::<TrialSession>();
             let registry = self.world.resource::<GameModelRegistryRes>();
 
-            let current_question_idx = trial_session.current_question_index;
+            let current_question_idx = session.current_question_index;
             let response = &registry.trial.responses[resp_corpus_index];
             let response_score = response.response_score;
-            let speech = response.content.to_view();
+            let speech = response.content.to_view_with_index(resp_corpus_index);
 
             (current_question_idx, response_score, speech)
         };
 
         // Record the player's response choice
-        let mut trial_session = self.world.resource_mut::<TrialSession>();
-        trial_session.set_last_response(resp_corpus_index);
+        let mut session = self.world.resource_mut::<TrialSession>();
+        session.set_last_response(resp_corpus_index);
 
         // Contextual evaluation: check if response is relevant to the current question
         // Use QA ranks to measure relevance (higher rank = more relevant)
@@ -86,16 +102,16 @@ impl Simulation {
     pub(super) fn trial_should_continue(&mut self) -> bool {
         let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
             SystemState::new(&mut self.world);
-        let (registry, mut trial_session) = system_state.get_mut(&mut self.world);
+        let (registry, mut session) = system_state.get_mut(&mut self.world);
 
         // Check if there are available follow-up questions based on player's response
-        if let Some(last_response_idx) = trial_session.last_response_index
+        if let Some(last_response_idx) = session.last_response_index
             && let Some(aq_rank) = registry.trial.aq_ranks.get(last_response_idx)
         {
             // Filter available questions (not yet asked)
             let available_ranks: Vec<_> = aq_rank
                 .iter()
-                .filter(|rank| !trial_session.has_asked(rank.answer_index))
+                .filter(|rank| !session.has_asked(rank.answer_index))
                 .cloned()
                 .collect();
 
@@ -104,10 +120,10 @@ impl Simulation {
             }
             // Use best score as probability to continue
             let best_score = available_ranks[0].score;
-            trial_session.should_continue(best_score)
+            session.should_continue(best_score)
         } else {
             // No response history or ranks - randomly decide
-            trial_session.rng.random_bool(0.3)
+            session.rng.random_bool(0.3)
         }
     }
 }
@@ -145,7 +161,7 @@ fn generate_speech_sequence(corpus: &TrialCorpus, session: &mut TrialSession) ->
     // Generate continuation sequence using QQ ranks
     let mut current_speech = first_speech;
 
-    while sequence.len() < session.max_continuation_depth as usize + 1 {
+    while sequence.len() <= session.max_continuation_depth as usize {
         if let Some(qq_rank) = corpus.qq_ranks.get(current_speech)
             && !qq_rank.is_empty()
         {
@@ -300,84 +316,75 @@ fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usi
 
 fn create_diner_statement_with_sequence(
     speech_indices: Vec<usize>,
-    trial_registry: &TrialCorpus,
-    trial_session: &mut TrialSession,
+    corpus: &TrialCorpus,
+    _session: &mut TrialSession,
 ) -> TrialStatement {
-    let temperature = trial_session.temperature;
-
-    // Generate response options for EACH speech in the sequence
-    // Player can interrupt and respond after any speech
-    let mut options_sequence: Vec<Vec<Vec<TrialResponseOption>>> = Vec::new();
-
-    for &speech_idx in &speech_indices {
-        let speech = &trial_registry.diner_speeches[speech_idx];
-        let mut speech_options: Vec<Vec<TrialResponseOption>> = Vec::new();
-        let mut keyword_idx = 0;
-
-        log::info!(
-            "Creating response options for speech {} in sequence",
-            speech_idx
-        );
-
-        for item in &speech.items {
-            let TrialSpeechItem::Keyword(_) = item else {
-                continue;
-            };
-
-            let options_count = trial_session.rng.random_range(2..=4);
-
-            let selected = if let Some(question_ranks) = trial_registry.qa_ranks.get(speech_idx)
-                && let Some(ranks) = question_ranks.get(keyword_idx)
-            {
-                log::debug!(
-                    "> Sampling response options for speech {} keyword {} using ranks",
-                    speech_idx,
-                    keyword_idx
-                );
-                // Sample responses using temperature-weighted scores
-                sample_weighted_indices(ranks, temperature, options_count, &mut trial_session.rng)
-            } else {
-                // Fallback: random sampling
-                (0..trial_registry.responses.len())
-                    .choose_multiple(&mut trial_session.rng, options_count)
-            };
-
-            speech_options.push(
-                selected
-                    .into_iter()
-                    .map(|idx| {
-                        let response = &trial_registry.responses[idx];
-                        TrialResponseOption {
-                            corpus_index: idx,
-                            kind: response.kind.to_view(),
-                            summary: response.summary.clone(),
-                        }
-                    })
-                    .collect(),
-            );
-
-            keyword_idx += 1;
-        }
-
-        options_sequence.push(speech_options);
-    }
-
     // Convert speech indices to view speeches
     let speech_sequence: Vec<_> = speech_indices
         .iter()
-        .map(|&idx| trial_registry.diner_speeches[idx].to_view())
+        .map(|&idx| corpus.diner_speeches[idx].to_view_with_index(idx))
         .collect();
 
     log::info!(
-        "Generated {} speeches with {} option sets",
-        speech_sequence.len(),
-        options_sequence.len()
+        "Generated speech sequence with {} speeches (lazy option generation)",
+        speech_sequence.len()
     );
 
-    TrialStatement {
-        speech_sequence,
-        options_sequence,
-    }
+    TrialStatement { speech_sequence }
+}
+
+/// Generate response options for a specific question keyword.
+///
+/// Used for lazy loading - called only when player actually selects a keyword.
+/// Uses QA ranks to find contextually relevant responses with temperature-weighted sampling.
+fn generate_response_options(
+    speech_idx: usize,
+    keyword_idx: usize,
+    corpus: &TrialCorpus,
+    session: &mut TrialSession,
+) -> Vec<TrialResponseOption> {
+    const WEIGHTED_OPTION_COUNTS: &[(usize, i32)] = &[(1, 1), (2, 3), (3, 4), (4, 2)];
+
+    let temperature = session.temperature;
+    let options_count = WEIGHTED_OPTION_COUNTS
+        .choose_weighted(&mut session.rng, |it| it.1)
+        .unwrap()
+        .0;
+
+    log::info!(
+        "Generating {} response options for speech {} keyword {}",
+        options_count,
+        speech_idx,
+        keyword_idx
+    );
+
+    let selected = if let Some(question_ranks) = corpus.qa_ranks.get(speech_idx)
+        && let Some(ranks) = question_ranks.get(keyword_idx)
+    {
+        log::debug!("> Using QA ranks with {} candidates", ranks.len());
+        // Sample responses using temperature-weighted scores
+        sample_weighted_indices(ranks, temperature, options_count, &mut session.rng)
+    } else {
+        // Fallback: random sampling
+        log::warn!(
+            "No QA ranks found for speech {} keyword {}, using random selection",
+            speech_idx,
+            keyword_idx
+        );
+        (0..corpus.responses.len()).choose_multiple(&mut session.rng, options_count)
+    };
+
+    selected
+        .into_iter()
+        .map(|idx| {
+            let response = &corpus.responses[idx];
+            TrialResponseOption {
+                corpus_index: idx,
+                kind: response.kind.to_view(),
+                summary: response.summary.clone(),
+            }
+        })
+        .collect()
 }
 
 /// Sample indices from ranks using temperature-weighted softmax

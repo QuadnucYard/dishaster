@@ -16,7 +16,7 @@ struct State {
     pub phase: Phase,
     pub inner_speech_text: EcoString,
     pub fade_time: f32,
-    /// Current response options (for the currently displayed speech)
+    /// Current response options (loaded lazily when keyword is selected)
     pub options: Vec<Vec<TrialResponseOption>>,
 }
 
@@ -61,6 +61,7 @@ impl TrialGui {
         self.left.content.set_visible(false);
         self.right.content.set_visible(false);
         self.time_progress.set_visible(false);
+        self.thought.set_visible(false);
 
         // Play intro animation
         self.anim_player.play_ex().name("intro").done();
@@ -69,19 +70,13 @@ impl TrialGui {
 
     pub fn left_speak(&mut self, statement: TrialStatement) {
         // Start with the first speech in the sequence
-        let speech_sequence = statement.speech_sequence;
-        let mut options_sequence = statement.options_sequence;
+        let mut speech_sequence = statement.speech_sequence;
 
         if speech_sequence.is_empty() {
             panic!("Speech sequence should not be empty");
         }
 
-        let first_speech = speech_sequence[0].clone();
-        let first_options = if !options_sequence.is_empty() {
-            options_sequence.remove(0)
-        } else {
-            Vec::new()
-        };
+        let first_speech = speech_sequence.remove(0);
 
         // The speech may contain keywords for the left side.
         let inner_text = speech_to_bbcode(&first_speech);
@@ -94,7 +89,7 @@ impl TrialGui {
             time: 0.0,
             inner_speech_text: inner_text,
             fade_time: estimate_fade_time(&first_speech.text),
-            options: first_options,
+            options: Vec::new(), // Options loaded lazily when keyword selected
         });
     }
 
@@ -113,12 +108,22 @@ impl TrialGui {
         self.time_progress.set_visible(false);
     }
 
-    pub fn check_keyword(&mut self, keyword_index: usize) {
-        if let Some(state) = &self.state
+    pub fn show_response_candidates(
+        &mut self,
+        keyword_index: usize,
+        options: Vec<TrialResponseOption>,
+    ) {
+        if let Some(state) = &mut self.state
             && let Phase::LeftSpeaking = state.phase
-            && let Some(options) = state.options.get(keyword_index)
         {
-            self.thought.set_options(options);
+            // Store the options for this keyword index
+            if state.options.len() <= keyword_index {
+                state.options.resize(keyword_index + 1, Vec::new());
+            }
+            state.options[keyword_index] = options;
+
+            // Show the thought panel with the options
+            self.thought.set_options(&state.options[keyword_index]);
             self.thought.set_visible(true);
         }
     }

@@ -15,15 +15,13 @@ pub struct TrialStatement {
     /// The sequence of speeches made by the left participant (diner).
     /// Displayed with delays; player can interrupt to respond early.
     pub speech_sequence: Vec<TrialSpeech>,
-    /// Possible response options for each speech in the sequence.
-    /// Each speech can have its own set of keyword-based options.
-    /// Player can choose to respond after any speech in the sequence.
-    pub options_sequence: Vec<Vec<Vec<TrialResponseOption>>>,
 }
 
 /// A single speech made by a trial participant.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TrialSpeech {
+    /// The index of the speech in the corpus.
+    pub index: usize,
     /// The text of the statement.
     pub text: EcoString,
     /// The breakdown of the statement into items.
@@ -44,7 +42,7 @@ pub enum TrialSpeechItem {
 }
 
 /// A single response option during a trial.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrialResponseOption {
     /// Index into the corpus responses.
     pub corpus_index: usize,

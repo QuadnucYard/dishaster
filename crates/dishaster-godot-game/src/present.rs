@@ -143,6 +143,21 @@ impl Game {
 
                     self.ui_commands.push(UiCommand::TrialRightSpeak(speech));
                 }
+                SimEvent::TrialResponseCandidates {
+                    keyword_index,
+                    options,
+                } => {
+                    godot_print!(
+                        "Received trial response candidates for keyword {}: {} options",
+                        keyword_index,
+                        options.len()
+                    );
+
+                    self.ui_commands.push(UiCommand::TrialResponseCandidates {
+                        keyword_index,
+                        options,
+                    });
+                }
                 SimEvent::TrialEnd => {
                     godot_print!("Received trial end");
 

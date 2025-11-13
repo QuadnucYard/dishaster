@@ -153,8 +153,8 @@ impl GameScene {
             }
             GameRequest::TrialCheckKeyword(keyword_index) => {
                 godot_print!("Trial check keyword: {:?}", keyword_index);
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.check_keyword(keyword_index);
+                // Send command to simulation to generate candidates
+                game.send_sim_command(SimCommand::TrialRequestCandidates { keyword_index });
             }
             GameRequest::TrialBackFromThought => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
@@ -251,6 +251,13 @@ impl GameScene {
             UiCommand::TrialRightSpeak(speech) => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
                 trial_gui.right_speak(*speech);
+            }
+            UiCommand::TrialResponseCandidates {
+                keyword_index,
+                options,
+            } => {
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.show_response_candidates(keyword_index, options);
             }
             UiCommand::TrialEnd => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();

@@ -74,6 +74,23 @@ impl Simulation {
                 let mut events = self.world.resource_mut::<EventQueue>();
                 events.push(SimEvent::TrialEnd);
             }
+            SimCommand::TrialRequestCandidates { keyword_index } => {
+                // Get current speech index from trial session
+                let speech_index = {
+                    let trial_session = self.world.resource::<TrialSession>();
+                    trial_session.last_diner_speech_index.unwrap_or(0)
+                };
+
+                // Generate response candidates for this keyword
+                let options = self.generate_trial_response_candidates(speech_index, keyword_index);
+
+                // Emit event with the candidates
+                let mut events = self.world.resource_mut::<EventQueue>();
+                events.push(SimEvent::TrialResponseCandidates {
+                    keyword_index,
+                    options,
+                });
+            }
             SimCommand::TrialProceed => {
                 let should_continue = self.trial_should_continue();
 

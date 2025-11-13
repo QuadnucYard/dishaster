@@ -6,6 +6,12 @@ pub trait ToView {
     fn to_view(&self) -> Self::View;
 }
 
+pub trait ToViewWithIndex {
+    type View;
+
+    fn to_view_with_index(&self, index: usize) -> Self::View;
+}
+
 pub trait ToModel {
     type Model;
 
@@ -34,11 +40,12 @@ impl ToModel for views::PricingMethod {
     }
 }
 
-impl ToView for models::TrialSpeech {
+impl ToViewWithIndex for models::TrialSpeech {
     type View = views::TrialSpeech;
 
-    fn to_view(&self) -> Self::View {
+    fn to_view_with_index(&self, index: usize) -> Self::View {
         views::TrialSpeech {
+            index,
             text: self.text.clone(),
             items: self.items.iter().map(|item| item.to_view()).collect(),
             appearance: self.appearance.to_view(),
@@ -54,18 +61,6 @@ impl ToView for models::TrialSpeechItem {
             models::TrialSpeechItem::Text(t) => views::TrialSpeechItem::Text(t.clone()),
             models::TrialSpeechItem::Keyword(k) => views::TrialSpeechItem::Keyword(k.clone()),
             models::TrialSpeechItem::LineBreak => views::TrialSpeechItem::LineBreak,
-        }
-    }
-}
-
-impl ToView for models::TrialResponse {
-    type View = views::TrialResponse;
-
-    fn to_view(&self) -> Self::View {
-        views::TrialResponse {
-            kind: self.kind.to_view(),
-            summary: self.summary.clone(),
-            content: self.content.to_view(),
         }
     }
 }
