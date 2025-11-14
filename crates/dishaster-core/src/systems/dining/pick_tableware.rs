@@ -350,18 +350,7 @@ pub fn handle_return_dishes_goal(
                 movement.pos
             );
 
-            // Despawn tablewares
-            if let Some(chopsticks_entity) = state.chopsticks.take() {
-                commands.entity(chopsticks_entity).despawn();
-            }
-            if let Some(tray_entity) = state.tray.take() {
-                commands.entity(tray_entity).despawn();
-            }
-
-            // Despawn all served dishes
-            for served_dish in state.served_dishes.drain(..) {
-                commands.entity(served_dish.entity).despawn();
-            }
+            despawn_diner_items(&mut commands, &mut state);
 
             events.push(SimEvent::DinerItemsChanged {
                 entity: entity.to_entity_id(),
@@ -372,5 +361,20 @@ pub fn handle_return_dishes_goal(
         } else {
             goal.reset_timer();
         }
+    }
+}
+
+pub fn despawn_diner_items(commands: &mut Commands, state: &mut DinerState) {
+    // Despawn tableware
+    if let Some(chopsticks_entity) = state.chopsticks.take() {
+        commands.entity(chopsticks_entity).despawn();
+    }
+    if let Some(tray_entity) = state.tray.take() {
+        commands.entity(tray_entity).despawn();
+    }
+
+    // Despawn all served dishes
+    for served_dish in state.served_dishes.drain(..) {
+        commands.entity(served_dish.entity).despawn();
     }
 }

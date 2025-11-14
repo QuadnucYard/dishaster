@@ -65,7 +65,9 @@ impl Game {
                     current_stock,
                     capacity,
                 } => {
-                    if let Some(presenter) = self.pres.dispensers.get_mut(&entity) {
+                    if self.stage.is_entity_valid(entity)
+                        && let Some(presenter) = self.pres.dispensers.get_mut(&entity)
+                    {
                         presenter.set_stock(current_stock, capacity);
                     }
                 }
@@ -74,7 +76,9 @@ impl Game {
                     entity,
                     new_pricing,
                 } => {
-                    if let Some(presenter) = self.pres.dishes.get_mut(&entity) {
+                    if self.stage.is_entity_valid(entity)
+                        && let Some(presenter) = self.pres.dishes.get_mut(&entity)
+                    {
                         presenter.set_price(new_pricing);
                     }
                 }
@@ -109,12 +113,15 @@ impl Game {
                     self.pres.dishes.insert(entity, presenter);
                 }
                 SimEvent::DinerItemsChanged { entity, change } => {
-                    if let Some(agent) = self.pres.agents.get_mut(&entity) {
+                    if self.stage.is_entity_valid(entity)
+                        && let Some(agent) = self.pres.agents.get_mut(&entity)
+                    {
                         agent.handle_item_change(change, &mut self.stage);
                     }
                 }
                 SimEvent::Feedback(feedback) => {
-                    if let Some(agent) = self.pres.agents.get_mut(&feedback.entity)
+                    if self.stage.is_entity_valid(feedback.entity)
+                        && let Some(agent) = self.pres.agents.get_mut(&feedback.entity)
                         && let Some(feedback_presenter) = &mut agent.feedback
                     {
                         feedback_presenter.show(

@@ -370,12 +370,13 @@ fn handle_leave_goal(
     diner_query: Query<(
         Entity,
         &mut DinerGoalState,
+        &mut DinerState,
         &mut DinerTargets,
         &mut Movement,
     )>,
     canteen: Res<Canteen>,
 ) {
-    for (entity, goal, mut targets, mut movement) in diner_query {
+    for (entity, goal, mut state, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::Leave) {
             continue;
         }
@@ -416,6 +417,8 @@ fn handle_leave_goal(
                 "despawn: pos={:.2}",
                 movement.pos
             );
+
+            despawn_diner_items(&mut commands, &mut state);
             commands.entity(entity).despawn();
         }
     }

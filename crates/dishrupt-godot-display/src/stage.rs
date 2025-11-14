@@ -57,6 +57,11 @@ impl Stage {
         self.factory.init();
     }
 
+    /// Check if the given entity has a valid Godot node.
+    pub fn is_entity_valid(&self, entity: EntityId) -> bool {
+        self.get_godot_node(entity).is_some()
+    }
+
     /// Get reference to the Godot node for the given entity.
     pub fn get_godot_node(&self, entity: EntityId) -> Option<&GdNode2D> {
         let e = *self.core_to_view.get(&entity)?;
