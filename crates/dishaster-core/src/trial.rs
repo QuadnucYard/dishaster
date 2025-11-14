@@ -36,47 +36,62 @@ impl Simulation {
     ///
     /// Called when player selects a keyword to respond to. Uses QA ranks to find
     /// contextually relevant responses with temperature-weighted sampling.
+    ///
+    /// Use cache to ensure consistent options for repeated requests.
     pub(super) fn generate_trial_response_candidates(
         &mut self,
-        speech_index: usize,
+        speech_id: usize,
         keyword_index: usize,
     ) -> Vec<TrialResponseOption> {
         let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
             SystemState::new(&mut self.world);
         let (registry, mut session) = system_state.get_mut(&mut self.world);
 
-        generate_response_options(speech_index, keyword_index, &registry.trial, &mut session)
+        // Check cache first
+        let key = (speech_id, keyword_index);
+        if let Some(cached) = session.cached_options.get(&key) {
+            log::info!(
+                "Using cached response options for speech {} keyword {}",
+                speech_id,
+                keyword_index
+            );
+            return cached.clone();
+        }
+        let options =
+            generate_response_options(speech_id, keyword_index, &registry.trial, &mut session);
+        session.cached_options.insert(key, options.clone());
+        options
     }
 
-    pub(super) fn trial_respond(&mut self, resp_corpus_index: usize) -> views::TrialSpeech {
+    pub(super) fn trial_respond(&mut self, resp_id: usize) -> views::TrialSpeech {
         // Get current question index and response data first
         let (current_question_idx, mut response_score, speech) = {
             let session = self.world.resource::<TrialSession>();
             let registry = self.world.resource::<GameModelRegistryRes>();
 
             let current_question_idx = session.current_question_index;
-            let response = &registry.trial.responses[resp_corpus_index];
+            let response = &registry.trial.responses[resp_id];
             let response_score = response.response_score;
-            let speech = response.content.to_view_with_index(resp_corpus_index);
+            let speech = response.content.to_view_with_index(resp_id);
 
             (current_question_idx, response_score, speech)
         };
 
         // Record the player's response choice
         let mut session = self.world.resource_mut::<TrialSession>();
-        session.set_last_response(resp_corpus_index);
+        session.set_last_response(resp_id);
 
         // Contextual evaluation: check if response is relevant to the current question
         // Use QA ranks to measure relevance (higher rank = more relevant)
         if let Some(question_idx) = current_question_idx {
             let registry = self.world.resource::<GameModelRegistryRes>();
             let relevance_penalty =
-                calculate_relevance_penalty(question_idx, resp_corpus_index, &registry.trial);
+                calculate_relevance_penalty(question_idx, resp_id, &registry.trial);
 
             if relevance_penalty < 0.0 {
                 log::info!(
                     "Response {} to question {} is irrelevant (penalty: {:.3})",
-                    resp_corpus_index,
+                    resp_id,
                     question_idx,
                     relevance_penalty
                 );
@@ -105,7 +120,7 @@ impl Simulation {
         let (registry, mut session) = system_state.get_mut(&mut self.world);
 
         // Check if there are available follow-up questions based on player's response
-        if let Some(last_response_idx) = session.last_response_index
+        if let Some(last_response_idx) = session.last_response_id
             && let Some(aq_rank) = registry.trial.aq_ranks.get(last_response_idx)
         {
             // Filter available questions (not yet asked)
@@ -162,47 +177,45 @@ fn generate_speech_sequence(corpus: &TrialCorpus, session: &mut TrialSession) ->
     let mut current_speech = first_speech;
 
     while sequence.len() <= session.max_continuation_depth as usize {
-        if let Some(qq_rank) = corpus.qq_ranks.get(current_speech)
-            && !qq_rank.is_empty()
-        {
-            // Filter available continuations (not yet asked)
-            let available_ranks: Vec<_> = qq_rank
-                .iter()
-                .filter(|rank| !session.has_asked(rank.answer_index))
-                .cloned()
-                .collect();
+        let Some(qq_rank) = corpus.qq_ranks.get(current_speech) else {
+            break;
+        };
 
-            if !available_ranks.is_empty() {
-                let best_score = available_ranks[0].score;
+        // Filter available continuations (not yet asked)
+        let available_ranks: Vec<_> = qq_rank
+            .iter()
+            .filter(|rank| !session.has_asked(rank.answer_index))
+            .cloned()
+            .collect();
 
-                // Use score as probability: higher similarity = more likely to continue
-                if session.should_continue(best_score) {
-                    // Sample a continuation from available QQ ranks
-                    let selected = sample_weighted_indices(
-                        &available_ranks,
-                        session.temperature,
-                        1,
-                        &mut session.rng,
-                    );
-
-                    if let Some(&next_speech) = selected.first() {
-                        session.mark_asked(next_speech);
-                        sequence.push(next_speech);
-                        current_speech = next_speech;
-                        log::info!(
-                            "QQ continuation in sequence: {} → {} (score: {:.3})",
-                            current_speech,
-                            next_speech,
-                            best_score
-                        );
-                        continue;
-                    }
-                }
-            }
+        if available_ranks.is_empty() {
+            break;
         }
 
-        // No more continuations
-        break;
+        let best_score = available_ranks[0].score;
+
+        // Use score as probability: higher similarity = more likely to continue
+        if !session.should_continue(best_score) {
+            break;
+        }
+
+        // Sample a continuation from available QQ ranks
+        let selected =
+            sample_weighted_indices(&available_ranks, session.temperature, 1, &mut session.rng);
+
+        let Some(&next_speech) = selected.first() else {
+            break;
+        };
+
+        session.mark_asked(next_speech);
+        sequence.push(next_speech);
+        current_speech = next_speech;
+        log::info!(
+            "QQ continuation in sequence: {} → {} (score: {:.3})",
+            current_speech,
+            next_speech,
+            best_score
+        );
     }
 
     // Update session state
@@ -224,42 +237,39 @@ fn generate_speech_sequence(corpus: &TrialCorpus, session: &mut TrialSession) ->
 /// Checks if the player's response is relevant to the current question using QA ranks.
 /// Returns 0.0 if relevant, negative penalty if irrelevant.
 fn calculate_relevance_penalty(
-    question_idx: usize,
-    response_idx: usize,
+    question_id: usize,
+    response_id: usize,
     corpus: &TrialCorpus,
 ) -> f32 {
     // Get QA ranks for this question
-    if let Some(question_ranks) = corpus.qa_ranks.get(question_idx) {
-        // Check all keywords in this question
-        for keyword_ranks in question_ranks {
-            // Check if response is in the top ranks for any keyword
-            if let Some(_rank) = keyword_ranks
-                .iter()
-                .find(|r| r.answer_index == response_idx)
-            {
-                // Found in ranks - check position
-                let position = keyword_ranks
-                    .iter()
-                    .position(|r| r.answer_index == response_idx)
-                    .unwrap();
+    let Some(question_ranks) = corpus.qa_ranks.get(question_id) else {
+        return 0.0;
+    };
 
-                if position < 5 {
-                    // Top 5 - highly relevant, no penalty
-                    return 0.0;
-                } else if position < 10 {
-                    // Top 10 - somewhat relevant, small penalty
-                    return -0.2;
-                }
+    // Check all keywords in this question
+    for keyword_ranks in question_ranks {
+        // Check if response is in the top ranks for any keyword
+        if keyword_ranks.iter().any(|r| r.answer_index == response_id) {
+            // Found in ranks - check position
+            let position = keyword_ranks
+                .iter()
+                .position(|r| r.answer_index == response_id)
+                .unwrap();
+
+            // FIXME: should use score instead of position
+            if position < 5 {
+                // Top 5 - highly relevant, no penalty
+                return 0.0;
+            } else if position < 10 {
+                // Top 10 - somewhat relevant, small penalty
+                return -0.2;
             }
         }
-
-        // Response not found in top ranks for any keyword - irrelevant
-        // Apply significant penalty
-        return -0.5;
     }
 
-    // No QA ranks available - can't evaluate relevance
-    0.0
+    // Response not found in top ranks for any keyword - irrelevant
+    // Apply significant penalty
+    -0.5
 }
 
 /// Select the next question to ask based on previous interactions
@@ -274,7 +284,7 @@ fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usi
     session.reset_continuation();
 
     // If there's a previous player response, use AQ ranks to select related question
-    if let Some(last_response_idx) = session.last_response_index
+    if let Some(last_response_idx) = session.last_response_id
         && let Some(aq_rank) = corpus.aq_ranks.get(last_response_idx)
     {
         // Filter available questions (not yet asked)
@@ -315,12 +325,12 @@ fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usi
 }
 
 fn create_diner_statement_with_sequence(
-    speech_indices: Vec<usize>,
+    speech_ids: Vec<usize>,
     corpus: &TrialCorpus,
     _session: &mut TrialSession,
 ) -> TrialStatement {
     // Convert speech indices to view speeches
-    let speech_sequence: Vec<_> = speech_indices
+    let speech_sequence: Vec<_> = speech_ids
         .iter()
         .map(|&idx| corpus.diner_speeches[idx].to_view_with_index(idx))
         .collect();
@@ -338,7 +348,7 @@ fn create_diner_statement_with_sequence(
 /// Used for lazy loading - called only when player actually selects a keyword.
 /// Uses QA ranks to find contextually relevant responses with temperature-weighted sampling.
 fn generate_response_options(
-    speech_idx: usize,
+    speech_id: usize,
     keyword_idx: usize,
     corpus: &TrialCorpus,
     session: &mut TrialSession,
@@ -354,11 +364,11 @@ fn generate_response_options(
     log::info!(
         "Generating {} response options for speech {} keyword {}",
         options_count,
-        speech_idx,
+        speech_id,
         keyword_idx
     );
 
-    let selected = if let Some(question_ranks) = corpus.qa_ranks.get(speech_idx)
+    let selected = if let Some(question_ranks) = corpus.qa_ranks.get(speech_id)
         && let Some(ranks) = question_ranks.get(keyword_idx)
     {
         log::debug!("> Using QA ranks with {} candidates", ranks.len());
@@ -368,7 +378,7 @@ fn generate_response_options(
         // Fallback: random sampling
         log::warn!(
             "No QA ranks found for speech {} keyword {}, using random selection",
-            speech_idx,
+            speech_id,
             keyword_idx
         );
         (0..corpus.responses.len()).choose_multiple(&mut session.rng, options_count)

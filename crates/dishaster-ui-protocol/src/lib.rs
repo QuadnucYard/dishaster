@@ -46,7 +46,12 @@ pub enum GameRequest {
     /// Mark trial intro as done and proceed to main trial.
     TrialIntroDone,
     /// Check a keyword during trial interaction.
-    TrialCheckKeyword(usize),
+    TrialCheckKeyword {
+        /// Index of the speech in the corpus (for generating appropriate responses).
+        speech_id: usize,
+        /// Index of the keyword within that speech.
+        keyword_index: usize,
+    },
     /// Navigate back from thought display in trial.
     TrialBackFromThought,
     /// Submit a response choice during trial.
@@ -101,12 +106,7 @@ pub enum UiCommand {
     /// Trial player responds.
     TrialRightSpeak(Box<TrialSpeech>),
     /// Response candidates for a keyword (lazy loaded).
-    TrialResponseCandidates {
-        /// Index of the keyword these candidates are for.
-        keyword_index: usize,
-        /// The response options to choose from.
-        options: Vec<TrialResponseOption>,
-    },
+    TrialResponseCandidates(Vec<TrialResponseOption>),
     /// Trial has ended.
     TrialEnd,
 

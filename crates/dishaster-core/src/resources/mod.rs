@@ -6,6 +6,7 @@ mod time;
 use std::{collections::VecDeque, sync::Arc};
 
 use dishaster_save_models::PermanentEffects;
+use dishaster_views::TrialResponseOption;
 
 pub use self::{buffers::*, time::Time};
 use crate::{components::*, models::*, prelude::*};
@@ -153,10 +154,12 @@ pub struct TrialSession {
     pub rng: Prng,
     /// Indices of questions already asked in this trial
     asked_questions: Vec<usize>,
+    /// Cached response options for (speech_id, keyword_index) pairs
+    pub cached_options: FxHashMap<(usize, usize), Vec<TrialResponseOption>>,
     /// The most recent response corpus index selected by the player
-    pub last_response_index: Option<usize>,
+    pub last_response_id: Option<usize>,
     /// The most recent diner speech index
-    pub last_diner_speech_index: Option<usize>,
+    pub last_diner_speech_id: Option<usize>,
     /// The most recent diner speech index that the player is responding to (for context evaluation)
     pub current_question_index: Option<usize>,
     /// Current continuation depth (consecutive speeches by same speaker)
@@ -173,8 +176,9 @@ impl TrialSession {
         Self {
             rng: Prng::new(seed),
             asked_questions: Vec::new(),
-            last_response_index: None,
-            last_diner_speech_index: None,
+            cached_options: Default::default(),
+            last_response_id: None,
+            last_diner_speech_id: None,
             current_question_index: None,
             continuation_depth: 0,
             max_continuation_depth: 3,
@@ -185,8 +189,9 @@ impl TrialSession {
     /// Reset the session for a new trial
     pub fn reset(&mut self) {
         self.asked_questions.clear();
-        self.last_response_index = None;
-        self.last_diner_speech_index = None;
+        self.cached_options.clear();
+        self.last_response_id = None;
+        self.last_diner_speech_id = None;
         self.current_question_index = None;
         self.continuation_depth = 0;
     }
@@ -205,14 +210,14 @@ impl TrialSession {
 
     /// Record the player's response choice
     pub fn set_last_response(&mut self, response_index: usize) {
-        self.last_response_index = Some(response_index);
+        self.last_response_id = Some(response_index);
         // Reset continuation depth when speaker alternates
         self.continuation_depth = 0;
     }
 
     /// Record a diner speech
     pub fn set_last_diner_speech(&mut self, speech_index: usize) {
-        self.last_diner_speech_index = Some(speech_index);
+        self.last_diner_speech_id = Some(speech_index);
     }
 
     /// Set the current question index (the question player is responding to)

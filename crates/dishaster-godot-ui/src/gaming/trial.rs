@@ -8,6 +8,7 @@ use godot::{classes::AnimationPlayer, prelude::*};
 use crate::prelude::*;
 
 const INTRO_TIME: f32 = 2.0;
+const SPEECH_INTERVAL: f32 = 2.0;
 const COUNTDOWN_TIME: f32 = 3.0;
 
 #[derive(Debug, Default)]
@@ -16,8 +17,8 @@ struct State {
     pub phase: Phase,
     pub inner_speech_text: EcoString,
     pub fade_time: f32,
-    /// Current response options (loaded lazily when keyword is selected)
-    pub options: Vec<Vec<TrialResponseOption>>,
+    /// Remaining speeches in the sequence (for multi-turn diner dialogue)
+    pub speech_sequence: Vec<TrialSpeech>,
 }
 
 #[derive(Debug, Default)]
@@ -46,15 +47,15 @@ pub struct TrialGui {
     #[subtree("%Thought")]
     thought: TrialThoughtGui,
 
-    state: Option<State>,
+    state: State,
 }
 
 impl TrialGui {
     pub fn intro(&mut self, e: TrialIntro) {
-        self.state = Some(State {
+        self.state = State {
             phase: Phase::Intro,
             ..Default::default()
-        });
+        };
 
         self.left.set_appearance(&e.left);
         self.right.set_appearance(&e.right);
@@ -70,27 +71,21 @@ impl TrialGui {
 
     pub fn left_speak(&mut self, statement: TrialStatement) {
         // Start with the first speech in the sequence
-        let mut speech_sequence = statement.speech_sequence;
+        let speech_sequence = statement.speech_sequence;
 
         if speech_sequence.is_empty() {
             panic!("Speech sequence should not be empty");
         }
 
-        let first_speech = speech_sequence.remove(0);
-
-        // The speech may contain keywords for the left side.
-        let inner_text = speech_to_bbcode(&first_speech);
         self.right.set_visible(false);
-        self.left.set_speech(&first_speech.appearance, &inner_text);
         self.left.set_visible(true);
 
-        self.state = Some(State {
+        self.state = State {
             phase: Phase::LeftSpeaking,
-            time: 0.0,
-            inner_speech_text: inner_text,
-            fade_time: estimate_fade_time(&first_speech.text),
-            options: Vec::new(), // Options loaded lazily when keyword selected
-        });
+            speech_sequence,
+            ..Default::default()
+        };
+        self.display_next_speech_left();
     }
 
     pub fn right_speak(&mut self, speech: TrialSpeech) {
@@ -98,32 +93,35 @@ impl TrialGui {
         self.left.set_visible(false);
         self.right.set_speech(&speech.appearance, &inner_text);
         self.right.set_visible(true);
-        self.state = Some(State {
+        self.state = State {
             phase: Phase::RightSpeaking,
             time: 0.0,
             inner_speech_text: inner_text,
             fade_time: estimate_fade_time(&speech.text),
-            options: Vec::new(),
-        });
+            speech_sequence: Vec::new(),
+        };
         self.time_progress.set_visible(false);
     }
 
-    pub fn show_response_candidates(
-        &mut self,
-        keyword_index: usize,
-        options: Vec<TrialResponseOption>,
-    ) {
-        if let Some(state) = &mut self.state
-            && let Phase::LeftSpeaking = state.phase
-        {
-            // Store the options for this keyword index
-            if state.options.len() <= keyword_index {
-                state.options.resize(keyword_index + 1, Vec::new());
-            }
-            state.options[keyword_index] = options;
+    fn display_next_speech_left(&mut self) {
+        let state = &mut self.state;
 
+        let next_speech = state.speech_sequence.remove(0);
+        let next_text = speech_to_bbcode(&next_speech);
+
+        self.left.set_speech(&next_speech.appearance, &next_text);
+
+        // Update state for next speech
+        state.time = 0.0;
+        state.fade_time = estimate_fade_time(&next_speech.text);
+        state.inner_speech_text = next_text;
+    }
+
+    pub fn show_response_candidates(&mut self, options: Vec<TrialResponseOption>) {
+        let state = &mut self.state;
+        if let Phase::LeftSpeaking = state.phase {
             // Show the thought panel with the options
-            self.thought.set_options(&state.options[keyword_index]);
+            self.thought.set_options(&options);
             self.thought.set_visible(true);
         }
     }
@@ -146,8 +144,12 @@ impl Gui for TrialGui {
         let cmd = commands.clone();
         self.left.content.on_meta_click.connect(move |meta| {
             godot_print!("Left content meta clicked: {:?}", meta);
-            let keyword_index = meta.to::<GString>().to_string().parse().unwrap_or_default();
-            cmd.push_req(GameRequest::TrialCheckKeyword(keyword_index));
+            let meta = meta.to::<GString>().to_string();
+            let parts = meta.split_once('-').expect("invalid meta format");
+            cmd.push_req(GameRequest::TrialCheckKeyword {
+                speech_id: parts.0.parse().unwrap(),
+                keyword_index: parts.1.parse().unwrap(),
+            });
         });
 
         let cmd = commands.clone();
@@ -165,9 +167,7 @@ impl Gui for TrialGui {
     }
 
     fn process(&mut self, cmd: GuiCommands, delta: f64) {
-        let Some(state) = &mut self.state else {
-            return;
-        };
+        let state = &mut self.state;
 
         state.time += delta as f32;
 
@@ -185,7 +185,15 @@ impl Gui for TrialGui {
                 self.left
                     .content
                     .set_text(&faded(&state.inner_speech_text, state.time));
-                if state.time > state.fade_time {
+
+                // Check if current speech has finished displaying
+                if state.time <= state.fade_time {
+                    return;
+                }
+
+                // Check if there are more speeches in the sequence
+                if state.speech_sequence.is_empty() {
+                    // All speeches done, show countdown
                     self.time_progress.set_visible(true);
                     self.time_progress
                         .set_value((state.time - state.fade_time) / COUNTDOWN_TIME);
@@ -193,7 +201,16 @@ impl Gui for TrialGui {
                         state.phase = Phase::Idle;
                         cmd.push_req(GameRequest::TrialTimeout);
                     }
+                    return;
                 }
+
+                // Move to next speech after a short interval
+                if state.time <= state.fade_time + SPEECH_INTERVAL {
+                    return;
+                }
+
+                // Display next speech
+                self.display_next_speech_left();
             }
             Phase::RightSpeaking => {
                 self.right
@@ -255,7 +272,8 @@ fn speech_to_bbcode(speech: &TrialSpeech) -> EcoString {
                 buffer.push_str(t);
             }
             TrialSpeechItem::Keyword(k) => {
-                buffer.push_str(&format!("[url={keyword_index}][b][color=dark_orchid][font_size=90]{k}[/font_size][/color][/b][/url]"));
+                let meta = format!("{}-{}", speech.index, keyword_index);
+                buffer.push_str(&format!("[url={meta}][b][color=dark_orchid][font_size=90]{k}[/font_size][/color][/b][/url]"));
                 keyword_index += 1;
             }
             TrialSpeechItem::LineBreak => {

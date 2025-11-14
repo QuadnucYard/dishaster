@@ -36,6 +36,8 @@ pub enum SimCommand {
     TrialTimeout,
     /// Request response candidates for a specific keyword (lazy loading).
     TrialRequestCandidates {
+        /// Id of the current speech in the trial.
+        speech_id: usize,
         /// Index of the keyword within the current speech.
         keyword_index: usize,
     },
