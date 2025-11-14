@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use dishaster_godot_game::progress_service;
 use dishrupt_godot_scene::*;
 
@@ -9,8 +7,9 @@ pub struct StartProcedure;
 
 impl SceneProcedure for StartProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
-        // ctx.transition = Some(SceneTransition::Push(GameScene::ID));
-        ctx.scene_stack.change_push_scene(ctx.base, StartScene::ID);
+        // Initial scene load without transition
+        ctx.scene_stack
+            .change_push_scene_immediate(ctx.base, StartScene::ID);
 
         SceneProcedurePoll::Ready
     }
@@ -20,8 +19,6 @@ pub struct EnterLevelProcedure;
 
 impl SceneProcedure for EnterLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
-        println!("enter level");
-
         let level = {
             let service = progress_service();
             service
@@ -29,14 +26,20 @@ impl SceneProcedure for EnterLevelProcedure {
                 .expect("failed to get current day level in progress store")
         };
 
-        ctx.scene_stack.change_push_scene(ctx.base, GameScene::ID);
-
-        ctx.scene_stack.inspect_active_scene_mut(|scene| {
-            let scene: &mut dyn Any = scene;
-            let game_scene = scene.downcast_mut::<GameScene>().expect("game scene");
-
-            game_scene.start_game(ctx.base, level);
-        });
+        // Use callback to initialize game scene after it's loaded
+        let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
+        ctx.scene_stack.change_push_scene_with_callback(
+            ctx.base,
+            GameScene::ID,
+            Some(trans),
+            move |scene, scene_ctx| {
+                use std::any::Any;
+                let game_scene = (scene as &mut dyn Any)
+                    .downcast_mut::<GameScene>()
+                    .expect("expected GameScene");
+                game_scene.start_game(scene_ctx, level);
+            },
+        );
 
         SceneProcedurePoll::Ready
     }
@@ -46,8 +49,9 @@ pub struct ExitLevelProcedure;
 
 impl SceneProcedure for ExitLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
-        // assert!(ctx.scene_manager.is_active_of_type::<GameScene>());
-        ctx.scene_stack.change_pop_scene(ctx.base);
+        let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
+        ctx.scene_stack.change_pop_scene(ctx.base, Some(trans));
+
         SceneProcedurePoll::Ready
     }
 }
@@ -56,7 +60,8 @@ pub struct AdvanceLevelProcedure;
 
 impl SceneProcedure for AdvanceLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
-        ctx.scene_stack.change_pop_scene(ctx.base); // pop GameScene
+        let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
+        ctx.scene_stack.change_pop_scene(ctx.base, Some(trans)); // pop GameScene
 
         EnterLevelProcedure.process(ctx) // push new GameScene
     }

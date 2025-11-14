@@ -4,6 +4,8 @@ version.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 edition.workspace = true
+description = "Stack-based scene management system for Godot with transitions and lifecycle hooks"
+readme = "README.md"
 
 [lib]
 test = false
@@ -17,4 +19,4 @@ godot.workspace = true
 log.workspace = true
 
 [lints]
-# workspace = true
+workspace = true
