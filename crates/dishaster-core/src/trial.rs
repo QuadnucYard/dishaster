@@ -63,18 +63,22 @@ impl Simulation {
         options
     }
 
-    pub(super) fn trial_respond(&mut self, resp_id: usize) -> views::TrialSpeech {
-        // Get current question index and response data first
-        let (current_question_idx, mut response_score, speech) = {
-            let session = self.world.resource::<TrialSession>();
-            let registry = self.world.resource::<GameModelRegistryRes>();
+    pub(super) fn trial_respond(&mut self, resp_id: usize) -> views::TrialStatement {
+        // Get current question index and response data, then build speech sequence
+        let (current_question_idx, mut response_score, speech_sequence) = {
+            let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
+                SystemState::new(&mut self.world);
+            let (registry, mut session) = system_state.get_mut(&mut self.world);
 
             let current_question_idx = session.current_question_index;
             let response = &registry.trial.responses[resp_id];
             let response_score = response.response_score;
-            let speech = response.content.to_view_with_index(resp_id);
 
-            (current_question_idx, response_score, speech)
+            // Build speech sequence: start with the main response, then follow RR ranks for continuations
+            let speech_sequence =
+                generate_response_sequence(resp_id, &registry.trial, &mut session);
+
+            (current_question_idx, response_score, speech_sequence)
         };
 
         // Record the player's response choice
@@ -109,7 +113,7 @@ impl Simulation {
         let base_impact = reputation_config.base_impacts.quality;
         reputation.apply_feedback_impact(base_impact, response_score, &reputation_config);
 
-        speech
+        views::TrialStatement { speech_sequence }
     }
 
     /// After player responds, check if diner should continue with new topic.
@@ -228,6 +232,81 @@ fn generate_speech_sequence(corpus: &TrialCorpus, session: &mut TrialSession) ->
         "Generated speech sequence of length {}: {:?}",
         sequence.len(),
         sequence
+    );
+    sequence
+}
+
+/// Generate a sequence of related player responses using RR ranks for topic coherence
+///
+/// This creates multi-statement player responses by:
+/// 1. Starting with the selected response
+/// 2. Following RR continuation chains based on semantic similarity
+/// 3. Using probabilistic decision (score as probability) to continue or stop
+/// 4. Limiting sequence length to avoid overly long responses
+fn generate_response_sequence(
+    resp_id: usize,
+    corpus: &TrialCorpus,
+    session: &mut TrialSession,
+) -> Vec<views::TrialSpeech> {
+    let mut sequence = Vec::new();
+    let mut used_responses = FxHashSet::default();
+
+    // Start with the main response
+    let response = &corpus.responses[resp_id];
+    sequence.push(response.content.to_view_with_index(resp_id));
+    used_responses.insert(resp_id);
+
+    // Generate continuation sequence using RR ranks
+    let mut current_response = resp_id;
+
+    while sequence.len() <= session.max_continuation_depth as usize {
+        let Some(rr_rank) = corpus.rr_ranks.get(current_response) else {
+            break;
+        };
+
+        // Filter available continuations (exclude already used responses to avoid repetition)
+        let available_ranks: Vec<_> = rr_rank
+            .iter()
+            .filter(|rank| !used_responses.contains(&rank.answer_index))
+            .cloned()
+            .collect();
+
+        if available_ranks.is_empty() {
+            break;
+        }
+
+        let best_score = available_ranks[0].score;
+
+        // Use score as probability: higher similarity = more likely to continue
+        if !session.should_continue(best_score) {
+            break;
+        }
+
+        // Sample a continuation from available RR ranks
+        let selected =
+            sample_weighted_indices(&available_ranks, session.temperature, 1, &mut session.rng);
+
+        let Some(&next_response) = selected.first() else {
+            break;
+        };
+
+        let next_response_content = &corpus.responses[next_response].content;
+        sequence.push(next_response_content.to_view_with_index(next_response));
+        used_responses.insert(next_response);
+        current_response = next_response;
+
+        log::info!(
+            "RR continuation in response sequence: {} → {} (score: {:.3})",
+            resp_id,
+            next_response,
+            best_score
+        );
+    }
+
+    log::info!(
+        "Generated response sequence of length {}: {:?}",
+        sequence.len(),
+        sequence.iter().map(|s| s.index).collect::<Vec<_>>()
     );
     sequence
 }

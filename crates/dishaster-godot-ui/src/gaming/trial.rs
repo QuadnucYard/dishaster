@@ -8,7 +8,8 @@ use godot::{classes::AnimationPlayer, prelude::*};
 use crate::prelude::*;
 
 const INTRO_TIME: f32 = 2.0;
-const SPEECH_INTERVAL: f32 = 2.0;
+const LEFT_SPEECH_INTERVAL: f32 = 2.0;
+const RIGHT_SPEECH_INTERVAL: f32 = 2.0;
 const COUNTDOWN_TIME: f32 = 3.0;
 
 #[derive(Debug, Default)]
@@ -28,6 +29,11 @@ enum Phase {
     Intro,
     LeftSpeaking,
     RightSpeaking,
+}
+
+enum Side {
+    Left,
+    Right,
 }
 
 #[derive(UITree)]
@@ -72,7 +78,6 @@ impl TrialGui {
     pub fn left_speak(&mut self, statement: TrialStatement) {
         // Start with the first speech in the sequence
         let speech_sequence = statement.speech_sequence;
-
         if speech_sequence.is_empty() {
             panic!("Speech sequence should not be empty");
         }
@@ -85,31 +90,38 @@ impl TrialGui {
             speech_sequence,
             ..Default::default()
         };
-        self.display_next_speech_left();
+        self.display_next_speech(Side::Left);
     }
 
-    pub fn right_speak(&mut self, speech: TrialSpeech) {
-        let inner_text = speech_to_bbcode(&speech);
+    pub fn right_speak(&mut self, statement: TrialStatement) {
+        // Start with the first speech in the sequence
+        let speech_sequence = statement.speech_sequence;
+        if speech_sequence.is_empty() {
+            panic!("Speech sequence should not be empty");
+        }
+
         self.left.set_visible(false);
-        self.right.set_speech(&speech.appearance, &inner_text);
         self.right.set_visible(true);
+
         self.state = State {
             phase: Phase::RightSpeaking,
-            time: 0.0,
-            inner_speech_text: inner_text,
-            fade_time: estimate_fade_time(&speech.text),
-            speech_sequence: Vec::new(),
+            speech_sequence,
+            ..Default::default()
         };
-        self.time_progress.set_visible(false);
+        self.display_next_speech(Side::Right);
     }
 
-    fn display_next_speech_left(&mut self) {
-        let state = &mut self.state;
+    fn display_next_speech(&mut self, side: Side) {
+        let state: &mut State = &mut self.state;
 
         let next_speech = state.speech_sequence.remove(0);
         let next_text = speech_to_bbcode(&next_speech);
 
-        self.left.set_speech(&next_speech.appearance, &next_text);
+        let speech_gui = match side {
+            Side::Left => &mut self.left,
+            Side::Right => &mut self.right,
+        };
+        speech_gui.set_speech(&next_speech.appearance, &next_text);
 
         // Update state for next speech
         state.time = 0.0;
@@ -208,21 +220,40 @@ impl Gui for TrialGui {
                 }
 
                 // Move to next speech after a short interval
-                if state.time <= state.fade_time + SPEECH_INTERVAL {
+                if state.time <= state.fade_time + LEFT_SPEECH_INTERVAL {
                     return;
                 }
 
                 // Display next speech
-                self.display_next_speech_left();
+                self.display_next_speech(Side::Left);
             }
             Phase::RightSpeaking => {
                 self.right
                     .content
                     .set_text(&faded(&state.inner_speech_text, state.time));
-                if state.time > state.fade_time + 1.0 {
-                    state.phase = Phase::Idle;
-                    cmd.push_req(GameRequest::TrialResponseDone);
+
+                // Check if current speech has finished displaying
+                if state.time <= state.fade_time {
+                    return;
                 }
+
+                // Check if there are more speeches in the sequence
+                if state.speech_sequence.is_empty() {
+                    // All speeches done
+                    if state.time > state.fade_time + RIGHT_SPEECH_INTERVAL {
+                        state.phase = Phase::Idle;
+                        cmd.push_req(GameRequest::TrialResponseDone);
+                    }
+                    return;
+                }
+
+                // Move to next speech after a short interval
+                if state.time <= state.fade_time + RIGHT_SPEECH_INTERVAL {
+                    return;
+                }
+
+                // Display next speech
+                self.display_next_speech(Side::Right);
             }
             _ => { /* TODO */ }
         }

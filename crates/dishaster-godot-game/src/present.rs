@@ -149,10 +149,10 @@ impl Game {
 
                     self.ui_commands.push(UiCommand::TrialLeftSpeak(statement));
                 }
-                SimEvent::TrialRightSpeak(speech) => {
-                    godot_print!("Received trial speech (right): {:?}", speech);
+                SimEvent::TrialRightSpeak(statement) => {
+                    godot_print!("Received trial speech (right): {:?}", statement);
 
-                    self.ui_commands.push(UiCommand::TrialRightSpeak(speech));
+                    self.ui_commands.push(UiCommand::TrialRightSpeak(statement));
                 }
                 SimEvent::TrialResponseCandidates(options) => {
                     godot_print!(

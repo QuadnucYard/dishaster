@@ -114,7 +114,7 @@ pub enum UiCommand {
     /// Trial diner speaks.
     TrialLeftSpeak(Box<TrialStatement>),
     /// Trial player responds.
-    TrialRightSpeak(Box<TrialSpeech>),
+    TrialRightSpeak(Box<TrialStatement>),
     /// Response candidates for a keyword (lazy loaded).
     TrialResponseCandidates(Vec<TrialResponseOption>),
     /// Trial has ended.

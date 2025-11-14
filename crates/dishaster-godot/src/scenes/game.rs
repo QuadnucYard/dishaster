@@ -264,9 +264,9 @@ impl GameScene {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
                 trial_gui.left_speak(*statement);
             }
-            UiCommand::TrialRightSpeak(speech) => {
+            UiCommand::TrialRightSpeak(statement) => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.right_speak(*speech);
+                trial_gui.right_speak(*statement);
             }
             UiCommand::TrialResponseCandidates(options) => {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
