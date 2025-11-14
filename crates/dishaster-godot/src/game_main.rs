@@ -6,9 +6,9 @@ use std::{
 
 use anyhow::{Context, Result, anyhow};
 use dishaster_data::{DataLoader, GameDataAssets, load_toml};
-use dishaster_godot_game::{PROGRESS_SERVICE, user_store::GodotUserStorage};
+use dishaster_godot_game::{PROGRESS_SERVICE, progress_service, user_store::GodotUserStorage};
 use dishaster_godot_ui::register_guis;
-use dishaster_persistence::PlayerService;
+use dishaster_persistence::UserDataService;
 use dishrupt_asset::{AssetCatalog, AssetPathConfig, AssetResolver};
 use dishrupt_godot_audio::AudioManager;
 use dishrupt_godot_input::listener::InputListener;
@@ -112,6 +112,8 @@ impl Inner {
         );
         self.gui.ready();
 
+        self.apply_preferences();
+
         self.scene_manager.schedule(StartProcedure);
     }
 
@@ -188,6 +190,18 @@ impl Inner {
     }
 }
 
+impl Inner {
+    fn apply_preferences(&mut self) {
+        let svc = progress_service();
+        let audio_preferences = &svc.preferences().audio;
+
+        self.audio.set_music_mute(audio_preferences.music_mute);
+        self.audio.set_sound_mute(audio_preferences.sound_mute);
+        self.audio.set_music_volume(audio_preferences.music_volume);
+        self.audio.set_sound_volume(audio_preferences.sound_volume);
+    }
+}
+
 pub(crate) static ASSET_CATALOG: OnceLock<AssetCatalog> = OnceLock::new();
 
 static GAME_DATA: OnceLock<GameDataAssets> = OnceLock::new();
@@ -214,7 +228,7 @@ fn init_game() -> Result<()> {
         .context("failed to load game data")?;
     let db = GAME_DATA.get_or_init(|| db);
 
-    let mut service = PlayerService::load_or_create(GodotUserStorage, &db.models, None)
+    let mut service = UserDataService::load_or_create(GodotUserStorage, &db.models, None)
         .context("failed to initialize progress service")?;
     if dishaster_validation::validate_player_profile(service.profile(), &db.models).is_err() {
         log::warn!("Player profile validation failed, resetting to default profile");
@@ -233,19 +247,3 @@ fn init_game() -> Result<()> {
 
     Ok(())
 }
-
-/*
-fn setup_preference() {
-    let pref = local_store().get_preference().expect("preference");
-
-    let mut audio_server = AudioServer::singleton();
-
-    let bus = audio_server.get_bus_index("Music");
-    audio_server.set_bus_volume_db(bus, pref.music_volume as f32 / 100.0);
-    audio_server.set_bus_mute(bus, pref.music_mute);
-
-    let bus = audio_server.get_bus_index("Sound");
-    audio_server.set_bus_volume_db(bus, pref.sound_volume as f32 / 100.0);
-    audio_server.set_bus_mute(bus, pref.sound_mute);
-}
- */

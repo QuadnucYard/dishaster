@@ -7,7 +7,7 @@ use dishaster_core::{
     sim::{ISimulation, Simulation},
 };
 use dishaster_data::DataLoader;
-use dishaster_persistence::{PersistentStorage, Persister, PlayerService};
+use dishaster_persistence::{PersistentStorage, Persister, UserDataService};
 use dishrupt_rng::{Prng, prelude::Rng};
 
 /// In-memory persistent storage for testing purposes.
@@ -78,7 +78,7 @@ fn main() -> Result<()> {
     dishaster_validation::validate_registry(&registry)?;
     println!("✓ Data validation passed");
 
-    let mut service = PlayerService::load_or_create(MemoryStorage, &registry, None)?;
+    let mut service = UserDataService::load_or_create(MemoryStorage, &registry, None)?;
     dishaster_validation::validate_player_profile(service.profile(), &registry)?;
     println!("✓ Player profile validation passed");
 
@@ -143,7 +143,7 @@ fn main() -> Result<()> {
         day_stats.total_visits
     );
 
-    service.save_profile(persisted)?;
+    service.save_sim_profile(persisted)?;
     std::mem::drop(sim);
 
     // now run more days
@@ -178,7 +178,7 @@ fn main() -> Result<()> {
         sim.run_steps(1);
 
         let persisted = sim.persist();
-        service.save_profile(persisted)?;
+        service.save_sim_profile(persisted)?;
     }
 
     // Print aggregate stats at the end

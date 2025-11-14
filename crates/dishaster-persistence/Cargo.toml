@@ -14,10 +14,12 @@ dishaster-models.workspace = true # only for registry
 anyhow.workspace = true
 log.workspace = true
 ron.workspace = true
+toml.workspace = true
 
 [dev-dependencies]
 dishrupt-core.workspace = true
 dishrupt-persistence = { workspace = true, features = ["fs"] }
+dishaster-save-models.workspace = true
 dishaster-models.workspace = true
 
 tempfile.workspace = true

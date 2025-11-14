@@ -12,7 +12,7 @@ use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
 use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelSetupState};
-use dishaster_persistence::PlayerService;
+use dishaster_persistence::UserDataService;
 use dishaster_ui_protocol::{PhaseMusic, StatsView, UiCommand};
 use dishaster_views::DayHudState;
 use dishrupt_asset::AssetCatalog;
@@ -30,9 +30,9 @@ use rustc_hash::FxHashMap;
 use self::{perf::PerfTracker, present::*};
 use crate::{dbgviz::*, hint::HintTracker, user_store::GodotUserStorage};
 
-pub static PROGRESS_SERVICE: OnceLock<Mutex<PlayerService<GodotUserStorage>>> = OnceLock::new();
+pub static PROGRESS_SERVICE: OnceLock<Mutex<UserDataService<GodotUserStorage>>> = OnceLock::new();
 
-pub fn progress_service() -> MutexGuard<'static, PlayerService<GodotUserStorage>> {
+pub fn progress_service() -> MutexGuard<'static, UserDataService<GodotUserStorage>> {
     PROGRESS_SERVICE
         .get()
         .expect("progress service not initialized")

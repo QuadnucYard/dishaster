@@ -17,6 +17,11 @@ pub enum AppRequest {
     ShowCredits,
     /// Return to main menu from credits or other screens.
     BackToMenu,
+
+    /// Toggle music on/off.
+    ToggleMusic(bool),
+    /// Toggle sound effects on/off.
+    ToggleSound(bool),
 }
 
 impl UiRequest for AppRequest {}

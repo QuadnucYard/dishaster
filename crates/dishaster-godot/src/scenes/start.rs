@@ -1,13 +1,18 @@
 use std::{any::Any, sync::LazyLock};
 
 use dishaster_core::views::{CreditSectionView, CreditsView};
+use dishaster_godot_game::progress_service;
 use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_core::asset::AudioRef;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use dishrupt_godot_utils::BindGodot;
-use godot::{classes::Node, global::godot_print, obj::Gd};
+use godot::{
+    classes::Node,
+    global::{godot_error, godot_print},
+    obj::Gd,
+};
 
 use crate::{
     game_main::{ASSET_CATALOG, game_data},
@@ -44,6 +49,15 @@ impl Scene for StartScene {
 
     fn enter(&mut self, ctx: &mut SceneContext) {
         ctx.gui.show::<StartMenuGui>();
+
+        // Update toggle buttons from saved settings
+        {
+            let svc = progress_service();
+            let audio_prefs = &svc.preferences().audio;
+            ctx.gui
+                .get_mut::<StartMenuGui>()
+                .update_from_preferences(audio_prefs.music_mute, audio_prefs.sound_mute);
+        }
 
         if self.opening.is_none() {
             let catalog = ASSET_CATALOG.get().unwrap().clone();
@@ -102,6 +116,28 @@ impl StartScene {
             AppRequest::BackToMenu => {
                 ctx.gui.hide::<CreditsGui>();
                 ctx.gui.show::<StartMenuGui>();
+            }
+
+            AppRequest::ToggleMusic(enabled) => {
+                godot_print!("Toggling music: {}", enabled);
+                // Apply immediately
+                ctx.audio.set_music_mute(enabled);
+
+                let mut svc = progress_service();
+                svc.preferences_mut().audio.music_mute = enabled;
+                if let Err(e) = svc.save_preferences() {
+                    godot_error!("Failed to save preferences: {}", e);
+                }
+            }
+            AppRequest::ToggleSound(enabled) => {
+                // Apply immediately
+                ctx.audio.set_sound_mute(enabled);
+
+                let mut svc = progress_service();
+                svc.preferences_mut().audio.sound_mute = enabled;
+                if let Err(e) = svc.save_preferences() {
+                    godot_error!("Failed to save preferences: {}", e);
+                }
             }
             AppRequest::ExitLevel => panic!("should not happen in start menu"),
         }

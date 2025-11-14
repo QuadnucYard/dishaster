@@ -5,12 +5,14 @@ mod diner_pool;
 mod level;
 mod perma_effects;
 mod player;
+mod preference;
 
 pub use cosmetic::*;
 pub use diner_pool::*;
 pub use level::*;
 pub use perma_effects::*;
 pub use player::*;
+pub use preference::*;
 
 mod prelude {
     pub use dishrupt_core::{

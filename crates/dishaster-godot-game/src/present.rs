@@ -24,7 +24,7 @@ impl Game {
 
                     let profile = self.sim_runner.persist();
                     progress_service()
-                        .save_profile(profile)
+                        .save_sim_profile(profile)
                         .expect("failed to persist profile");
                 }
 
@@ -189,7 +189,7 @@ impl Game {
                         // Save hint immediately
                         let mut svc = progress_service();
                         svc.update_seen_hint(hint_id);
-                        let _ = svc.save(); // Ignore errors for hint saving
+                        let _ = svc.save_profile(); // Ignore errors for hint saving
                     }
                 }
             }

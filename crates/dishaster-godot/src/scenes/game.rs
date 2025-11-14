@@ -118,6 +118,8 @@ impl GameScene {
             AppRequest::ExitLevel => {
                 ctx.schedule(ExitLevelProcedure);
             }
+            AppRequest::ToggleMusic(_mute) => {}
+            AppRequest::ToggleSound(_mute) => {}
         }
     }
 

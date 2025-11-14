@@ -2,7 +2,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
 use dishaster_models::{
-    CanteenLayoutState, CanteenPlacements, GameModelRegistry, LevelConfig, ModelId, SimProfile,
+    CanteenLayoutState, CanteenPlacements, GameModelRegistry, LevelConfig, ModelId, Preferences,
+    SimProfile,
 };
 use dishaster_save_models::{
     LevelSetupState, PlayerProfile, PlayerProgress, ProfileMeta, USER_PROGRESS_VERSION,
@@ -10,7 +11,7 @@ use dishaster_save_models::{
 use dishrupt_core::prelude::*;
 use dishrupt_persistence::PersistentStorage;
 
-use crate::PlayerProfilePersister;
+use crate::{PlayerProfilePersister, PreferencesPersister};
 
 /// Low-level persistence service for user progress.
 struct PersistenceService<Store: PersistentStorage> {
@@ -19,12 +20,13 @@ struct PersistenceService<Store: PersistentStorage> {
 
 impl<Store: PersistentStorage> PersistenceService<Store> {
     const SAVE_FILE: &str = "save_default.ron";
+    const PREFERENCES_FILE: &str = "preferences.toml";
 
     pub fn new(store: Store) -> Self {
         Self { store }
     }
 
-    pub fn load_progress(&mut self, default_level: &LevelConfig) -> Result<PlayerProfile> {
+    pub fn load_profile(&mut self, default_level: &LevelConfig) -> Result<PlayerProfile> {
         match self
             .store
             .load_or_create_with::<_, PlayerProfilePersister>(Self::SAVE_FILE, || {
@@ -45,20 +47,33 @@ impl<Store: PersistentStorage> PersistenceService<Store> {
         }
     }
 
-    pub fn save_progress(&mut self, profile: &PlayerProfile) -> Result<()> {
+    pub fn save_profile(&mut self, profile: &PlayerProfile) -> Result<()> {
         self.store
             .save_with::<_, PlayerProfilePersister>(Self::SAVE_FILE, profile)
+    }
+
+    pub fn load_preferences(&mut self) -> Result<Preferences> {
+        self.store.load_or_create_with::<_, PreferencesPersister>(
+            Self::PREFERENCES_FILE,
+            Preferences::default,
+        )
+    }
+
+    pub fn save_preferences(&mut self, preferences: &Preferences) -> Result<()> {
+        self.store
+            .save_with::<_, PreferencesPersister>(Self::PREFERENCES_FILE, preferences)
     }
 }
 
 /// High-level facade that ties the persistence layer to model data.
-pub struct PlayerService<Store: PersistentStorage> {
+pub struct UserDataService<Store: PersistentStorage> {
     inner: PersistenceService<Store>,
 
     profile: PlayerProfile,
+    preferences: Preferences,
 }
 
-impl<Store: PersistentStorage> PlayerService<Store> {
+impl<Store: PersistentStorage> UserDataService<Store> {
     /// Load (or create) progress and prepare a service ready to dispense levels.
     pub fn load_or_create(
         store: Store,
@@ -68,8 +83,14 @@ impl<Store: PersistentStorage> PlayerService<Store> {
         let mut inner = PersistenceService::new(store);
 
         let default_level = get_default_level(registry, default_level_id)?;
-        let profile = inner.load_progress(default_level)?;
-        Ok(Self { inner, profile })
+        let profile = inner.load_profile(default_level)?;
+        let preferences = inner.load_preferences()?;
+
+        Ok(Self {
+            inner,
+            profile,
+            preferences,
+        })
     }
 
     /// Create a new profile, replacing any existing progress.
@@ -81,7 +102,7 @@ impl<Store: PersistentStorage> PlayerService<Store> {
         let default_level = get_default_level(registry, default_level_id)?;
         let profile = new_profile(default_level);
         self.profile = profile;
-        self.inner.save_progress(&self.profile)?;
+        self.inner.save_profile(&self.profile)?;
         Ok(())
     }
 
@@ -104,7 +125,7 @@ impl<Store: PersistentStorage> PlayerService<Store> {
     }
 
     /// Save simulation profile data after completing a day.
-    pub fn save_profile(&mut self, profile: SimProfile) -> Result<()> {
+    pub fn save_sim_profile(&mut self, profile: SimProfile) -> Result<()> {
         self.profile.meta.updated_at_utc = now_unix();
 
         self.profile.progress.current_day = profile.current_day;
@@ -128,7 +149,7 @@ impl<Store: PersistentStorage> PlayerService<Store> {
         self.profile.aggregates.lifetime_served += day_stats.completed_diners as u64;
         self.profile.aggregates.lifetime_profit += day_stats.revenue as f64; // Revenue as profit (no costs yet)
 
-        self.inner.save_progress(&self.profile)
+        self.inner.save_profile(&self.profile)
     }
 
     /// Update shown hints in progress
@@ -137,10 +158,25 @@ impl<Store: PersistentStorage> PlayerService<Store> {
     }
 
     /// Save current progress to storage
-    pub fn save(&mut self) -> Result<()> {
+    pub fn save_profile(&mut self) -> Result<()> {
         self.profile.meta.updated_at_utc = now_unix();
-        self.inner.save_progress(&self.profile)?;
+        self.inner.save_profile(&self.profile)?;
         Ok(())
+    }
+
+    /// Access user preferences
+    pub fn preferences(&self) -> &Preferences {
+        &self.preferences
+    }
+
+    /// Access mutable user preferences
+    pub fn preferences_mut(&mut self) -> &mut Preferences {
+        &mut self.preferences
+    }
+
+    /// Save current settings to storage
+    pub fn save_preferences(&mut self) -> Result<()> {
+        self.inner.save_preferences(&self.preferences)
     }
 }
 

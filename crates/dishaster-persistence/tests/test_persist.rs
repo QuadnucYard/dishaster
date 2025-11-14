@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use dishaster_models::*;
-use dishaster_persistence::PlayerService;
+use dishaster_persistence::UserDataService;
 use dishrupt_persistence::FsStorage;
 use tempfile::tempdir;
 
@@ -51,7 +51,7 @@ fn sample_diner_provider() -> DinerRandomizerModel {
 fn new_user_receives_first_day_level() -> Result<()> {
     let registry = Arc::new(sample_registry());
     let dir = tempdir()?;
-    let service = PlayerService::load_or_create(
+    let service = UserDataService::load_or_create(
         FsStorage::new(dir.path().to_path_buf()).unwrap(),
         &registry,
         None,

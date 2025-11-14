@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_core::asset::AudioRef;
 use godot::{
-    classes::{AudioStream, AudioStreamPlayer, Tween, tween::TweenPauseMode},
+    classes::{AudioServer, AudioStream, AudioStreamPlayer, Tween, tween::TweenPauseMode},
     prelude::*,
 };
 
@@ -72,6 +72,8 @@ pub struct AudioManager {
     sound_players: HashMap<AudioRef, Gd<AudioStreamPlayer>>,
     bgm: BgmManager,
 
+    music_mute: bool,
+    sound_mute: bool,
     music_volume: f32,
     sound_volume: f32,
 
@@ -93,11 +95,35 @@ impl AudioManager {
             sound_players: Default::default(),
             bgm,
 
+            music_mute: false,
+            sound_mute: false,
             music_volume: 1.0, // Default music volume
             sound_volume: 1.0, // Default sound volume
 
             catalog,
         }
+    }
+
+    /// Set whether music is mute.
+    pub fn set_music_mute(&mut self, mute: bool) {
+        self.music_mute = mute;
+
+        // TODO: for volume, we may also need to modify bus
+        let mut audio_server = AudioServer::singleton();
+
+        let bus = audio_server.get_bus_index(Self::MUSIC_BUS);
+        audio_server.set_bus_mute(bus, mute);
+    }
+
+    /// Set whether sound effects are mute.
+    pub fn set_sound_mute(&mut self, mute: bool) {
+        self.sound_mute = mute;
+
+        // TODO: for volume, we may also need to modify bus
+        let mut audio_server = AudioServer::singleton();
+
+        let bus = audio_server.get_bus_index(Self::SOUND_BUS);
+        audio_server.set_bus_mute(bus, mute);
     }
 
     /// Get the current sound volume.
