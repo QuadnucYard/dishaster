@@ -31,11 +31,23 @@ pub fn feedback_present_system(
     mut events: ResMut<EventQueue>,
     mut reputation: ResMut<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
+    registry: Res<GameModelRegistryRes>,
 ) {
     for msg in feedback_messages.read() {
+        // Check if this feedback can trigger a trial: if there are any diner speeches with this topic in the corpus
+        let can_trigger_trial = msg.trigger.is_some_and(|topic| {
+            registry
+                .trial
+                .diner_speeches
+                .iter()
+                .any(|speech| speech.topic == Some(topic) || speech.topic.is_none())
+        });
+
         events.push(SimEvent::Feedback(FeedbackView {
             entity: msg.entity.to_entity_id(),
             content: msg.content.clone(),
+            topic: msg.trigger.as_ref().map(ToView::to_view),
+            can_trigger_trial,
         }));
 
         // Apply reputation impact if feedback has a topic

@@ -98,7 +98,12 @@ pub enum UiCommand {
     RefillDispenser(EntityId),
 
     /// Start a trial for the given diner entity.
-    TrialStart(EntityId),
+    TrialStart {
+        /// The diner entity.
+        diner: EntityId,
+        /// Optional topic that triggered this trial.
+        topic: Option<FeedbackTopic>,
+    },
     /// Show trial intro.
     TrialIntro(Box<TrialIntro>),
     /// Trial diner speaks.

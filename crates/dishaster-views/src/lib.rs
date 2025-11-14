@@ -68,6 +68,10 @@ pub struct FeedbackView {
     pub entity: EntityId,
     /// Content of the feedback.
     pub content: Feedback,
+    /// Optional topic associated with this feedback (for trial triggering).
+    pub topic: Option<FeedbackTopic>,
+    /// Whether this feedback can trigger a trial (based on topic and trial corpus).
+    pub can_trigger_trial: bool,
 }
 
 /// Content of feedback events.
@@ -77,6 +81,27 @@ pub enum Feedback {
     Thought(EcoString),
     /// Spoken feedback with implicit content
     Speech,
+}
+
+/// Different feedback topics that can be triggered
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FeedbackTopic {
+    /// No dishes appealed to the diner
+    Appeal,
+    /// Queue too long / exceeded patience
+    Queue,
+    /// Missing tableware (tray or chopsticks)
+    Tableware,
+    /// Dish below expectation
+    Quality,
+    /// Food hygiene issues encountered
+    Hygiene,
+    /// Dish tastes bad
+    Taste,
+    /// Still hungry after meal
+    Hunger,
+    /// Positive feedback
+    Praise,
 }
 
 /// Complete appearance configuration for an agent

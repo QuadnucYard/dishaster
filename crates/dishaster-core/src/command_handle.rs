@@ -45,10 +45,14 @@ impl Simulation {
                 });
             }
 
-            SimCommand::TrialStart(_entity_id) => {
+            SimCommand::TrialStart {
+                diner: _diner,
+                topic,
+            } => {
                 // Reset trial session for new trial
                 let mut trial_session = self.world.resource_mut::<TrialSession>();
                 trial_session.reset();
+                trial_session.trigger_topic = topic.as_ref().map(ToModel::to_model);
 
                 // Currently, emit random appearances for both sides.
                 let intro = self.create_trial_intro();

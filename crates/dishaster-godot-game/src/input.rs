@@ -31,7 +31,8 @@ impl Game {
                     && let Some(&diner) = self.pres.agents.keys().next()
                 {
                     godot_print!("DEV: Starting trial for diner {:?}", diner);
-                    self.ui_commands.push(UiCommand::TrialStart(diner));
+                    self.ui_commands
+                        .push(UiCommand::TrialStart { diner, topic: None });
                 }
                 if key.pressed && key.keycode == Key::H {
                     let message = "This is a hint triggered by pressing the H key.".into();
@@ -104,7 +105,8 @@ fn get_pickable_under_mouse<'a>(
         .iter_shared()
         .map(|x| x.at("collider").to())
         .filter_map(mapper)
-        .max_by_key(|x| x.z_index())
+        .filter(|p| p.is_active())
+        .max_by_key(|p| p.z_index())
 }
 
 fn screen_to_canvas(root: &Gd<Node>, screen_pos: Vector2) -> Vector2 {
@@ -122,6 +124,11 @@ pub struct PickingContext<'a> {
 #[allow(unused_variables)]
 pub trait Pickable {
     fn collider_instance_id(&self) -> InstanceId;
+
+    /// Check if this pickable is currently active
+    fn is_active(&self) -> bool {
+        true
+    }
 
     /// The z-index for sorting order detection in events
     fn z_index(&self) -> i32 {

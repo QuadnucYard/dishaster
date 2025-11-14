@@ -1,6 +1,6 @@
 //! Simulation commands and control interfaces.
 
-use dishaster_views::PricingMethod;
+use dishaster_views::{FeedbackTopic, PricingMethod};
 use dishrupt_core::EntityId;
 
 use crate::snapshots::DebugFlags;
@@ -26,8 +26,13 @@ pub enum SimCommand {
     /// Request refill for a dispenser.
     RefillDispenser(EntityId),
 
-    /// Start a trial for the given diner entity.
-    TrialStart(EntityId),
+    /// Start a trial for the given diner entity with optional topic.
+    TrialStart {
+        /// The diner entity triggering the trial.
+        diner: EntityId,
+        /// Optional topic that triggered this trial (for filtering relevant speeches).
+        topic: Option<FeedbackTopic>,
+    },
     /// Launch the trial after intro is complete.
     TrialLaunch,
     /// Choose a response during the trial.

@@ -277,20 +277,35 @@ fn calculate_relevance_penalty(
 /// This creates a coherent dialogue flow by:
 /// 1. Using AQ ranks (answer → question) to select questions related to player's last response
 /// 2. Filtering out already-asked questions to avoid repetition
-/// 3. Applying temperature-weighted sampling for variety while maintaining relevance
-/// 4. Falling back to random selection if no history or ranks available
+/// 3. Filtering by topic if the trial was triggered by specific feedback
+/// 4. Applying temperature-weighted sampling for variety while maintaining relevance
+/// 5. Falling back to random selection if no history or ranks available
 fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usize {
     // Reset continuation depth for new topic
     session.reset_continuation();
 
+    // Helper to check if a speech matches the trigger topic
+    let matches_topic = |speech_id: usize| -> bool {
+        // Speech must either have matching topic or no topic (general)
+        // General speeches can be used for any topic
+        session.trigger_topic.is_none_or(|trigger_topic| {
+            corpus
+                .diner_speeches
+                .get(speech_id)
+                .is_some_and(|speech| speech.topic.is_none_or(|topic| topic == trigger_topic))
+        })
+    };
+
     // If there's a previous player response, use AQ ranks to select related question
-    if let Some(last_response_idx) = session.last_response_id
-        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_idx)
+    if let Some(last_response_id) = session.last_response_id
+        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_id)
     {
-        // Filter available questions (not yet asked)
+        // Filter available questions (not yet asked AND matching topic)
         let available_ranks: Vec<_> = aq_rank
             .iter()
-            .filter(|rank| !session.has_asked(rank.answer_index))
+            .filter(|rank| {
+                !session.has_asked(rank.answer_index) && matches_topic(rank.answer_index)
+            })
             .cloned()
             .collect();
 
@@ -306,18 +321,28 @@ fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usi
         }
     }
 
-    // Fallback: random available question
+    // Fallback: random available question (filtered by topic)
     let num_questions = corpus.diner_speeches.len();
-    let available_questions = (0..num_questions)
-        .filter(|&idx| !session.has_asked(idx))
-        .collect::<Vec<_>>();
+    let available_questions: Vec<_> = (0..num_questions)
+        .filter(|&idx| !session.has_asked(idx) && matches_topic(idx))
+        .collect();
 
     // Pick a random available question.
-    // If all questions asked, pick any random one
+    // If no topic-matching questions available, allow any available question
     let speech_index = available_questions
         .choose(&mut session.rng)
         .cloned()
-        .unwrap_or_else(|| session.rng.random_range(0..num_questions));
+        .unwrap_or_else(|| {
+            // No topic-matching questions - fall back to any available or any random
+            let all_available: Vec<_> = (0..num_questions)
+                .filter(|&idx| !session.has_asked(idx))
+                .collect();
+
+            all_available
+                .choose(&mut session.rng)
+                .cloned()
+                .unwrap_or_else(|| session.rng.random_range(0..num_questions))
+        });
 
     session.mark_asked(speech_index);
 

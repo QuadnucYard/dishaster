@@ -1,9 +1,9 @@
 use dishaster_ui_protocol::UiCommand;
-use dishaster_views::Feedback;
+use dishaster_views::{Feedback, FeedbackTopic};
 use dishrupt_core::EntityId;
 use dishrupt_godot_input::event::MouseButtonEvent;
 use godot::{
-    classes::{Label, Node2D},
+    classes::{AnimationPlayer, Label, Node2D},
     prelude::*,
 };
 
@@ -17,8 +17,14 @@ pub struct FeedbackPresenter {
     thought: Gd<Node2D>,
     thought_emoji: Gd<Label>,
     speech: Gd<Node2D>,
+    anim_player: Gd<AnimationPlayer>,
 
     lifetime: Option<f64>,
+
+    /// Topic associated with the current feedback (if any).
+    topic: Option<FeedbackTopic>,
+    /// Whether the current feedback can trigger a trial.
+    can_trigger_trial: bool,
 }
 
 impl FeedbackPresenter {
@@ -29,9 +35,12 @@ impl FeedbackPresenter {
             thought: node.get_node_as("Thought"),
             thought_emoji: node.get_node_as("Thought/Emoji"),
             speech: node.get_node_as("Speech"),
+            anim_player: node.get_node_as("%AnimationPlayer"),
             root: node,
 
             lifetime: None,
+            topic: None,
+            can_trigger_trial: false,
         }
     }
 
@@ -43,12 +52,19 @@ impl FeedbackPresenter {
         if *t <= 0.0 {
             self.root.set_visible(false);
             self.lifetime = None;
+
+            if self.can_trigger_trial {
+                self.anim_player.stop();
+            }
         }
     }
 
-    pub fn show(&mut self, feedback: &Feedback) {
+    pub fn show(&mut self, feedback: &Feedback, topic: Option<FeedbackTopic>, can_trigger: bool) {
         /// How long feedback balloons last on screen (placeholder value).
         const BALLOON_LIFETIME: f64 = 3.0;
+
+        self.topic = topic;
+        self.can_trigger_trial = can_trigger;
 
         match feedback {
             Feedback::Thought(emoji) => {
@@ -63,6 +79,10 @@ impl FeedbackPresenter {
         }
         self.root.set_visible(true);
         self.lifetime = Some(BALLOON_LIFETIME);
+
+        if can_trigger {
+            self.anim_player.play_ex().name("bounce").done();
+        }
     }
 
     pub fn hide(&mut self) {
@@ -76,7 +96,17 @@ impl Pickable for FeedbackPresenter {
         self.root.instance_id_unchecked()
     }
 
+    fn is_active(&self) -> bool {
+        self.can_trigger_trial
+    }
+
     fn on_click(&mut self, ctx: &mut PickingContext, _event: &MouseButtonEvent) {
-        ctx.cmds.push(UiCommand::TrialStart(self.entity));
+        // Only trigger trial if this feedback can do so
+        if self.can_trigger_trial {
+            ctx.cmds.push(UiCommand::TrialStart {
+                diner: self.entity,
+                topic: self.topic,
+            });
+        }
     }
 }

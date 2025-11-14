@@ -40,6 +40,40 @@ impl ToModel for views::PricingMethod {
     }
 }
 
+impl ToView for models::FeedbackTopic {
+    type View = views::FeedbackTopic;
+
+    fn to_view(&self) -> Self::View {
+        match *self {
+            models::FeedbackTopic::Appeal => views::FeedbackTopic::Appeal,
+            models::FeedbackTopic::Queue => views::FeedbackTopic::Queue,
+            models::FeedbackTopic::Tableware => views::FeedbackTopic::Tableware,
+            models::FeedbackTopic::Quality => views::FeedbackTopic::Quality,
+            models::FeedbackTopic::Hygiene => views::FeedbackTopic::Hygiene,
+            models::FeedbackTopic::Taste => views::FeedbackTopic::Taste,
+            models::FeedbackTopic::Hunger => views::FeedbackTopic::Hunger,
+            models::FeedbackTopic::Praise => views::FeedbackTopic::Praise,
+        }
+    }
+}
+
+impl ToModel for views::FeedbackTopic {
+    type Model = models::FeedbackTopic;
+
+    fn to_model(&self) -> Self::Model {
+        match *self {
+            views::FeedbackTopic::Appeal => models::FeedbackTopic::Appeal,
+            views::FeedbackTopic::Queue => models::FeedbackTopic::Queue,
+            views::FeedbackTopic::Tableware => models::FeedbackTopic::Tableware,
+            views::FeedbackTopic::Quality => models::FeedbackTopic::Quality,
+            views::FeedbackTopic::Hygiene => models::FeedbackTopic::Hygiene,
+            views::FeedbackTopic::Taste => models::FeedbackTopic::Taste,
+            views::FeedbackTopic::Hunger => models::FeedbackTopic::Hunger,
+            views::FeedbackTopic::Praise => models::FeedbackTopic::Praise,
+        }
+    }
+}
+
 impl ToViewWithIndex for models::TrialSpeech {
     type View = views::TrialSpeech;
 

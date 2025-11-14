@@ -1,6 +1,6 @@
 use dishrupt_core::prelude::*;
 
-use super::prelude::*;
+use super::{FeedbackTopic, prelude::*};
 
 /// The corpus of trial speeches and responses.
 #[derive(Debug, Default)]
@@ -31,6 +31,10 @@ pub struct TrialSpeech {
     /// The appearance associated with the statement.
     #[serde(flatten)]
     pub appearance: TrialParticipantAppearance,
+    /// Optional topic that this speech addresses (for trial triggering from feedback).
+    /// If present, this speech can only be triggered by feedback with matching topic.
+    #[serde(default)]
+    pub topic: Option<FeedbackTopic>,
 }
 
 /// An item within a trial speech.

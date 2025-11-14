@@ -117,7 +117,11 @@ impl Game {
                     if let Some(agent) = self.pres.agents.get_mut(&feedback.entity)
                         && let Some(feedback_presenter) = &mut agent.feedback
                     {
-                        feedback_presenter.show(&feedback.content);
+                        feedback_presenter.show(
+                            &feedback.content,
+                            feedback.topic,
+                            feedback.can_trigger_trial,
+                        );
                     }
                 }
 

@@ -5,6 +5,7 @@ mod time;
 
 use std::{collections::VecDeque, sync::Arc};
 
+use dishaster_models::FeedbackTopic;
 use dishaster_save_models::PermanentEffects;
 use dishaster_views::TrialResponseOption;
 
@@ -168,6 +169,8 @@ pub struct TrialSession {
     pub max_continuation_depth: u32,
     /// Temperature parameter for sampling (higher = more random, lower = more deterministic)
     pub temperature: f32,
+    /// Topic that triggered this trial (for filtering relevant speeches)
+    pub trigger_topic: Option<FeedbackTopic>,
 }
 
 impl TrialSession {
@@ -183,6 +186,7 @@ impl TrialSession {
             continuation_depth: 0,
             max_continuation_depth: 3,
             temperature: 0.8,
+            trigger_topic: None,
         }
     }
 
@@ -194,6 +198,7 @@ impl TrialSession {
         self.last_diner_speech_id = None;
         self.current_question_index = None;
         self.continuation_depth = 0;
+        self.trigger_topic = None;
     }
 
     /// Check if a question has been asked
