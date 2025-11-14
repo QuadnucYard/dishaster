@@ -115,6 +115,9 @@ impl TrialGui {
         state.time = 0.0;
         state.fade_time = estimate_fade_time(&next_speech.text);
         state.inner_speech_text = next_text;
+
+        // Hide thought panel if it was open
+        self.thought.set_visible(false);
     }
 
     pub fn show_response_candidates(&mut self, options: Vec<TrialResponseOption>) {
@@ -346,12 +349,16 @@ pub struct TrialThoughtOptionItem {
 impl TrialThoughtOptionItem {
     pub fn set_option(&mut self, option: &TrialResponseOption) {
         self.option_button.set_text(&option.summary);
-        self.kind_label.set_text(match option.kind {
-            TrialResponseKind::Agreement => "赞同",
-            TrialResponseKind::Objection => "反对",
-            TrialResponseKind::Perjury => "伪证",
-            TrialResponseKind::Question => "疑问",
-        });
+        let (kind_msg, kind_color) = match option.kind {
+            TrialResponseKind::Agreement => ("trial-agreement", Color::from_rgb(0.0, 0.23, 0.06)),
+            TrialResponseKind::Objection => ("trial-objection", Color::from_rgb(0.23, 0.02, 0.02)),
+            TrialResponseKind::Perjury => ("trial-perjury", Color::from_rgb(0.06, 0.08, 0.41)),
+            TrialResponseKind::Question => ("trial-question", Color::from_rgb(0.39, 0.18, 0.01)),
+        };
+        self.kind_label.set_text(&tr!(kind_msg));
+        self.kind_label
+            .gd()
+            .add_theme_color_override("font_outline_color", kind_color);
     }
 }
 

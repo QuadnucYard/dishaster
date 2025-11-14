@@ -60,3 +60,8 @@ effects-title =
     .label = 效果:
 select-option =
     .label = 选择此项
+
+trial-agreement = 赞同
+trial-objection = 反对
+trial-perjury = 伪证
+trial-question = 疑问

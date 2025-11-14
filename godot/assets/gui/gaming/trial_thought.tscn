@@ -1,19 +1,35 @@
-[gd_scene load_steps=5 format=3 uid="uid://scmpfafwfu2a"]
+[gd_scene load_steps=12 format=3 uid="uid://scmpfafwfu2a"]
 
 [ext_resource type="Texture2D" uid="uid://ccxbmdwldmchs" path="res://assets/sprites/trial/player_thought_avatar.svg" id="1_vfbr7"]
-[ext_resource type="FontFile" uid="uid://y0ksi2gh02q2" path="res://assets/fonts/SourceHanSerifCN-VF.otf" id="2_nwvuc"]
+[ext_resource type="FontVariation" uid="uid://b8xlji4sfc38j" path="res://assets/fonts/serif_semibold.tres" id="2_44808"]
+[ext_resource type="Texture2D" uid="uid://d211p8683765y" path="res://assets/gui/textures/trial_option_button-normal.tres" id="3_nwvuc"]
+[ext_resource type="Texture2D" uid="uid://ddcybq7ae237o" path="res://assets/gui/textures/trial_option_button-active.tres" id="4_wukn4"]
+[ext_resource type="Texture2D" uid="uid://brdyubrtn3t7e" path="res://assets/gui/textures/trial_back_button-normal.tres" id="6_44808"]
+[ext_resource type="Texture2D" uid="uid://mji2f0um8h5y" path="res://assets/gui/textures/trial_back_button-active.tres" id="7_7xl48"]
 
-[sub_resource type="FontVariation" id="FontVariation_utn3p"]
-base_font = ExtResource("2_nwvuc")
-variation_opentype = {
-2003265652: 500
-}
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nwvuc"]
+content_margin_top = 10.0
+texture = ExtResource("3_nwvuc")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_y333i"]
+content_margin_top = 10.0
+texture = ExtResource("4_wukn4")
 
 [sub_resource type="FontVariation" id="FontVariation_kbmlc"]
-base_font = ExtResource("2_nwvuc")
+base_font = ExtResource("2_44808")
 variation_opentype = {
 2003265652: 600
 }
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bm83c"]
+content_margin_left = 20.0
+content_margin_bottom = 5.0
+texture = ExtResource("6_44808")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ml33o"]
+content_margin_left = 20.0
+content_margin_bottom = 5.0
+texture = ExtResource("7_7xl48")
 
 [node name="Thought" type="Panel"]
 anchors_preset = 15
@@ -35,13 +51,13 @@ layout_mode = 0
 offset_left = 600.0
 offset_right = 1432.0
 offset_bottom = 1080.0
-theme_override_constants/separation = 80
+theme_override_constants/separation = 60
 alignment = 1
 
 [node name="OptionButtons" type="VBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 80
+theme_override_constants/separation = 60
 
 [node name="OptionButtonTemplate" type="Control" parent="VBoxContainer/OptionButtons"]
 unique_name_in_owner = true
@@ -49,33 +65,57 @@ custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 
 [node name="OptionButton" type="Button" parent="VBoxContainer/OptionButtons/OptionButtonTemplate"]
-custom_minimum_size = Vector2(800, 120)
+custom_minimum_size = Vector2(800, 160)
 layout_mode = 0
 offset_left = 32.0
 offset_right = 832.0
 offset_bottom = 120.0
 size_flags_horizontal = 8
-theme_override_fonts/font = SubResource("FontVariation_utn3p")
+theme_override_colors/font_color = Color(0.39920714, 0.20651823, 0.102940895, 1)
+theme_override_colors/font_focus_color = Color(0.4, 0.20784314, 0.101960786, 1)
+theme_override_colors/font_pressed_color = Color(0.4, 0.20784314, 0.101960786, 1)
+theme_override_colors/font_hover_color = Color(0.4, 0.20784314, 0.101960786, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.4, 0.20784314, 0.101960786, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.20784314, 0.101960786, 1)
+theme_override_fonts/font = ExtResource("2_44808")
 theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxTexture_nwvuc")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_y333i")
+theme_override_styles/hover = SubResource("StyleBoxTexture_y333i")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_nwvuc")
+theme_override_styles/focus = SubResource("StyleBoxTexture_y333i")
 text = "立即处理"
 
 [node name="KindLabel" type="Label" parent="VBoxContainer/OptionButtons/OptionButtonTemplate"]
 layout_mode = 0
-offset_left = 16.0
-offset_top = -30.0
-offset_right = 136.0
-offset_bottom = 58.0
+offset_left = 34.0
+offset_top = -15.0
+offset_right = 199.0
+offset_bottom = 73.0
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_colors/font_outline_color = Color(0.6572934, 0.46442807, 0.121884726, 1)
+theme_override_constants/outline_size = 16
 theme_override_constants/shadow_outline_size = 4
 theme_override_fonts/font = SubResource("FontVariation_kbmlc")
 theme_override_font_sizes/font_size = 60
-text = "赞同"
+text = "{赞同}"
 
 [node name="BackButton" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(500, 120)
 layout_mode = 2
 size_flags_horizontal = 8
-theme_override_fonts/font = SubResource("FontVariation_utn3p")
+theme_override_colors/font_color = Color(0.40713382, 0.23943308, 0.14800459, 1)
+theme_override_colors/font_focus_color = Color(0.40784314, 0.23921569, 0.14901961, 1)
+theme_override_colors/font_pressed_color = Color(0.40784314, 0.23921569, 0.14901961, 1)
+theme_override_colors/font_hover_color = Color(0.40784314, 0.23921569, 0.14901961, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.40784314, 0.23921569, 0.14901961, 1)
+theme_override_colors/font_disabled_color = Color(0.40784314, 0.23921569, 0.14901961, 1)
+theme_override_fonts/font = ExtResource("2_44808")
 theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxTexture_bm83c")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_ml33o")
+theme_override_styles/hover = SubResource("StyleBoxTexture_ml33o")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_bm83c")
+theme_override_styles/focus = SubResource("StyleBoxTexture_ml33o")
 text = "返回"
