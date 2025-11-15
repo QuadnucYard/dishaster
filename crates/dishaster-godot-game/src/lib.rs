@@ -45,11 +45,11 @@ struct DayTelemetry {
     tick: u32,
     seconds: f64,
     /// Current number of live diners in the canteen
-    live_diners: usize,
+    live_diners: u32,
     /// Total number of diners that have visited this day
-    total_visits: usize,
+    total_visits: u32,
     /// Number of diners who completed their meal today
-    completed_diners: usize,
+    completed_diners: u32,
     /// Total revenue collected today
     revenue: f32,
     /// Total food consumed today in kilograms

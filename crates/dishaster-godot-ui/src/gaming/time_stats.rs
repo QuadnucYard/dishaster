@@ -37,9 +37,9 @@ impl TimeStatsGui {
 
     pub fn update_diner_stats(
         &mut self,
-        current_diners: usize,
-        total_visits: usize,
-        completed_diners: usize,
+        current_diners: u32,
+        total_visits: u32,
+        completed_diners: u32,
         revenue: f32,
         consumption_kg: f32,
     ) {

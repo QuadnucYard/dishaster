@@ -59,20 +59,20 @@ pub struct DayStatus {
     /// Whether the day completion event has been emitted
     pub completion_emitted: bool,
     /// Number of diners currently active in the canteen
-    pub live_diner_count: usize,
+    pub live_diner_count: u32,
 }
 
 /// Statistics collected during a single day
 #[derive(Resource, Default)]
 pub struct DailyStats {
     /// Total number of diner visits since the start of the day
-    pub total_visits: usize,
+    pub total_visits: u32,
     /// Total food consumed in kilograms
     pub total_consumption_kg: f32,
     /// Total revenue collected in currency units
     pub total_revenue: f32,
     /// Number of diners who completed their meal
-    pub completed_diners: usize,
+    pub completed_diners: u32,
 }
 
 /// Resource wrapper for Arc<GameModelRegistry>

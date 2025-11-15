@@ -15,7 +15,7 @@ pub fn check_day_completion(
     }
 
     // Update current diner count
-    day_status.live_diner_count = diner_query.iter().count();
+    day_status.live_diner_count = diner_query.iter().count() as u32;
 
     // Check if day is complete: no active diners and no more scheduled arrivals
     let spawning_finished = !schedule.has_pending_spawns();

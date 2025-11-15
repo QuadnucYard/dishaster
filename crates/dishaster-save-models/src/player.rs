@@ -89,9 +89,9 @@ pub struct DayStats {
     /// Day index when these stats were recorded.
     pub day: Day,
     /// Total number of diner visits.
-    pub total_visits: usize,
+    pub total_visits: u32,
     /// Number of diners who completed their meal.
-    pub completed_diners: usize,
+    pub completed_diners: u32,
     /// Total revenue collected.
     pub revenue: f32,
     /// Total food consumed in kilograms.
@@ -101,8 +101,8 @@ pub struct DayStats {
 impl AggregateStats {
     /// Update aggregate stats with data from a completed day.
     pub fn update(&mut self, day_stats: &DayStats) {
-        self.lifetime_visits += day_stats.total_visits as u32;
-        self.lifetime_served += day_stats.completed_diners as u32;
+        self.lifetime_visits += day_stats.total_visits;
+        self.lifetime_served += day_stats.completed_diners;
         self.lifetime_revenue += day_stats.revenue as f64;
         self.lifetime_consumption_kg += day_stats.consumption_kg as f64;
     }

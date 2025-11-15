@@ -20,11 +20,11 @@ pub struct DayStats {
     pub tick: Tick,
 
     /// Current number of live diners in the simulation.
-    pub live_diners: usize,
+    pub live_diners: u32,
     /// Total diner visits since start of day.
-    pub total_visits: usize,
+    pub total_visits: u32,
     /// Number of diners who completed their meal today.
-    pub completed_diners: usize,
+    pub completed_diners: u32,
 
     /// Total revenue collected today.
     pub revenue: f32,

@@ -159,10 +159,10 @@ pub struct StatsView {
     pub fps: f32,
     pub ups: f32,
 
-    pub current_diners: usize,
-    pub total_visits: usize,
+    pub current_diners: u32,
+    pub total_visits: u32,
     /// Number of diners who completed their meal today
-    pub completed_diners: usize,
+    pub completed_diners: u32,
 
     /// Total revenue collected today
     pub revenue: f32,
