@@ -18,7 +18,8 @@ pub fn handle_decide_window_goal(
     dish_query: Query<&Dish>,
     lane_query: Query<(&QueueLane, &QueueLaneMembers)>,
     registry: Res<GameModelRegistryRes>,
-    ordering_config: Res<OrderingConfig>,
+    ordering_config: Res<OrderingConfigRes>,
+    decision_config: Res<DecisionConfigRes>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
 ) {
     for (
@@ -54,6 +55,7 @@ pub fn handle_decide_window_goal(
             &psych_state,
             ltm,
             registry.as_ref(),
+            &decision_config,
             &mut rng,
         ) else {
             handle_no_suitable_window(
@@ -138,9 +140,9 @@ fn evaluate_and_select_window(
     psych_state: &PsychState,
     ltm: &LongTermMemory,
     registry: &GameModelRegistry,
+    config: &DecisionConfig,
     rng: &mut EntityRng,
 ) -> Option<Entity> {
-    let config = DecisionConfig::default();
     let mut candidates = Vec::new();
 
     for (window_entity, window, window_dishes) in window_query.iter() {
@@ -166,13 +168,13 @@ fn evaluate_and_select_window(
             psych_state,
             ltm,
             registry,
-            &config,
+            config,
         ) {
             candidates.push(candidate);
         }
     }
 
-    select_window_from_candidates(&candidates, &config, rng)
+    select_window_from_candidates(&candidates, config, rng)
 }
 
 /// Handle case when no suitable window is found

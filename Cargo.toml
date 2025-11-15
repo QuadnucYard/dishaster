@@ -60,6 +60,7 @@ derive_more = { version = "2", features = ["deref", "deref_mut"] }
 dodgy = "0.3"
 ecow = { version = "0.2", features = ["serde"] }
 edt = "0.2"
+enum-map = { version = "2.7", features = ["serde"] }
 env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }
 fibre = "0.5"
 fluent = "0.17"

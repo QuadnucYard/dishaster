@@ -5,7 +5,7 @@ use dishaster_interface::SimEvent;
 
 use crate::{
     components::DinerPsychState,
-    models::{TrialCorpus, TrialQARank},
+    models::{self, TrialCorpus, TrialQARank},
     prelude::*,
     resources::*,
     sim::Simulation,
@@ -185,7 +185,7 @@ impl Simulation {
             SystemState::new(&mut self.world);
         let (mut reputation, reputation_config) = system_state.get_mut(&mut self.world);
 
-        let base_impact = reputation_config.base_impacts.quality;
+        let base_impact = reputation_config.base_impacts[models::FeedbackTopic::Quality];
         let old_reputation = reputation.reputation;
 
         reputation.apply_feedback_impact(base_impact, response_score, &reputation_config);

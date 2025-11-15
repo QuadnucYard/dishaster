@@ -15,9 +15,8 @@ pub fn check_queue_patience(
     )>,
     lane_query: Query<&QueueLaneMembers>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
+    decision_config: Res<DecisionConfigRes>,
 ) {
-    let config = DecisionConfig::default();
-
     for (entity, mut goal, mut psych_state, mut ltm, _personality, queue_member, mut rng) in
         diner_query.iter_mut()
     {
@@ -50,7 +49,7 @@ pub fn check_queue_patience(
                 &mut ltm,
                 estimated_wait,
                 patience_now,
-                &config,
+                &decision_config,
             );
 
             // Additional mood and trust penalties
@@ -107,7 +106,7 @@ pub fn handle_queue_for_window_goal(
     dish_query: Query<&Dish>,
     lane_query: Query<(&QueueLane, &QueueLaneMembers)>,
     registry: Res<GameModelRegistryRes>,
-    ordering_config: Res<OrderingConfig>,
+    ordering_config: Res<OrderingConfigRes>,
     time: Res<Time>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
 ) {

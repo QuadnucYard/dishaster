@@ -128,6 +128,21 @@ impl DataLoader {
         self.load_to_registry(&mut registry.mgmt_decisions, "mgmt_decisions")?;
         self.load_to_registry(&mut registry.mgmt_incidents, "mgmt_incidents")?;
 
+        // Load reputation configuration
+        registry.reputation_config = self
+            .load_ron_file(&self.assets_path.join("reputation.ron"))
+            .context("Loading reputation configuration")?;
+
+        // Load ordering configuration
+        registry.ordering_config = self
+            .load_ron_file(&self.assets_path.join("ordering.ron"))
+            .context("Loading ordering configuration")?;
+
+        // Load decision configuration
+        registry.decision_config = self
+            .load_ron_file(&self.assets_path.join("decision.ron"))
+            .context("Loading decision configuration")?;
+
         registry.trial = TrialCorpus {
             diner_speeches: {
                 let mut diner_speeches = self.load_corpus("trial/corpus.toml")?;
@@ -147,11 +162,11 @@ impl DataLoader {
 
         let opening_config = self
             .load_ron_file(&self.assets_path.join("opening.ron"))
-            .with_context(|| "Loading opening configuration")?;
+            .context("Loading opening configuration")?;
 
         let credits: CreditsData = self
             .load_ron_file(&self.assets_path.join("misc/credits.ron"))
-            .with_context(|| "Loading credits data")?;
+            .context("Loading credits data")?;
 
         Ok(GameDataAssets {
             models: registry.into(),

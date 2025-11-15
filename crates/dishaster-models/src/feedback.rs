@@ -1,7 +1,10 @@
+use enum_map::{Enum, EnumMap, enum_map};
+
 use super::prelude::*;
 
 /// Different feedback topics that can be triggered
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Enum)]
+#[serde(rename_all = "lowercase")]
 pub enum FeedbackTopic {
     /// No dishes appealed to the diner
     Appeal,
@@ -60,43 +63,27 @@ impl Default for FeedbackThresholds {
     }
 }
 
-/// Trial trigger probabilities for different feedback types
-///
-/// These base probabilities are modified by diner personality
-/// (especially confrontational trait) to determine if a trial is triggered.
-/// TODO: this is unused
-#[derive(Debug, Clone, Deserialize)]
-pub struct TrialTriggerProbabilities {
-    /// Base probability for missing tableware
-    pub missing_tableware: f32,
-    /// Base probability for appearance not as expected
-    pub appearance_mismatch: f32,
-    /// Base probability for contamination
-    pub contamination: f32,
-    /// Base probability for bad taste (only for confrontational > 0.6)
-    pub bad_taste: f32,
-    /// Base probability for still hungry
-    pub still_hungry: f32,
-}
-
-impl Default for TrialTriggerProbabilities {
-    fn default() -> Self {
-        Self {
-            missing_tableware: 0.3,
-            appearance_mismatch: 0.2,
-            contamination: 0.6,
-            bad_taste: 0.3,
-            still_hungry: 0.1,
-        }
-    }
-}
-
 /// Configuration for reputation system
 #[derive(Debug, Clone, Deserialize)]
 pub struct ReputationConfig {
     /// Base impact values for each feedback topic on reputation
     /// Positive values increase reputation, negative values decrease it
-    pub base_impacts: FeedbackBaseImpacts,
+    pub base_impacts: EnumMap<FeedbackTopic, f32>,
+
+    /// Probability of showing feedback bubble for each topic
+    ///
+    /// Controls visual feedback frequency. Lower values = fewer bubbles shown.
+    /// Note: Reputation impact still calculated even if bubble not shown.
+    pub display_probabilities: EnumMap<FeedbackTopic, f32>,
+
+    /// Probability of applying reputation impact for each feedback topic
+    ///
+    /// Gates whether feedback affects reputation. This is separate from display probability.
+    /// Lower values = more forgiving (some complaints ignored for reputation).
+    pub impact_probabilities: EnumMap<FeedbackTopic, f32>,
+
+    /// Thresholds for triggering different types of feedback
+    pub feedback_thresholds: FeedbackThresholds,
 
     /// How much player response affects the impact (0..1)
     /// Higher means player responses have more effect
@@ -117,65 +104,44 @@ pub struct ReputationConfig {
 
 impl Default for ReputationConfig {
     fn default() -> Self {
+        use FeedbackTopic::*;
         Self {
-            base_impacts: FeedbackBaseImpacts::default(),
+            base_impacts: enum_map! {
+                Praise => 3.0,
+                Appeal => -2.0,
+                Queue => -3.0,
+                Tableware => -2.5,
+                Quality => -4.0,
+                Hygiene => -12.0, // Most severe
+                Taste => -3.5,
+                Hunger => -2.0,
+            },
+            display_probabilities: enum_map! {
+                Praise => 0.2,    // Show 20% of praise
+                Appeal => 0.3,    // Show 30% of appeal issues
+                Queue => 0.4,     // Show 40% of queue complaints
+                Tableware => 0.3, // Show 30 of tableware issues
+                Quality => 0.3,   // Show 30% of quality issues
+                Hygiene => 1.0,   // Always show hygiene (critical)
+                Taste => 0.3,     // Show 30% of taste complaints
+                Hunger => 0.2,    // Show 20% of hunger complaints
+            },
+            impact_probabilities: enum_map! {
+                Praise => 1.0,    // Always apply positive feedback
+                Appeal => 0.4,    // Apply 40% of appeal issues
+                Queue => 0.6,     // Apply 60% of queue complaints
+                Tableware => 0.5, // Apply 50% of tableware issues
+                Quality => 0.4,   // Apply 40% of quality issues
+                Hygiene => 1.0,   // Always apply hygiene (critical)
+                Taste => 0.4,     // Apply 40% of taste complaints
+                Hunger => 0.3,    // Apply 30% of hunger complaints
+            },
+            feedback_thresholds: FeedbackThresholds::default(),
             response_factor: 0.6,
             max_single_change: 8.0,
             max_daily_change: 12.0,
             fsri_incident_multiplier: 0.0015,
             max_incident_probability: 0.25,
-        }
-    }
-}
-
-/// Base reputation impact values for each feedback topic
-#[derive(Debug, Clone, Deserialize)]
-pub struct FeedbackBaseImpacts {
-    /// Positive feedback base impact
-    pub praise: f32,
-    /// No appealing dish base impact
-    pub appeal: f32,
-    /// Queue too long base impact
-    pub queue: f32,
-    /// Missing tableware base impact
-    pub tableware: f32,
-    /// Dish quality issue base impact
-    pub quality: f32,
-    /// Food hygiene issue base impact (most severe)
-    pub hygiene: f32,
-    /// Bad taste base impact
-    pub taste: f32,
-    /// Still hungry base impact
-    pub hunger: f32,
-}
-
-impl Default for FeedbackBaseImpacts {
-    fn default() -> Self {
-        Self {
-            praise: 3.0,
-            appeal: -2.0,
-            queue: -3.0,
-            tableware: -2.5,
-            quality: -4.0,
-            hygiene: -12.0, // Most severe
-            taste: -3.5,
-            hunger: -2.0,
-        }
-    }
-}
-
-impl FeedbackBaseImpacts {
-    /// Get base impact for a specific feedback topic
-    pub fn get(&self, topic: FeedbackTopic) -> f32 {
-        match topic {
-            FeedbackTopic::Praise => self.praise,
-            FeedbackTopic::Appeal => self.appeal,
-            FeedbackTopic::Queue => self.queue,
-            FeedbackTopic::Tableware => self.tableware,
-            FeedbackTopic::Quality => self.quality,
-            FeedbackTopic::Hygiene => self.hygiene,
-            FeedbackTopic::Taste => self.taste,
-            FeedbackTopic::Hunger => self.hunger,
         }
     }
 }

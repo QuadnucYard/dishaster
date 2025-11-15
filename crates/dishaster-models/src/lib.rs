@@ -72,6 +72,15 @@ pub struct GameModelRegistry {
     /// Management incident events
     pub mgmt_incidents: ModelRegistry<ManagementIncidentTemplate>,
 
+    /// Reputation system configuration
+    pub reputation_config: ReputationConfig,
+
+    /// Ordering system configuration
+    pub ordering_config: OrderingConfig,
+
+    /// Decision system configuration
+    pub decision_config: DecisionConfig,
+
     /// Trial corpus
     pub trial: TrialCorpus,
 }

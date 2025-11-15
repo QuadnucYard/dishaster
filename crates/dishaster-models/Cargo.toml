@@ -9,6 +9,7 @@ edition.workspace = true
 dishrupt-core.workspace = true
 dishaster-save-models.workspace = true
 
+enum-map.workspace = true
 paste.workspace = true
 serde.workspace = true
 

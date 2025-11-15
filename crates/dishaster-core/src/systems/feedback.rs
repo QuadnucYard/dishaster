@@ -34,35 +34,53 @@ pub fn feedback_present_system(
     reputation_config: Res<ReputationConfigRes>,
     trial_session: Res<TrialSession>,
     registry: Res<GameModelRegistryRes>,
+    mut rng: ResMut<WorldRng>,
 ) {
     for msg in feedback_messages.read() {
-        // Check if this feedback can trigger a trial: if there are any diner speeches with this topic in the corpus
-        let can_trigger_trial = msg.trigger.is_some_and(|topic| {
-            registry
-                .trial
-                .diner_speeches
-                .iter()
-                .any(|speech| speech.topic == Some(topic) || speech.topic.is_none())
+        let topic = msg.trigger;
+
+        // Apply probability gate for displaying feedback bubble
+        // This reduces visual noise with many diners (e.g., 500/day)
+        let should_display = topic.is_none_or(|t| {
+            let display_prob = reputation_config.display_probabilities[t];
+            rng.random_bool(display_prob as f64)
         });
 
-        events.push(SimEvent::Feedback(FeedbackView {
-            entity: msg.entity.to_entity_id(),
-            content: msg.content.clone(),
-            topic: msg.trigger.as_ref().map(ToView::to_view),
-            can_trigger_trial,
-        }));
+        if should_display {
+            // Check if this feedback can trigger a trial
+            let can_trigger_trial = topic.is_some_and(|t| {
+                registry
+                    .trial
+                    .diner_speeches
+                    .iter()
+                    .any(|speech| speech.topic == Some(t) || speech.topic.is_none())
+            });
 
-        // Emit hint for first-time trial trigger opportunity
-        if can_trigger_trial && !trial_session.ever_triggered {
-            events.emit_hint(hints::CLICK_FEEDBACK_TO_TRIAL, HintCondition::Always);
+            events.push(SimEvent::Feedback(FeedbackView {
+                entity: msg.entity.to_entity_id(),
+                content: msg.content.clone(),
+                topic: topic.as_ref().map(ToView::to_view),
+                can_trigger_trial,
+            }));
+
+            // Emit hint for first-time trial trigger opportunity
+            if can_trigger_trial && !trial_session.ever_triggered {
+                events.emit_hint(hints::CLICK_FEEDBACK_TO_TRIAL, HintCondition::Always);
+            }
         }
 
         // Apply reputation impact if feedback has a topic
-        if let Some(topic) = msg.trigger {
-            let base_impact = reputation_config.base_impacts.get(topic);
-            // Use 0.0 response_score for non-trial feedback (neutral player response)
-            // Trial system will handle response scoring separately
-            reputation.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+        // This is separate from display - impact can apply even if not shown
+        if let Some(t) = topic {
+            let impact_prob = reputation_config.impact_probabilities[t];
+
+            // Probability gate for reputation impact
+            if rng.random_bool(impact_prob as f64) {
+                let base_impact = reputation_config.base_impacts[t];
+                // Use 0.0 response_score for non-trial feedback (neutral player response)
+                // Trial system will handle response scoring separately
+                reputation.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+            }
         }
     }
 }

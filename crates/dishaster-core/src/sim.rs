@@ -129,11 +129,15 @@ impl Simulation {
 
         self.world.insert_resource(EventQueue::default());
         self.world.insert_resource(ResponseQueue::default());
-
         self.world.insert_resource(ServingCommsQueue::default());
-        self.world.insert_resource(OrderingConfig::default());
+
         self.world
-            .insert_resource(ReputationConfig::default().into_res());
+            .insert_resource(db.ordering_config.clone().into_res());
+        self.world
+            .insert_resource(db.decision_config.clone().into_res());
+        self.world
+            .insert_resource(db.reputation_config.clone().into_res());
+
         self.world
             .insert_resource(ReputationState::default().into_res());
         self.world.insert_resource(DayStatus {

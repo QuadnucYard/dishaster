@@ -50,6 +50,10 @@ fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
         "Mismatched number of responses and AQ ranks"
     );
 
+    println!("Reputation config: {:#?}", registry.reputation_config);
+    println!("Ordering config: {:#?}", registry.ordering_config);
+    println!("Decision config: {:#?}", registry.decision_config);
+
     // Validate all loaded data
     dishaster_validation::validate_registry(&registry).context("validating game model registry")?;
     println!("✓ Data validation passed");

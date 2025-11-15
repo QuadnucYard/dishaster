@@ -15,6 +15,7 @@ pub fn handle_eat_goal(
     )>,
     mut table_query: Query<(Entity, &mut DiningTable)>,
     registry: Res<GameModelRegistryRes>,
+    reputation_config: Res<ReputationConfigRes>,
     perma_effects: Res<PermanentEffectsRes>,
     time: Res<Time>,
     mut daily_stats: ResMut<DailyStats>,
@@ -22,7 +23,7 @@ pub fn handle_eat_goal(
     mut events: ResMut<EventQueue>,
 ) {
     let satisfaction_weights = SatisfactionWeights::default();
-    let feedback_thresholds = FeedbackThresholds::default();
+    let feedback_thresholds = &reputation_config.feedback_thresholds;
     let dt = time.tick_duration as f32;
 
     for (
