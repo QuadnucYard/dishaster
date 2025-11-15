@@ -1,4 +1,8 @@
-[gd_scene format=3 uid="uid://ckietib4g2q0d"]
+[gd_scene load_steps=4 format=3 uid="uid://ckietib4g2q0d"]
+
+[ext_resource type="Theme" uid="uid://r4reuheu2fem" path="res://assets/themes/panel_text.tres" id="1_ea4ck"]
+[ext_resource type="StyleBox" uid="uid://cbrpkgkeg2mch" path="res://assets/themes/panel.tres" id="1_qpv0l"]
+[ext_resource type="Theme" uid="uid://c5h27pdjsc30" path="res://assets/themes/round_button.tres" id="2_ea4ck"]
 
 [node name="Settlement" type="Control"]
 layout_mode = 3
@@ -7,16 +11,32 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.46666667)
 
 [node name="Panel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 420.0
-offset_bottom = 360.0
-grow_horizontal = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -273.0
+offset_top = -193.5
+offset_right = 273.0
+offset_bottom = 193.5
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_ea4ck")
+theme_override_styles/panel = ExtResource("1_qpv0l")
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
@@ -46,10 +66,13 @@ scroll_active = false
 [node name="ButtonRow" type="HBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
+alignment = 1
 
 [node name="ConfirmButton" type="LocalizedButton" parent="Panel/VBox/ButtonRow"]
 message_id = "confirm.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 90)
 layout_mode = 2
+theme = ExtResource("2_ea4ck")
 theme_override_font_sizes/font_size = 24
 text = "Confirm"

@@ -1,0 +1,88 @@
+[gd_scene load_steps=5 format=3 uid="uid://lcua5x56lq68"]
+
+[ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="1_ending"]
+[ext_resource type="Theme" uid="uid://r4reuheu2fem" path="res://assets/themes/panel_text.tres" id="1_fgs30"]
+[ext_resource type="StyleBox" uid="uid://cbrpkgkeg2mch" path="res://assets/themes/panel.tres" id="2_n147k"]
+[ext_resource type="Theme" uid="uid://c5h27pdjsc30" path="res://assets/themes/round_button.tres" id="2_x241y"]
+
+[node name="Ending" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.46666667)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(800, 500)
+layout_mode = 2
+theme = ExtResource("1_fgs30")
+theme_override_styles/panel = ExtResource("2_n147k")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_bottom = -32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_ending")
+theme_override_font_sizes/font_size = 56
+text = "结局标题"
+horizontal_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_ending")
+theme_override_font_sizes/font_size = 28
+text = "这里是结局描述文本
+可以有多行"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ButtonContainer" type="HBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ContinueButton" type="LocalizedButton" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/ButtonContainer"]
+message_id = "continue-run.label"
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 90)
+layout_mode = 2
+theme = ExtResource("2_x241y")
+text = "{继续经营}"
+
+[node name="ExitButton" type="LocalizedButton" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/ButtonContainer"]
+message_id = "exit.label"
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 90)
+layout_mode = 2
+theme = ExtResource("2_x241y")
+text = "{退出}"

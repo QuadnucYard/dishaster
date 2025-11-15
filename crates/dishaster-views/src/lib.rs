@@ -177,3 +177,25 @@ pub struct PsychImpactView {
     /// Change in patience [-100, 100]
     pub patience_delta: f32,
 }
+
+/// Type of game ending reached.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum EndingType {
+    /// Bad ending: Reputation dropped to 0 (forced).
+    BadReputation,
+    /// Good ending: Reputation reached 100 (optional).
+    GoodReputation,
+    /// Bad ending: Food safety shutdown (forced).
+    FoodSafety,
+}
+
+impl EndingType {
+    /// Get string identifier for this ending type.
+    pub fn id(self) -> &'static str {
+        match self {
+            EndingType::BadReputation => "bad_reputation",
+            EndingType::GoodReputation => "good_reputation",
+            EndingType::FoodSafety => "food_safety",
+        }
+    }
+}

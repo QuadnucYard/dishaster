@@ -21,6 +21,8 @@ confirm =
     .label = 确认
 skip =
     .label = 跳过
+exit =
+    .label = 退出
 
 ## In Game
 
@@ -60,6 +62,9 @@ effects-title =
     .label = 效果:
 select-option =
     .label = 选择此项
+
+continue-run =
+    .label = 继续运营
 
 trial-agreement = 赞同
 trial-objection = 反对

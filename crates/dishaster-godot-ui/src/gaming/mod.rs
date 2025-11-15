@@ -1,3 +1,4 @@
+mod ending;
 mod hint;
 mod layout;
 mod manage_decision;
@@ -9,6 +10,7 @@ mod time_stats;
 mod trial;
 mod trial_impact;
 
+pub use ending::*;
 pub use hint::*;
 pub use layout::*;
 pub use manage_decision::*;

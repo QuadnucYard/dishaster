@@ -18,7 +18,7 @@ pub fn register_guis(registry: &mut GuiRegistry, catalog: &AssetCatalog) {
         };
     }
 
-    // NOTE: the following are registered by declaration order.
+    // NOTE: the following are registered and displayed by declaration order.
     register_gui!(
         StartMenuGui => "start/start_menu",
         CreditsGui => "start/credits",
@@ -27,6 +27,7 @@ pub fn register_guis(registry: &mut GuiRegistry, catalog: &AssetCatalog) {
         SettlementGui => "gaming/settlement",
         ManageDecisionGui => "gaming/decision_selection",
         ManageIncidentGui => "gaming/incident_notification",
+        EndingGui => "gaming/ending",
         TimeStatsGui => "gaming/time_stats",
         ReputationGui => "gaming/reputation",
         TrialGui => "gaming/trial",

@@ -208,6 +208,11 @@ impl Game {
                         self.ui_commands.push(UiCommand::ShowHint { message });
                     }
                 }
+
+                SimEvent::ShowEnding(ending_type) => {
+                    godot_print!("Received ending: {:?}", ending_type);
+                    self.ui_commands.push(UiCommand::ShowEnding(ending_type));
+                }
             }
         }
     }

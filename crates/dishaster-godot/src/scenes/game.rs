@@ -311,6 +311,10 @@ impl GameScene {
                 ctx.gui.get_mut::<ManageIncidentGui>().show();
             }
 
+            UiCommand::ShowEnding(ending_type) => {
+                ctx.gui.get_mut::<EndingGui>().show_ending(ending_type);
+            }
+
             UiCommand::ShowHint { message } => {
                 ctx.gui.get_mut::<HintNotification>().show_hint(&message);
             }

@@ -1,5 +1,6 @@
 use dishaster_interface::{SimEvent, event::HintCondition};
 use dishaster_models::Seed;
+use dishaster_views::EndingType;
 
 use crate::{
     components::Diner,
@@ -37,6 +38,7 @@ fn on_run_started(
     reputation: Res<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
     mut rng: ResMut<WorldRng>,
+    mut events: ResMut<EventQueue>,
 ) {
     day_status.started = true;
 
@@ -54,7 +56,7 @@ fn on_run_started(
             reputation.fsri,
             incident_prob
         );
-        // TODO: Trigger actual ending through proper ending system
+        events.push(SimEvent::ShowEnding(EndingType::FoodSafety));
         return; // Don't roll regular incidents if shutdown occurs
     }
 
@@ -111,10 +113,10 @@ fn on_advance_day(
     // Check for reputation-based endings
     if reputation.reputation <= 0.0 {
         log::info!("Reputation dropped to 0 - triggering bad ending");
-        // TODO: Trigger actual ending through proper ending system
+        events.push(SimEvent::ShowEnding(EndingType::BadReputation));
     } else if reputation.reputation >= 100.0 {
         log::info!("Reputation reached 100 - potential good ending");
-        // TODO: Offer good ending option
+        events.push(SimEvent::ShowEnding(EndingType::GoodReputation));
     }
 
     // Update day status for next day. This will be used when persisting progress.

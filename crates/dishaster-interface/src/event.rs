@@ -1,9 +1,9 @@
 //! Presentation events emitted by the core simulation for client display.
 
 use dishaster_views::{
-    Appearance, DishView, FeedbackView, ManagementDecisionsView, ManagementIncidentView,
-    PricingMethod, ReputationView, TrialImpactView, TrialIntro, TrialResponseOption,
-    TrialStatement,
+    Appearance, DishView, EndingType, FeedbackView, ManagementDecisionsView,
+    ManagementIncidentView, PricingMethod, ReputationView, TrialImpactView, TrialIntro,
+    TrialResponseOption, TrialStatement,
 };
 use dishrupt_core::{EntityId, prelude::EcoString};
 
@@ -81,6 +81,9 @@ pub enum SimEvent {
     ShowManagementDecisions(Box<ManagementDecisionsView>),
     /// Show incident notification at day start.
     ShowManagementIncident(Box<ManagementIncidentView>),
+
+    /// Show ending screen.
+    ShowEnding(EndingType),
 
     /// Show a hint to the player for first-time events.
     ShowHint {
