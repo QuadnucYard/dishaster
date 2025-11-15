@@ -6,503 +6,613 @@
 text = '这[菜]里有[异物]，\我刚咬到一块硬的，牙都快崩了！\你们怎么做饭的？'
 emotion = "😠"
 gesture = "👊"
+topic = "hygiene"
 
 [[item]]
 text = '为什么今天[饭卡]扣了两次钱？\卡上明明只有一次消费，\我要解释清楚！'
 emotion = "😤"
 gesture = "🤚"
+# No specific feedback topic - payment/system issue
 
 [[item]]
 text = '这[汤]一点味道都没有，是[清水]吧？\我花钱买的是[菜]不是水！'
 emotion = "😞"
 gesture = "✋"
-
-[[item]]
-text = '服务员刚才[态度]太差了，\直接推开我的餐盘，\这也太不尊重人了。'
-emotion = "😢"
-gesture = "👋"
+topic = "taste"
 
 [[item]]
 text = '你们的[分量]也太少了，\别看价格便宜，吃了还饿，\这算消费体验吗？'
 emotion = "😭"
 gesture = "🤞"
+topic = "hunger"
 
 [[item]]
 text = '这[菜]有股怪味，\可能是[油]放久了，\我要一份新的或者退钱。'
 emotion = "😰"
 gesture = "🤏"
+topic = "taste"
 
 [[item]]
 text = '刚才队里有人插队，\你们[管理]在哪里？\每次来都有这种情况！'
 emotion = "😨"
 gesture = "👈"
+topic = "queue"
 
 [[item]]
 text = '我[饭卡]被吞了，\卡里还有钱，\你们能不能现在查一下并补办？'
 emotion = "😱"
 gesture = "👉"
+# No specific feedback topic - card/system issue
 
 [[item]]
 text = '这[菜色]和图片完全不一样，\分明是昨晚剩的，\你们凭什么卖给我们？'
 emotion = "😠"
 gesture = "🤝"
+topic = "quality"
 
 [[item]]
 text = '今天的[菜名]怎么变了？\我点的明明是标注的辣，\结果一口都不辣，味道全变了。'
 emotion = "😡"
 gesture = "👍"
+topic = "taste"
 
 [[item]]
 text = '这碗[面]里有[头发]！\你看看这是什么情况，\我要投诉到学校食堂负责人。'
 emotion = "😠"
 gesture = "👏"
+topic = "hygiene"
 
 [[item]]
 text = '汤太[烫]了，吃得我嘴巴都烫糊了，\你们出餐有没有基本的温度控制？'
 emotion = "😤"
 gesture = "🤌"
-
-[[item]]
-text = '为什么今天没有[学生价]？\我明明是学生，\收我成人价这是歧视吗？'
-emotion = "😞"
-gesture = "🤙"
+topic = "quality"
 
 [[item]]
 text = '这[配菜]都发黑了，\是不是放了太久，\还能吃吗？'
 emotion = "😢"
 gesture = "👎"
-
-[[item]]
-text = '你们每次[打包]不同意，\有时候菜没吃完就浪费，\能不能提供小份或者打包服务？'
-emotion = "😭"
-gesture = "👊"
+topic = "hygiene"
 
 [[item]]
 text = '刚才掏卡等了半天，\收银[慢]得要命，\是不是要多配一个窗口？'
 emotion = "😰"
 gesture = "🤚"
+topic = "queue"
 
 [[item]]
 text = '这[饭菜]冷冰冰的，\看得出来刚从冰箱里拿出来重新加热，\难道就不能现做吗？'
 emotion = "😨"
 gesture = "✋"
-
-[[item]]
-text = '你们的[炒菜]都是放太多味精吧？\吃完头晕得不行，\我要知道成分表。'
-emotion = "😱"
-gesture = "👋"
+topic = "quality"
 
 [[item]]
 text = '为什么有个桌子一直没人清理，[卫生]状况太差了，\我都不想在这儿吃了。'
 emotion = "😠"
 gesture = "🤞"
+topic = "hygiene"
 
 [[item]]
 text = '今天饭卡[余额]显示不对，\结账的时候又跳错了，\你们系统是不是出问题了？'
 emotion = "😡"
 gesture = "🤏"
+# No specific feedback topic - system issue
 
 [[item]]
 text = '这[鱼]明显不新鲜，\吃起来有股腥味，\你们确定供应商没问题？'
 emotion = "😠"
 gesture = "👈"
+topic = "quality"
 
 [[item]]
 text = '服务员把菜单[价格]写错了，\我照着菜单点的却被多收了，\我要现场更正并退款。'
 emotion = "😤"
 gesture = "👉"
+# No specific feedback topic - pricing issue
 
 [[item]]
 text = '这一碗[粥]里怎么有沙粒，\牙都被磕到了，\厨房的[清洗]流程在哪里？'
 emotion = "😞"
 gesture = "🤝"
+topic = "hygiene"
 
 [[item]]
 text = '你们最近[更换]了厨师吧？\味道全变了，\难道传统配方都不重要了吗？'
 emotion = "😢"
 gesture = "👍"
+topic = "taste"
 
 [[item]]
 text = '刚才吃到一个很硬的[骨头]，\咬到牙齿差点断了，\我要你们负责医疗费用。'
 emotion = "😭"
 gesture = "👏"
+topic = "hygiene"
 
 [[item]]
 text = '排队买餐居然要排这么久，\高峰期根本[调度]不好，\能不能优化流程？'
 emotion = "😰"
 gesture = "🤌"
+topic = "queue"
 
 [[item]]
 text = '今天[套餐]里的菜少了一样，\我已经付过钱了，\你们给个解释或者补差价。'
 emotion = "😨"
 gesture = "🤙"
+topic = "quality"
 
 [[item]]
 text = '你们的餐具有点[破损]，\碗边有裂痕，用起来很不安全，\能不能检查并替换？'
 emotion = "😱"
 gesture = "👎"
+topic = "tableware"
 
 [[item]]
 text = '这[米饭]煮得硬邦邦的，\像没煮熟似的，\怎么能这样就端出来卖？'
 emotion = "😠"
 gesture = "👊"
+topic = "quality"
 
 [[item]]
 text = '今天有只[蟑螂]爬过桌子，\卫生问题严重，\管理方在哪？'
 emotion = "😡"
 gesture = "🤚"
+topic = "hygiene"
 
 [[item]]
 text = '你们的[出菜]速度跟不上，\点了十五分钟还没到，\我们有课怎么迟到？'
 emotion = "😠"
 gesture = "✋"
+topic = "queue"
 
 [[item]]
 text = '配菜里有[辣椒籽]，\我不敢吃辣的，结果被弄得鼻子难受，\这算怎么回事？'
 emotion = "😤"
 gesture = "👋"
+topic = "quality"
 
 [[item]]
 text = '你们这[打卡]方式也太不人性化了，\学生忘带卡怎么办，\能不能有备用机制？'
 emotion = "😞"
 gesture = "🤞"
+# No specific feedback topic - system issue
 
 [[item]]
 text = '菜里有明显的[塑料]味，\我怀疑用了不合格的包装，\我要看到你们的采购单。'
 emotion = "😢"
 gesture = "🤏"
+topic = "hygiene"
 
 [[item]]
 text = '今天的[汤]里有块状的东西，\不是菜也不是肉，\你们解释一下这是什么？'
 emotion = "😭"
 gesture = "👈"
+topic = "hygiene"
 
 [[item]]
 text = '有人给我错端了[过敏]食物，\我对海鲜过敏，差点进医院，\你们要承担责任。'
 emotion = "😰"
 gesture = "👉"
+topic = "quality"
 
 [[item]]
 text = '这[饮品]里怎么有气泡，\明明是没有碳酸的，\是不是掺了别的东西？'
 emotion = "😨"
 gesture = "🤝"
+topic = "quality"
 
 [[item]]
 text = '门口的[指示牌]写得不清楚，\找不到菜品摊位，\你们能不能把布局改清楚点？'
 emotion = "😱"
 gesture = "👍"
+# No specific feedback topic - navigation issue
 
 [[item]]
 text = '今天的[消费]记录对不上，\我被多扣了几块钱，\希望能当面核对并退款。'
 emotion = "😠"
 gesture = "👏"
-
-[[item]]
-text = '那位阿姨刚才[大声]骂人，\影响就餐环境，\你们怎么处理这种员工？'
-emotion = "😡"
-gesture = "🤌"
+# No specific feedback topic - billing issue
 
 [[item]]
 text = '这份[沙拉]里有霉点儿，\我有拍照片，\希望你们给个合理的赔偿。'
 emotion = "😠"
 gesture = "🤙"
+topic = "hygiene"
 
 [[item]]
 text = '这碗[鸡汤]浮着油腻，\喝一口就觉得不对，\你们的[食材]到底哪里来的？'
 emotion = "😤"
 gesture = "👎"
-
-[[item]]
-text = '你们的[排队]引导太混乱，\学生们都推搡，\安全隐患很大。'
-emotion = "😞"
-gesture = "👊"
+topic = "quality"
 
 [[item]]
 text = '我点的[素菜]竟然有肉，\我是[素食者]，\这差错太严重了！'
 emotion = "😢"
 gesture = "🤚"
+topic = "quality"
 
 [[item]]
 text = '这[饭菜]味道忽咸忽淡，\像是谁随便搅和的，\能不能保证稳定性？'
 emotion = "😭"
 gesture = "✋"
+topic = "taste"
 
 [[item]]
 text = '我的[饭卡]今天刷不了，\每次都要去窗口，\你们能不能修好系统？'
 emotion = "😰"
 gesture = "👋"
-
-[[item]]
-text = '服务员拿[托盘]太快，\盘里[汤]溅到了我[裤子]，\这[赔偿]谁来负责？'
-emotion = "😨"
-gesture = "🤞"
+# No specific feedback topic - system issue
 
 [[item]]
 text = '今日[特价]菜标错价了，\我凭菜单付的，\结果结账又被要求补差价。'
 emotion = "😱"
 gesture = "🤏"
+# No specific feedback topic - pricing issue
 
 [[item]]
 text = '菜里有[异味]，闻起来像化学品，\我根本吃不下去，\你们能解释吗？'
 emotion = "😠"
 gesture = "👈"
+topic = "hygiene"
 
 [[item]]
 text = '窗边那张桌子没人收，\地上都是剩饭，\食堂[清洁]做得太敷衍了。'
 emotion = "😡"
 gesture = "👉"
+topic = "hygiene"
 
 [[item]]
 text = '你们的[汤底]看着浑浊，\顾客都看不过去，\希望能改进配方。'
 emotion = "😠"
 gesture = "🤝"
-
-[[item]]
-text = '菜谱上写着有[鸡蛋]，\但我吃到却是豆制品，\过敏信息标注不清。'
-emotion = "😤"
-gesture = "👍"
-
-[[item]]
-text = '[老人家]来吃饭也被[推搡]，\队伍[管理]太粗暴，\这是基本的服务问题。'
-emotion = "😞"
-gesture = "👏"
-
-[[item]]
-text = '今天的[窗口]工作人员居然打电话，\态度敷衍，\顾客投诉都不重视。'
-emotion = "😢"
-gesture = "🤌"
+topic = "quality"
 
 [[item]]
 text = '这盒[便当]盖子内有油渍，\看着就不卫生，\我不敢吃了。'
 emotion = "😭"
 gesture = "🤙"
+topic = "hygiene"
 
 [[item]]
 text = '你们把[菜名]写得太模糊，\我点的口味完全不对，\能不能标准化一下？'
 emotion = "😰"
 gesture = "👎"
+topic = "quality"
 
 [[item]]
 text = '饮料[温度]太低了，\跟冰柜里拿出来的一样，\喝了不舒服。'
 emotion = "😨"
 gesture = "👊"
+topic = "quality"
 
 [[item]]
 text = '这盘[青菜]有虫眼，\明显没处理干净，\你们怎么还敢上桌？'
 emotion = "😱"
 gesture = "🤚"
-
-[[item]]
-text = '我朋友的[饭卡]被锁了，\管理处说要等半小时，\这也太不方便了。'
-emotion = "😠"
-gesture = "✋"
+topic = "hygiene"
 
 [[item]]
 text = '你们的[餐具]漂白味道太重，\我一吃就头疼，\建议更换清洗剂。'
 emotion = "😡"
 gesture = "👋"
+topic = "tableware"
 
 [[item]]
 text = '自助区的[菜品]经常空着，\补菜补得又慢，\我们得等很久才能吃上。'
 emotion = "😠"
 gesture = "🤞"
+topic = "queue"
 
 [[item]]
 text = '这份[牛肉]有难闻的腥味，\我怀疑没煮熟，\厨房的食品安全在哪里？'
 emotion = "😤"
 gesture = "🤏"
+topic = "hygiene"
 
 [[item]]
 text = '你们的[结账]系统总闪退，\我两次都没付上，\希望技术上能解决。'
 emotion = "😞"
 gesture = "👈"
-
-[[item]]
-text = '门口的[取餐牌]不准用，\服务员又乱叫号，\秩序根本没有。'
-emotion = "😢"
-gesture = "👉"
+# No specific feedback topic - system issue
 
 [[item]]
 text = '今天[早饭]的面条都煮烂了，\口感糟糕，\不能随便糊弄学生的早餐。'
 emotion = "😭"
 gesture = "🤝"
+topic = "quality"
 
 [[item]]
 text = '我点的[甜点]有异物，\像塑料碎片一样，\这太可怕了。'
 emotion = "😰"
 gesture = "👍"
-
-[[item]]
-text = '你们的[宣传]和实际不符，\特价并没有到，\这是误导消费者。'
-emotion = "😨"
-gesture = "👏"
-
-[[item]]
-text = '今天被安排到最后一个[窗口]，\窗口供应的东西都剩下渣，\[公平性]在哪？'
-emotion = "😱"
-gesture = "🤌"
+topic = "hygiene"
 
 [[item]]
 text = '青菜里有[农药味]，\吃了担心安全问题，\你们的采购合格证呢？'
 emotion = "😠"
 gesture = "🤙"
+topic = "hygiene"
 
 [[item]]
 text = '点了个[便宜菜]结果全是配料，\几口就没了，\商家良心在哪？'
 emotion = "😡"
 gesture = "👎"
+topic = "hunger"
 
 [[item]]
 text = '食堂[广播]一直放得很吵，\用餐体验被影响，\能不能声音小点？'
 emotion = "😠"
 gesture = "👊"
+# No specific feedback topic - environment issue
 
 [[item]]
 text = '这盘[卤味]吃着有点咸，\但同桌人的却不咸，\你们的标准到底在哪？'
 emotion = "😤"
 gesture = "🤚"
+topic = "taste"
 
 [[item]]
 text = '我看到后厨有人不戴[手套]处理食物，\这卫生规定谁来监督？'
 emotion = "😞"
 gesture = "✋"
+topic = "hygiene"
 
 [[item]]
 text = '你们把[菜名]改了又不公告，\学生根本不知道，\管理要透明一点。'
 emotion = "😢"
 gesture = "👋"
+# No specific feedback topic - communication issue
 
 [[item]]
 text = '今天[特供]居然卖完了，\明明早上才上架，\供应链控制得太差。'
 emotion = "😭"
 gesture = "🤞"
+topic = "appeal"
 
 [[item]]
 text = '这碗[面条]里有焦味，\可能糊锅了，\味道让人难以入口。'
 emotion = "😰"
 gesture = "🤏"
+topic = "taste"
 
 [[item]]
 text = '你们的[座位]设计很不合理，\桌椅靠得太挤，\大家吃饭像挤火车。'
 emotion = "😨"
 gesture = "👈"
+# No specific feedback topic - facility issue
 
 [[item]]
 text = '食堂洗手池水[温度]不稳，\冬天洗手很冷，\设施维护不到位。'
 emotion = "😱"
 gesture = "👉"
+# No specific feedback topic - facility issue
 
 [[item]]
 text = '这盘[鱼香肉丝]里没肉，\全是配菜，\你们在节省还是在[偷工减料]？'
 emotion = "😠"
 gesture = "🤝"
+topic = "hunger"
 
 [[item]]
 text = '自助取餐的[勺子]总不干净，\黏黏的让人恶心，\希望清洁频率提高。'
 emotion = "😡"
 gesture = "👍"
-
-[[item]]
-text = '有人在餐桌上[吸烟]，\烟味散满整个[大厅]，\你们的[巡查]在哪里？'
-emotion = "😠"
-gesture = "👏"
+topic = "tableware"
 
 [[item]]
 text = '这盘[炸鸡]吃着有旧油味，\可能油[重复使用]，\我不敢吃第二块了。'
 emotion = "😤"
 gesture = "🤌"
+topic = "hygiene"
 
 [[item]]
 text = '我点的[酸辣]口味完全没酸，\像是忘了[放醋]，\厨房做菜太随意了。'
 emotion = "😞"
 gesture = "🤙"
+topic = "taste"
 
 [[item]]
 text = '你们的[午休]时间配菜少，\很多学生吃不上饭，\能不能[提前]准备多一些？'
 emotion = "😢"
 gesture = "👎"
+topic = "appeal"
 
 [[item]]
 text = '[托盘]放置区没有指示，\大家乱堆盘子，\导致通道拥堵。'
 emotion = "😭"
 gesture = "👊"
+topic = "queue"
 
 [[item]]
 text = '这汤里有像[胶状]的东西，\舀起来黏糊糊的，\我根本不敢喝。'
 emotion = "😰"
 gesture = "🤚"
+topic = "hygiene"
 
 [[item]]
 text = '你们的[员工]对待学生傲慢，\说话带刺，\这种服务态度不能接受。'
 emotion = "😨"
 gesture = "✋"
+# No specific feedback topic - service attitude
 
 [[item]]
 text = '今天的[菜价]突然上涨，\没有任何通知，\学生们都很不满。'
 emotion = "😱"
 gesture = "👋"
+topic = "price"
 
 [[item]]
 text = '我发现[餐盘]上有[油渍]，\明显没[洗干净]，\食具清洗[流程]存在问题。'
 emotion = "😠"
 gesture = "🤞"
+topic = "tableware"
 
 [[item]]
 text = '你们的[窗口]标签显示错位，\我以为是另外一种菜，\结果点错了。'
 emotion = "😡"
 gesture = "🤏"
-
-[[item]]
-text = '服务员把[饮料]撒在我书上，\书被弄湿了，\能不能赔偿我的教材？'
-emotion = "😠"
-gesture = "👈"
+topic = "quality"
 
 [[item]]
 text = '这[面汤]里居然有塑料膜，\我差点吞下去，\这是极其危险的失误！'
 emotion = "😤"
 gesture = "👉"
-
-[[item]]
-text = '排到半路有人被叫走[插队]，\管理完全[不公平]，\你们要公开处理结果。'
-emotion = "😞"
-gesture = "🤝"
+topic = "hygiene"
 
 [[item]]
 text = '我在取餐处看见[老鼠]，\当时就走了，\这[卫生问题]不能[拖延]。'
 emotion = "😢"
 gesture = "👍"
-
-[[item]]
-text = '这[饭菜]颜色异常，\看起来像加了色素，\我很担心食品添加剂问题。'
-emotion = "😭"
-gesture = "👏"
-
-[[item]]
-text = '你们的[服务时间]不稳定，\有时一开门就没菜，\学生被迫去外面吃。'
-emotion = "😰"
-gesture = "🤌"
+topic = "hygiene"
 
 [[item]]
 text = '这盒[便当]里发现一张垃圾纸，\我当场[拍照]，\希望你们[严肃对待]。'
 emotion = "😨"
 gesture = "🤙"
-
-[[item]]
-text = '今天有员工在厨房[抽烟]，\油烟里混着烟味，\谁来保证食品安全？'
-emotion = "😱"
-gesture = "👎"
-
-[[item]]
-text = '你们的[退款]流程拖得太久，\我已经催了好几次，\还没见到账。'
-emotion = "😠"
-gesture = "👊"
-
-[[item]]
-text = '门口[秩序混乱]有人吵架，\食堂变得很不安全，\希望可以加强[安保]。'
-emotion = "😡"
-gesture = "🤚"
+topic = "hygiene"
 
 [[item]]
 text = '这[水果]有发霉的痕迹，\看起来像放了很久，\我不敢再买了。'
 emotion = "😠"
 gesture = "✋"
+topic = "hygiene"
+
+# === NEW ITEMS ===
+
+[[item]]
+text = '这[米饭]里有小石子，\我刚咬到一下，\牙都快硌坏了！\你们怎么清洗的？'
+emotion = "😡"
+
+[[item]]
+text = '这[青菜]都发黄了，\是不是昨天剩的？\我闻着都有点酸味了！'
+emotion = "🤢"
+gesture = "👎"
+topic = "hygiene"
+
+[[item]]
+text = '刚才那个[服务员]态度太差了，\盛菜时直接甩勺，\汤都溅我脸上了！'
+emotion = "😠"
+
+[[item]]
+text = '这[红烧肉]全是肥肉，\瘦的都没几块，\你们是按这个标准配的吗？'
+emotion = "😤"
+topic = "quality"
+
+[[item]]
+text = '这[汤]里面怎么有头发，\我都喝了一口才发现，\你们后厨卫生谁管的？'
+emotion = "🤮"
+topic = "hygiene"
+
+[[item]]
+text = '今天的[番茄炒蛋]太咸了，\根本没法下口，\你们是不是把盐罐打翻了？'
+emotion = "😤"
+topic = "taste"
+
+[[item]]
+text = '前面那个穿黑衣服的[插队]了，\直接跑到窗口前，\你们[管理]都不管的吗？'
+emotion = "😠"
+gesture = "👊"
+topic = "queue"
+
+[[item]]
+text = '这个[餐盘]边缘有裂口，\划到我手了，\你们怎么还在用破损的[餐具]？'
+emotion = "😨"
+topic = "tableware"
+
+[[item]]
+text = '每次来都只剩[青菜]和[豆腐]，\想吃的[红烧肉]永远卖光，\是不是故意少做？'
+emotion = "😒"
+gesture = "👎"
+topic = "appeal"
+
+[[item]]
+text = '这[汤]完全冷掉了，\喝下去胃都不舒服，\你们多久没换一锅了？'
+emotion = "😖"
+topic = "quality"
+
+[[item]]
+text = '这[米饭]里有小石子，\差点把我的牙硌坏了，\你们[筛选]都不做的吗？'
+emotion = "😡"
+
+[[item]]
+text = '你们这个[打菜窗口]太慢了，\我排了二十分钟队，\后面还有那么多人等着！'
+emotion = "😩"
+
+[[item]]
+text = '我发现你们[垃圾桶]满了也没人倒，\垃圾都溢出来了，\卫生状况太差了！'
+emotion = "🤢"
+topic = "hygiene"
+
+[[item]]
+text = '你们[标识]不清楚，\我完全不知道哪个菜是辣的，\结果吃到一个超级辣的[青椒]！'
+emotion = "🥵"
+
+[[item]]
+text = '你们这个[座椅]太不舒服了，\坐久了腰酸背痛，\就不能换一些更舒服的吗？'
+emotion = "😖"
+
+[[item]]
+text = '我发现你们[餐具]洗得不干净，\这个[勺子]上还有油渍，\让人怎么安心使用？'
+emotion = "🤢"
+topic = "hygiene"
+
+[[item]]
+text = '你们[免费续汤]的承诺是假的！\我刚想去续，\工作人员却说我已经续过一次了！'
+emotion = "😠"
+
+[[item]]
+text = '你们的[菜品价格]涨了好多，\比上周贵了两块，\这也涨得太快了吧！'
+emotion = "😮"
+topic = "price"
+
+[[item]]
+text = '你们[清真窗口]的标识不清楚，\我差点就误点了非清真菜品，\这很不尊重我们的饮食习惯！'
+emotion = "😤"
+
+[[item]]
+text = '你们[高峰时段排队]太夸张了，\排了二十分钟还没打上饭，\就不能增加服务窗口吗？'
+emotion = "⏰"
+
+[[item]]
+text = '你们这个[米饭硬度]每次都不同，\有时候太软有时候太硬，\就不能保持一致吗？'
+emotion = "🍚"
+
+[[item]]
+text = '你们[菜品标签]太不明显了，\很多菜都不知道是什么，\特别是辣度也没有标注。'
+emotion = "❓"
+
+[[item]]
+text = '你们这个[座位安排]太不合理了，\四人桌经常被一个人占着，\导致我们多人聚餐没地方坐。'
+emotion = "😤"
+
+[[item]]
+text = '你们[免费汤品]的供应时间太短了，\刚开餐十分钟就没有了，\能不能延长补汤频率？'
+emotion = "😢"
+
+[[item]]
+text = '你们这个[地面清洁]不够及时，\吃完饭地上总有洒落的食物残渣，\容易踩到滑倒。'
+emotion = "😬"
+topic = "hygiene"
+
+[[item]]
+text = '你们[菜品价格]调整得太频繁了，\上周还卖8块的红烧肉这周就10块，\能不能稳定一点？'
+emotion = "💸"
+topic = "price"
+
+[[item]]
+text = '你们[取餐夹子]容易串味，\夹过辣菜的夹子又去夹清淡的菜，\能不能一菜一夹？'
+emotion = "🤢"
+topic = "hygiene"
+
+[[item]]
+text = '你们[菜品标签]写得太小了，\字迹模糊看不清楚，\特别是老年人根本看不清成分和价格。'
+emotion = "👀"
+
+[[item]]
+text = '你们[菜单价格]涨得太快了，\才一个月没来，\好几道常点的菜都贵了好几块。'
+emotion = "💰"
+topic = "price"
+
+[[item]]
+text = '你们[菜品分量]越来越少了，\同样的价格，现在盘子都快空了，\明显缩水。'
+emotion = "🤢"
+topic = "quality"

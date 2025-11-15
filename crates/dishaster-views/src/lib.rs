@@ -94,6 +94,8 @@ pub enum FeedbackTopic {
     Tableware,
     /// Dish below expectation
     Quality,
+    /// Pricing complaints
+    Price,
     /// Food hygiene issues encountered
     Hygiene,
     /// Dish tastes bad

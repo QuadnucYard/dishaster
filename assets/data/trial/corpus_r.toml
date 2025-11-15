@@ -9,24 +9,24 @@ kind = "agreement"
 summary = "立即处理"
 text = '抱歉给您带来不便，\我这就为您处理\并更换一份新的菜品。'
 emotion = "😔"
-response_score = 0.744
 gesture = "🙏"
+response_score = 0.744
 
 [[item]]
 kind = "agreement"
 summary = "登记并回访"
 text = '我会把您的意见\登记为正式投诉，\并安排专人回访\处理结果。'
 emotion = "🙂"
-response_score = 0.585
 gesture = "📝"
+response_score = 0.585
 
 [[item]]
 kind = "question"
 summary = "需要证据吗？"
 text = '能否请您提供\照片或样品，\以便我们核实\并加快处理流程？'
 emotion = "🤔"
-response_score = -0.519
 gesture = "❓"
+response_score = -0.519
 
 [[item]]
 kind = "agreement"
@@ -34,23 +34,22 @@ summary = "更换或退款"
 text = '如果您不愿继续用餐，\我们可以为您更换\或立即退款处理。'
 emotion = "🙂"
 response_score = -0.088
-gesture = "💳"
 
 [[item]]
 kind = "objection"
 summary = "说明流程"
 text = '为确保公平\我们需要核对相关记录，\请您配合提供\消费凭证或时间信息。'
 emotion = "🤨"
-response_score = -0.364
 gesture = "📋"
+response_score = -0.364
 
 [[item]]
 kind = "agreement"
 summary = "立刻下架"
 text = '为保证安全我们会\先下架相关菜品\并抽样检验，\并在核实后给出\处理结果。'
 emotion = "😠"
-response_score = -0.020
 gesture = "🛑"
+response_score = -0.020
 
 [[item]]
 kind = "question"
@@ -58,15 +57,14 @@ summary = "需要医疗帮助吗？"
 text = '若您感觉不适需要就医，\我可以协助联系医务\或安排陪同。'
 emotion = "😔"
 response_score = 0.286
-gesture = "🚑"
 
 [[item]]
 kind = "agreement"
 summary = "优先处理"
 text = '我会优先为您处理此事，\并确保有专人跟进\直到问题解决。'
 emotion = "🙂"
-response_score = 0.666
 gesture = "👍"
+response_score = 0.666
 
 [[item]]
 kind = "objection"
@@ -74,15 +72,14 @@ summary = "解释与改进"
 text = '关于您提到的问题\我们会检查工序并改进，\防止类似情况发生。'
 emotion = "🙂"
 response_score = -0.122
-gesture = "🔧"
 
 [[item]]
 kind = "agreement"
 summary = "提供补偿"
 text = '为了表达歉意，\我们可以提供换餐、\退款或优惠券供您选择。'
 emotion = "😔"
-response_score = 1.000
 gesture = "🎁"
+response_score = 1.000
 
 [[item]]
 kind = "question"
@@ -90,7 +87,6 @@ summary = "是否保留样品？"
 text = '请尽量保留\可疑样品并拍照，\这有助于我们做出\准确判定。'
 emotion = "🤔"
 response_score = -0.415
-gesture = "📷"
 
 [[item]]
 kind = "agreement"
@@ -98,7 +94,6 @@ summary = "改进卫生"
 text = '我们会加强卫生巡检\并对责任区域\进行清洁与记录，\感谢您的提醒。'
 emotion = "🙂"
 response_score = 0.506
-gesture = "🧹"
 
 [[item]]
 kind = "objection"
@@ -106,7 +101,6 @@ summary = "说明检测"
 text = '我们会把样品送检\并在结果出来后\公开处理意见，\保证透明公正。'
 emotion = "🤨"
 response_score = 0.125
-gesture = "🔬"
 
 [[item]]
 kind = "agreement"
@@ -114,31 +108,30 @@ summary = "替换并检测"
 text = '我们可以为您更换\并把问题样品送检，\结果出来后\会第一时间通知您。'
 emotion = "🙂"
 response_score = 0.345
-gesture = "🔔"
 
 [[item]]
 kind = "agreement"
 summary = "道歉并跟进"
 text = '对此造成的困扰我们深表歉意，\会立刻改进并安排回访。'
 emotion = "😔"
-response_score = 0.918
 gesture = "🙏"
+response_score = 0.918
 
 [[item]]
 kind = "question"
 summary = "需要现场沟通吗？"
 text = '是否需要我们安排主管当面与您沟通处理方案？'
 emotion = "🤔"
-response_score = -0.503
 gesture = "🤝"
+response_score = -0.503
 
 [[item]]
 kind = "objection"
 summary = "说明赔偿"
 text = '关于赔偿我们会视情提供退款、换餐或其他合理补偿，\并记录处理依据。'
 emotion = "🤨"
-response_score = -0.086
 gesture = "📋"
+response_score = -0.086
 
 [[item]]
 kind = "agreement"
@@ -146,15 +139,14 @@ summary = "补做与优化"
 text = '若饭菜不符合标准，\我们会当场补做\并优化出品流程\以提升质量。'
 emotion = "🙂"
 response_score = 0.272
-gesture = "🔧"
 
 [[item]]
 kind = "agreement"
 summary = "感谢反馈"
 text = '感谢您的反馈，\这将帮助我们改进\并避免同类问题\再次发生。'
 emotion = "🙂"
-response_score = 1.000
 gesture = "🙏"
+response_score = 1.000
 
 [[item]]
 kind = "question"
@@ -162,15 +154,14 @@ summary = "需要临时就餐方案吗？"
 text = '若饭卡或支付出现问题，\我们可以\提供临时就餐\或人工结账方案。'
 emotion = "🤔"
 response_score = 0.905
-gesture = "💳"
 
 [[item]]
 kind = "objection"
 summary = "说明采购"
 text = '我们会追溯供货批次\并检验相关原料，\必要时召回或更换供应商。'
 emotion = "🤨"
-response_score = -0.488
 gesture = "🔎"
+response_score = -0.488
 
 [[item]]
 kind = "agreement"
@@ -178,7 +169,6 @@ summary = "改进标识"
 text = '我们会改进菜单与标识，\以减少误点或对食材的误解。'
 emotion = "🙂"
 response_score = 1.000
-gesture = "🪧"
 
 [[item]]
 kind = "agreement"
@@ -186,7 +176,6 @@ summary = "优先退款"
 text = '确认问题属实后，\我会优先为您办理退款或其它补偿。'
 emotion = "🙂"
 response_score = 0.224
-gesture = "💳"
 
 [[item]]
 kind = "question"
@@ -194,7 +183,6 @@ summary = "需要我们联系您吗？"
 text = '请留下联系方式，\我们会把处理进展\及时告知您。'
 emotion = "🙂"
 response_score = -0.630
-gesture = "📞"
 
 [[item]]
 kind = "objection"
@@ -202,7 +190,6 @@ summary = "解释时限"
 text = '某些核查需要时间，\我们会在最短时间内\完成并告知您结果。'
 emotion = "🤨"
 response_score = 0.119
-gesture = "⏳"
 
 [[item]]
 kind = "agreement"
@@ -210,7 +197,6 @@ summary = "清理与整改"
 text = '我们会立刻清理现场并对责任环节进行整改，\并记录处理过程。'
 emotion = "🙂"
 response_score = 0.387
-gesture = "🧼"
 
 [[item]]
 kind = "agreement"
@@ -218,7 +204,6 @@ summary = "加强培训"
 text = '针对服务或卫生问题，\我们会组织专项培训并加强监督。'
 emotion = "🙂"
 response_score = 0.945
-gesture = "🎓"
 
 [[item]]
 kind = "objection"
@@ -226,23 +211,22 @@ summary = "说明处理依据"
 text = '处理申诉时我们需要凭证与记录，\请尽量保留相关票据与样品。'
 emotion = "🤨"
 response_score = -0.826
-gesture = "📁"
 
 [[item]]
 kind = "agreement"
 summary = "免费换餐"
 text = '为表示歉意，\我们可以为您免费更换\并免单处理。'
 emotion = "😔"
-response_score = 0.325
 gesture = "🎁"
+response_score = 0.325
 
 [[item]]
 kind = "question"
 summary = "是否需要书面回执？"
 text = '若您需要书面处理回执，\我们可以在处理完成后\提供相关证明。'
 emotion = "🤔"
-response_score = -0.250
 gesture = "📝"
+response_score = -0.250
 
 [[item]]
 kind = "agreement"
@@ -250,7 +234,6 @@ summary = "回收并检验"
 text = '如发现问题批次\我们会回收并送检，\并对结果负责公布与处理。'
 emotion = "🤨"
 response_score = 0.455
-gesture = "🔬"
 
 [[item]]
 kind = "objection"
@@ -258,7 +241,6 @@ summary = "说明证据渠道"
 text = '您可以通过窗口、\电话或邮件提交证据，\我们会优先核查\并反馈结果。'
 emotion = "🙂"
 response_score = 0.190
-gesture = "📬"
 
 [[item]]
 kind = "agreement"
@@ -266,7 +248,6 @@ summary = "安排回访"
 text = '我们会安排专人回访\并告知最终处理结果，\确保问题被妥善解决。'
 emotion = "🙂"
 response_score = 0.772
-gesture = "📞"
 
 [[item]]
 kind = "question"
@@ -288,7 +269,6 @@ summary = "说明安全措施"
 text = '食品安全是我们的\首要任务，\我们会严格把关\并对问题负责。'
 emotion = "😠"
 response_score = 0.396
-gesture = "🔒"
 
 [[item]]
 kind = "agreement"
@@ -296,7 +276,6 @@ summary = "提升巡检"
 text = '我们会增加后厨与用餐区\巡检频率，\以减少卫生与质量隐患。'
 emotion = "🙂"
 response_score = 1.000
-gesture = "🔍"
 
 [[item]]
 kind = "agreement"
@@ -310,32 +289,32 @@ kind = "question"
 summary = "是否需现场协助？"
 text = '是否希望我们现在\安排人到现场\与您一同核查处理？'
 emotion = "🤔"
-response_score = -0.576
 gesture = "🤝"
+response_score = -0.576
 
 [[item]]
 kind = "agreement"
 summary = "感谢并改进"
 text = '感谢您的提醒，\我们会立刻改进\并把处理结果向您反馈。'
 emotion = "🙂"
-response_score = 0.366
 gesture = "🙏"
+response_score = 0.366
 
 [[item]]
 kind = "agreement"
 summary = "优先复查"
 text = '我会把您的反馈列为\优先事项，\并尽快完成复查与整改。'
 emotion = "🙂"
-response_score = 0.755
 gesture = "🔎"
+response_score = 0.755
 
 [[item]]
 kind = "objection"
 summary = "安排补救"
 text = '我们可以为您安排\补救措施，\比如更换菜品、\退款或提供折扣。'
 emotion = "🙂"
-response_score = 0.517
 gesture = "🎁"
+response_score = 0.517
 
 [[item]]
 kind = "question"
@@ -343,39 +322,38 @@ summary = "需否联系供应商？"
 text = '如属供应问题，\是否需要我们联系供应商\并把处理结果告知您？'
 emotion = "🤔"
 response_score = -0.671
-gesture = "📞"
 
 [[item]]
 kind = "agreement"
 summary = "暂停销售"
 text = '若问题严重\我们会暂停该批次销售\并展开全面检测。'
 emotion = "😠"
-response_score = -0.248
 gesture = "🛑"
+response_score = -0.248
 
 [[item]]
 kind = "objection"
 summary = "提供流程"
 text = '处理流程包括登记、取样、\检测与反馈，\我们会按流程执行\并通知您。'
 emotion = "🤨"
-response_score = 0.354
 gesture = "📋"
+response_score = 0.354
 
 [[item]]
 kind = "agreement"
 summary = "现场补偿"
 text = '作为补偿我可以当场提供\一份替代餐\或相关优惠，\请您选择。'
 emotion = "🙂"
-response_score = 0.746
 gesture = "🎁"
+response_score = 0.746
 
 [[item]]
 kind = "question"
 summary = "希望怎样处理？"
 text = '请问您倾向于换餐、\退款还是其他补偿方式？'
 emotion = "🤔"
-response_score = -0.580
 gesture = "❓"
+response_score = -0.580
 
 [[item]]
 kind = "objection"
@@ -410,8 +388,8 @@ kind = "question"
 summary = "是否需要陪同取样？"
 text = '您是否愿意在我们取样时\在场\以便共同记录？'
 emotion = "🤔"
-response_score = 0.196
 gesture = "🤝"
+response_score = 0.196
 
 [[item]]
 kind = "agreement"
@@ -425,48 +403,48 @@ kind = "objection"
 summary = "说明责任"
 text = '根据调查结果\我们会根据责任程度\采取相应处理措施，\并向您说明处理结果。'
 emotion = "🤨"
-response_score = -0.541
 gesture = "📋"
+response_score = -0.541
 
 [[item]]
 kind = "agreement"
 summary = "补偿方案"
 text = '我们会为您提供\明确补偿方案\选项，\方便您选择最合适的\处理方式。'
 emotion = "🙂"
-response_score = 0.838
 gesture = "🎁"
+response_score = 0.838
 
 [[item]]
 kind = "question"
 summary = "需要官方说明吗？"
 text = '是否需要我们出具\正式处理证明\或道歉信？'
 emotion = "🤔"
-response_score = -0.604
 gesture = "📝"
+response_score = -0.604
 
 [[item]]
 kind = "agreement"
 summary = "立即处理并记录"
 text = '我会立刻处理此事\并将过程记录在案，\确保后续可追溯。'
 emotion = "🙂"
-response_score = 0.786
 gesture = "📝"
+response_score = 0.786
 
 [[item]]
 kind = "objection"
 summary = "改善采购流程"
 text = '若确认为供应链问题\我们会对采购流程\进行整改\并更换供应商。'
 emotion = "🤨"
-response_score = -0.138
 gesture = "🔎"
+response_score = -0.138
 
 [[item]]
 kind = "agreement"
 summary = "免费样品提供"
 text = '我们可以提供免费样品\以便您确认改进后的\品质，\欢迎您试用。'
 emotion = "🙂"
-response_score = 0.658
 gesture = "🎁"
+response_score = 0.658
 
 [[item]]
 kind = "question"
@@ -474,7 +452,6 @@ summary = "是否需要回访？"
 text = '在处理完成后，\是否需要我们安排回访\以确认您满意度？'
 emotion = "🤔"
 response_score = -0.454
-gesture = "📞"
 
 [[item]]
 kind = "agreement"
@@ -482,15 +459,14 @@ summary = "信息公开"
 text = '处理结果会在合理范围内\对受影响的顾客公开，\并接受监督。'
 emotion = "🙂"
 response_score = 0.465
-gesture = "📢"
 
 [[item]]
 kind = "objection"
 summary = "跨部门合作"
 text = '这类问题我们会与后勤、\采购及质检部门\协同处理，\确保责任明确。'
 emotion = "🤨"
-response_score = -0.900
 gesture = "🤝"
+response_score = -0.900
 
 [[item]]
 kind = "agreement"
@@ -498,7 +474,6 @@ summary = "快速响应"
 text = '接到反馈后\我们会启动快速响应\流程，\尽可能在最短时间内\完成初步处理。'
 emotion = "🙂"
 response_score = 0.704
-gesture = "⚡"
 
 [[item]]
 kind = "question"
@@ -506,7 +481,6 @@ summary = "是否保留票据？"
 text = '保留消费票据\有助于我们加快核查，\请尽量保留\并提供给窗口。'
 emotion = "🤔"
 response_score = 0.702
-gesture = "🧾"
 
 [[item]]
 kind = "agreement"
@@ -514,7 +488,6 @@ summary = "加强监督"
 text = '我们会增加管理人员\巡查频次，\并对关键环节加大\抽检力度。'
 emotion = "🙂"
 response_score = 0.385
-gesture = "🔍"
 
 [[item]]
 kind = "objection"
@@ -522,7 +495,6 @@ summary = "说明透明渠道"
 text = '您可以通过多种渠道\提交投诉，\我们会建立专门流程\进行处理。'
 emotion = "🙂"
 response_score = -0.269
-gesture = "📬"
 
 [[item]]
 kind = "agreement"
@@ -536,16 +508,16 @@ kind = "question"
 summary = "需要我方陪同走流程吗？"
 text = '如果您需要，\我可以安排工作人员\陪同您完成投诉\与取证流程。'
 emotion = "🤔"
-response_score = -0.157
 gesture = "🤝"
+response_score = -0.157
 
 [[item]]
 kind = "agreement"
 summary = "记录并跟进"
 text = '我们会把此事件写入\例行检查记录\并跟进整改执行情况。'
 emotion = "🙂"
-response_score = 0.834
 gesture = "📋"
+response_score = 0.834
 
 [[item]]
 kind = "objection"
@@ -553,7 +525,6 @@ summary = "引入第三方"
 text = '必要时我们会引入\第三方检测机构\以确保检测公正性，\并公布检测报告。'
 emotion = "🤨"
 response_score = -0.029
-gesture = "🔬"
 
 [[item]]
 kind = "agreement"
@@ -561,7 +532,6 @@ summary = "加强培训与考核"
 text = '我们会对相关岗位\加强培训\并设立考核\以保证流程执行。'
 emotion = "🙂"
 response_score = 0.874
-gesture = "🎓"
 
 [[item]]
 kind = "question"
@@ -569,7 +539,6 @@ summary = "希望匿名处理吗？"
 text = '若您担心隐私\我们可以提供匿名投诉渠道\处理。'
 emotion = "🤔"
 response_score = -0.654
-gesture = "🤐"
 
 [[item]]
 kind = "agreement"
@@ -577,7 +546,6 @@ summary = "优化菜单信息"
 text = '我们会更新菜单说明\与过敏信息，\以减少顾客误点与风险。'
 emotion = "🙂"
 response_score = 1.000
-gesture = "🪧"
 
 [[item]]
 kind = "objection"
@@ -585,7 +553,6 @@ summary = "记录保存"
 text = '我们会妥善保存处理记录\与检测报告，\以备后续审计与查询。'
 emotion = "🙂"
 response_score = 0.229
-gesture = "📚"
 
 [[item]]
 kind = "agreement"
@@ -599,8 +566,8 @@ kind = "question"
 summary = "需要道歉信吗？"
 text = '是否需要我们出具\正式道歉信\或处理回执？'
 emotion = "🤔"
-response_score = -0.558
 gesture = "📝"
+response_score = -0.558
 
 [[item]]
 kind = "agreement"
@@ -608,7 +575,6 @@ summary = "调整供应"
 text = '若供应商问题频繁\我们会考虑更换\并作长期评估。'
 emotion = "🙂"
 response_score = -0.211
-gesture = "🔁"
 
 [[item]]
 kind = "objection"
@@ -616,7 +582,6 @@ summary = "说明补救时间"
 text = '整改与检测通常需要时间，\我们会在合理时间内\给出阶段性更新。'
 emotion = "🤨"
 response_score = 0.207
-gesture = "⏳"
 
 [[item]]
 kind = "agreement"
@@ -624,23 +589,22 @@ summary = "公布改进计划"
 text = '我们会制定并公布\具体改进计划，\接受监督\并按时反馈进度。'
 emotion = "🙂"
 response_score = 0.520
-gesture = "📢"
 
 [[item]]
 kind = "question"
 summary = "是否需要进一步协助？"
 text = '还有什么我们\可以为您提供\的协助\或说明？'
 emotion = "🤔"
-response_score = -0.435
 gesture = "❓"
+response_score = -0.435
 
 [[item]]
 kind = "agreement"
 summary = "紧急下架并检验"
 text = '接到您关于异物的反馈\我们会立即下架该批次\并取样检测，\同时为您更换\并提供赔偿方案。'
 emotion = "😠"
-response_score = 0.671
 gesture = "🛑"
+response_score = 0.671
 
 [[item]]
 kind = "question"
@@ -648,7 +612,6 @@ summary = "是否保留卡据？"
 text = '能否把出现异常的饭卡\或支付凭证留给我们，\以便我们核对\并快速处理退费或补偿？'
 emotion = "🤔"
 response_score = -0.089
-gesture = "🧾"
 
 [[item]]
 kind = "objection"
@@ -656,23 +619,22 @@ summary = "解释出品差异"
 text = '关于口味与图片不符，\我会向厨师确认出品标准\并说明是否为配方调整，\并在必要时恢复原配方。'
 emotion = "🙂"
 response_score = -1.000
-gesture = "🔍"
 
 [[item]]
 kind = "agreement"
 summary = "现场道歉并处理"
 text = '对于服务态度问题\我们会当面道歉\并进行员工训导，\如需我们可以安排赔偿\或替代餐。'
 emotion = "😔"
-response_score = 0.185
 gesture = "🙏"
+response_score = 0.185
 
 [[item]]
 kind = "agreement"
 summary = "调整分量与补偿"
 text = '对于分量不足的反馈\我们会补足\并在后续调整出品标准，\必要时提供一次性补偿\或折扣。'
 emotion = "🙂"
-response_score = 0.773
 gesture = "🎁"
+response_score = 0.773
 
 [[item]]
 kind = "objection"
@@ -680,15 +642,14 @@ summary = "检验油品"
 text = '关于油品变味\我们会抽样检验\并核查存储记录，\如确认问题会更换批次\并处理赔偿。'
 emotion = "🤨"
 response_score = -0.366
-gesture = "🔬"
 
 [[item]]
 kind = "agreement"
 summary = "加强现场管理"
 text = '我们会加强高峰期的\现场秩序\管理\并安排人员巡查，\以减少插队和拥挤情况。'
 emotion = "🙂"
-response_score = 0.855
 gesture = "👉"
+response_score = 0.855
 
 [[item]]
 kind = "agreement"
@@ -696,7 +657,6 @@ summary = "查卡并补办"
 text = '关于饭卡被吞\我们会立即到后台核查\并协助补办\或临时解决您的就餐需求。'
 emotion = "🙂"
 response_score = 0.765
-gesture = "💳"
 
 [[item]]
 kind = "objection"
@@ -704,15 +664,14 @@ summary = "防止剩菜再售"
 text = '我们将核查是否存在\回用剩菜的情况\并加强出品检验，\发现问题会严肃处理\并追责。'
 emotion = "😠"
 response_score = -0.898
-gesture = "🔒"
 
 [[item]]
 kind = "agreement"
 summary = "记录并上报"
 text = '关于头发或异物的投诉\我们会记录样品\并上报管理层，\以便跟进\并公布处理结果。'
 emotion = "🙂"
-response_score = 0.259
 gesture = "📋"
+response_score = 0.259
 
 [[item]]
 kind = "question"
@@ -762,7 +721,6 @@ summary = "检查清洗流程"
 text = '关于粥里沙粒或餐具油渍\我们会检查清洗流程\并对相关环节整改，\同时对受影响的顾客\提供补偿。'
 emotion = "🤨"
 response_score = 0.439
-gesture = "🧽"
 
 [[item]]
 kind = "agreement"
@@ -777,7 +735,6 @@ summary = "需要我们协助证明吗？"
 text = '若您需要我们可以提供\处理记录或证明\以便您用于后续申诉\或理赔。'
 emotion = "🤔"
 response_score = 0.014
-gesture = "📄"
 
 [[item]]
 kind = "objection"
@@ -805,8 +762,8 @@ kind = "agreement"
 summary = "现场换餐并免单"
 text = '对于出现质量问题的餐品\我们可以立即为您更换\一份\并免去费用，\以示歉意。'
 emotion = "😔"
-response_score = 0.906
 gesture = "🎁"
+response_score = 0.906
 
 [[item]]
 kind = "question"
@@ -814,7 +771,6 @@ summary = "是否需要监控回放？"
 text = '在发生争议时\我们可以调取监控回放\以核实当时情况，\请告知是否同意我们\这么做。'
 emotion = "🤔"
 response_score = 0.369
-gesture = "📹"
 
 [[item]]
 kind = "agreement"
@@ -822,7 +778,6 @@ summary = "加强后厨管理"
 text = '针对不戴手套或抽烟等\违规行为\我们会立刻整顿\并加强监督，\保证食品安全。'
 emotion = "😠"
 response_score = 1.000
-gesture = "🔒"
 
 [[item]]
 kind = "objection"
@@ -830,7 +785,6 @@ summary = "说明退款时限"
 text = '退款需要一定流程\与时间，\我们会尽量加快\并把进度告知您，\如遇延迟会提供\临时补偿。'
 emotion = "🤨"
 response_score = -0.580
-gesture = "⏳"
 
 [[item]]
 kind = "agreement"
@@ -838,7 +792,6 @@ summary = "回收并检验可疑批次"
 text = '如发现可疑异物\或质量问题\我们会回收整批\并送检，\结果出来后会反馈\处理措施。'
 emotion = "🤨"
 response_score = 0.105
-gesture = "🔬"
 
 [[item]]
 kind = "question"
@@ -846,7 +799,6 @@ summary = "希望怎样公开结果？"
 text = '您希望我们通过公告栏、\在线渠道还是私下通知\来公布检测与处理结果？'
 emotion = "🤔"
 response_score = -0.596
-gesture = "📢"
 
 [[item]]
 kind = "objection"
@@ -854,23 +806,22 @@ summary = "处理投诉渠道"
 text = '我们会提供多渠道\投诉与追踪方式，\确保每个投诉都能被落实\与跟进。'
 emotion = "🙂"
 response_score = 0.148
-gesture = "📬"
 
 [[item]]
 kind = "agreement"
 summary = "安排安保与秩序维护"
 text = '针对门口秩序混乱的\情况\我们会协调安保\加派人手，\并完善突发事件\应对机制。'
 emotion = "🙂"
-response_score = 0.479
 gesture = "👉"
+response_score = 0.479
 
 [[item]]
 kind = "agreement"
 summary = "下架霉变水果并更换"
 text = '发现发霉的水果\我们会立刻下架\并为您更换或退款，\并追查进货与保鲜流程。'
 emotion = "😠"
-response_score = 0.563
 gesture = "🛑"
+response_score = 0.563
 
 [[item]]
 kind = "question"
@@ -878,7 +829,6 @@ summary = "是否需要书面材料？"
 text = '若您需要书面证明\或处理回执，\我们可以在处理后提供，\请告知收件方式。'
 emotion = "🤔"
 response_score = -0.301
-gesture = "📄"
 
 [[item]]
 kind = "objection"
@@ -886,7 +836,6 @@ summary = "公开整改计划"
 text = '我们会在整改后\发布阶段性报告\并接受监督，\确保改进落到实处。'
 emotion = "🙂"
 response_score = -0.596
-gesture = "📢"
 
 [[item]]
 kind = "agreement"
@@ -894,7 +843,6 @@ summary = "改进服务与培训"
 text = '我们会对窗口人员进行\服务与卫生培训\并检查执行情况，\以提升整体就餐体验。'
 emotion = "🙂"
 response_score = 1.000
-gesture = "🎓"
 
 [[item]]
 kind = "question"
@@ -902,7 +850,6 @@ summary = "是否需要联系我们？"
 text = '在处理期间\是否需要我们的负责人\直接与您联系\以便沟通细节？'
 emotion = "🤔"
 response_score = -0.515
-gesture = "📞"
 
 [[item]]
 kind = "agreement"
@@ -923,8 +870,8 @@ kind = "agreement"
 summary = "道歉并承诺改善"
 text = '对于给您带来的不便\我们深表歉意，\并承诺会在规定时间内\完成整改。'
 emotion = "😔"
-response_score = 0.356
 gesture = "🙏"
+response_score = 0.356
 
 [[item]]
 kind = "question"
@@ -939,7 +886,6 @@ summary = "持续跟进"
 text = '我们会把此事持续跟进\直到彻底解决，\并把处理结果反馈给您。'
 emotion = "🙂"
 response_score = 0.784
-gesture = "🔔"
 
 [[item]]
 kind = "objection"
@@ -947,7 +893,6 @@ summary = "这是小题大作"
 text = '这点小事不用夸大，\我们检查就行了。'
 emotion = "😒"
 response_score = -0.391
-gesture = "🙄"
 
 [[item]]
 kind = "objection"
@@ -955,7 +900,6 @@ summary = "不耐烦"
 text = '我已经说了会处理，\麻烦您别一直重复。'
 emotion = "😤"
 response_score = -1.000
-gesture = "🤦"
 
 [[item]]
 kind = "agreement"
@@ -963,7 +907,6 @@ summary = "随便换一份"
 text = '行，我换一份给你，\不过别太较真。'
 emotion = "😏"
 response_score = 0.386
-gesture = "🙄"
 
 [[item]]
 kind = "perjury"
@@ -971,15 +914,14 @@ summary = "否认责任"
 text = '我们厨房一向按规矩做，\不可能出现那样的东西。'
 emotion = "😒"
 response_score = -0.240
-gesture = "🤥"
 
 [[item]]
 kind = "objection"
 summary = "敷衍退款"
 text = '行，退就退，\别再来添麻烦。'
 emotion = "😒"
-response_score = -0.998
 gesture = "👎"
+response_score = -0.998
 
 [[item]]
 kind = "question"
@@ -987,15 +929,14 @@ summary = "想怎么赔？"
 text = '你想要什么赔偿，\说清楚我们再看能不能办。'
 emotion = "😐"
 response_score = -0.585
-gesture = "🤨"
 
 [[item]]
 kind = "objection"
 summary = "别一上来就指责"
 text = '别一上来就指责人，\大家都很忙。'
 emotion = "😤"
-response_score = 0.047
 gesture = "👎"
+response_score = 0.047
 
 [[item]]
 kind = "agreement"
@@ -1003,7 +944,6 @@ summary = "勉强同意"
 text = '好吧，我们可以再做一份，\但这是最后一次。'
 emotion = "😒"
 response_score = 0.631
-gesture = "🙄"
 
 [[item]]
 kind = "objection"
@@ -1011,7 +951,6 @@ summary = "挑剔顾客"
 text = '天啊，这也能挑刺，\我们也不是机器。'
 emotion = "😒"
 response_score = 0.395
-gesture = "🤦"
 
 [[item]]
 kind = "question"
@@ -1019,7 +958,6 @@ summary = "要不要证据"
 text = '要不你先把东西给我，\不然我怎么处理？'
 emotion = "🤨"
 response_score = -0.743
-gesture = "📎"
 
 [[item]]
 kind = "agreement"
@@ -1027,15 +965,14 @@ summary = "冷淡换餐"
 text = '换就换，\不过别怪我们慢。'
 emotion = "😐"
 response_score = -0.072
-gesture = "🤷"
 
 [[item]]
 kind = "objection"
 summary = "不予受理"
 text = '这类问题超过投诉期，\我们不再受理。'
 emotion = "😠"
-response_score = -1.000
 gesture = "👎"
+response_score = -1.000
 
 [[item]]
 kind = "perjury"
@@ -1043,7 +980,6 @@ summary = "拒绝承认"
 text = '我们没发现过类似记录，\可能是误会。'
 emotion = "😏"
 response_score = -0.384
-gesture = "🤥"
 
 [[item]]
 kind = "agreement"
@@ -1051,7 +987,6 @@ summary = "勉强退款"
 text = '好，我退给你，\下次别这么冲。'
 emotion = "😒"
 response_score = 0.849
-gesture = "💳"
 
 [[item]]
 kind = "objection"
@@ -1059,7 +994,6 @@ summary = "别挡道"
 text = '别在这站着不走，\还有客户在排队。'
 emotion = "😤"
 response_score = -1.000
-gesture = "👮"
 
 [[item]]
 kind = "question"
@@ -1067,7 +1001,6 @@ summary = "要去投诉吗？"
 text = '要投诉就去行政那边，\我们这儿能做的有限。'
 emotion = "😐"
 response_score = -0.815
-gesture = "📢"
 
 [[item]]
 kind = "agreement"
@@ -1075,31 +1008,30 @@ summary = "草率道歉"
 text = '好吧，对不起，\你满意就好。'
 emotion = "😔"
 response_score = 0.581
-gesture = "🙇"
 
 [[item]]
 kind = "objection"
 summary = "夸张"
 text = '这明显夸大了事实，\别把小事弄大。'
 emotion = "😒"
-response_score = -1.000
 gesture = "👎"
+response_score = -1.000
 
 [[item]]
 kind = "question"
 summary = "还要别的？"
 text = '还需要我们做什么，\说吧。'
 emotion = "🤨"
-response_score = 0.742
 gesture = "❓"
+response_score = 0.742
 
 [[item]]
 kind = "agreement"
 summary = "冷漠承诺"
 text = '我会记下，\但不保证一定改。'
 emotion = "😐"
-response_score = 0.110
 gesture = "📝"
+response_score = 0.110
 
 [[item]]
 kind = "objection"
@@ -1121,7 +1053,6 @@ summary = "别扯了"
 text = '别扯了，\这事儿就按照规矩来，\不要找借口。'
 emotion = "😤"
 response_score = -0.669
-gesture = "🫰"
 
 [[item]]
 kind = "question"
@@ -1184,8 +1115,8 @@ kind = "objection"
 summary = "我不负责这部分"
 text = '我负责前台处理，\供应链问题请找采购去问。'
 emotion = "😤"
-response_score = -0.900
 gesture = "👉"
+response_score = -0.900
 
 [[item]]
 kind = "agreement"
@@ -1195,19 +1126,12 @@ emotion = "😒"
 response_score = -0.555
 
 [[item]]
-kind = "objection"
-summary = "别耽误时间"
-text = '别耽误大家时间，\把要点说清楚就行。'
-emotion = "😠"
-response_score = -0.862
-
-[[item]]
 kind = "question"
 summary = "还想要什么？"
 text = '您还想要什么补救措施，\先把要求说清楚\再说其他。'
 emotion = "😑"
-response_score = -0.024
 gesture = "❓"
+response_score = -0.024
 
 [[item]]
 kind = "agreement"
@@ -1235,13 +1159,860 @@ kind = "question"
 summary = "要不要我叫人？"
 text = '要闹事的话我就叫保安，\还是先好好讲清楚？'
 emotion = "😠"
-response_score = -0.718
 gesture = "👉"
+response_score = -0.718
 
 [[item]]
 kind = "objection"
 summary = "别做无谓指责"
 text = '没有证据别随便指责，\讲事实我们才能处理。'
 emotion = "🙄"
-response_score = -0.972
 gesture = "✋"
+response_score = -0.972
+
+# === NEW ITEMS ===
+
+[[item]]
+kind = "agreement"
+summary = "马上换"
+text = '非常抱歉，\我们立刻为您更换一份新餐。'
+emotion = "😓"
+gesture = "🙏"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "米有问题"
+text = '这可能是[大米]本身的问题，\我们每批都有质检。'
+emotion = "🤔"
+response_score = -0.343
+
+[[item]]
+kind = "question"
+summary = "能看看吗"
+text = '能让我看看\具体是哪颗石子吗？\说不定是米里的硬壳。'
+emotion = "🧐"
+response_score = -0.434
+
+[[item]]
+kind = "perjury"
+summary = "学生搞事"
+text = '最近总有学生说吃到石子，\其实是自己带进来碰瓷的。'
+emotion = "😏"
+response_score = 0.521
+
+[[item]]
+kind = "agreement"
+summary = "重新打菜"
+text = '实在不好意思，\我们马上给您换一份新鲜的。'
+emotion = "😔"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "光照问题"
+text = '是因为灯光偏黄，\菜其实很新鲜，刚出锅的。'
+emotion = "😅"
+response_score = 0.756
+
+[[item]]
+kind = "question"
+summary = "能给我看"
+text = '能让我看看那盘[青菜]吗？\也许只是个别叶片老了。'
+emotion = "🤨"
+response_score = -0.601
+
+[[item]]
+kind = "perjury"
+summary = "心理作用"
+text = '很多同学都觉得菜发黄，\其实是心理作用，菜没问题。'
+emotion = "😑"
+response_score = 0.578
+
+[[item]]
+kind = "agreement"
+summary = "道歉处理"
+text = '非常抱歉，\我们立刻对相关人员进行教育。'
+emotion = "🙇"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "人太多忙不过来"
+text = '今天人太多，\大家都在赶时间，可能动作急了点。'
+emotion = "😅"
+response_score = 0.667
+
+[[item]]
+kind = "question"
+summary = "哪个服务员"
+text = '您能描述下是哪位[服务员]吗？\我们好进一步了解情况。'
+emotion = "🤔"
+response_score = -0.629
+
+[[item]]
+kind = "perjury"
+summary = "你站太近了"
+text = '可能是您靠得太近，\才被汤汁溅到，不是故意的。'
+emotion = "🙄"
+response_score = -0.591
+
+[[item]]
+kind = "agreement"
+summary = "重新打一份"
+text = '对不起，\我们马上为您重新打一份均衡的。'
+emotion = "😊"
+response_score = 0.557
+
+[[item]]
+kind = "objection"
+summary = "肥肉更香"
+text = '肥肉部分更香浓，\很多人专门喜欢这一口。'
+emotion = "😋"
+gesture = "👍"
+response_score = 0.778
+
+[[item]]
+kind = "question"
+summary = "能看看肉吗"
+text = '能让我看看您这份[红烧肉]吗？\可能是分菜不均造成的。'
+emotion = "🧐"
+response_score = -0.258
+
+[[item]]
+kind = "perjury"
+summary = "大家都满意"
+text = '之前没人反映这个问题，\大家都吃得挺满意的。'
+emotion = "😒"
+response_score = 0.562
+
+[[item]]
+kind = "agreement"
+summary = "立刻换汤"
+text = '万分抱歉，\我们马上为您换一碗干净的汤。'
+emotion = "😰"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "可能是顾客的"
+text = '有时候顾客自己的头发也会掉进去，\我们厨师都戴帽子的。'
+emotion = "😅"
+response_score = -0.469
+
+[[item]]
+kind = "question"
+summary = "能给我看"
+text = '能让我看看那根[头发]吗？\长度颜色能帮我们判断来源。'
+emotion = "🧐"
+response_score = -0.089
+
+[[item]]
+kind = "perjury"
+summary = "看错了"
+text = '汤里飘的是香菜丝，\您可能眼花了看错了。'
+emotion = "🤨"
+response_score = -1.000
+
+[[item]]
+kind = "agreement"
+summary = "重新做"
+text = '非常抱歉，\我马上让厨房\重新为您做一份。'
+emotion = "😓"
+gesture = "🙏"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "正常口味"
+text = '这道菜的口味一直如此，\很多同学都喜欢。'
+emotion = "😐"
+response_score = 0.784
+
+[[item]]
+kind = "question"
+summary = "别人没说"
+text = '其他同学都没反映，\您确定是菜的问题吗？'
+emotion = "🤔"
+response_score = -0.551
+
+[[item]]
+kind = "perjury"
+summary = "新厨师"
+text = '今天换了新厨师，\可能调味还不熟练。'
+emotion = "😅"
+response_score = 0.545
+
+[[item]]
+kind = "agreement"
+summary = "去制止"
+text = '实在不好意思，\我现在就过去\提醒那位同学。'
+emotion = "😰"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "没看见"
+text = '我一直在这看着，\没有发现有人插队。'
+emotion = "😐"
+response_score = 0.389
+
+[[item]]
+kind = "question"
+summary = "看清了吗"
+text = '您能确认清楚吗？\也许只是来询问菜品。'
+emotion = "🤔"
+response_score = -0.635
+
+[[item]]
+kind = "perjury"
+summary = "老员工"
+text = '那是食堂的退休职工，\有优先打饭的权利。'
+emotion = "🙂"
+response_score = 0.440
+
+[[item]]
+kind = "agreement"
+summary = "马上换"
+text = '非常抱歉给您带来伤害，\我立刻更换新的餐盘。'
+emotion = "😰"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "不严重"
+text = '这点小裂口不影响使用，\不至于这么激动吧。'
+emotion = "😑"
+response_score = -0.022
+
+[[item]]
+kind = "question"
+summary = "伤得重吗"
+text = '伤口深吗？\需要去医务室看看吗？'
+emotion = "😟"
+response_score = 0.269
+
+[[item]]
+kind = "perjury"
+summary = "刚损坏"
+text = '这个盘子是刚刚\才被其他人摔坏的。'
+emotion = "😅"
+response_score = 0.422
+
+[[item]]
+kind = "agreement"
+summary = "增加供应"
+text = '我们会根据需求\调整备菜量，\明天多准备一些。'
+emotion = "😌"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "卖完正常"
+text = '红烧肉很受欢迎，\卖完是很正常的现象。'
+emotion = "🙂"
+gesture = "👍"
+response_score = 0.787
+
+[[item]]
+kind = "question"
+summary = "早来点"
+text = '您要是想吃热门菜，\建议早点来排队哦。'
+emotion = "😊"
+response_score = 0.128
+
+[[item]]
+kind = "perjury"
+summary = "限量供应"
+text = '这是为了控制成本，\每天只做固定份数。'
+emotion = "🤐"
+response_score = 0.387
+
+[[item]]
+kind = "agreement"
+summary = "换热汤"
+text = '非常抱歉，\我马上给您盛一碗热的。'
+emotion = "😓"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "刚出锅"
+text = '这锅汤是十分钟前\刚从厨房端出来的。'
+emotion = "😐"
+response_score = -0.257
+
+[[item]]
+kind = "question"
+summary = "温度计测"
+text = '我们有规定温度标准，\要不拿温度计测一下？'
+emotion = "🤔"
+response_score = -0.197
+
+[[item]]
+kind = "perjury"
+summary = "节能政策"
+text = '学校最近推行节能，\不允许频繁加热。'
+emotion = "😅"
+response_score = 0.376
+
+[[item]]
+kind = "agreement"
+summary = "立即道歉"
+text = '非常抱歉，\这是我们的严重失误，\马上为您更换一份米饭。'
+emotion = "😰"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "不可能有"
+text = '大米经过多重筛选，\绝对不可能出现石子。'
+emotion = "😤"
+response_score = 0.678
+
+[[item]]
+kind = "question"
+summary = "确认一下"
+text = '您能让我看看那颗石子吗？\我们需要核实情况。'
+emotion = "🧐"
+response_score = -0.606
+
+[[item]]
+kind = "perjury"
+summary = "新米批次"
+text = '这批新到的大米供应商\可能出现了问题，\我们也是受害者。'
+emotion = "😅"
+response_score = -1.000
+
+[[item]]
+kind = "agreement"
+summary = "增开窗口"
+text = '非常抱歉让您久等，\我立刻协调增开一个打菜窗口。'
+emotion = "😓"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "时间正常"
+text = '二十分钟是正常等待时间，\大家都一样排队。'
+emotion = "😐"
+response_score = -0.026
+
+[[item]]
+kind = "question"
+summary = "几点来的"
+text = '您是什么时候开始排队的？\也许可以避开高峰时段。'
+emotion = "🤔"
+response_score = 0.714
+
+[[item]]
+kind = "perjury"
+summary = "系统故障"
+text = '是因为刷卡系统刚刚\经历了一次临时故障，\导致速度变慢。'
+emotion = "😅"
+response_score = -0.660
+
+[[item]]
+kind = "agreement"
+summary = "立即清理"
+text = '非常抱歉，\我马上安排工作人员去清理。'
+emotion = "😰"
+response_score = 0.281
+
+[[item]]
+kind = "objection"
+summary = "刚清过"
+text = '就在十分钟前才清理过，\没想到这么快就满了。'
+emotion = "😑"
+response_score = -0.036
+
+[[item]]
+kind = "question"
+summary = "哪个位置"
+text = '您能告诉我具体是哪个位置的垃圾桶吗？\我们好及时处理。'
+emotion = "😟"
+response_score = -0.404
+
+[[item]]
+kind = "perjury"
+summary = "清洁工请假"
+text = '负责这片区域的清洁工\今天突然请假了。'
+emotion = "😅"
+response_score = -0.120
+
+[[item]]
+kind = "agreement"
+summary = "完善标识"
+text = '感谢您的反馈，\我们会立即改进菜品标识。'
+emotion = "😊"
+response_score = 0.699
+
+[[item]]
+kind = "objection"
+summary = "很明显"
+text = '那个菜的颜色很明显是辣的，\您应该自己注意。'
+emotion = "😐"
+response_score = -0.611
+
+[[item]]
+kind = "question"
+summary = "能吃辣吗"
+text = '平时能吃辣吗？\也许只是您的口味比较敏感。'
+emotion = "🤔"
+response_score = 0.464
+
+[[item]]
+kind = "perjury"
+summary = "新调料"
+text = '今天厨师用了新的辣椒调料，\我们也是第一次用。'
+emotion = "😅"
+response_score = 0.582
+
+[[item]]
+kind = "agreement"
+summary = "考虑更换"
+text = '感谢您的建议，\我们会向上级反映，\考虑采购更符合人体工学的座椅。'
+emotion = "😊"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "都很舒适"
+text = '这批座椅是统一采购的，\大家都说坐着挺舒服的。'
+emotion = "🙂"
+response_score = 0.787
+
+[[item]]
+kind = "question"
+summary = "哪种不适"
+text = '您能具体说说是哪个部位不适吗？\是高度、硬度还是其他问题？'
+emotion = "🧐"
+response_score = -0.138
+
+[[item]]
+kind = "perjury"
+summary = "预算限制"
+text = '其实我们早就想换了，\但今年的办公家具预算已经被削减了。'
+emotion = "😅"
+response_score = 0.436
+
+[[item]]
+kind = "agreement"
+summary = "立即更换"
+text = '非常抱歉，\这是我们的疏忽，\马上为您更换一套干净的餐具。'
+emotion = "😰"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "不可能脏"
+text = '我们的餐具都经过高温消毒，\绝对不可能有油渍残留。'
+emotion = "😤"
+response_score = -0.097
+
+[[item]]
+kind = "question"
+summary = "哪件餐具"
+text = '您能让我看一下是哪件餐具吗？\我们需要进行核查。'
+emotion = "😟"
+response_score = -0.687
+
+[[item]]
+kind = "perjury"
+summary = "新洗涤剂"
+text = '可能是今天更换了新的洗涤剂，\导致冲洗没有完全到位。'
+emotion = "😅"
+response_score = -0.274
+
+[[item]]
+kind = "agreement"
+summary = "允许续汤"
+text = '非常抱歉，\我们的员工可能误解了规定，\您完全可以免费续汤。'
+emotion = "😊"
+response_score = 0.429
+
+[[item]]
+kind = "objection"
+summary = "规定如此"
+text = '我们的规定是每人只能免费续一次，\这是为了防止浪费。'
+emotion = "😐"
+response_score = 0.059
+
+[[item]]
+kind = "question"
+summary = "确认次数"
+text = '您确定之前没有续过吗？\也许是我们系统记录有误。'
+emotion = "🤔"
+response_score = -0.368
+
+[[item]]
+kind = "perjury"
+summary = "临时调整"
+text = '因为今天汤的供应量紧张，\所以临时调整了续汤政策。'
+emotion = "😅"
+response_score = 0.349
+
+[[item]]
+kind = "agreement"
+summary = "解释原因"
+text = '非常抱歉给您带来困扰，\近期食材成本上涨较多，\我们不得不进行小幅调整。'
+emotion = "😰"
+response_score = 0.860
+
+[[item]]
+kind = "objection"
+summary = "没涨价"
+text = '价格是系统统一定价，\不可能出现随意上涨的情况。'
+emotion = "😤"
+response_score = -0.235
+
+[[item]]
+kind = "question"
+summary = "对比菜单"
+text = '您方便和我核对一下今天的菜单\n和上周的菜单吗？我想确认具体情况。'
+emotion = "🧐"
+response_score = 0.269
+
+[[item]]
+kind = "perjury"
+summary = "标价错误"
+text = '可能是某个窗口贴错了价格标签，\我们马上去检查。'
+emotion = "😅"
+response_score = -0.276
+
+[[item]]
+kind = "agreement"
+summary = "立即整改"
+text = '非常抱歉造成困扰，\我们马上重新设计更醒目的专用标识，\并加强员工培训以确保区分管理。'
+emotion = "😊"
+response_score = 0.921
+
+[[item]]
+kind = "objection"
+summary = "已有标识"
+text = '入口处已经有文字说明了，\您应该提前确认清楚再点餐。'
+emotion = "😐"
+response_score = -0.165
+
+[[item]]
+kind = "question"
+summary = "建议样式"
+text = '您觉得什么样的标识会更清晰呢？\是否有推荐的设计方案？'
+emotion = "🤔"
+response_score = 0.821
+
+[[item]]
+kind = "perjury"
+summary = "正在更换"
+text = '其实新标识昨天就到了，\只是还没来得及贴上去。'
+emotion = "😅"
+response_score = 0.567
+
+[[item]]
+kind = "agreement"
+summary = "增开窗口"
+text = '理解您的焦急心情，\我们会在午间11:45-12:30增派两名工作人员，\开放备用备餐通道。'
+emotion = "😅"
+response_score = 0.749
+
+[[item]]
+kind = "objection"
+summary = "时间正常"
+text = '平均等待时间只有八分钟，\您可能刚好遇到客流峰值。'
+emotion = "😅"
+response_score = -1.000
+
+[[item]]
+kind = "question"
+summary = "记录时间"
+text = '您是什么时间段来就餐的？\我们可以调取监控核实排队情况。'
+emotion = "🧐"
+response_score = 0.422
+
+[[item]]
+kind = "perjury"
+summary = "临时支援"
+text = '其实已经申请了志愿者支援，\只是今天他们来晚了。'
+emotion = "😅"
+response_score = 0.004
+
+[[item]]
+kind = "agreement"
+summary = "规范流程"
+text = '感谢细致反馈，\我们会统一米水比例和蒸煮时长，\建立标准化操作手册。'
+emotion = "😅"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "机器决定"
+text = '米饭是由智能电饭煲自动控制的，\每锅口感自然会有细微差异。'
+emotion = "🤖"
+response_score = 0.663
+
+[[item]]
+kind = "question"
+summary = "偏好口感"
+text = '您更喜欢偏软还是偏硬的米饭？\我们可以记录您的偏好。'
+emotion = "😋"
+gesture = "👍"
+response_score = 0.326
+
+[[item]]
+kind = "perjury"
+summary = "换米批次"
+text = '最近换了新的大米供应商，\还在调试最适合的烹饪参数。'
+emotion = "😅"
+response_score = 0.579
+
+[[item]]
+kind = "agreement"
+summary = "优化标签"
+text = '感谢建议，\我们会更换为更醒目的立式标牌，\并统一标注主要食材和辣度等级。'
+emotion = "😊"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "应自行询问"
+text = '每道菜旁边都有基础名称，\不清楚的话可以现场询问工作人员。'
+emotion = "😅"
+response_score = 0.721
+
+[[item]]
+kind = "question"
+summary = "具体需求"
+text = '您希望标签包含哪些信息？\比如过敏原、热量或是烹饪方式？'
+emotion = "🤔"
+response_score = 0.330
+
+[[item]]
+kind = "perjury"
+summary = "即将更新"
+text = '新的智能电子标签下周就到货，\到时候所有信息都会自动显示。'
+emotion = "😅"
+response_score = -0.585
+
+[[item]]
+kind = "agreement"
+summary = "动态调整"
+text = '我们会加强巡视，\引导单人用餐者优先使用两人位，\高峰时段对四人桌进行灵活调配。'
+emotion = "😊"
+response_score = 0.779
+
+[[item]]
+kind = "objection"
+summary = "自由选择"
+text = '座位是公共资源，\每个人都有权选择自己喜欢的位置。'
+emotion = "😊"
+response_score = 0.777
+
+[[item]]
+kind = "question"
+summary = "高峰时段"
+text = '您通常在哪个时间段遇到这个问题？\是午间还是晚间用餐高峰？'
+emotion = "🧐"
+response_score = 0.361
+
+[[item]]
+kind = "perjury"
+summary = "已有规定"
+text = '其实我们有张贴“高峰时段优先拼桌”的提示，\只是可能您没注意到。'
+emotion = "😅"
+response_score = 0.111
+
+[[item]]
+kind = "agreement"
+summary = "增加补汤"
+text = '感谢反馈，\我们将把补汤间隔从30分钟缩短至15分钟，\确保整个供餐时段都能享用。'
+emotion = "😊"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "时间合理"
+text = '目前的补汤频次是根据历史消耗数据设定的，\已经是最优方案。'
+emotion = "😊"
+response_score = 0.778
+
+[[item]]
+kind = "question"
+summary = "记录消耗"
+text = '您能帮忙留意一下汤品大概在几点钟耗尽吗？\这有助于我们精准调整。'
+emotion = "🤔"
+response_score = 0.291
+
+[[item]]
+kind = "perjury"
+summary = "设备问题"
+text = '今天是因为送汤车出了点故障，\所以补给延迟了，平时不会这样。'
+emotion = "😅"
+response_score = -0.690
+
+[[item]]
+kind = "agreement"
+summary = "加强清扫"
+text = '非常抱歉，\我们会增加保洁人员巡视频次，\特别是在午间高峰后立即进行区域清理。'
+emotion = "😊"
+response_score = 0.814
+
+[[item]]
+kind = "objection"
+summary = "偶发情况"
+text = '我们每小时都有例行清洁，\您看到的可能是刚洒落还没来得及处理。'
+emotion = "😐"
+response_score = 0.456
+
+[[item]]
+kind = "question"
+summary = "具体位置"
+text = '您是在哪个区域发现这个问题的？\是取餐区附近还是靠窗座位？'
+emotion = "😅"
+response_score = -0.425
+
+[[item]]
+kind = "perjury"
+summary = "正在整改"
+text = '其实新购置的自动清扫机器人明天就到，\以后会实现全天候清洁。'
+emotion = "😅"
+response_score = 0.473
+
+[[item]]
+kind = "agreement"
+summary = "价格公示"
+text = '理解您的困扰，\我们会提前一周公示调价信息，\并尽量保持核心菜品价格稳定。'
+emotion = "😅"
+response_score = 0.989
+
+[[item]]
+kind = "objection"
+summary = "市场决定"
+text = '食材成本每天都在变动，\我们必须根据采购价实时调整售价。'
+emotion = "😅"
+response_score = -0.576
+
+[[item]]
+kind = "question"
+summary = "关注菜品"
+text = '您最常吃的几道菜是哪些？\我们可以优先考虑这些菜品的价格策略。'
+emotion = "🤔"
+response_score = 0.840
+
+[[item]]
+kind = "perjury"
+summary = "临时补贴"
+text = '这次调价是因为临时取消了运营补贴，\等财政拨款到位后会回调价格。'
+emotion = "😅"
+response_score = -0.525
+
+[[item]]
+kind = "agreement"
+summary = "专人专夹"
+text = '您的建议非常好，\我们将实行“每菜一夹”制度，\并安排专人定时更换和消毒。'
+emotion = "😊"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "流程规范"
+text = '我们的员工会按标准流程清洗夹子，\每次使用后都会用消毒水擦拭。'
+emotion = "😐"
+response_score = -0.135
+
+[[item]]
+kind = "question"
+summary = "具体菜品"
+text = '您是在取用哪两类菜品时发现串味问题的？\我们可以优先在这些位置加强管理。'
+emotion = "🤔"
+response_score = 0.262
+
+[[item]]
+kind = "perjury"
+summary = "已有措施"
+text = '其实我们上周已经开始试点“智能感应夹”，\只是还没推广到所有窗口。'
+emotion = "😅"
+response_score = 0.557
+
+[[item]]
+kind = "agreement"
+summary = "放大标签"
+text = '感谢提醒，\我们将重新设计菜品标识牌，\采用大号字体并增加背光显示，\方便所有顾客清晰阅读。'
+emotion = "😊"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "符合标准"
+text = '当前标签字体大小符合餐饮行业通用规范，\且已使用高对比度配色。'
+emotion = "😅"
+response_score = 0.779
+
+[[item]]
+kind = "question"
+summary = "视觉需求"
+text = '您觉得标签文字至少需要多大才便于阅读？\是否需要我们提供放大镜或语音导览服务？'
+emotion = "🤔"
+response_score = 0.287
+
+[[item]]
+kind = "perjury"
+summary = "即将升级"
+text = '其实新版的电子点餐屏已经在安装中，\下周就能上线，支持字体缩放功能。'
+emotion = "😅"
+response_score = 0.583
+
+[[item]]
+kind = "agreement"
+summary = "成本说明"
+text = '非常理解您的感受，\近期因部分食材供应链成本显著上升，\我们不得不对价格进行适度调整。\我们会努力优化采购渠道，\并推出更多高性价比的套餐回馈老顾客。'
+emotion = "😊"
+response_score = 1.000
+
+[[item]]
+kind = "objection"
+summary = "涨幅合理"
+text = '经核算，\本月菜品平均价格上涨幅度仅为3.2%，\低于同期餐饮行业5.1%的平均水平。'
+emotion = "😊"
+response_score = -0.322
+
+[[item]]
+kind = "question"
+summary = "关注菜品"
+text = '您提到的“好几道”具体是哪些菜品呢？\我们很关注老顾客常点的菜品价格体验。'
+emotion = "🤔"
+response_score = 0.693
+
+[[item]]
+kind = "perjury"
+summary = "即将降价"
+text = '其实财务部门已经审批了一份调价单，\下个月就会有至少五款畅销菜恢复原价。'
+emotion = "😅"
+response_score = 0.341
+
+[[item]]
+kind = "agreement"
+summary = "标准说明"
+text = '感谢您的关注，\我们一直坚持标准化出餐，\每道菜的主料和辅料配比都有严格规定。\可能因个别时段食材规格略有差异导致视觉误差，\我们会加强出品质量巡查。'
+emotion = "😊"
+response_score = 0.272
+
+[[item]]
+kind = "objection"
+summary = "从未减少"
+text = '经核查近三个月的厨房记录，\所有热菜的主料称重均值稳定在标准范围内，\未发现系统性减量情况。'
+emotion = "🧐"
+response_score = 0.734
+
+[[item]]
+kind = "question"
+summary = "具体菜品"
+text = '您觉得哪些菜品的分量变化最明显呢？\我们可以针对性地进行复查和优化。'
+emotion = "🧐"
+response_score = 0.802
+
+[[item]]
+kind = "perjury"
+summary = "准备加量"
+text = '其实管理层已经决定从下周起对五款主打菜实行“加量不加价”，\目前正在调整备货计划。'
+emotion = "😅"
+response_score = 0.363

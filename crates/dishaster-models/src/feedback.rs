@@ -14,6 +14,8 @@ pub enum FeedbackTopic {
     Tableware,
     /// Dish below expectation
     Quality,
+    /// Pricing complaints
+    Price,
     /// Food hygiene issues encountered
     Hygiene,
     /// Dish tastes bad
@@ -112,6 +114,7 @@ impl Default for ReputationConfig {
                 Queue => -3.0,
                 Tableware => -2.5,
                 Quality => -4.0,
+                Price => -3.0,    // Pricing complaints
                 Hygiene => -12.0, // Most severe
                 Taste => -3.5,
                 Hunger => -2.0,
@@ -122,6 +125,7 @@ impl Default for ReputationConfig {
                 Queue => 0.4,     // Show 40% of queue complaints
                 Tableware => 0.3, // Show 30 of tableware issues
                 Quality => 0.3,   // Show 30% of quality issues
+                Price => 0.4,     // Show 40% of price complaints
                 Hygiene => 1.0,   // Always show hygiene (critical)
                 Taste => 0.3,     // Show 30% of taste complaints
                 Hunger => 0.2,    // Show 20% of hunger complaints
@@ -132,6 +136,7 @@ impl Default for ReputationConfig {
                 Queue => 0.6,     // Apply 60% of queue complaints
                 Tableware => 0.5, // Apply 50% of tableware issues
                 Quality => 0.4,   // Apply 40% of quality issues
+                Price => 0.5,     // Apply 50% of price complaints
                 Hygiene => 1.0,   // Always apply hygiene (critical)
                 Taste => 0.4,     // Apply 40% of taste complaints
                 Hunger => 0.3,    // Apply 30% of hunger complaints
