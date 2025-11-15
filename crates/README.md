@@ -89,11 +89,12 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 
 ### dishrupt-persistence
 
-- **Purpose**: Generic persistence trait
+- **Purpose**: Generic persistence abstraction
 - **Contains**:
-  - `Persistable` trait for serialization
-  - `PersistentStorage` trait (filesystem backend)
-- **Dependencies**: Minimal
+  - `PersistentStorage` trait - backend-agnostic save/load interface
+  - `FsStorage` - filesystem backend with atomic writes (feature: `fs`)
+  - `GodotUserStorage` - Godot user:// backend (feature: `godot`)
+- **Features**: `fs` (filesystem), `godot` (Godot integration)
 
 ### dishrupt-asset
 
@@ -273,14 +274,14 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 
 ### dishaster-persistence
 
-- **Purpose**: Save/load game progress
+- **Purpose**: Save/load game progress and preferences
 - **Contains**:
-  - `UserProgress` - player save file structure
-  - `ProgressService` - high-level save/load API
-  - Diner pool persistence (profiles across days)
-  - Player stats, canteen layout state
-  - Day progression and seed management
-- **Dependencies**: `dishrupt-core`, `dishrupt-persistence`, `dishaster-models`
+  - `UserDataService` - high-level service aggregating preferences and profiles
+  - `PreferencesService` - manages user settings (TOML format, cached)
+  - `ProfileService` - manages player progress (RON format, cached, auto-timestamps)
+  - `TomlFormat` / `RonFormat` - serialization helpers
+- **Dependencies**: `dishrupt-core`, `dishrupt-persistence`, `dishaster-save-models`
+- **Architecture**: Write-through caching with atomic mutations
 
 ### dishaster-ui-protocol
 

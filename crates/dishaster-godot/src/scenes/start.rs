@@ -1,7 +1,6 @@
 use std::{any::Any, sync::LazyLock};
 
 use dishaster_core::views::{CreditSectionView, CreditsView};
-use dishaster_godot_game::progress_service;
 use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
@@ -14,10 +13,7 @@ use godot::{
     obj::Gd,
 };
 
-use crate::{
-    game_main::{ASSET_CATALOG, game_data},
-    scenes::proc::EnterLevelProcedure,
-};
+use crate::{game_main::game_services, scenes::proc::EnterLevelProcedure};
 
 static MAIN_THEME_MUSIC: LazyLock<AudioRef> = LazyLock::new(|| AudioRef::new("main_theme.ogg"));
 
@@ -48,20 +44,22 @@ impl Scene for StartScene {
     }
 
     fn enter(&mut self, ctx: &mut SceneContext) {
+        let services = game_services();
+
         ctx.gui.show::<StartMenuGui>();
 
         // Update toggle buttons from saved settings
         {
-            let svc = progress_service();
-            let audio_prefs = &svc.preferences().audio;
+            let svc = &services.user_service.prefs;
+            let audio_prefs = &svc.load().expect("failed to load prefs").audio;
             ctx.gui
                 .get_mut::<StartMenuGui>()
                 .update_from_preferences(audio_prefs.music_mute, audio_prefs.sound_mute);
         }
 
         if self.opening.is_none() {
-            let catalog = ASSET_CATALOG.get().unwrap().clone();
-            let config = game_data().opening_config.clone();
+            let catalog = services.catalog.clone();
+            let config = services.data.opening_config.clone();
             let opening = Opening::new(self.gd.clone(), config, catalog);
             self.opening = Some(opening);
         }
@@ -96,7 +94,7 @@ impl StartScene {
                 ctx.schedule(EnterLevelProcedure);
             }
             AppRequest::ShowCredits => {
-                let credits_data = &game_data().credits;
+                let credits_data = &game_services().data.credits;
 
                 let credits_view = CreditsView {
                     sections: credits_data
@@ -118,24 +116,30 @@ impl StartScene {
                 ctx.gui.show::<StartMenuGui>();
             }
 
-            AppRequest::ToggleMusic(enabled) => {
-                godot_print!("Toggling music: {}", enabled);
+            AppRequest::ToggleMusic(mute) => {
+                godot_print!("Toggling music: {}", mute);
                 // Apply immediately
-                ctx.audio.set_music_mute(enabled);
+                ctx.audio.set_music_mute(mute);
 
-                let mut svc = progress_service();
-                svc.preferences_mut().audio.music_mute = enabled;
-                if let Err(e) = svc.save_preferences() {
+                let svc = &game_services().user_service.prefs;
+                let res = svc.update(|prefs| {
+                    prefs.audio.music_mute = mute;
+                    Ok(())
+                });
+                if let Err(e) = res {
                     godot_error!("Failed to save preferences: {}", e);
                 }
             }
-            AppRequest::ToggleSound(enabled) => {
+            AppRequest::ToggleSound(mute) => {
                 // Apply immediately
-                ctx.audio.set_sound_mute(enabled);
+                ctx.audio.set_sound_mute(mute);
 
-                let mut svc = progress_service();
-                svc.preferences_mut().audio.sound_mute = enabled;
-                if let Err(e) = svc.save_preferences() {
+                let svc = &game_services().user_service.prefs;
+                let res = svc.update(|prefs| {
+                    prefs.audio.sound_mute = mute;
+                    Ok(())
+                });
+                if let Err(e) = res {
                     godot_error!("Failed to save preferences: {}", e);
                 }
             }

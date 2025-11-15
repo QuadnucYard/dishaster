@@ -2,6 +2,8 @@
 
 mod present;
 
+use std::sync::Arc;
+
 use dishaster_opening::{
     OpeningSimulationFeat, Simulation as OpeningSimulation,
     models::OpeningConfig,
@@ -35,14 +37,14 @@ struct Presenters {
 
 impl Opening {
     /// Create a new opening presenter
-    pub fn new(root: Gd<Node>, config: OpeningConfig, asset_catalog: AssetCatalog) -> Self {
+    pub fn new(root: Gd<Node>, config: OpeningConfig, catalog: Arc<AssetCatalog>) -> Self {
         // Initialize simulation
         let seed = godot::global::randi() as u64;
         let sim = Box::new(OpeningSimulation::new(config, seed));
         let root_entity = sim.root_entity();
         let sim_runner = Box::new(SyncSimulationRunner::new(sim, 60.0));
 
-        let stage = Self::setup_stage(&root, root_entity, asset_catalog);
+        let stage = Self::setup_stage(&root, root_entity, catalog);
 
         Self {
             sim_runner,
@@ -51,13 +53,13 @@ impl Opening {
         }
     }
 
-    fn setup_stage(root: &Gd<Node>, root_entity: EntityId, asset_catalog: AssetCatalog) -> Stage {
+    fn setup_stage(root: &Gd<Node>, root_entity: EntityId, catalog: Arc<AssetCatalog>) -> Stage {
         // Opening world is 20x12 meters. With viewport 1920x1080,
         // we want the 20m width to fill most of the screen. 1920/20 = 96 pixels per meter.
         let display_ctx = DisplayContext2D {
             view_scale: vec3(100., -100., 100.),
         };
-        let mut stage = Stage::new(display_ctx, asset_catalog);
+        let mut stage = Stage::new(display_ctx, catalog);
         let mut display_root_node = root.get_node_as::<Node2D>("%DisplayRoot");
         let origin = root.get_node_as::<Node2D>("%Origin").get_global_position();
         display_root_node.set_position(origin);

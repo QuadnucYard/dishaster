@@ -1,4 +1,4 @@
-use std::any::Any;
+use std::{any::Any, sync::Arc};
 
 use dishaster_core::{interface::SimCommand, models::LevelSetupState, sim::Simulation};
 use dishaster_godot_game::Game;
@@ -12,7 +12,7 @@ use dishrupt_godot_utils::BindGodot;
 use godot::{classes::Node, prelude::*};
 
 use crate::{
-    game_main::{ASSET_CATALOG, game_data},
+    game_main::{GameServices, game_services},
     scenes::proc::*,
 };
 
@@ -93,14 +93,27 @@ impl Scene for GameScene {
 }
 
 impl GameScene {
-    pub fn start_game(&mut self, ctx: &mut SceneContext, level: LevelSetupState) {
-        let catalog = ASSET_CATALOG.get().unwrap().clone();
-        let db = &game_data().models;
-        let mut game = Game::new(self.gd(), db.clone(), catalog, level, |level| {
-            let mut sim = Box::new(Simulation::new(db.clone()));
-            sim.start(level);
-            sim
-        });
+    pub fn start_game(
+        &mut self,
+        ctx: &mut SceneContext,
+        level: LevelSetupState,
+        services: Arc<GameServices>,
+    ) {
+        let db = services.data.models.clone();
+        let catalog = services.catalog.clone();
+        let profile_svc = services.user_service.profiles.clone();
+        let mut game = Game::new(
+            self.gd(),
+            db.clone(),
+            catalog,
+            profile_svc,
+            level,
+            |level| {
+                let mut sim = Box::new(Simulation::new(db));
+                sim.start(level);
+                sim
+            },
+        );
         game.start_day();
         self.game = Some(game);
 
@@ -278,7 +291,7 @@ impl GameScene {
             }
 
             UiCommand::ShowDecisionSelection(view) => {
-                let catalog = ASSET_CATALOG.get().unwrap();
+                let catalog = &game_services().catalog;
                 ctx.gui
                     .get_mut::<ManageDecisionGui>()
                     .set_view(&view, catalog);
@@ -286,7 +299,7 @@ impl GameScene {
                 // we defer showing the decision GUI until settlement is confirmed
             }
             UiCommand::ShowIncidentNotification(view) => {
-                let catalog = ASSET_CATALOG.get().unwrap();
+                let catalog = &game_services().catalog;
                 ctx.gui
                     .get_mut::<ManageIncidentGui>()
                     .set_view(&view, catalog);

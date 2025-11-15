@@ -1,7 +1,10 @@
-use dishaster_godot_game::progress_service;
+use dishaster_godot_game::persist::level_for_current_day;
 use dishrupt_godot_scene::*;
 
-use crate::scenes::{GameScene, StartScene};
+use crate::{
+    game_main::game_services,
+    scenes::{GameScene, StartScene},
+};
 
 pub struct StartProcedure;
 
@@ -19,12 +22,9 @@ pub struct EnterLevelProcedure;
 
 impl SceneProcedure for EnterLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
-        let level = {
-            let service = progress_service();
-            service
-                .level_for_current_day()
-                .expect("failed to get current day level in progress store")
-        };
+        let services = game_services().clone();
+        let level = level_for_current_day(&services.user_service.profiles, &services.data.models)
+            .expect("failed to get current day level in progress store");
 
         // Use callback to initialize game scene after it's loaded
         let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
@@ -37,7 +37,7 @@ impl SceneProcedure for EnterLevelProcedure {
                 let game_scene = (scene as &mut dyn Any)
                     .downcast_mut::<GameScene>()
                     .expect("expected GameScene");
-                game_scene.start_game(scene_ctx, level);
+                game_scene.start_game(scene_ctx, level, services);
             },
         );
 

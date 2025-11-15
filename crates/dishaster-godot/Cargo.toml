@@ -11,6 +11,7 @@ test = false
 [dependencies]
 dishrupt-core.workspace = true
 dishrupt-asset.workspace = true
+dishrupt-persistence = { workspace = true, features = ["godot"] }
 dishrupt-godot-utils.workspace = true
 dishrupt-godot-audio.workspace = true
 dishrupt-godot-input.workspace = true

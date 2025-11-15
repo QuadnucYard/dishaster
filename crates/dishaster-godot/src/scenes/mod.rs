@@ -3,6 +3,8 @@ pub mod proc;
 mod game;
 mod start;
 
+use std::sync::Arc;
+
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_godot_scene::*;
 use dishrupt_godot_utils::BindGodot;
@@ -15,11 +17,11 @@ use godot::{
 pub use start::StartScene;
 
 pub struct DefaultSceneLoader {
-    catalog: AssetCatalog,
+    catalog: Arc<AssetCatalog>,
 }
 
 impl DefaultSceneLoader {
-    pub fn new(catalog: AssetCatalog) -> Self {
+    pub fn new(catalog: Arc<AssetCatalog>) -> Self {
         Self { catalog }
     }
 }

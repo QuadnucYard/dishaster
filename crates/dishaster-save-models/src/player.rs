@@ -7,13 +7,13 @@ pub const USER_PROGRESS_VERSION: u32 = 1;
 ///
 /// The structure only contains stable data that must survive across sessions.
 /// Transient entities live solely inside the simulation and never appear here.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PlayerProfile {
     /// Metadata describing file format and timestamps.
     pub meta: ProfileMeta,
 
     /// Player-specific counters and unlock tracking.
-    pub progress: PlayerProgress,
+    pub progress: Option<PlayerProgress>,
 
     /// Cumulative statistics for analytics and balancing.
     #[serde(default)]
@@ -33,10 +33,14 @@ pub struct PlayerProfile {
     /// Permanent effects from management decisions.
     #[serde(default)]
     pub permanent_effects: crate::PermanentEffects,
+
+    /// Set of hint IDs that have been shown to the player (persisted).
+    #[serde(default)]
+    pub seen_hints: FxHashSet<EcoString>,
 }
 
 /// Metadata stored alongside the progress payload.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProfileMeta {
     /// Format schema version to support migrations.
     pub version: u32,
@@ -47,7 +51,7 @@ pub struct ProfileMeta {
 }
 
 /// Player-centric state that drives level selection.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayerProgress {
     /// The level played.
     pub level_id: ModelId,
@@ -60,19 +64,15 @@ pub struct PlayerProgress {
 
     /// Base seed for deterministic day generation.
     pub rng_seed: Seed,
-
-    /// Set of hint IDs that have been shown to the player (persisted).
-    #[serde(default)]
-    pub seen_hints: FxHashSet<EcoString>,
 }
 
 /// Lifetime statistics collected for dashboards and analytics.
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AggregateStats {
-    /// Accumulated profit across all completed days.
-    pub lifetime_profit: f64,
+    /// Total number of diner visits.
+    pub lifetime_visits: u32,
     /// Total number of diners served.
-    pub lifetime_served: u64,
+    pub lifetime_served: u32,
     /// Total safety incidents recorded.
     pub safety_incidents: u32,
     /// Average satisfaction of the most recent day.
@@ -84,7 +84,7 @@ pub struct AggregateStats {
 }
 
 /// Per-day statistics history for tracking performance over time.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DayStats {
     /// Day index when these stats were recorded.
     pub day: Day,
@@ -96,4 +96,14 @@ pub struct DayStats {
     pub revenue: f32,
     /// Total food consumed in kilograms.
     pub consumption_kg: f32,
+}
+
+impl AggregateStats {
+    /// Update aggregate stats with data from a completed day.
+    pub fn update(&mut self, day_stats: &DayStats) {
+        self.lifetime_visits += day_stats.total_visits as u32;
+        self.lifetime_served += day_stats.completed_diners as u32;
+        self.lifetime_revenue += day_stats.revenue as f64;
+        self.lifetime_consumption_kg += day_stats.consumption_kg as f64;
+    }
 }

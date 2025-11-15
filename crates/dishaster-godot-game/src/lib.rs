@@ -5,14 +5,14 @@ mod handle_request;
 mod hint;
 mod input;
 pub mod perf;
+pub mod persist;
 mod present;
-pub mod user_store;
 
-use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
+use std::sync::Arc;
 
 use dishaster_interface::*;
 use dishaster_models::{GameModelRegistry, LevelSetupState};
-use dishaster_persistence::UserDataService;
+use dishaster_persistence::ProfileService;
 use dishaster_ui_protocol::{PhaseMusic, StatsView, UiCommand};
 use dishaster_views::DayHudState;
 use dishrupt_asset::AssetCatalog;
@@ -28,17 +28,7 @@ use godot::{
 use rustc_hash::FxHashMap;
 
 use self::{perf::PerfTracker, present::*};
-use crate::{dbgviz::*, hint::HintTracker, user_store::GodotUserStorage};
-
-pub static PROGRESS_SERVICE: OnceLock<Mutex<UserDataService<GodotUserStorage>>> = OnceLock::new();
-
-pub fn progress_service() -> MutexGuard<'static, UserDataService<GodotUserStorage>> {
-    PROGRESS_SERVICE
-        .get()
-        .expect("progress service not initialized")
-        .lock()
-        .expect("progress service poisoned")
-}
+use crate::{dbgviz::*, hint::HintTracker};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum DayPhase {
@@ -83,6 +73,8 @@ pub struct Game {
     debug_enabled: bool,
     suspended_sim_speed: Option<f64>,
 
+    profile_svc: Arc<ProfileService>,
+
     /// Queue of UI commands to be processed by the scene layer.
     ui_commands: Vec<UiCommand>,
 }
@@ -101,7 +93,8 @@ impl Game {
     pub fn new(
         gd: Gd<Node>,
         db: Arc<GameModelRegistry>,
-        asset_catalog: AssetCatalog,
+        asset_catalog: Arc<AssetCatalog>,
+        profile_svc: Arc<ProfileService>,
         level: LevelSetupState,
         sim_creator: impl FnOnce(LevelSetupState) -> Box<dyn ISimulation<CoreSimulationFeat>>,
     ) -> Self {
@@ -166,14 +159,14 @@ impl Game {
 
             perf_tracker: Default::default(),
             pres: Default::default(),
-            hint_tracker: HintTracker::new(
-                progress_service().profile().progress.seen_hints.clone(),
-            ),
+            hint_tracker: HintTracker::new(profile_svc.load().unwrap().seen_hints.clone()),
 
             phase: DayPhase::Preparation,
             telemetry,
             debug_enabled: false,
             suspended_sim_speed: None,
+
+            profile_svc,
             ui_commands: Vec::new(),
         }
     }

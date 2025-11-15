@@ -1,6 +1,6 @@
 //! Dishrupt Godot audio manager.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_core::asset::AudioRef;
@@ -77,7 +77,7 @@ pub struct AudioManager {
     music_volume: f32,
     sound_volume: f32,
 
-    catalog: AssetCatalog,
+    catalog: Arc<AssetCatalog>,
 }
 
 impl AudioManager {
@@ -85,7 +85,7 @@ impl AudioManager {
     const SOUND_BUS: &str = "Sound";
 
     /// Create a new audio manager.
-    pub fn new(audio_root: Gd<Node>, catalog: AssetCatalog) -> AudioManager {
+    pub fn new(audio_root: Gd<Node>, catalog: Arc<AssetCatalog>) -> AudioManager {
         let mut bgm = BgmManager::new();
         bgm.target_volume = 1.0; // Default to full volume
 

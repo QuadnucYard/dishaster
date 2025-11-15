@@ -11,7 +11,7 @@ use godot::global::godot_print;
 
 pub use self::{agent::AgentPresenter, dish::DishPresenter, dispenser::DispenserPresenter};
 use super::Game;
-use crate::{DayPhase, progress_service};
+use crate::{DayPhase, persist::save_sim_profile};
 
 const TRIAL_FIXED_SIM_TPS: f64 = 30.0;
 
@@ -23,8 +23,7 @@ impl Game {
                     godot_print!("Persisting player progress upon request");
 
                     let profile = self.sim_runner.persist();
-                    progress_service()
-                        .save_sim_profile(profile)
+                    save_sim_profile(&self.profile_svc, profile)
                         .expect("failed to persist profile");
                 }
 
@@ -194,9 +193,9 @@ impl Game {
                         self.ui_commands.push(UiCommand::ShowHint { message });
 
                         // Save hint immediately
-                        let mut svc = progress_service();
-                        svc.update_seen_hint(hint_id);
-                        let _ = svc.save_profile(); // Ignore errors for hint saving
+                        if let Err(e) = self.profile_svc.update_seen_hint(hint_id) {
+                            godot_print!("Failed to persist seen hint: {e:?}");
+                        }
                     }
                 }
             }

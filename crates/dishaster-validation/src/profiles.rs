@@ -13,10 +13,12 @@ pub fn validate_player_profile(
     registry: &GameModelRegistry,
 ) -> ValidationResult {
     // Validate level reference
-    if !registry.levels.contains_id(&profile.progress.level_id) {
+    if let Some(progress) = &profile.progress
+        && !registry.levels.contains_id(&progress.level_id)
+    {
         return Err(ValidationError::MissingReference {
             model_type: "level",
-            id: profile.progress.level_id.clone(),
+            id: progress.level_id.clone(),
             context: "PlayerProgress.level_id".to_string(),
         });
     }

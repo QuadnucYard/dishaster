@@ -1,4 +1,4 @@
-use std::cell::OnceCell;
+use std::{cell::OnceCell, sync::Arc};
 
 use dishrupt_asset::AssetCatalog;
 use dishrupt_core::prelude::*;
@@ -27,7 +27,7 @@ pub struct Stage {
 
 impl Stage {
     /// Create a new stage with the given display context and asset catalog.
-    pub fn new(display_ctx: DisplayContext2D, catalog: AssetCatalog) -> Self {
+    pub fn new(display_ctx: DisplayContext2D, catalog: Arc<AssetCatalog>) -> Self {
         Self {
             factory: DisplayFactory::new(catalog),
             display_ctx,

@@ -1,43 +1,62 @@
-//! Persistence layer for Dishaster.
+//! Persistence layer for Dishaster game data.
+//!
+//! Provides high-level services for saving and loading:
+//! - Player profiles (progress, stats, diner pool)
+//! - User preferences (settings, audio levels)
+//!
+//! Uses different serialization formats:
+//! - TOML for preferences
+//! - RON for profiles
 
 mod service;
 
 use anyhow::{Context, Result};
-use dishaster_save_models::{PlayerProfile, Preferences};
 
-pub use self::service::UserDataService;
+pub use self::service::{PreferencesService, ProfileService, UserDataService};
 
 /// Re-exports of persistence-related types.
 mod reexport {
-    pub use dishrupt_persistence::{Persistable, PersistentStorage, Persister};
+    pub use dishrupt_persistence::PersistentStorage;
 }
 
 pub use reexport::*;
 
-struct PlayerProfilePersister;
+/// Serialization format abstraction for persistence.
+trait PersistenceFormat {
+    /// Deserialize bytes into a typed value.
+    fn load_bytes<T: serde::de::DeserializeOwned>(data: Vec<u8>) -> Result<T>
+    where
+        Self: Sized;
 
-impl Persister<PlayerProfile> for PlayerProfilePersister {
-    fn load_bytes(data: Vec<u8>) -> Result<PlayerProfile> {
-        ron::de::from_bytes(&data).context("fail to parse user progress RON")
+    /// Serialize a value into bytes.
+    fn dump_bytes<T: serde::Serialize>(value: &T) -> Result<Vec<u8>>;
+}
+
+/// TOML format serializer for preferences.
+pub struct TomlFormat;
+
+impl PersistenceFormat for TomlFormat {
+    fn load_bytes<T: serde::de::DeserializeOwned>(data: Vec<u8>) -> Result<T> {
+        toml::from_slice(&data).context("failed to deserialize TOML data")
     }
 
-    fn dump_bytes(value: &PlayerProfile) -> Result<Vec<u8>> {
-        let ron_str = ron::ser::to_string_pretty(value, Default::default())?;
-        Ok(ron_str.into_bytes())
+    fn dump_bytes<T: serde::Serialize>(value: &T) -> Result<Vec<u8>> {
+        let toml_str = toml::to_string_pretty(value).context("failed to serialize data to TOML")?;
+        Ok(toml_str.into_bytes())
     }
 }
 
-/// Persister for preferences
-pub struct PreferencesPersister;
+/// RON format serializer for player profiles.
+pub struct RonFormat;
 
-impl Persister<Preferences> for PreferencesPersister {
-    fn load_bytes(data: Vec<u8>) -> Result<Preferences> {
-        toml::from_slice(&data).context("failed to deserialize preferences TOML")
+impl PersistenceFormat for RonFormat {
+    fn load_bytes<T: serde::de::DeserializeOwned>(data: Vec<u8>) -> Result<T> {
+        ron::de::from_bytes(&data).context("failed to parse RON data")
     }
 
-    fn dump_bytes(value: &Preferences) -> Result<Vec<u8>> {
-        let toml_str =
-            toml::to_string_pretty(value).context("failed to serialize preferences to TOML")?;
-        Ok(toml_str.into_bytes())
+    fn dump_bytes<T: serde::Serialize>(value: &T) -> Result<Vec<u8>> {
+        let ron_str = ron::ser::to_string_pretty(value, Default::default())
+            .context("failed to serialize data to RON")?;
+        Ok(ron_str.into_bytes())
     }
 }

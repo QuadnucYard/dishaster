@@ -9,6 +9,7 @@ mod preference;
 
 pub use cosmetic::*;
 pub use diner_pool::*;
+use dishrupt_core::ModelId;
 pub use level::*;
 pub use perma_effects::*;
 pub use player::*;
@@ -42,8 +43,14 @@ impl Seed {
 /// Persistent simulation profile data to be saved between runs
 #[derive(Debug)]
 pub struct SimProfile {
+    /// Level configuration identifier
+    pub level_id: ModelId,
+
     /// Day index (1-based). Increment on new day/run.
     pub current_day: Day,
+
+    /// Player reputation at end of day
+    pub reputation: f32,
 
     /// Seed for current run's RNG
     pub rng_seed: Seed,

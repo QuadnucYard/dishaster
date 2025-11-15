@@ -13,7 +13,6 @@ pub struct HintTracker {
 
 impl HintTracker {
     /// Create a new hint tracker with pre-shown hints
-    #[allow(unused)]
     pub fn new(shown_hints: FxHashSet<EcoString>) -> Self {
         Self { shown_hints }
     }

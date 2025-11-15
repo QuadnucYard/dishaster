@@ -528,6 +528,7 @@ dependencies = [
  "dishrupt-godot-ui",
  "dishrupt-godot-utils",
  "dishrupt-l10n-godot",
+ "dishrupt-persistence",
  "env_logger",
  "godot",
  "log",
@@ -557,7 +558,6 @@ dependencies = [
  "dishrupt-godot-input",
  "dishrupt-godot-utils",
  "dishrupt-l10n",
- "dishrupt-persistence",
  "dishrupt-runner",
  "godot",
  "rustc-hash",
@@ -652,8 +652,8 @@ dependencies = [
  "dishaster-save-models",
  "dishrupt-core",
  "dishrupt-persistence",
- "log",
  "ron",
+ "serde",
  "tempfile",
  "toml",
 ]
@@ -830,6 +830,7 @@ name = "dishrupt-persistence"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "godot",
 ]
 
 [[package]]

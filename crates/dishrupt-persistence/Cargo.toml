@@ -7,10 +7,12 @@ edition.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+godot = { workspace = true, optional = true }
 
 [features]
 default = []
 fs = []
+godot = ["dep:godot"]
 
 [lints]
 workspace = true

@@ -19,7 +19,6 @@ pub use feedback::*;
 pub use level::*;
 pub use management::*;
 pub use misc::*;
-pub use prelude::ModelId;
 pub use trial::*;
 
 mod prelude {
@@ -44,7 +43,7 @@ pub type Meters = f32;
 /// game mechanics throughout the simulation.
 pub type Seconds = f32;
 
-use dishrupt_core::model_registry::ModelRegistry;
+pub use dishrupt_core::model_registry::{ModelId, ModelRegistry};
 
 /// Centralized registry for all game object model definitions
 ///

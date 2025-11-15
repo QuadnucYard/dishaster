@@ -1,0 +1,92 @@
+//! This is a copy of dishaster-game/src/persist.rs for integration testing.
+
+use anyhow::{Context, Result};
+use dishaster_core::models::{
+    CanteenLayoutState, CanteenPlacements, GameModelRegistry, LevelConfig, LevelSetupState,
+    ModelId, PlayerProgress, SimProfile,
+};
+use dishaster_persistence::ProfileService;
+
+/// Produce a level configuration for the player's current day.
+pub fn level_for_current_day(
+    svc: &ProfileService,
+    registry: &GameModelRegistry,
+) -> Result<LevelSetupState> {
+    let mut profile = svc.load().context("failed to load player profile")?;
+
+    let progress = match profile.progress {
+        Some(progress) => progress,
+        None => {
+            let default_level =
+                get_default_level(registry, None).expect("no default level available in registry");
+
+            profile.layout = CanteenLayoutState {
+                window_configurations: default_level.window_configurations.clone(),
+                placement: CanteenPlacements {
+                    tables: default_level.table_placements.clone(),
+                    tray_dispensers: default_level.tray_dispenser_placements.clone(),
+                    chopstick_dispensers: default_level.chopstick_dispenser_placements.clone(),
+                    collectors: default_level.collector_placements.clone(),
+                },
+            };
+            PlayerProgress {
+                level_id: default_level.id.clone(),
+                current_day: default_level.start_day,
+                reputation: 50.0,
+                rng_seed: default_level.seed,
+            }
+        }
+    };
+
+    let level = LevelSetupState {
+        level_id: progress.level_id,
+        canteen: profile.layout,
+        day: progress.current_day,
+        seed: progress.rng_seed,
+        diner_pool: profile.diner_pool.profiles,
+        permanent_effects: profile.permanent_effects,
+    };
+    Ok(level)
+}
+
+fn get_default_level(
+    registry: &GameModelRegistry,
+    default_level_id: Option<ModelId>,
+) -> Result<&LevelConfig> {
+    match default_level_id {
+        Some(id) => registry
+            .levels
+            .get_by_id(&id)
+            .context("level does not exist"),
+        None => registry
+            .levels
+            .first()
+            .context("no level configurations available in registry"),
+    }
+}
+
+/// Save simulation profile data after completing a day.
+pub fn save_sim_profile(svc: &ProfileService, sim_profile: SimProfile) -> Result<()> {
+    svc.update(|profile| {
+        profile.progress = Some(PlayerProgress {
+            level_id: sim_profile.level_id,
+            current_day: sim_profile.current_day,
+            reputation: sim_profile.reputation,
+            rng_seed: sim_profile.rng_seed,
+        });
+
+        profile.layout.window_configurations = sim_profile.window_configurations;
+        profile.layout.placement = sim_profile.placement;
+        profile.diner_pool.profiles = sim_profile.diner_profiles;
+        profile.permanent_effects = sim_profile.permanent_effects;
+
+        // Update daily history and aggregate stats
+        let day_stats = sim_profile.day_stats;
+        // Update aggregate stats
+        profile.aggregates.update(&day_stats);
+        // Add to daily history
+        profile.daily_history.push(day_stats);
+
+        Ok(())
+    })
+}

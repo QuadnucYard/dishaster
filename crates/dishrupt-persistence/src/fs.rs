@@ -4,7 +4,7 @@ use std::{fs, io::ErrorKind, path::PathBuf};
 
 use anyhow::{Context, Result};
 
-use crate::{PersistentStorage, Persister};
+use crate::PersistentStorage;
 
 /// Filesystem-based storage backend.
 pub struct FsStorage {
@@ -21,30 +21,23 @@ impl FsStorage {
 }
 
 impl PersistentStorage for FsStorage {
-    fn load_or_create_with<T, P: Persister<T>>(
-        &mut self,
-        path: &str,
-        init: impl FnOnce() -> T,
-    ) -> Result<T> {
+    fn read(&self, path: &str) -> Result<Option<Vec<u8>>> {
         let file_path = self.root_dir.join(path);
-        if !file_path.exists() {
-            // Initialize new data and save it.
-            let value = init();
-            self.save_with::<T, P>(path, &value)?;
-            return Ok(value);
+        match fs::read(&file_path) {
+            Ok(data) => Ok(Some(data)),
+            Err(err) if err.kind() == ErrorKind::NotFound => Ok(None),
+            Err(err) => {
+                Err(err).with_context(|| format!("failed to read persistence file {:?}", file_path))
+            }
         }
-
-        let data = fs::read(&file_path)?;
-        P::load_bytes(data)
     }
 
-    fn save_with<T, P: Persister<T>>(&mut self, path: &str, data: &T) -> Result<()> {
+    fn write_atomic(&self, path: &str, bytes: &[u8]) -> Result<()> {
         let file_path = self.root_dir.join(path);
 
         // Write to a temporary file first.
         let tmp = file_path.with_extension("tmp");
-        fs::write(&tmp, P::dump_bytes(data)?)
-            .with_context(|| format!("failed to write temp save {tmp:?}"))?;
+        fs::write(&tmp, bytes).with_context(|| format!("failed to write temp save {tmp:?}"))?;
 
         // Replace the old save file with the new one.
         match fs::rename(&tmp, &file_path) {

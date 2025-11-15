@@ -1,5 +1,9 @@
 //! Integration tests for Dishaster.
 
+mod persist;
+
+use std::sync::Arc;
+
 use anyhow::Result;
 use dishaster_core::{
     interface::{SimCommand, SimEvent},
@@ -7,25 +11,21 @@ use dishaster_core::{
     sim::{ISimulation, Simulation},
 };
 use dishaster_data::DataLoader;
-use dishaster_persistence::{PersistentStorage, Persister, UserDataService};
+use dishaster_persistence::{PersistentStorage, UserDataService};
 use dishrupt_rng::{Prng, prelude::Rng};
+
+use crate::persist::{level_for_current_day, save_sim_profile};
 
 /// In-memory persistent storage for testing purposes.
 pub struct MemoryStorage;
 
 impl PersistentStorage for MemoryStorage {
-    fn load_or_create_with<T, P: Persister<T>>(
-        &mut self,
-        _path: &str,
-        init: impl FnOnce() -> T,
-    ) -> Result<T> {
-        // Always return a new instance
-        Ok(init())
+    fn read(&self, _path: &str) -> Result<Option<Vec<u8>>> {
+        Ok(None) // Always return None (no data)
     }
 
-    fn save_with<T, P: Persister<T>>(&mut self, _path: &str, _data: &T) -> Result<()> {
-        // Saves nothing
-        Ok(())
+    fn write_atomic(&self, _path: &str, _bytes: &[u8]) -> Result<()> {
+        Ok(()) // Do nothing on write
     }
 }
 
@@ -78,11 +78,12 @@ fn main() -> Result<()> {
     dishaster_validation::validate_registry(&registry)?;
     println!("✓ Data validation passed");
 
-    let mut service = UserDataService::load_or_create(MemoryStorage, &registry, None)?;
-    dishaster_validation::validate_player_profile(service.profile(), &registry)?;
+    let service = UserDataService::new(Arc::new(MemoryStorage));
+    let profile_svc = &service.profiles;
+    dishaster_validation::validate_player_profile(&profile_svc.load().unwrap(), &registry)?;
     println!("✓ Player profile validation passed");
 
-    let level = service.level_for_current_day()?;
+    let level = level_for_current_day(profile_svc, &registry)?;
     let start_day = level.day;
 
     let mut sim = Simulation::new(registry.clone());
@@ -143,7 +144,7 @@ fn main() -> Result<()> {
         day_stats.total_visits
     );
 
-    service.save_sim_profile(persisted)?;
+    save_sim_profile(profile_svc, persisted)?;
     std::mem::drop(sim);
 
     // now run more days
@@ -152,7 +153,7 @@ fn main() -> Result<()> {
         println!("--- Day {} ---", i + 1);
 
         // Start next day
-        let level = service.level_for_current_day()?;
+        let level = level_for_current_day(profile_svc, &registry)?;
         let mut sim = Simulation::new(registry.clone());
         sim.start(level);
         sim.run_steps(10);
@@ -178,11 +179,11 @@ fn main() -> Result<()> {
         sim.run_steps(1);
 
         let persisted = sim.persist();
-        service.save_sim_profile(persisted)?;
+        save_sim_profile(profile_svc, persisted)?;
     }
 
     // Print aggregate stats at the end
-    let profile = service.profile();
+    let profile = profile_svc.load().unwrap();
     println!("\n=== Final Statistics ===");
     println!(
         "Total consumption: {:.2} kg",

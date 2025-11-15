@@ -8,9 +8,11 @@ pub fn persist_system(
     collector_query: Query<&DishCollector>,
     day_status: Res<DayStatus>,
     daily_stats: Res<DailyStats>,
+    reputation: Res<ReputationStateRes>,
     diner_pool: Res<ResWrapper<DinerPool>>,
     perma_effects: Res<PermanentEffectsRes>,
     registry: Res<GameModelRegistryRes>,
+    level: Res<ResWrapper<LevelSetupState>>,
 ) -> SimProfile {
     let window_configurations = window_query
         .iter()
@@ -85,7 +87,9 @@ pub fn persist_system(
     };
 
     SimProfile {
+        level_id: level.level_id.clone(),
         current_day: day_status.current_day,
+        reputation: reputation.reputation,
         rng_seed: day_status.seed,
         window_configurations,
         placement,

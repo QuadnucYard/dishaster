@@ -1,236 +1,30 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+//! Service layer for managing user data persistence.
 
-use anyhow::{Context, Result};
-use dishaster_models::{
-    CanteenLayoutState, CanteenPlacements, GameModelRegistry, LevelConfig, ModelId, Preferences,
-    SimProfile,
-};
-use dishaster_save_models::{
-    LevelSetupState, PlayerProfile, PlayerProgress, ProfileMeta, USER_PROGRESS_VERSION,
-};
-use dishrupt_core::prelude::*;
+mod pref;
+mod profile;
+
+use std::sync::Arc;
+
 use dishrupt_persistence::PersistentStorage;
 
-use crate::{PlayerProfilePersister, PreferencesPersister};
+pub use crate::service::{pref::PreferencesService, profile::ProfileService};
 
-/// Low-level persistence service for user progress.
-struct PersistenceService<Store: PersistentStorage> {
-    store: Store,
+/// High-level service for managing all user data.
+///
+/// Aggregates preferences and player profile services with shared storage backend.
+pub struct UserDataService {
+    /// User preferences.
+    pub prefs: Arc<PreferencesService>,
+    /// Player profile.
+    pub profiles: Arc<ProfileService>,
 }
 
-impl<Store: PersistentStorage> PersistenceService<Store> {
-    const SAVE_FILE: &str = "save_default.ron";
-    const PREFERENCES_FILE: &str = "preferences.toml";
-
-    pub fn new(store: Store) -> Self {
-        Self { store }
-    }
-
-    pub fn load_profile(&mut self, default_level: &LevelConfig) -> Result<PlayerProfile> {
-        match self
-            .store
-            .load_or_create_with::<_, PlayerProfilePersister>(Self::SAVE_FILE, || {
-                new_profile(default_level)
-            }) {
-            Ok(profile) => Ok(profile),
-            Err(err) => {
-                log::warn!(
-                    "Failed to load progress from {}: {}. Creating new profile.",
-                    Self::SAVE_FILE,
-                    err
-                );
-                let profile = new_profile(default_level);
-                self.store
-                    .save_with::<_, PlayerProfilePersister>(Self::SAVE_FILE, &profile)?;
-                Ok(profile)
-            }
+impl UserDataService {
+    /// Create a new user data service with the specified storage backend.
+    pub fn new(store: Arc<dyn PersistentStorage>) -> Self {
+        Self {
+            prefs: Arc::new(PreferencesService::new(store.clone())),
+            profiles: Arc::new(ProfileService::new(store)),
         }
     }
-
-    pub fn save_profile(&mut self, profile: &PlayerProfile) -> Result<()> {
-        self.store
-            .save_with::<_, PlayerProfilePersister>(Self::SAVE_FILE, profile)
-    }
-
-    pub fn load_preferences(&mut self) -> Result<Preferences> {
-        self.store.load_or_create_with::<_, PreferencesPersister>(
-            Self::PREFERENCES_FILE,
-            Preferences::default,
-        )
-    }
-
-    pub fn save_preferences(&mut self, preferences: &Preferences) -> Result<()> {
-        self.store
-            .save_with::<_, PreferencesPersister>(Self::PREFERENCES_FILE, preferences)
-    }
-}
-
-/// High-level facade that ties the persistence layer to model data.
-pub struct UserDataService<Store: PersistentStorage> {
-    inner: PersistenceService<Store>,
-
-    profile: PlayerProfile,
-    preferences: Preferences,
-}
-
-impl<Store: PersistentStorage> UserDataService<Store> {
-    /// Load (or create) progress and prepare a service ready to dispense levels.
-    pub fn load_or_create(
-        store: Store,
-        registry: &GameModelRegistry,
-        default_level_id: Option<ModelId>,
-    ) -> Result<Self> {
-        let mut inner = PersistenceService::new(store);
-
-        let default_level = get_default_level(registry, default_level_id)?;
-        let profile = inner.load_profile(default_level)?;
-        let preferences = inner.load_preferences()?;
-
-        Ok(Self {
-            inner,
-            profile,
-            preferences,
-        })
-    }
-
-    /// Create a new profile, replacing any existing progress.
-    pub fn recreate_profile(
-        &mut self,
-        registry: &GameModelRegistry,
-        default_level_id: Option<ModelId>,
-    ) -> Result<()> {
-        let default_level = get_default_level(registry, default_level_id)?;
-        let profile = new_profile(default_level);
-        self.profile = profile;
-        self.inner.save_profile(&self.profile)?;
-        Ok(())
-    }
-
-    /// Access the immutable progress snapshot managed by the service.
-    pub fn profile(&self) -> &PlayerProfile {
-        &self.profile
-    }
-
-    /// Produce a level configuration for the player's current day.
-    pub fn level_for_current_day(&self) -> Result<LevelSetupState> {
-        let level = LevelSetupState {
-            level_id: self.profile.progress.level_id.clone(),
-            canteen: self.profile.layout.clone(),
-            day: self.profile.progress.current_day,
-            seed: self.profile.progress.rng_seed,
-            diner_pool: self.profile.diner_pool.profiles.clone(),
-            permanent_effects: self.profile.permanent_effects.clone(),
-        };
-        Ok(level)
-    }
-
-    /// Save simulation profile data after completing a day.
-    pub fn save_sim_profile(&mut self, profile: SimProfile) -> Result<()> {
-        self.profile.meta.updated_at_utc = now_unix();
-
-        self.profile.progress.current_day = profile.current_day;
-        self.profile.progress.rng_seed = profile.rng_seed;
-
-        self.profile.layout.window_configurations = profile.window_configurations;
-        self.profile.layout.placement = profile.placement;
-        self.profile.diner_pool.profiles = profile.diner_profiles;
-
-        self.profile.permanent_effects = profile.permanent_effects;
-
-        // Update daily history and aggregate stats
-        let day_stats = &profile.day_stats;
-
-        // Add to daily history
-        self.profile.daily_history.push(day_stats.clone());
-
-        // Update aggregate stats
-        self.profile.aggregates.lifetime_consumption_kg += day_stats.consumption_kg as f64;
-        self.profile.aggregates.lifetime_revenue += day_stats.revenue as f64;
-        self.profile.aggregates.lifetime_served += day_stats.completed_diners as u64;
-        self.profile.aggregates.lifetime_profit += day_stats.revenue as f64; // Revenue as profit (no costs yet)
-
-        self.inner.save_profile(&self.profile)
-    }
-
-    /// Update shown hints in progress
-    pub fn update_seen_hint(&mut self, new_hint: EcoString) {
-        self.profile.progress.seen_hints.insert(new_hint);
-    }
-
-    /// Save current progress to storage
-    pub fn save_profile(&mut self) -> Result<()> {
-        self.profile.meta.updated_at_utc = now_unix();
-        self.inner.save_profile(&self.profile)?;
-        Ok(())
-    }
-
-    /// Access user preferences
-    pub fn preferences(&self) -> &Preferences {
-        &self.preferences
-    }
-
-    /// Access mutable user preferences
-    pub fn preferences_mut(&mut self) -> &mut Preferences {
-        &mut self.preferences
-    }
-
-    /// Save current settings to storage
-    pub fn save_preferences(&mut self) -> Result<()> {
-        self.inner.save_preferences(&self.preferences)
-    }
-}
-
-fn get_default_level(
-    registry: &GameModelRegistry,
-    default_level_id: Option<ModelId>,
-) -> Result<&LevelConfig> {
-    match default_level_id {
-        Some(id) => registry
-            .levels
-            .get_by_id(&id)
-            .context("level does not exist"),
-        None => registry
-            .levels
-            .first()
-            .context("no level configurations available in registry"),
-    }
-}
-
-/// Create a brand-new progress record for first-time players.
-fn new_profile(default_level: &LevelConfig) -> PlayerProfile {
-    let now = now_unix();
-    PlayerProfile {
-        meta: ProfileMeta {
-            version: USER_PROGRESS_VERSION,
-            created_at_utc: now,
-            updated_at_utc: now,
-        },
-        progress: PlayerProgress {
-            level_id: default_level.id.clone(),
-            current_day: default_level.start_day,
-            reputation: 50.0,
-            rng_seed: default_level.seed,
-            seen_hints: Default::default(),
-        },
-        aggregates: Default::default(),
-        daily_history: Vec::new(),
-        layout: CanteenLayoutState {
-            window_configurations: default_level.window_configurations.clone(),
-            placement: CanteenPlacements {
-                tables: default_level.table_placements.clone(),
-                tray_dispensers: default_level.tray_dispenser_placements.clone(),
-                chopstick_dispensers: default_level.chopstick_dispenser_placements.clone(),
-                collectors: default_level.collector_placements.clone(),
-            },
-        },
-        diner_pool: Default::default(),
-        permanent_effects: Default::default(),
-    }
-}
-
-pub(crate) fn now_unix() -> u64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("system time before UNIX EPOCH")
-        .as_secs()
 }
