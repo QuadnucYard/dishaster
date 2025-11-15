@@ -21,7 +21,7 @@ pub fn detect_dispenser_stock_change(
 
         // Emit hint for first-time out-of-stock
         if stock.current == 0 {
-            events.emit_hint(hints::DISPENSER_OUT_OF_STOCK);
+            events.emit_hint(hints::DISPENSER_OUT_OF_STOCK, HintCondition::Always);
         }
     }
 }

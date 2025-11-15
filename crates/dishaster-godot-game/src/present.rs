@@ -25,6 +25,12 @@ impl Game {
                     let profile = self.sim_runner.persist();
                     save_sim_profile(&self.profile_svc, profile)
                         .expect("failed to persist profile");
+
+                    // Update seen hints in profile
+                    let _ = self.profile_svc.update(|profile| {
+                        profile.seen_hints = self.hint_tracker.profile_shown_hints().clone();
+                        Ok(())
+                    });
                 }
 
                 SimEvent::RunCompleted => {
@@ -190,17 +196,16 @@ impl Game {
                         .push(UiCommand::ShowIncidentNotification(view));
                 }
 
-                SimEvent::ShowHint(hint_id) => {
-                    godot_print!("Showing hint: {hint_id}");
+                SimEvent::ShowHint {
+                    id: hint_id,
+                    condition,
+                } => {
+                    godot_print!("Received hint: {hint_id}");
 
-                    if self.hint_tracker.mark_shown(&hint_id) {
+                    // Check if we should show this hint based on its emission mode
+                    if self.hint_tracker.mark_shown(&hint_id, condition) {
                         let message = tr!(&format!("hint--{hint_id}"));
                         self.ui_commands.push(UiCommand::ShowHint { message });
-
-                        // Save hint immediately
-                        if let Err(e) = self.profile_svc.update_seen_hint(hint_id) {
-                            godot_print!("Failed to persist seen hint: {e:?}");
-                        }
                     }
                 }
             }

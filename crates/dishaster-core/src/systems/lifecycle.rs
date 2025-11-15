@@ -1,7 +1,16 @@
-use dishaster_interface::SimEvent;
+use dishaster_interface::{SimEvent, event::HintCondition};
 use dishaster_models::Seed;
 
-use crate::{components::Diner, events::*, prelude::*, resources::*, systems};
+use crate::{
+    components::Diner,
+    events::*,
+    prelude::*,
+    resources::*,
+    systems::{
+        self,
+        hint::{HintEmitter, hints},
+    },
+};
 
 pub fn register_lifecycle_systems(world: &mut World) {
     world.add_observer(on_run_started);
@@ -17,6 +26,10 @@ pub fn register_lifecycle_systems(world: &mut World) {
     systems::register_management_incident_systems(world);
 }
 
+pub fn on_day_started(mut events: ResMut<EventQueue>) {
+    events.emit_hint(hints::ADJUST_PRICE, HintCondition::OnceLocal);
+}
+
 fn on_run_started(
     _event: On<RunStarted>,
     mut commands: Commands,
@@ -24,7 +37,6 @@ fn on_run_started(
     reputation: Res<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
     mut rng: ResMut<WorldRng>,
-    mut events: ResMut<EventQueue>,
 ) {
     day_status.started = true;
 
@@ -42,7 +54,6 @@ fn on_run_started(
             reputation.fsri,
             incident_prob
         );
-        events.push(SimEvent::ShowHint("food_safety_shutdown".into()));
         // TODO: Trigger actual ending through proper ending system
         return; // Don't roll regular incidents if shutdown occurs
     }
@@ -100,11 +111,9 @@ fn on_advance_day(
     // Check for reputation-based endings
     if reputation.reputation <= 0.0 {
         log::info!("Reputation dropped to 0 - triggering bad ending");
-        events.push(SimEvent::ShowHint("reputation_zero".into()));
         // TODO: Trigger actual ending through proper ending system
     } else if reputation.reputation >= 100.0 {
         log::info!("Reputation reached 100 - potential good ending");
-        events.push(SimEvent::ShowHint("reputation_max".into()));
         // TODO: Offer good ending option
     }
 

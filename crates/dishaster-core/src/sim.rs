@@ -197,6 +197,7 @@ impl Simulation {
         let mut schedule = Schedule::default();
         schedule.add_systems(
             (
+                on_day_started,
                 initial_spawning_systems(),
                 build_collision_grid,
                 populate_diner_pool,

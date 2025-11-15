@@ -83,7 +83,12 @@ pub enum SimEvent {
     ShowManagementIncident(Box<ManagementIncidentView>),
 
     /// Show a hint to the player for first-time events.
-    ShowHint(EcoString),
+    ShowHint {
+        /// Unique identifier for the hint.
+        id: EcoString,
+        /// Emission condition for the hint.
+        condition: HintCondition,
+    },
 }
 
 /// Types of changes to a diner's held items.
@@ -101,6 +106,17 @@ pub enum DinerItemsChange {
     FinishEating,
     /// Diner dropped all items (when returning dishes).
     DropAll,
+}
+
+/// Emission condition for hints
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HintCondition {
+    /// Always show the hint (e.g., critical warnings)
+    Always,
+    /// Show once per game profile (first-time tutorial hints)
+    OnceGlobal,
+    /// Show once per day (daily reminders)
+    OnceLocal,
 }
 
 #[cfg(test)]

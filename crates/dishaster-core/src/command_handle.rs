@@ -49,6 +49,7 @@ impl Simulation {
                 // Reset trial session for new trial
                 let mut trial_session = self.world.resource_mut::<TrialSession>();
                 trial_session.reset();
+                trial_session.ever_triggered = true;
                 trial_session.diner_entity = Some(diner.to_entity());
                 trial_session.trigger_topic = topic.as_ref().map(ToModel::to_model);
 

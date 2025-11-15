@@ -153,6 +153,8 @@ impl DailyDinerSchedule {
 pub struct TrialSession {
     /// Pseudorandom number generator for trial session
     pub rng: Prng,
+    /// Whether the trial has ever been triggered in this run
+    pub ever_triggered: bool,
     /// The diner entity that triggered this trial (for applying psych state impacts)
     pub diner_entity: Option<Entity>,
     /// Indices of questions already asked in this trial
@@ -180,6 +182,7 @@ impl TrialSession {
     pub fn new(seed: u64) -> Self {
         Self {
             rng: Prng::new(seed),
+            ever_triggered: false,
             diner_entity: None,
             asked_questions: Vec::new(),
             cached_options: Default::default(),

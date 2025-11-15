@@ -1,6 +1,7 @@
 use dishaster_views::{Feedback, FeedbackView};
 
 use super::prelude::*;
+use crate::systems::hint::{HintEmitter, hints};
 
 // For now, we use simple emoji strings as feedback indicators.
 pub mod feedbacks {
@@ -31,6 +32,7 @@ pub fn feedback_present_system(
     mut events: ResMut<EventQueue>,
     mut reputation: ResMut<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
+    trial_session: Res<TrialSession>,
     registry: Res<GameModelRegistryRes>,
 ) {
     for msg in feedback_messages.read() {
@@ -49,6 +51,11 @@ pub fn feedback_present_system(
             topic: msg.trigger.as_ref().map(ToView::to_view),
             can_trigger_trial,
         }));
+
+        // Emit hint for first-time trial trigger opportunity
+        if can_trigger_trial && !trial_session.ever_triggered {
+            events.emit_hint(hints::CLICK_FEEDBACK_TO_TRIAL, HintCondition::Always);
+        }
 
         // Apply reputation impact if feedback has a topic
         if let Some(topic) = msg.trigger {
