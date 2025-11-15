@@ -117,8 +117,13 @@ pub enum UiCommand {
     TrialRightSpeak(Box<TrialStatement>),
     /// Response candidates for a keyword (lazy loaded).
     TrialResponseCandidates(Vec<TrialResponseOption>),
+    /// Trial feedback impact on diner psychology and reputation.
+    TrialImpact(Box<TrialImpactView>),
     /// Trial has ended.
-    TrialEnd,
+    TrialEnd {
+        /// Whether the trial ended due to a timeout.
+        timeout: bool,
+    },
 
     /// Show management decisions to the player.
     ShowDecisionSelection(Box<ManagementDecisionsView>),

@@ -45,13 +45,11 @@ impl Simulation {
                 });
             }
 
-            SimCommand::TrialStart {
-                diner: _diner,
-                topic,
-            } => {
+            SimCommand::TrialStart { diner, topic } => {
                 // Reset trial session for new trial
                 let mut trial_session = self.world.resource_mut::<TrialSession>();
                 trial_session.reset();
+                trial_session.diner_entity = Some(diner.to_entity());
                 trial_session.trigger_topic = topic.as_ref().map(ToModel::to_model);
 
                 // Currently, emit random appearances for both sides.
@@ -74,9 +72,11 @@ impl Simulation {
                 events.push(SimEvent::TrialRightSpeak(speech.into()));
             }
             SimCommand::TrialTimeout => {
-                // TODO: Simply end the trial on timeout for now.
+                // Apply timeout penalty before ending trial
+                self.apply_trial_timeout_penalty();
+
                 let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialEnd);
+                events.push(SimEvent::TrialEnd { timeout: true });
             }
             SimCommand::TrialRequestCandidates {
                 speech_id,
@@ -101,7 +101,7 @@ impl Simulation {
                 } else {
                     // End of trial
                     let mut events = self.world.resource_mut::<EventQueue>();
-                    events.push(SimEvent::TrialEnd);
+                    events.push(SimEvent::TrialEnd { timeout: false });
                 }
             }
 

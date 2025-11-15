@@ -162,7 +162,12 @@ impl Game {
                     self.ui_commands
                         .push(UiCommand::TrialResponseCandidates(options));
                 }
-                SimEvent::TrialEnd => {
+                SimEvent::TrialImpact(impact) => {
+                    godot_print!("Received trial impact: {:?}", impact);
+
+                    self.ui_commands.push(UiCommand::TrialImpact(impact));
+                }
+                SimEvent::TrialEnd { timeout } => {
                     godot_print!("Received trial end");
 
                     // Restore simulation speed
@@ -173,7 +178,7 @@ impl Game {
                     // Emit command to exit trial music
                     self.ui_commands.push(UiCommand::ExitTrialMusic);
 
-                    self.ui_commands.push(UiCommand::TrialEnd);
+                    self.ui_commands.push(UiCommand::TrialEnd { timeout });
                 }
 
                 SimEvent::ShowManagementDecisions(view) => {

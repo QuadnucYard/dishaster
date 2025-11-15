@@ -154,3 +154,26 @@ pub struct ReputationView {
     /// Food quality level [0, 100]
     pub food_quality: f32,
 }
+
+/// Trial feedback impact on both diner psychology and reputation
+///
+/// Emitted when trial responses or timeouts affect game state,
+/// allowing the trial GUI to display these consequences in real-time.
+#[derive(Debug, Clone)]
+pub struct TrialImpactView {
+    /// Changes to diner's psychological state (if any)
+    pub psych_impact: Option<PsychImpactView>,
+    /// Changes to global reputation (if any)
+    pub reputation_impact: Option<ReputationView>,
+}
+
+/// Impact on a diner's psychological state
+#[derive(Debug, Clone)]
+pub struct PsychImpactView {
+    /// Change in mood [-100, 100]
+    pub mood_delta: f32,
+    /// Change in trust [-100, 100]
+    pub trust_delta: f32,
+    /// Change in patience [-100, 100]
+    pub patience_delta: f32,
+}

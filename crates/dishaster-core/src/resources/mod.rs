@@ -153,6 +153,8 @@ impl DailyDinerSchedule {
 pub struct TrialSession {
     /// Pseudorandom number generator for trial session
     pub rng: Prng,
+    /// The diner entity that triggered this trial (for applying psych state impacts)
+    pub diner_entity: Option<Entity>,
     /// Indices of questions already asked in this trial
     asked_questions: Vec<usize>,
     /// Cached response options for (speech_id, keyword_index) pairs
@@ -178,6 +180,7 @@ impl TrialSession {
     pub fn new(seed: u64) -> Self {
         Self {
             rng: Prng::new(seed),
+            diner_entity: None,
             asked_questions: Vec::new(),
             cached_options: Default::default(),
             last_response_id: None,
@@ -192,6 +195,7 @@ impl TrialSession {
 
     /// Reset the session for a new trial
     pub fn reset(&mut self) {
+        self.diner_entity = None;
         self.asked_questions.clear();
         self.cached_options.clear();
         self.last_response_id = None;
@@ -256,7 +260,7 @@ impl TrialSession {
         // Use score directly as probability (already normalized 0-1 from embedding similarity)
         // Low scores (<0.3) rarely continue, high scores (>0.7) usually continue
         let prob = best_score.clamp(0.0, 1.0);
-        self.rng.random::<f32>() < prob
+        self.rng.random_bool(prob as f64)
     }
 }
 

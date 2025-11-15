@@ -285,10 +285,8 @@ impl GameScene {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
                 trial_gui.show_response_candidates(options);
             }
-            UiCommand::TrialEnd => {
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
-                trial_gui.hide();
-            }
+            UiCommand::TrialImpact(_impact) => {}
+            UiCommand::TrialEnd { timeout: _timeout } => {}
 
             UiCommand::ShowDecisionSelection(view) => {
                 let catalog = &game_services().catalog;

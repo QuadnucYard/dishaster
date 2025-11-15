@@ -1,13 +1,15 @@
 //! The trial system. It works outside the ECS loop.
 
 use bevy_ecs::system::SystemState;
+use dishaster_interface::SimEvent;
 
 use crate::{
+    components::DinerPsychState,
     models::{TrialCorpus, TrialQARank},
     prelude::*,
     resources::*,
     sim::Simulation,
-    views::{self, TrialIntro, TrialResponseOption, TrialStatement},
+    views::{self, *},
 };
 
 impl Simulation {
@@ -103,15 +105,10 @@ impl Simulation {
             }
         }
 
-        // Apply reputation impact
-        let mut system_state: SystemState<(ResMut<ReputationStateRes>, Res<ReputationConfigRes>)> =
-            SystemState::new(&mut self.world);
-        let (mut reputation, reputation_config) = system_state.get_mut(&mut self.world);
-
-        // Apply a moderate base impact modified by response score (including relevance penalty)
-        // Using quality topic (-4.0) as a representative negative feedback
-        let base_impact = reputation_config.base_impacts.quality;
-        reputation.apply_feedback_impact(base_impact, response_score, &reputation_config);
+        // Apply impacts and emit event
+        let impact = self.apply_trial_impacts(response_score, false);
+        let mut events = self.world.resource_mut::<EventQueue>();
+        events.push(SimEvent::TrialImpact(impact.into()));
 
         views::TrialStatement { speech_sequence }
     }
@@ -144,6 +141,130 @@ impl Simulation {
             // No response history or ranks - randomly decide
             session.rng.random_bool(0.3)
         }
+    }
+
+    /// Apply penalty when trial times out without player response
+    ///
+    /// This affects both reputation and psychological state:
+    /// - Reputation: Negative impact (ignoring customer concerns)
+    /// - Psych state: Mood and trust penalties for the trial diner
+    pub(super) fn apply_trial_timeout_penalty(&mut self) {
+        // Use a more severe response score for timeout
+        let timeout_response_score = -0.8; // Worse than a poor response
+        let impact = self.apply_trial_impacts(timeout_response_score, true);
+
+        // Emit impact event for GUI
+        let mut events = self.world.resource_mut::<EventQueue>();
+        events.push(SimEvent::TrialImpact(impact.into()));
+
+        log::info!("Applied trial timeout penalty");
+    }
+
+    /// Apply impacts from trial interactions to both reputation and diner psychology
+    ///
+    /// This is the core feedback application system for trials, affecting:
+    /// - Global reputation based on response quality
+    /// - Diner's mood, trust, and patience based on how they were treated
+    ///
+    /// Returns a view of the impacts for GUI display.
+    fn apply_trial_impacts(&mut self, response_score: f32, is_timeout: bool) -> TrialImpactView {
+        // Apply reputation impact
+        let reputation_impact = self.apply_reputation_impact(response_score);
+
+        // Apply psychological impact to the diner
+        let psych_impact = self.apply_psych_impact(response_score, is_timeout);
+
+        TrialImpactView {
+            psych_impact,
+            reputation_impact,
+        }
+    }
+
+    fn apply_reputation_impact(&mut self, response_score: f32) -> Option<ReputationView> {
+        let mut system_state: SystemState<(ResMut<ReputationStateRes>, Res<ReputationConfigRes>)> =
+            SystemState::new(&mut self.world);
+        let (mut reputation, reputation_config) = system_state.get_mut(&mut self.world);
+
+        let base_impact = reputation_config.base_impacts.quality;
+        let old_reputation = reputation.reputation;
+
+        reputation.apply_feedback_impact(base_impact, response_score, &reputation_config);
+
+        let reputation_delta = reputation.reputation - old_reputation;
+
+        log::info!(
+            "Trial response impact on reputation: {:.2} (score: {:.2})",
+            reputation_delta,
+            response_score
+        );
+
+        Some(ReputationView {
+            reputation: reputation.reputation,
+            reputation_delta,
+            fsri: reputation.fsri,
+            food_quality: reputation.food_quality,
+        })
+    }
+
+    fn apply_psych_impact(
+        &mut self,
+        response_score: f32,
+        is_timeout: bool,
+    ) -> Option<PsychImpactView> {
+        let session = self.world.resource::<TrialSession>();
+        let diner_entity = session.diner_entity?;
+
+        let mut system_state: SystemState<Query<&mut DinerPsychState>> =
+            SystemState::new(&mut self.world);
+        let mut diner_query = system_state.get_mut(&mut self.world);
+
+        let mut psych_state = diner_query.get_mut(diner_entity).ok()?;
+
+        let old_mood = psych_state.mood;
+        let old_trust = psych_state.trust;
+        let old_patience = psych_state.patience;
+
+        // Calculate psychological impacts based on response quality
+        // Good responses (positive score) improve mood/trust, bad ones decrease
+        let mood_change = if is_timeout {
+            -0.15 // Significant mood penalty for being ignored
+        } else {
+            response_score * 0.1 // Scale response score to mood change
+        };
+
+        let trust_change = if is_timeout {
+            -0.1 // Trust penalty for being ignored
+        } else {
+            response_score * 0.05 // Smaller trust impact
+        };
+
+        let patience_change = if is_timeout {
+            -5.0 // Reduce patience significantly for timeout
+        } else {
+            response_score * 2.0 // Patience affected by response quality
+        };
+
+        // Apply changes with clamping
+        psych_state.mood = (psych_state.mood + mood_change).clamp(-1.0, 1.0);
+        psych_state.trust = (psych_state.trust + trust_change).clamp(0.0, 1.0);
+        psych_state.patience = (psych_state.patience + patience_change).max(0.0);
+
+        let mood_delta = psych_state.mood - old_mood;
+        let trust_delta = psych_state.trust - old_trust;
+        let patience_delta = psych_state.patience - old_patience;
+
+        log::info!(
+            "Trial impact on diner psych: mood={:+.2} trust={:+.2} patience={:+.2}",
+            mood_delta,
+            trust_delta,
+            patience_delta
+        );
+
+        Some(PsychImpactView {
+            mood_delta,
+            trust_delta,
+            patience_delta,
+        })
     }
 }
 
@@ -275,7 +396,7 @@ fn generate_response_sequence(
             break;
         }
 
-        let best_score = available_ranks[0].score;
+        let best_score = available_ranks[0].score * 0.2;
 
         // Use score as probability: higher similarity = more likely to continue
         if !session.should_continue(best_score) {

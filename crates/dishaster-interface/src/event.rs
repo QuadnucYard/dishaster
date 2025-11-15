@@ -2,7 +2,8 @@
 
 use dishaster_views::{
     Appearance, DishView, FeedbackView, ManagementDecisionsView, ManagementIncidentView,
-    PricingMethod, ReputationView, TrialIntro, TrialResponseOption, TrialStatement,
+    PricingMethod, ReputationView, TrialImpactView, TrialIntro, TrialResponseOption,
+    TrialStatement,
 };
 use dishrupt_core::{EntityId, prelude::EcoString};
 
@@ -68,8 +69,13 @@ pub enum SimEvent {
     TrialRightSpeak(Box<TrialStatement>),
     /// Response candidates for a keyword (lazy loaded).
     TrialResponseCandidates(Vec<TrialResponseOption>),
+    /// Trial feedback impact on diner psychology and reputation.
+    TrialImpact(Box<TrialImpactView>),
     /// Trial has ended.
-    TrialEnd,
+    TrialEnd {
+        /// Whether the trial ended due to a timeout.
+        timeout: bool,
+    },
 
     /// Show management decisions to the player.
     ShowManagementDecisions(Box<ManagementDecisionsView>),
