@@ -51,6 +51,7 @@ impl Scene for GameScene {
 
         gui.show::<GamingLayout>();
         gui.show::<TimeStatsGui>();
+        gui.show::<TrialImpactGui>();
     }
 
     fn process(&mut self, ctx: &mut SceneContext, delta: f64) {
@@ -285,8 +286,14 @@ impl GameScene {
                 let trial_gui = ctx.gui.get_mut::<TrialGui>();
                 trial_gui.show_response_candidates(options);
             }
-            UiCommand::TrialImpact(_impact) => {}
-            UiCommand::TrialEnd { timeout: _timeout } => {}
+            UiCommand::TrialImpact(impact) => {
+                let trial_impact_gui = ctx.gui.get_mut::<TrialImpactGui>();
+                trial_impact_gui.show_impact(*impact);
+            }
+            UiCommand::TrialEnd { timeout: _timeout } => {
+                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                trial_gui.hide();
+            }
 
             UiCommand::ShowDecisionSelection(view) => {
                 let catalog = &game_services().catalog;

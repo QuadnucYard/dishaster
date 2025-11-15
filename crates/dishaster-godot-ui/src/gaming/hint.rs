@@ -11,8 +11,6 @@ pub struct HintNotification {
     panel: ControlA,
     #[child("%Label")]
     label: LabelA,
-    // #[node("%Timer")]
-    // timer: Gd<Timer>,
 }
 
 #[ui_tree_api]

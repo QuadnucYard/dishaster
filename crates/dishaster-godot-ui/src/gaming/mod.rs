@@ -7,6 +7,7 @@ mod reputation;
 mod settlement;
 mod time_stats;
 mod trial;
+mod trial_impact;
 
 pub use hint::*;
 pub use layout::*;
@@ -17,3 +18,4 @@ pub use reputation::*;
 pub use settlement::*;
 pub use time_stats::*;
 pub use trial::*;
+pub use trial_impact::*;

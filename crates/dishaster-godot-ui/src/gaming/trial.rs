@@ -9,7 +9,7 @@ use crate::prelude::*;
 
 const INTRO_TIME: f32 = 2.0;
 const LEFT_SPEECH_INTERVAL: f32 = 2.0;
-const RIGHT_SPEECH_INTERVAL: f32 = 2.0;
+const RIGHT_SPEECH_INTERVAL: f32 = 1.0;
 const COUNTDOWN_TIME: f32 = 3.0;
 
 #[derive(Debug, Default)]
@@ -255,7 +255,7 @@ impl Gui for TrialGui {
                 // Display next speech
                 self.display_next_speech(Side::Right);
             }
-            _ => { /* TODO */ }
+            Phase::Idle => {}
         }
     }
 }

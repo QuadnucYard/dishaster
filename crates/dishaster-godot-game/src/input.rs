@@ -38,6 +38,25 @@ impl Game {
                     let message = "This is a hint triggered by pressing the H key.".into();
                     self.ui_commands.push(UiCommand::ShowHint { message });
                 }
+                if key.pressed && key.keycode == Key::I {
+                    use dishaster_views::{PsychImpactView, ReputationView, TrialImpactView};
+                    godot_print!("DEV: Triggering random trial impact");
+                    let test_impact = TrialImpactView {
+                        psych_impact: Some(PsychImpactView {
+                            mood_delta: 0.15,
+                            trust_delta: 0.08,
+                            patience_delta: 3.0,
+                        }),
+                        reputation_impact: Some(ReputationView {
+                            reputation: 65.0,
+                            reputation_delta: 2.5,
+                            fsri: 5.0,
+                            food_quality: 75.0,
+                        }),
+                    };
+                    self.ui_commands
+                        .push(UiCommand::TrialImpact(Box::new(test_impact)));
+                }
             }
             _ => {}
         }
