@@ -362,14 +362,6 @@ pub fn handle_queue_re_evaluation(
     ordering_config: &OrderingConfig,
     feedback_messages: &mut MessageWriter<FeedbackMessage>,
 ) {
-    const RE_EVALUATION_PROBABILITY: f64 = 0.1;
-    const RE_EVALUATION_COOLDOWN: f32 = 5.0;
-
-    // Check cooldown and probability
-    if goal.timer <= RE_EVALUATION_COOLDOWN || !rng.random_bool(RE_EVALUATION_PROBABILITY) {
-        return;
-    }
-
     let window_entity = targets.chosen_window.unwrap();
 
     // Check if window still has dishes

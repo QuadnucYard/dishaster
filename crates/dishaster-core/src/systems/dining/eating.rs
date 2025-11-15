@@ -45,11 +45,11 @@ pub fn handle_eat_goal(
         // Check all dishes for contamination
         for served_dish in &state.served_dishes {
             if served_dish.contamination_level > feedback_thresholds.contamination_threshold {
-                // Calculate detection chance based on eating time elapsed
+                // Calculate detection chance based on contamination level
                 // Higher contamination = faster detection
                 let detection_rate = served_dish.contamination_level * 0.5; // 0.05/s at threshold, 0.5/s at max
 
-                if rng.random_bool((detection_rate * dt) as f64) {
+                if rng.random_bool_dt(detection_rate as f64, dt as f64) {
                     log::warn!(
                         target: "diner",
                         "diner {:?} detected contamination: level={:.2}",

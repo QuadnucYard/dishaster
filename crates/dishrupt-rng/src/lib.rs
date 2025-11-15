@@ -79,3 +79,22 @@ impl<Tag> DerefMut for SystemRng<Tag> {
         &mut self.0
     }
 }
+
+// === Extensions ===
+
+/// Extension trait for RNG with delta-time-aware random booleans
+pub trait RandomDt {
+    /// Use exponential probability: P(detect in dt) = 1 - exp(-rate * dt)
+    /// This ensures the overall detection probability is independent of tick rate
+    ///
+    /// Convert rate to probability for this tick (exponential distribution)
+    /// For small dt, this approximates to detection_rate * dt, but is mathematically correct
+    fn random_bool_dt(&mut self, p: f64, dt: f64) -> bool;
+}
+
+impl<T: Rng> RandomDt for T {
+    #[inline]
+    fn random_bool_dt(&mut self, p: f64, dt: f64) -> bool {
+        self.random_bool(1.0 - (-p * dt).exp())
+    }
+}

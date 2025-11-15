@@ -106,7 +106,10 @@ fn handle_observe_goal(
     window_query: Query<(Entity, &Window)>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
+    time: Res<Time>,
 ) {
+    let dt = time.tick_duration;
+
     for (entity, mut goal, mut targets, mut movement, personality, mut rng) in diner_query {
         if !goal.is(DinerGoal::Observe) {
             continue;
@@ -146,7 +149,8 @@ fn handle_observe_goal(
             continue;
         }
 
-        if rng.random_bool(0.01) {
+        // Occasionally show observing feedback (rate: 0.01/s means ~1% per second)
+        if rng.random_bool_dt(0.01, dt) {
             feedback_messages.write(FeedbackMessage {
                 entity,
                 content: choose_feedback(&mut rng, feedbacks::OBSERVING),
@@ -213,13 +217,17 @@ fn handle_find_seat_goal(
     )>,
     table_query: Query<(Entity, &mut DiningTable)>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
+    time: Res<Time>,
 ) {
+    let dt = time.tick_duration;
+
     for (mut goal, mut targets, mut movement, mut rng) in diner_query {
         if !goal.is(DinerGoal::FindSeat) {
             continue;
         }
 
-        if !(goal.timer > 3.0 && rng.random_bool(0.1)) {
+        // After 3s cooldown, attempt to find seat with rate 0.1/s (~9.5% chance per second)
+        if !(goal.timer > 3.0 && rng.random_bool_dt(0.1, dt)) {
             continue;
         }
 

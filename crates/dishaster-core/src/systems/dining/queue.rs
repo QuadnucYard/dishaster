@@ -165,9 +165,16 @@ pub fn handle_queue_for_window_goal(
             continue;
         }
 
+        // Re-evaluation rate: 0.02/s means ~1.98% chance per second, or ~9.5% chance in 5 seconds
+        // This creates occasional reconsideration without being too frequent
+        const RE_EVALUATION_RATE: f64 = 0.02;
+        const RE_EVALUATION_COOLDOWN: f32 = 5.0;
+
         // Case 3: Waiting in queue - allow re-evaluation
         if let Some(queue_member) = queue_member
             && queue_member.ranking > 0
+            && goal.timer >= RE_EVALUATION_COOLDOWN
+            && rng.random_bool_dt(RE_EVALUATION_RATE, time.tick_duration)
         {
             handle_queue_re_evaluation(
                 &mut commands,
