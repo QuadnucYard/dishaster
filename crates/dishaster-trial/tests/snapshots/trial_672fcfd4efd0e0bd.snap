@@ -1,0 +1,61 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 7435390023275438269
+  trigger_topic: appeal
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 39
+        text: "我的[饭卡]今天刷不了，\\每次都要去窗口，\\你们能不能修好系统？"
+        emotion: 😰
+        gesture: 👋
+      - id: 28
+        text: "你们这[打卡]方式也太不人性化了，\\学生忘带卡怎么办，\\能不能有备用机制？"
+        emotion: 😞
+        gesture: 🤞
+    response_options:
+      - speech_id: 39
+        keywords:
+          - keyword: 饭卡
+            options:
+              - id: 87
+                kind: agreement
+                summary: 查卡并补办
+              - id: 206
+                kind: perjury
+                summary: 系统故障
+              - id: 181
+                kind: question
+                summary: 别人没说
+      - speech_id: 28
+        keywords:
+          - keyword: 打卡
+            options:
+              - id: 266
+                kind: perjury
+                summary: 已有措施
+    selected_response:
+      speech_id: 28
+      keyword_idx: 0
+      option_idx: 3
+    manager_speeches:
+      - id: 266
+        summary: 已有措施
+        text: "其实我们上周已经开始试点“智能感应夹”，\\只是还没推广到所有窗口。"
+        emotion: 😅
+    impact:
+      reputation_score: 0.357
+      mood_change: 0.0357
+      trust_change: 0.01785
+      patience_change: 0.714
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 39
+    - 28
+  continuation_depth: 0

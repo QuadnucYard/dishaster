@@ -1,0 +1,72 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 928397841245673342
+  trigger_topic: quality
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 52
+        text: "今天[早饭]的面条都煮烂了，\\口感糟糕，\\不能随便糊弄学生的早餐。"
+        emotion: 😭
+        gesture: 🤝
+        topic: quality
+      - id: 10
+        text: "汤太[烫]了，吃得我嘴巴都烫糊了，\\你们出餐有没有基本的温度控制？"
+        emotion: 😤
+        gesture: 👎
+        topic: quality
+    response_options:
+      - speech_id: 52
+        keywords:
+          - keyword: 早饭
+            options:
+              - id: 229
+                kind: question
+                summary: 对比菜单
+              - id: 182
+                kind: perjury
+                summary: 新厨师
+              - id: 199
+                kind: agreement
+                summary: 立即道歉
+      - speech_id: 10
+        keywords:
+          - keyword: 烫
+            options:
+              - id: 275
+                kind: agreement
+                summary: 标准说明
+              - id: 253
+                kind: question
+                summary: 记录消耗
+              - id: 91
+                kind: agreement
+                summary: 温度控制与赔偿
+              - id: 195
+                kind: agreement
+                summary: 换热汤
+    selected_response:
+      speech_id: 52
+      keyword_idx: 0
+      option_idx: 2
+    manager_speeches:
+      - id: 199
+        summary: 立即道歉
+        text: "非常抱歉，\\这是我们的严重失误，\\马上为您更换一份米饭。"
+        emotion: 😰
+    impact:
+      reputation_score: 0.5
+      mood_change: 0.05
+      trust_change: 0.025
+      patience_change: 1
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 52
+    - 10
+  continuation_depth: 0

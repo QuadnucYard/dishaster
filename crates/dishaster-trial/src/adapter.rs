@@ -7,18 +7,18 @@ pub trait ToView {
     fn to_view(&self) -> Self::View;
 }
 
-pub trait ToViewWithIndex {
+pub trait ToViewWithId {
     type View;
 
-    fn to_view_with_index(&self, index: usize) -> Self::View;
+    fn to_view_with_id(&self, index: usize) -> Self::View;
 }
 
-impl ToViewWithIndex for models::TrialSpeech {
+impl ToViewWithId for models::TrialSpeech {
     type View = views::TrialSpeech;
 
-    fn to_view_with_index(&self, index: usize) -> Self::View {
+    fn to_view_with_id(&self, id: usize) -> Self::View {
         views::TrialSpeech {
-            index,
+            id,
             text: self.text.clone(),
             items: self.items.iter().map(|item| item.to_view()).collect(),
             appearance: self.appearance.to_view(),

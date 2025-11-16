@@ -306,7 +306,7 @@ fn speech_to_bbcode(speech: &TrialSpeech) -> EcoString {
                 buffer.push_str(t);
             }
             TrialSpeechItem::Keyword(k) => {
-                let meta = format!("{}-{}", speech.index, keyword_index);
+                let meta = format!("{}-{}", speech.id, keyword_index);
                 buffer.push_str(&format!("[url={meta}][b][color=dark_orchid][font_size=90]{k}[/font_size][/color][/b][/url]"));
                 keyword_index += 1;
             }
@@ -357,7 +357,7 @@ impl TrialThoughtGui {
 
             let on_select_option_handle = self.on_select_option.get_emit_handle();
             item.option_button.on_click.clear();
-            let corpus_index = option.corpus_index;
+            let corpus_index = option.id;
             item.option_button.on_click.connect(move || {
                 on_select_option_handle.emit(corpus_index);
             });

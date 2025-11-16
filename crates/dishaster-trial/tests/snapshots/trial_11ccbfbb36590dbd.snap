@@ -1,0 +1,53 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 1282610804685344189
+  trigger_topic: taste
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 38
+        text: "这[饭菜]味道忽咸忽淡，\\像是谁随便搅和的，\\能不能保证稳定性？"
+        emotion: 😭
+        gesture: ✋
+        topic: taste
+    response_options:
+      - speech_id: 38
+        keywords:
+          - keyword: 饭菜
+            options:
+              - id: 181
+                kind: question
+                summary: 别人没说
+              - id: 82
+                kind: objection
+                summary: 解释出品差异
+              - id: 100
+                kind: agreement
+                summary: 改进出品质量
+              - id: 5
+                kind: agreement
+                summary: 立刻下架
+    selected_response:
+      speech_id: 38
+      keyword_idx: 0
+      option_idx: 1
+    manager_speeches:
+      - id: 82
+        summary: 解释出品差异
+        text: "关于口味与图片不符，\\我会向厨师确认出品标准\\并说明是否为配方调整，\\并在必要时恢复原配方。"
+        emotion: 🙂
+    impact:
+      reputation_score: -1.2
+      mood_change: -0.120000005
+      trust_change: -0.060000002
+      patience_change: -2.4
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 38
+  continuation_depth: 0

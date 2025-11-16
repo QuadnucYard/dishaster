@@ -77,7 +77,7 @@ pub struct TrialResponse {
 
 /// The kind of trial response.
 #[allow(missing_docs)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TrialResponseKind {
     Agreement,

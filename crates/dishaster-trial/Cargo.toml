@@ -14,5 +14,12 @@ dishaster-views.workspace = true
 log.workspace = true
 rustc-hash.workspace = true
 
+[dev-dependencies]
+insta = { workspace = true, features = ["yaml"] }
+serde = { workspace = true }
+dishaster-data.workspace = true
+rand = { workspace = true }
+rand_xoshiro = { workspace = true }
+
 [lints]
 workspace = true

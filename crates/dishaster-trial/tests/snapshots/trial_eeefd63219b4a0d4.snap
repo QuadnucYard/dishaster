@@ -1,0 +1,43 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 17217215411128672468
+  trigger_topic: quality
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 15
+        text: "今天饭卡[余额]显示不对，\\结账的时候又跳错了，\\你们系统是不是出问题了？"
+        emotion: 😡
+        gesture: 🤏
+    response_options:
+      - speech_id: 15
+        keywords:
+          - keyword: 余额
+            options:
+              - id: 206
+                kind: perjury
+                summary: 系统故障
+    selected_response:
+      speech_id: 15
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 206
+        summary: 系统故障
+        text: "是因为刷卡系统刚刚\\经历了一次临时故障，\\导致速度变慢。"
+        emotion: 😅
+    impact:
+      reputation_score: -0.66
+      mood_change: -0.06600001
+      trust_change: -0.033000004
+      patience_change: -1.32
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 15
+  continuation_depth: 0

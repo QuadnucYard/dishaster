@@ -304,7 +304,7 @@ fn generate_response_sequence(
 
     // Start with the main response
     let response = &corpus.responses[resp_id];
-    sequence.push(response.content.to_view_with_index(resp_id));
+    sequence.push(response.content.to_view_with_id(resp_id));
     used_responses.insert(resp_id);
 
     // Generate continuation sequence using RR ranks
@@ -342,7 +342,7 @@ fn generate_response_sequence(
         };
 
         let next_response_content = &corpus.responses[next_response].content;
-        sequence.push(next_response_content.to_view_with_index(next_response));
+        sequence.push(next_response_content.to_view_with_id(next_response));
         used_responses.insert(next_response);
         current_response = next_response;
 
@@ -357,7 +357,7 @@ fn generate_response_sequence(
     log::info!(
         "Generated response sequence of length {}: {:?}",
         sequence.len(),
-        sequence.iter().map(|s| s.index).collect::<Vec<_>>()
+        sequence.iter().map(|s| s.id).collect::<Vec<_>>()
     );
     sequence
 }
@@ -485,8 +485,8 @@ fn create_diner_statement_with_sequence(
 ) -> TrialStatement {
     // Convert speech indices to view speeches
     let speech_sequence: Vec<_> = speech_ids
-        .iter()
-        .map(|&idx| corpus.diner_speeches[idx].to_view_with_index(idx))
+        .into_iter()
+        .map(|id| corpus.diner_speeches[id].to_view_with_id(id))
         .collect();
 
     log::info!(
@@ -540,10 +540,10 @@ fn generate_response_options(
 
     selected
         .into_iter()
-        .map(|idx| {
-            let response = &corpus.responses[idx];
+        .map(|id| {
+            let response = &corpus.responses[id];
             TrialResponseOption {
-                corpus_index: idx,
+                id,
                 kind: response.kind.to_view(),
                 summary: response.summary.clone(),
             }

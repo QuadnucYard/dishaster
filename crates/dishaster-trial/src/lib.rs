@@ -125,6 +125,11 @@ impl TrialSession {
         self.asked_questions.contains(&question_index)
     }
 
+    /// Get the list of asked question indices
+    pub fn get_asked_questions(&self) -> &[usize] {
+        &self.asked_questions
+    }
+
     /// Mark a question as asked
     pub fn mark_asked(&mut self, question_index: usize) {
         if !self.has_asked(question_index) {

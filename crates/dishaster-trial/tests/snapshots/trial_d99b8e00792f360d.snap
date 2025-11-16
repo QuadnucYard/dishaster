@@ -1,0 +1,48 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 15680282660304795149
+  trigger_topic: price
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 93
+        text: "你们这个[座椅]太不舒服了，\\坐久了腰酸背痛，\\就不能换一些更舒服的吗？"
+        emotion: 😖
+    response_options:
+      - speech_id: 93
+        keywords:
+          - keyword: 座椅
+            options:
+              - id: 215
+                kind: agreement
+                summary: 考虑更换
+              - id: 217
+                kind: question
+                summary: 哪种不适
+              - id: 216
+                kind: objection
+                summary: 都很舒适
+    selected_response:
+      speech_id: 93
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 215
+        summary: 考虑更换
+        text: "感谢您的建议，\\我们会向上级反映，\\考虑采购更符合人体工学的座椅。"
+        emotion: 😊
+    impact:
+      reputation_score: 1
+      mood_change: 0.1
+      trust_change: 0.05
+      patience_change: 2
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 93
+  continuation_depth: 0

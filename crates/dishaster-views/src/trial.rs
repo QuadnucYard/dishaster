@@ -21,7 +21,7 @@ pub struct TrialStatement {
 #[derive(Debug)]
 pub struct TrialSpeech {
     /// The index of the speech in the corpus.
-    pub index: usize,
+    pub id: usize,
     /// The text of the statement.
     pub text: EcoString,
     /// The breakdown of the statement into items.
@@ -45,7 +45,7 @@ pub enum TrialSpeechItem {
 #[derive(Debug, Clone)]
 pub struct TrialResponseOption {
     /// Index into the corpus responses.
-    pub corpus_index: usize,
+    pub id: usize,
     /// The kind of trial response.
     pub kind: TrialResponseKind,
     /// A brief summary of the response, displayed in the options list.

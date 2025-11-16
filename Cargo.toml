@@ -67,6 +67,7 @@ fibre = "0.5"
 fluent = "0.17"
 fluent-templates = { version = "0.13.2", default-features = false, features = ["walkdir"] }
 grid = "1.0"
+insta = "1"
 log = "0.4"
 ordered-float = "5"
 paste = "1.0"

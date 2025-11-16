@@ -1,0 +1,41 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 5881210131331364753
+  trigger_topic: quality
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 90
+        text: "你们这个[打菜窗口]太慢了，\\我排了二十分钟队，\\后面还有那么多人等着！"
+        emotion: 😩
+      - id: 26
+        text: "你们的[出菜]速度跟不上，\\点了十五分钟还没到，\\我们有课怎么迟到？"
+        emotion: 😠
+        gesture: ✋
+        topic: queue
+      - id: 22
+        text: "今天[套餐]里的菜少了一样，\\我已经付过钱了，\\你们给个解释或者补差价。"
+        emotion: 😨
+        gesture: 🤙
+        topic: quality
+      - id: 34
+        text: "今天的[消费]记录对不上，\\我被多扣了几块钱，\\希望能当面核对并退款。"
+        emotion: 😠
+        gesture: 👏
+    response_options: ~
+    selected_response: ~
+    manager_speeches: ~
+    impact: ~
+    continuation_decision: ~
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 90
+    - 26
+    - 22
+    - 34
+  continuation_depth: 0

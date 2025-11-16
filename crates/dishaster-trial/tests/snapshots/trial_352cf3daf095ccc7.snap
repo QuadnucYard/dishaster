@@ -1,0 +1,25 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 3831705504650218695
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 37
+        text: "我点的[素菜]竟然有肉，\\我是[素食者]，\\这差错太严重了！"
+        emotion: 😢
+        gesture: 🤚
+        topic: quality
+    response_options: ~
+    selected_response: ~
+    manager_speeches: ~
+    impact: ~
+    continuation_decision: ~
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 37
+  continuation_depth: 0

@@ -1,0 +1,71 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 3925656069808229166
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 87
+        text: "每次来都只剩[青菜]和[豆腐]，\\想吃的[红烧肉]永远卖光，\\是不是故意少做？"
+        emotion: 😒
+        gesture: 👎
+        topic: appeal
+    response_options:
+      - speech_id: 87
+        keywords:
+          - keyword: 青菜
+            options:
+              - id: 165
+                kind: question
+                summary: 能给我看
+              - id: 191
+                kind: agreement
+                summary: 增加供应
+              - id: 185
+                kind: question
+                summary: 看清了吗
+          - keyword: 豆腐
+            options:
+              - id: 165
+                kind: question
+                summary: 能给我看
+              - id: 185
+                kind: question
+                summary: 看清了吗
+              - id: 173
+                kind: question
+                summary: 能看看肉吗
+              - id: 88
+                kind: objection
+                summary: 防止剩菜再售
+          - keyword: 红烧肉
+            options:
+              - id: 191
+                kind: agreement
+                summary: 增加供应
+              - id: 173
+                kind: question
+                summary: 能看看肉吗
+    selected_response:
+      speech_id: 87
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 165
+        summary: 能给我看
+        text: "能让我看看那盘[青菜]吗？\\也许只是个别叶片老了。"
+        emotion: 🤨
+    impact:
+      reputation_score: -0.601
+      mood_change: -0.0601
+      trust_change: -0.03005
+      patience_change: -1.202
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 87
+  continuation_depth: 0

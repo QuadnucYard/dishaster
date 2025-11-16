@@ -3,8 +3,8 @@ use enum_map::{Enum, EnumMap, enum_map};
 use super::prelude::*;
 
 /// Different feedback topics that can be triggered
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Enum)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Enum)]
+#[serde(rename_all = "snake_case")]
 pub enum FeedbackTopic {
     /// No dishes appealed to the diner
     Appeal,

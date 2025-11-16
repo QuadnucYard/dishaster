@@ -65,7 +65,7 @@ topic = "hygiene"
 [[item]]
 text = '汤太[烫]了，吃得我嘴巴都烫糊了，\你们出餐有没有基本的温度控制？'
 emotion = "😤"
-gesture = "🤌"
+gesture = "👎"
 topic = "quality"
 
 [[item]]
@@ -131,7 +131,7 @@ topic = "hygiene"
 [[item]]
 text = '排队买餐居然要排这么久，\高峰期根本[调度]不好，\能不能优化流程？'
 emotion = "😰"
-gesture = "🤌"
+gesture = "👎"
 topic = "queue"
 
 [[item]]
@@ -401,7 +401,7 @@ topic = "tableware"
 [[item]]
 text = '这盘[炸鸡]吃着有旧油味，\可能油[重复使用]，\我不敢吃第二块了。'
 emotion = "😤"
-gesture = "🤌"
+gesture = "👎"
 topic = "hygiene"
 
 [[item]]

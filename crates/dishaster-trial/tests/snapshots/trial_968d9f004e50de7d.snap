@@ -1,0 +1,64 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 10848501901068131965
+  trigger_topic: taste
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 33
+        text: "门口的[指示牌]写得不清楚，\\找不到菜品摊位，\\你们能不能把布局改清楚点？"
+        emotion: 😱
+        gesture: 👍
+      - id: 59
+        text: "你们把[菜名]改了又不公告，\\学生根本不知道，\\管理要透明一点。"
+        emotion: 😢
+        gesture: 👋
+    response_options:
+      - speech_id: 33
+        keywords:
+          - keyword: 指示牌
+            options:
+              - id: 211
+                kind: agreement
+                summary: 完善标识
+              - id: 267
+                kind: agreement
+                summary: 放大标签
+      - speech_id: 59
+        keywords:
+          - keyword: 菜名
+            options:
+              - id: 21
+                kind: agreement
+                summary: 改进标识
+              - id: 211
+                kind: agreement
+                summary: 完善标识
+              - id: 244
+                kind: objection
+                summary: 应自行询问
+    selected_response:
+      speech_id: 33
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 211
+        summary: 完善标识
+        text: "感谢您的反馈，\\我们会立即改进菜品标识。"
+        emotion: 😊
+    impact:
+      reputation_score: 0.699
+      mood_change: 0.0699
+      trust_change: 0.03495
+      patience_change: 1.398
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 33
+    - 59
+  continuation_depth: 0

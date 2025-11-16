@@ -1,0 +1,102 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 10637074315653535228
+  trigger_topic: hygiene
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 51
+        text: "你们的[结账]系统总闪退，\\我两次都没付上，\\希望技术上能解决。"
+        emotion: 😞
+        gesture: 👈
+      - id: 12
+        text: "刚才掏卡等了半天，\\收银[慢]得要命，\\是不是要多配一个窗口？"
+        emotion: 😰
+        gesture: 🤚
+        topic: queue
+      - id: 98
+        text: "你们[高峰时段排队]太夸张了，\\排了二十分钟还没打上饭，\\就不能增加服务窗口吗？"
+        emotion: ⏰
+      - id: 102
+        text: "你们[免费汤品]的供应时间太短了，\\刚开餐十分钟就没有了，\\能不能延长补汤频率？"
+        emotion: 😢
+    response_options:
+      - speech_id: 51
+        keywords:
+          - keyword: 结账
+            options:
+              - id: 81
+                kind: question
+                summary: 是否保留卡据？
+              - id: 133
+                kind: agreement
+                summary: 勉强退款
+              - id: 206
+                kind: perjury
+                summary: 系统故障
+      - speech_id: 12
+        keywords:
+          - keyword: 慢
+            options:
+              - id: 99
+                kind: objection
+                summary: 改进排队机制
+              - id: 203
+                kind: agreement
+                summary: 增开窗口
+      - speech_id: 98
+        keywords:
+          - keyword: 高峰时段排队
+            options:
+              - id: 236
+                kind: objection
+                summary: 时间正常
+              - id: 235
+                kind: agreement
+                summary: 增开窗口
+              - id: 203
+                kind: agreement
+                summary: 增开窗口
+              - id: 204
+                kind: objection
+                summary: 时间正常
+      - speech_id: 102
+        keywords:
+          - keyword: 免费汤品
+            options:
+              - id: 253
+                kind: question
+                summary: 记录消耗
+              - id: 223
+                kind: agreement
+                summary: 允许续汤
+              - id: 226
+                kind: perjury
+                summary: 临时调整
+    selected_response:
+      speech_id: 98
+      keyword_idx: 0
+      option_idx: 8
+    manager_speeches:
+      - id: 204
+        summary: 时间正常
+        text: "二十分钟是正常等待时间，\\大家都一样排队。"
+        emotion: 😐
+    impact:
+      reputation_score: -0.526
+      mood_change: -0.052600004
+      trust_change: -0.026300002
+      patience_change: -1.052
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 51
+    - 12
+    - 98
+    - 102
+  continuation_depth: 0

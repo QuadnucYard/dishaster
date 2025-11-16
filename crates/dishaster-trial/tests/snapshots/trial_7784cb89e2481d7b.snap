@@ -1,0 +1,48 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 8612232180506566011
+  trigger_topic: price
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 81
+        text: "刚才那个[服务员]态度太差了，\\盛菜时直接甩勺，\\汤都溅我脸上了！"
+        emotion: 😠
+    response_options:
+      - speech_id: 81
+        keywords:
+          - keyword: 服务员
+            options:
+              - id: 219
+                kind: agreement
+                summary: 立即更换
+              - id: 182
+                kind: perjury
+                summary: 新厨师
+              - id: 83
+                kind: agreement
+                summary: 现场道歉并处理
+    selected_response:
+      speech_id: 81
+      keyword_idx: 0
+      option_idx: 1
+    manager_speeches:
+      - id: 182
+        summary: 新厨师
+        text: "今天换了新厨师，\\可能调味还不熟练。"
+        emotion: 😅
+    impact:
+      reputation_score: 0.545
+      mood_change: 0.054500002
+      trust_change: 0.027250001
+      patience_change: 1.09
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 81
+  continuation_depth: 0
