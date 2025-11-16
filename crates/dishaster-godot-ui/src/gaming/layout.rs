@@ -13,6 +13,7 @@ pub struct GamingLayout {
     details_label: RichLabelA,
     #[child("%StartButton")]
     start_button: ButtonA,
+
     #[child("%EndButton")]
     dev_end_button: ButtonA,
     #[child("%Exit")]
@@ -51,9 +52,10 @@ impl GamingLayout {
         self.start_button.set_visible(state.show_start);
         self.start_button
             .set_enabled(state.enable_start && state.show_start);
+    }
 
-        self.dev_end_button.set_visible(state.show_dev);
-        self.dev_end_button
-            .set_enabled(state.enable_dev && state.show_dev);
+    pub fn set_dev_enabled(&mut self, enabled: bool) {
+        self.dev_end_button.set_visible(enabled);
+        self.dev_end_button.set_enabled(enabled);
     }
 }

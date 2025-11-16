@@ -3,7 +3,9 @@ use dishaster_interface::{event::*, response::*, *};
 use dishaster_navigation::*;
 use dishaster_trial as trial;
 
-use crate::{components::*, events::*, messages::*, prelude::*, resources::*, sim::Simulation};
+use crate::{
+    components::*, events::*, messages::*, prelude::*, resources::*, sim::Simulation, views::*,
+};
 
 impl Simulation {
     /// Apply a high-level control command from the client runtime.
@@ -157,6 +159,29 @@ impl Simulation {
 
             SimCommand::ApplyManagementDecision(index) => {
                 self.world.trigger(ApplyManagementDecision(index));
+            }
+
+            SimCommand::DevAdjustReputation(delta) => {
+                // [DEV] Directly adjust reputation for testing
+                let mut reputation = self.world.resource_mut::<ReputationStateRes>();
+                reputation.reputation = (reputation.reputation + delta).clamp(0.0, 100.0);
+
+                log::info!(
+                    "DEV: Adjusted reputation by {:.2}, new value: {:.2}",
+                    delta,
+                    reputation.reputation
+                );
+
+                let rep_view = ReputationView {
+                    reputation: reputation.reputation,
+                    reputation_delta: delta,
+                    fsri: reputation.fsri,
+                    food_quality: reputation.food_quality,
+                };
+
+                // Emit event to update UI
+                let mut events = self.world.resource_mut::<EventQueue>();
+                events.push(SimEvent::ReputationUpdate(Box::new(rep_view)));
             }
         }
     }

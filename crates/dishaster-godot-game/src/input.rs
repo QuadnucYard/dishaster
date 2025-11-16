@@ -26,38 +26,69 @@ impl Game {
                 }
             }
             GodotInputEvent::Key(key) => {
-                if key.pressed
-                    && key.keycode == Key::Q
-                    && let Some(&diner) = self.pres.agents.keys().next()
-                {
+                if !key.pressed {
+                    return;
+                }
+
+                if key.keycode == Key::F1 {
+                    self.set_dev_enabled(!self.dev_features_enabled);
+                }
+
+                // Only process dev feature keys if enabled
+                if !self.dev_features_enabled {
+                    return;
+                }
+
+                self.process_key_dev(key.keycode);
+            }
+            _ => {}
+        }
+    }
+
+    fn process_key_dev(&mut self, keycode: Key) {
+        match keycode {
+            Key::Q => {
+                if let Some(&diner) = self.pres.agents.keys().next() {
                     godot_print!("DEV: Starting trial for diner {:?}", diner);
                     self.ui_commands
                         .push(UiCommand::TrialStart { diner, topic: None });
                 }
-                if key.pressed && key.keycode == Key::H {
-                    let message = "This is a hint triggered by pressing the H key.".into();
-                    self.ui_commands.push(UiCommand::ShowHint { message });
-                }
-                if key.pressed && key.keycode == Key::I {
-                    use dishaster_views::{PsychImpactView, ReputationView, TrialImpactView};
-                    godot_print!("DEV: Triggering random trial impact");
-                    let test_impact = TrialImpactView {
-                        psych_impact: Some(PsychImpactView {
-                            mood_delta: 0.15,
-                            trust_delta: 0.08,
-                            patience_delta: 3.0,
-                        }),
-                        reputation_impact: Some(ReputationView {
-                            reputation: 65.0,
-                            reputation_delta: 2.5,
-                            fsri: 5.0,
-                            food_quality: 75.0,
-                        }),
-                    };
-                    self.ui_commands
-                        .push(UiCommand::TrialImpact(Box::new(test_impact)));
-                }
             }
+            Key::H => {
+                let message = "This is a hint triggered by pressing the H key.".into();
+                self.ui_commands.push(UiCommand::ShowHint { message });
+            }
+            Key::I => {
+                use dishaster_views::{PsychImpactView, ReputationView, TrialImpactView};
+                godot_print!("DEV: Triggering random trial impact");
+                let test_impact = TrialImpactView {
+                    psych_impact: Some(PsychImpactView {
+                        mood_delta: 0.15,
+                        trust_delta: 0.08,
+                        patience_delta: 3.0,
+                    }),
+                    reputation_impact: Some(ReputationView {
+                        reputation: 65.0,
+                        reputation_delta: 2.5,
+                        fsri: 5.0,
+                        food_quality: 75.0,
+                    }),
+                };
+                self.ui_commands
+                    .push(UiCommand::TrialImpact(Box::new(test_impact)));
+            }
+
+            // Page Up: Increase reputation by 5
+            Key::PAGEUP => {
+                godot_print!("DEV: Increasing reputation by 5");
+                self.send_sim_command(SimCommand::DevAdjustReputation(5.0));
+            }
+            // Page Down: Decrease reputation by 5
+            Key::PAGEDOWN => {
+                godot_print!("DEV: Decreasing reputation by 5");
+                self.send_sim_command(SimCommand::DevAdjustReputation(-5.0));
+            }
+
             _ => {}
         }
     }

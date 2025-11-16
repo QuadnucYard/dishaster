@@ -71,6 +71,7 @@ pub struct Game {
     phase: DayPhase,
     telemetry: DayTelemetry,
     debug_enabled: bool,
+    dev_features_enabled: bool,
     suspended_sim_speed: Option<f64>,
 
     profile_svc: Arc<ProfileService>,
@@ -164,6 +165,7 @@ impl Game {
             phase: DayPhase::Preparation,
             telemetry,
             debug_enabled: false,
+            dev_features_enabled: false,
             suspended_sim_speed: None,
 
             profile_svc,
@@ -232,8 +234,6 @@ impl Game {
                 details: "Review canteen status then press Start Day to begin.".into(),
                 show_start: true,
                 enable_start: true,
-                show_dev: true,
-                enable_dev: false,
             }
             .into(),
         ));
@@ -271,8 +271,6 @@ impl Game {
                     details: "Service running.".to_string(),
                     show_start: false,
                     enable_start: false,
-                    show_dev: true,
-                    enable_dev: true,
                 }
                 .into(),
             ));
@@ -290,5 +288,19 @@ impl Game {
             completed_diners: self.telemetry.completed_diners,
         });
         self.ui_commands.push(UiCommand::UpdateStats(view));
+    }
+
+    fn set_dev_enabled(&mut self, enabled: bool) {
+        self.dev_features_enabled = enabled;
+        self.ui_commands.push(UiCommand::ToggleDev(enabled));
+
+        godot_print!(
+            "DEV: Dev features {}",
+            if self.dev_features_enabled {
+                "enabled"
+            } else {
+                "disabled"
+            }
+        );
     }
 }

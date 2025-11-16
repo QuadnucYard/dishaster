@@ -22,10 +22,6 @@ pub struct DayHudState {
     pub show_start: bool,
     /// Whether the start button is interactable.
     pub enable_start: bool,
-    /// Whether the developer end-day button should be visible.
-    pub show_dev: bool,
-    /// Whether the developer end-day button is interactable.
-    pub enable_dev: bool,
 }
 
 /// Snapshot of a dish display instance for presentation systems.

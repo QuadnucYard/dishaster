@@ -82,6 +82,9 @@ impl UiRequest for GameRequest {}
 /// Game logic (`dishaster-godot-game`) returns these commands instead of
 /// directly mutating UI components.
 pub enum UiCommand {
+    /// Enable or disable developer mode features in the UI.
+    ToggleDev(bool),
+
     /// Signal that the current run has finished and UI should transition.
     FinishRun,
     /// Signal that the current day has finished and should advance to next day.

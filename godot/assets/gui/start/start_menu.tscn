@@ -162,6 +162,14 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_lw2g1")
 
+[node name="DevHint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "Press F1 in game to toggle developer features"
+
 [node name="Title" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 8

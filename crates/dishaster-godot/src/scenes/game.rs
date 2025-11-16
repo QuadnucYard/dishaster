@@ -47,7 +47,7 @@ impl Scene for GameScene {
     }
 
     fn enter(&mut self, ctx: &mut SceneContext) {
-        let gui = &mut ctx.gui;
+        let SceneContext { gui, .. } = ctx;
 
         gui.show::<GamingLayout>();
         gui.show::<TimeStatsGui>();
@@ -139,11 +139,13 @@ impl GameScene {
 
     /// Handle a in-game ui request
     fn handle_game_request(ctx: &mut SceneContext, req: GameRequest, game: &mut Game) {
+        let SceneContext { gui, .. } = ctx;
+
         match req {
             GameRequest::StartRun => {
                 game.begin_run();
-                ctx.gui.get_mut::<DishPricePopup>().enabled = false;
-                ctx.gui.show::<ReputationGui>();
+                gui.get_mut::<DishPricePopup>().enabled = false;
+                gui.show::<ReputationGui>();
             }
             GameRequest::EndRun => {
                 game.force_finish_day();
@@ -153,7 +155,7 @@ impl GameScene {
             }
             GameRequest::SetTps(tps) => {
                 game.set_tps(tps);
-                ctx.gui.get_mut::<TimeStatsGui>().set_tps_display(tps);
+                gui.get_mut::<TimeStatsGui>().set_tps_display(tps);
             }
             GameRequest::SetDebugMode(mode) => {
                 game.set_debug_mode(mode);
@@ -183,14 +185,14 @@ impl GameScene {
                 });
             }
             GameRequest::TrialBackFromThought => {
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                let trial_gui = gui.get_mut::<TrialGui>();
                 trial_gui.back_from_thought();
             }
             GameRequest::TrialRespond(corpus_index) => {
                 godot_print!("Trial respond: {:?}", corpus_index);
                 game.send_sim_command(SimCommand::TrialRespond(corpus_index));
 
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                let trial_gui = gui.get_mut::<TrialGui>();
                 trial_gui.finish_thought();
             }
             GameRequest::TrialResponseDone => {
@@ -203,40 +205,46 @@ impl GameScene {
             }
 
             GameRequest::ConfirmSettlement => {
-                ctx.gui.hide::<SettlementGui>();
-                ctx.gui.show::<ManageDecisionGui>();
+                gui.hide::<SettlementGui>();
+                gui.show::<ManageDecisionGui>();
             }
             GameRequest::SelectDecision(index) => {
                 godot_print!("Decision selected: {}", index);
                 game.send_sim_command(SimCommand::ApplyManagementDecision(index));
 
-                ctx.gui.hide::<ManageDecisionGui>();
+                gui.hide::<ManageDecisionGui>();
             }
             GameRequest::ConfirmIncident => {
-                ctx.gui.hide::<ManageIncidentGui>();
+                gui.hide::<ManageIncidentGui>();
             }
         }
     }
 
     /// Handle UI commands emitted by game logic.
     fn handle_ui_command(ctx: &mut SceneContext, cmd: UiCommand, game: &mut Game) {
+        let SceneContext { gui, audio, .. } = ctx;
+
         match cmd {
+            UiCommand::ToggleDev(enabled) => {
+                gui.get_mut::<GamingLayout>().set_dev_enabled(enabled);
+            }
+
             UiCommand::FinishRun => {
-                ctx.gui.hide::<GamingLayout>();
-                ctx.gui.show::<SettlementGui>();
+                gui.hide::<GamingLayout>();
+                gui.show::<SettlementGui>();
             }
             UiCommand::FinishDay => {
                 ctx.schedule(AdvanceLevelProcedure);
             }
 
             UiCommand::UpdateTpsDisplay(tps) => {
-                ctx.gui.get_mut::<TimeStatsGui>().set_tps_display(tps);
+                gui.get_mut::<TimeStatsGui>().set_tps_display(tps);
             }
             UiCommand::UpdateDayHud(state) => {
-                ctx.gui.get_mut::<GamingLayout>().apply_state(&state);
+                gui.get_mut::<GamingLayout>().apply_state(&state);
             }
             UiCommand::UpdateStats(view) => {
-                let stats_gui = ctx.gui.get_mut::<TimeStatsGui>();
+                let stats_gui = gui.get_mut::<TimeStatsGui>();
                 stats_gui.update_time(view.sim_tick, view.sim_time);
                 stats_gui.update_perf(view.fps, view.ups);
                 stats_gui.update_diner_stats(
@@ -249,7 +257,7 @@ impl GameScene {
             }
 
             UiCommand::OpenDishPriceEditor(ref view) => {
-                let popup = ctx.gui.get_mut::<DishPricePopup>();
+                let popup = gui.get_mut::<DishPricePopup>();
                 if popup.enabled {
                     popup.set_view(view);
                     popup.show();
@@ -270,57 +278,53 @@ impl GameScene {
             }
             UiCommand::TrialIntro(intro) => {
                 // Show trial GUI
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                let trial_gui = gui.get_mut::<TrialGui>();
                 trial_gui.intro(*intro);
                 trial_gui.show();
             }
             UiCommand::TrialLeftSpeak(statement) => {
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                let trial_gui = gui.get_mut::<TrialGui>();
                 trial_gui.left_speak(*statement);
             }
             UiCommand::TrialRightSpeak(statement) => {
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                let trial_gui = gui.get_mut::<TrialGui>();
                 trial_gui.right_speak(*statement);
             }
             UiCommand::TrialResponseCandidates(options) => {
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                let trial_gui = gui.get_mut::<TrialGui>();
                 trial_gui.show_response_candidates(options);
             }
             UiCommand::TrialImpact(impact) => {
-                let trial_impact_gui = ctx.gui.get_mut::<TrialImpactGui>();
+                let trial_impact_gui = gui.get_mut::<TrialImpactGui>();
                 trial_impact_gui.show_impact(*impact);
             }
             UiCommand::TrialEnd { timeout: _timeout } => {
-                let trial_gui = ctx.gui.get_mut::<TrialGui>();
+                let trial_gui = gui.get_mut::<TrialGui>();
                 trial_gui.hide();
             }
 
             UiCommand::ShowDecisionSelection(view) => {
                 let catalog = &game_services().catalog;
-                ctx.gui
-                    .get_mut::<ManageDecisionGui>()
-                    .set_view(&view, catalog);
+                gui.get_mut::<ManageDecisionGui>().set_view(&view, catalog);
                 // this command is emitted just after day ends
                 // we defer showing the decision GUI until settlement is confirmed
             }
             UiCommand::ShowIncidentNotification(view) => {
                 let catalog = &game_services().catalog;
-                ctx.gui
-                    .get_mut::<ManageIncidentGui>()
-                    .set_view(&view, catalog);
-                ctx.gui.get_mut::<ManageIncidentGui>().show();
+                gui.get_mut::<ManageIncidentGui>().set_view(&view, catalog);
+                gui.get_mut::<ManageIncidentGui>().show();
             }
 
             UiCommand::ShowEnding(ending_type) => {
-                ctx.gui.get_mut::<EndingGui>().show_ending(ending_type);
+                gui.get_mut::<EndingGui>().show_ending(ending_type);
             }
 
             UiCommand::ShowHint { message } => {
-                ctx.gui.get_mut::<HintNotification>().show_hint(&message);
+                gui.get_mut::<HintNotification>().show_hint(&message);
             }
 
             UiCommand::UpdateReputation(view) => {
-                ctx.gui.get_mut::<ReputationGui>().update(&view);
+                gui.get_mut::<ReputationGui>().update(&view);
             }
 
             // Audio commands - execute music playback via the scene's audio manager
@@ -334,16 +338,15 @@ impl GameScene {
                     PhaseMusic::Settlement => "canteen_settlement_theme",
                 };
 
-                ctx.audio
-                    .play_music_crossfade(&AudioRef::new(track), FADE_DURATION);
+                audio.play_music_crossfade(&AudioRef::new(track), FADE_DURATION);
             }
             UiCommand::EnterTrialMusic => {
-                ctx.audio.pause_music();
-                ctx.audio.play_music_loop(&AudioRef::new("trial_theme"));
+                audio.pause_music();
+                audio.play_music_loop(&AudioRef::new("trial_theme"));
             }
             UiCommand::ExitTrialMusic => {
-                ctx.audio.stop_music();
-                ctx.audio.resume_music();
+                audio.stop_music();
+                audio.resume_music();
             }
         }
     }

@@ -51,4 +51,7 @@ pub enum SimCommand {
 
     /// Apply a selected management decision by index.
     ApplyManagementDecision(usize),
+
+    /// [DEV] Adjust reputation by a delta value.
+    DevAdjustReputation(f32),
 }

@@ -85,6 +85,8 @@ impl Scene for StartScene {
 
 impl StartScene {
     fn handle_app_request(&mut self, ctx: &mut SceneContext, req: AppRequest) {
+        let SceneContext { gui, audio, .. } = ctx;
+
         match req {
             AppRequest::Quit => {
                 godot_print!("Quit requested");
@@ -107,19 +109,19 @@ impl StartScene {
                         .collect(),
                 };
 
-                ctx.gui.hide::<StartMenuGui>();
-                ctx.gui.get_mut::<CreditsGui>().set_view(credits_view);
-                ctx.gui.show::<CreditsGui>();
+                gui.hide::<StartMenuGui>();
+                gui.get_mut::<CreditsGui>().set_view(credits_view);
+                gui.show::<CreditsGui>();
             }
             AppRequest::BackToMenu => {
-                ctx.gui.hide::<CreditsGui>();
-                ctx.gui.show::<StartMenuGui>();
+                gui.hide::<CreditsGui>();
+                gui.show::<StartMenuGui>();
             }
 
             AppRequest::ToggleMusic(mute) => {
                 godot_print!("Toggling music: {}", mute);
                 // Apply immediately
-                ctx.audio.set_music_mute(mute);
+                audio.set_music_mute(mute);
 
                 let svc = &game_services().user_service.prefs;
                 let res = svc.update(|prefs| {
@@ -132,7 +134,7 @@ impl StartScene {
             }
             AppRequest::ToggleSound(mute) => {
                 // Apply immediately
-                ctx.audio.set_sound_mute(mute);
+                audio.set_sound_mute(mute);
 
                 let svc = &game_services().user_service.prefs;
                 let res = svc.update(|prefs| {
