@@ -478,6 +478,7 @@ dependencies = [
  "dishaster-models",
  "dishaster-navigation",
  "dishaster-save-models",
+ "dishaster-trial",
  "dishaster-views",
  "dishrupt-core",
  "dishrupt-ecs",
@@ -680,6 +681,18 @@ dependencies = [
  "dishrupt-asset",
  "dishrupt-rng",
  "env_logger",
+]
+
+[[package]]
+name = "dishaster-trial"
+version = "0.1.0"
+dependencies = [
+ "dishaster-models",
+ "dishaster-views",
+ "dishrupt-core",
+ "dishrupt-rng",
+ "log",
+ "rustc-hash",
 ]
 
 [[package]]

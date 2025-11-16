@@ -147,8 +147,9 @@ impl Simulation {
             ..Default::default()
         });
         self.world.insert_resource(DailyStats::default());
-        self.world
-            .insert_resource(TrialSession::new(world_rng.derive_seed()));
+        self.world.insert_resource(
+            dishaster_trial::TrialSession::new(world_rng.derive_seed()).into_res(),
+        );
         self.world
             .insert_resource(level.permanent_effects.clone().into_res());
         self.world.insert_resource(level.into_res());

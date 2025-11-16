@@ -1,286 +1,216 @@
-//! The trial system. It works outside the ECS loop.
-
-use bevy_ecs::system::SystemState;
-use dishaster_interface::SimEvent;
-
-use crate::{
-    components::DinerPsychState,
-    models::{self, TrialCorpus, TrialQARank},
-    prelude::*,
-    resources::*,
-    sim::Simulation,
-    views::{self, *},
+use dishaster_models::{TrialCorpus, TrialQARank};
+use dishaster_views::{
+    TrialIntro, TrialParticipantAppearance as TrialParticipantAppearanceView, TrialResponseOption,
+    TrialSpeech, TrialStatement,
 };
 
-impl Simulation {
-    pub(super) fn create_trial_intro(&mut self) -> TrialIntro {
-        let mut session = self.world.resource_mut::<TrialSession>();
-        TrialIntro {
-            left: random_appearance(&mut session.rng),
-            right: random_appearance(&mut session.rng),
-        }
-    }
+use crate::{PsychImpact, ReputationImpact, TrialImpact, TrialSession, adapter::*, prelude::*};
 
-    pub(super) fn create_diner_statement(&mut self) -> TrialStatement {
-        let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
-            SystemState::new(&mut self.world);
-        let (registry, mut session) = system_state.get_mut(&mut self.world);
+/// Continuation probability multiplier for RR (response-response) sequences.
+///
+/// When generating multi-statement manager responses, the best RR rank score is
+/// multiplied by this factor before being used as the continuation probability.
+/// Lower values make continuations less likely, keeping responses more concise.
+const RR_CONTINUATION_MULTIPLIER: f32 = 0.2;
 
-        // Generate a sequence of related speeches (topic-centered)
-        let speech_sequence = generate_speech_sequence(&registry.trial, &mut session);
-
-        log::info!("Generated speech sequence: {:?}", speech_sequence);
-
-        create_diner_statement_with_sequence(speech_sequence, &registry.trial, &mut session)
-    }
-
-    /// Generate response candidates for a specific question keyword (lazy loading).
-    ///
-    /// Called when player selects a keyword to respond to. Uses QA ranks to find
-    /// contextually relevant responses with temperature-weighted sampling.
-    ///
-    /// Use cache to ensure consistent options for repeated requests.
-    pub(super) fn generate_trial_response_candidates(
-        &mut self,
-        speech_id: usize,
-        keyword_index: usize,
-    ) -> Vec<TrialResponseOption> {
-        let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
-            SystemState::new(&mut self.world);
-        let (registry, mut session) = system_state.get_mut(&mut self.world);
-
-        // Check cache first
-        let key = (speech_id, keyword_index);
-        if let Some(cached) = session.cached_options.get(&key) {
-            log::info!(
-                "Using cached response options for speech {} keyword {}",
-                speech_id,
-                keyword_index
-            );
-            return cached.clone();
-        }
-        let options =
-            generate_response_options(speech_id, keyword_index, &registry.trial, &mut session);
-        session.cached_options.insert(key, options.clone());
-        options
-    }
-
-    pub(super) fn trial_respond(&mut self, resp_id: usize) -> views::TrialStatement {
-        // Get current question index and response data, then build speech sequence
-        let (current_question_idx, mut response_score, speech_sequence) = {
-            let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
-                SystemState::new(&mut self.world);
-            let (registry, mut session) = system_state.get_mut(&mut self.world);
-
-            let current_question_idx = session.current_question_index;
-            let response = &registry.trial.responses[resp_id];
-            let response_score = response.response_score;
-
-            // Build speech sequence: start with the main response, then follow RR ranks for continuations
-            let speech_sequence =
-                generate_response_sequence(resp_id, &registry.trial, &mut session);
-
-            (current_question_idx, response_score, speech_sequence)
-        };
-
-        // Record the player's response choice
-        let mut session = self.world.resource_mut::<TrialSession>();
-        session.set_last_response(resp_id);
-
-        // Contextual evaluation: check if response is relevant to the current question
-        // Use QA ranks to measure relevance (higher rank = more relevant)
-        if let Some(question_idx) = current_question_idx {
-            let registry = self.world.resource::<GameModelRegistryRes>();
-            let relevance_penalty =
-                calculate_relevance_penalty(question_idx, resp_id, &registry.trial);
-
-            if relevance_penalty < 0.0 {
-                log::info!(
-                    "Response {} to question {} is irrelevant (penalty: {:.3})",
-                    resp_id,
-                    question_idx,
-                    relevance_penalty
-                );
-                response_score += relevance_penalty; // Apply penalty
-            }
-        }
-
-        // Apply impacts and emit event
-        let impact = self.apply_trial_impacts(response_score, false);
-        let mut events = self.world.resource_mut::<EventQueue>();
-        events.push(SimEvent::TrialImpact(impact.into()));
-
-        views::TrialStatement { speech_sequence }
-    }
-
-    /// After player responds, check if diner should continue with new topic.
-    /// This uses AQ ranks to select questions related to the player's last response.
-    pub(super) fn trial_should_continue(&mut self) -> bool {
-        let mut system_state: SystemState<(Res<GameModelRegistryRes>, ResMut<TrialSession>)> =
-            SystemState::new(&mut self.world);
-        let (registry, mut session) = system_state.get_mut(&mut self.world);
-
-        // Check if there are available follow-up questions based on player's response
-        if let Some(last_response_idx) = session.last_response_id
-            && let Some(aq_rank) = registry.trial.aq_ranks.get(last_response_idx)
-        {
-            // Filter available questions (not yet asked)
-            let available_ranks: Vec<_> = aq_rank
-                .iter()
-                .filter(|rank| !session.has_asked(rank.answer_index))
-                .cloned()
-                .collect();
-
-            if available_ranks.is_empty() {
-                return false;
-            }
-            // Use best score as probability to continue
-            let best_score = available_ranks[0].score;
-            session.should_continue(best_score)
-        } else {
-            // No response history or ranks - randomly decide
-            session.rng.random_bool(0.3)
-        }
-    }
-
-    /// Apply penalty when trial times out without player response
-    ///
-    /// This affects both reputation and psychological state:
-    /// - Reputation: Negative impact (ignoring customer concerns)
-    /// - Psych state: Mood and trust penalties for the trial diner
-    pub(super) fn apply_trial_timeout_penalty(&mut self) {
-        // Use a more severe response score for timeout
-        let timeout_response_score = -0.8; // Worse than a poor response
-        let impact = self.apply_trial_impacts(timeout_response_score, true);
-
-        // Emit impact event for GUI
-        let mut events = self.world.resource_mut::<EventQueue>();
-        events.push(SimEvent::TrialImpact(impact.into()));
-
-        log::info!("Applied trial timeout penalty");
-    }
-
-    /// Apply impacts from trial interactions to both reputation and diner psychology
-    ///
-    /// This is the core feedback application system for trials, affecting:
-    /// - Global reputation based on response quality
-    /// - Diner's mood, trust, and patience based on how they were treated
-    ///
-    /// Returns a view of the impacts for GUI display.
-    fn apply_trial_impacts(&mut self, response_score: f32, is_timeout: bool) -> TrialImpactView {
-        // Apply reputation impact
-        let reputation_impact = self.apply_reputation_impact(response_score);
-
-        // Apply psychological impact to the diner
-        let psych_impact = self.apply_psych_impact(response_score, is_timeout);
-
-        TrialImpactView {
-            psych_impact,
-            reputation_impact,
-        }
-    }
-
-    fn apply_reputation_impact(&mut self, response_score: f32) -> Option<ReputationView> {
-        let mut system_state: SystemState<(ResMut<ReputationStateRes>, Res<ReputationConfigRes>)> =
-            SystemState::new(&mut self.world);
-        let (mut reputation, reputation_config) = system_state.get_mut(&mut self.world);
-
-        let base_impact = reputation_config.base_impacts[models::FeedbackTopic::Quality];
-        let old_reputation = reputation.reputation;
-
-        reputation.apply_feedback_impact(base_impact, response_score, &reputation_config);
-
-        let reputation_delta = reputation.reputation - old_reputation;
-
-        log::info!(
-            "Trial response impact on reputation: {:.2} (score: {:.2})",
-            reputation_delta,
-            response_score
-        );
-
-        Some(ReputationView {
-            reputation: reputation.reputation,
-            reputation_delta,
-            fsri: reputation.fsri,
-            food_quality: reputation.food_quality,
-        })
-    }
-
-    fn apply_psych_impact(
-        &mut self,
-        response_score: f32,
-        is_timeout: bool,
-    ) -> Option<PsychImpactView> {
-        let session = self.world.resource::<TrialSession>();
-        let diner_entity = session.diner_entity?;
-
-        let mut system_state: SystemState<Query<&mut DinerPsychState>> =
-            SystemState::new(&mut self.world);
-        let mut diner_query = system_state.get_mut(&mut self.world);
-
-        let mut psych_state = diner_query.get_mut(diner_entity).ok()?;
-
-        let old_mood = psych_state.mood;
-        let old_trust = psych_state.trust;
-        let old_patience = psych_state.patience;
-
-        // Calculate psychological impacts based on response quality
-        // Good responses (positive score) improve mood/trust, bad ones decrease
-        let mood_change = if is_timeout {
-            -0.15 // Significant mood penalty for being ignored
-        } else {
-            response_score * 0.1 // Scale response score to mood change
-        };
-
-        let trust_change = if is_timeout {
-            -0.1 // Trust penalty for being ignored
-        } else {
-            response_score * 0.05 // Smaller trust impact
-        };
-
-        let patience_change = if is_timeout {
-            -5.0 // Reduce patience significantly for timeout
-        } else {
-            response_score * 2.0 // Patience affected by response quality
-        };
-
-        // Apply changes with clamping
-        psych_state.mood = (psych_state.mood + mood_change).clamp(-1.0, 1.0);
-        psych_state.trust = (psych_state.trust + trust_change).clamp(0.0, 1.0);
-        psych_state.patience = (psych_state.patience + patience_change).max(0.0);
-
-        let mood_delta = psych_state.mood - old_mood;
-        let trust_delta = psych_state.trust - old_trust;
-        let patience_delta = psych_state.patience - old_patience;
-
-        log::info!(
-            "Trial impact on diner psych: mood={:+.2} trust={:+.2} patience={:+.2}",
-            mood_delta,
-            trust_delta,
-            patience_delta
-        );
-
-        Some(PsychImpactView {
-            mood_delta,
-            trust_delta,
-            patience_delta,
-        })
+/// Creates introductory trial information with random participant appearances.
+///
+/// Generates random emotion and gesture combinations for both the diner (left)
+/// and the manager (right) to provide visual variety in the trial UI.
+pub fn create_trial_intro(session: &mut TrialSession) -> TrialIntro {
+    // Currently, emit random appearances for both sides.
+    TrialIntro {
+        left: random_appearance(&mut session.rng),
+        right: random_appearance(&mut session.rng),
     }
 }
 
-fn random_appearance(rng: &mut impl Rng) -> views::TrialParticipantAppearance {
-    views::TrialParticipantAppearance {
-        emotion: [
-            '😅', '😡', '😠', '😤', '😞', '😢', '😭', '😰', '😨', '😱', '😠',
-        ]
-        .choose(rng)
-        .copied()
-        .unwrap(),
-        gesture: [
-            '👍', '👎', '👊', '🤚', '✋', '👋', '🤞', '🤏', '👈', '👉', '🤝', '👍', '👏',
-        ]
-        .choose(rng)
-        .copied(),
+fn random_appearance(rng: &mut impl Rng) -> TrialParticipantAppearanceView {
+    const EMOTIONS: &[char] = &[
+        '😅', '😡', '😠', '😤', '😞', '😢', '😭', '😰', '😨', '😱', '😠',
+    ];
+    const GESTURES: &[char] = &[
+        '👍', '👎', '👊', '🤚', '✋', '👋', '🤞', '🤏', '👈', '👉', '🤝', '👍', '👏',
+    ];
+
+    TrialParticipantAppearanceView {
+        emotion: EMOTIONS.choose(rng).copied().unwrap(),
+        gesture: GESTURES.choose(rng).copied(),
+    }
+}
+
+/// Generates a coherent diner statement using QQ-rank based speech sequencing.
+///
+/// Creates a multi-turn statement where each speech item is selected based on
+/// semantic similarity (QQ ranks) to maintain topical coherence. Uses the session's
+/// trigger topic to filter relevant speeches.
+pub fn create_diner_statement(session: &mut TrialSession, corpus: &TrialCorpus) -> TrialStatement {
+    // Generate a sequence of related speeches (topic-centered)
+    let speech_sequence = generate_speech_sequence(session, corpus);
+
+    log::info!("Generated speech sequence: {:?}", speech_sequence);
+
+    create_diner_statement_with_sequence(speech_sequence, corpus)
+}
+
+/// Generate response candidates for a specific question keyword (lazy loading).
+///
+/// Called when player selects a keyword to respond to. Uses QA ranks to find
+/// contextually relevant responses with temperature-weighted sampling.
+///
+/// Use cache to ensure consistent options for repeated requests.
+pub fn generate_trial_response_candidates(
+    session: &mut TrialSession,
+    corpus: &TrialCorpus,
+    speech_id: usize,
+    keyword_index: usize,
+) -> Vec<TrialResponseOption> {
+    // Check cache first
+    let key = (speech_id, keyword_index);
+    if let Some(cached) = session.cached_options.get(&key) {
+        log::info!(
+            "Using cached response options for speech {} keyword {}",
+            speech_id,
+            keyword_index
+        );
+        return cached.clone();
+    }
+    let options = generate_response_options(session, corpus, speech_id, keyword_index);
+    session.cached_options.insert(key, options.clone());
+    options
+}
+
+/// Processes player's response selection and generates follow-up content.
+///
+/// Evaluates the response's contextual relevance using QA ranks, applies impacts
+/// to reputation and psychology, and generates a follow-up manager statement using
+/// RR-rank based response sequencing.
+///
+/// Returns both the manager's follow-up statement and the combined impact of the response.
+pub fn trial_respond(
+    session: &mut TrialSession,
+    corpus: &TrialCorpus,
+    resp_id: usize,
+) -> (TrialStatement, TrialImpact) {
+    // Get current question index and response data, then build speech sequence
+    let (current_question_idx, mut response_score, speech_sequence) = {
+        let current_question_idx = session.current_question_index;
+        let response = &corpus.responses[resp_id];
+        let response_score = response.response_score;
+
+        // Build speech sequence: start with the main response, then follow RR ranks for continuations
+        let speech_sequence = generate_response_sequence(session, corpus, resp_id);
+
+        (current_question_idx, response_score, speech_sequence)
+    };
+
+    // Record the player's response choice
+    session.set_last_response(resp_id);
+
+    // Contextual evaluation: check if response is relevant to the current question
+    // Use QA ranks to measure relevance (higher rank = more relevant)
+    if let Some(question_idx) = current_question_idx {
+        let relevance_penalty = calculate_relevance_penalty(corpus, question_idx, resp_id);
+
+        if relevance_penalty < 0.0 {
+            log::info!(
+                "Response {} to question {} is irrelevant (penalty: {:.3})",
+                resp_id,
+                question_idx,
+                relevance_penalty
+            );
+            response_score += relevance_penalty; // Apply penalty
+        }
+    }
+
+    // Apply impacts and emit event
+    let impact = get_trial_impacts(response_score, false);
+
+    (TrialStatement { speech_sequence }, impact)
+}
+
+/// After player responds, check if diner should continue with new topic.
+/// This uses AQ ranks to select questions related to the player's last response.
+pub fn trial_should_continue(session: &mut TrialSession, corpus: &TrialCorpus) -> bool {
+    // Check if there are available follow-up questions based on player's response
+    if let Some(last_response_idx) = session.last_response_id
+        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_idx)
+    {
+        // Filter available questions (not yet asked)
+        let available_ranks: Vec<_> = aq_rank
+            .iter()
+            .filter(|rank| !session.has_asked(rank.answer_index))
+            .cloned()
+            .collect();
+
+        if available_ranks.is_empty() {
+            return false;
+        }
+        // Use best score as probability to continue
+        let best_score = available_ranks[0].score;
+        session.should_continue(best_score)
+    } else {
+        // No response history or ranks - randomly decide
+        session.rng.random_bool(0.3)
+    }
+}
+
+/// Apply penalty when trial times out without player response
+///
+/// This affects both reputation and psychological state:
+/// - Reputation: Negative impact (ignoring customer concerns)
+/// - Psych state: Mood and trust penalties for the trial diner
+pub fn get_trial_timeout_penalty() -> TrialImpact {
+    // Use a more severe response score for timeout
+    let timeout_response_score = -0.8; // Worse than a poor response
+    get_trial_impacts(timeout_response_score, true)
+}
+
+/// Apply impacts from trial interactions to both reputation and diner psychology
+///
+/// This is the core feedback application system for trials, affecting:
+/// - Global reputation based on response quality
+/// - Diner's mood, trust, and patience based on how they were treated
+///
+/// Returns a view of the impacts for GUI display.
+fn get_trial_impacts(response_score: f32, is_timeout: bool) -> TrialImpact {
+    // Apply reputation impact
+    let reputation_impact = ReputationImpact { response_score };
+
+    // Apply psychological impact to the diner
+    let psych_impact = get_psych_impact(response_score, is_timeout);
+
+    TrialImpact {
+        reputation: reputation_impact,
+        psych: psych_impact,
+    }
+}
+
+fn get_psych_impact(response_score: f32, is_timeout: bool) -> PsychImpact {
+    // Calculate psychological impacts based on response quality
+    // Good responses (positive score) improve mood/trust, bad ones decrease
+    let mood_change = if is_timeout {
+        -0.15 // Significant mood penalty for being ignored
+    } else {
+        response_score * 0.1 // Scale response score to mood change
+    };
+
+    let trust_change = if is_timeout {
+        -0.1 // Trust penalty for being ignored
+    } else {
+        response_score * 0.05 // Smaller trust impact
+    };
+
+    let patience_change = if is_timeout {
+        -5.0 // Reduce patience significantly for timeout
+    } else {
+        response_score * 2.0 // Patience affected by response quality
+    };
+
+    PsychImpact {
+        mood_change,
+        trust_change,
+        patience_change,
     }
 }
 
@@ -291,11 +221,11 @@ fn random_appearance(rng: &mut impl Rng) -> views::TrialParticipantAppearance {
 /// 2. Following QQ continuation chains based on semantic similarity
 /// 3. Using probabilistic decision (score as probability) to continue or stop
 /// 4. Limiting sequence length to avoid overly long monologues
-fn generate_speech_sequence(corpus: &TrialCorpus, session: &mut TrialSession) -> Vec<usize> {
+fn generate_speech_sequence(session: &mut TrialSession, corpus: &TrialCorpus) -> Vec<usize> {
     let mut sequence = Vec::new();
 
     // Select initial question
-    let first_speech = select_next_question(corpus, session);
+    let first_speech = select_next_question(session, corpus);
     sequence.push(first_speech);
 
     // Generate continuation sequence using QQ ranks
@@ -365,10 +295,10 @@ fn generate_speech_sequence(corpus: &TrialCorpus, session: &mut TrialSession) ->
 /// 3. Using probabilistic decision (score as probability) to continue or stop
 /// 4. Limiting sequence length to avoid overly long responses
 fn generate_response_sequence(
-    resp_id: usize,
-    corpus: &TrialCorpus,
     session: &mut TrialSession,
-) -> Vec<views::TrialSpeech> {
+    corpus: &TrialCorpus,
+    resp_id: usize,
+) -> Vec<TrialSpeech> {
     let mut sequence = Vec::new();
     let mut used_responses = FxHashSet::default();
 
@@ -396,7 +326,7 @@ fn generate_response_sequence(
             break;
         }
 
-        let best_score = available_ranks[0].score * 0.2;
+        let best_score = available_ranks[0].score * RR_CONTINUATION_MULTIPLIER;
 
         // Use score as probability: higher similarity = more likely to continue
         if !session.should_continue(best_score) {
@@ -437,9 +367,9 @@ fn generate_response_sequence(
 /// Checks if the player's response is relevant to the current question using QA ranks.
 /// Returns 0.0 if relevant, negative penalty if irrelevant.
 fn calculate_relevance_penalty(
+    corpus: &TrialCorpus,
     question_id: usize,
     response_id: usize,
-    corpus: &TrialCorpus,
 ) -> f32 {
     // Get QA ranks for this question
     let Some(question_ranks) = corpus.qa_ranks.get(question_id) else {
@@ -480,7 +410,7 @@ fn calculate_relevance_penalty(
 /// 3. Filtering by topic if the trial was triggered by specific feedback
 /// 4. Applying temperature-weighted sampling for variety while maintaining relevance
 /// 5. Falling back to random selection if no history or ranks available
-fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usize {
+fn select_next_question(session: &mut TrialSession, corpus: &TrialCorpus) -> usize {
     // Reset continuation depth for new topic
     session.reset_continuation();
 
@@ -552,7 +482,6 @@ fn select_next_question(corpus: &TrialCorpus, session: &mut TrialSession) -> usi
 fn create_diner_statement_with_sequence(
     speech_ids: Vec<usize>,
     corpus: &TrialCorpus,
-    _session: &mut TrialSession,
 ) -> TrialStatement {
     // Convert speech indices to view speeches
     let speech_sequence: Vec<_> = speech_ids
@@ -573,10 +502,10 @@ fn create_diner_statement_with_sequence(
 /// Used for lazy loading - called only when player actually selects a keyword.
 /// Uses QA ranks to find contextually relevant responses with temperature-weighted sampling.
 fn generate_response_options(
+    session: &mut TrialSession,
+    corpus: &TrialCorpus,
     speech_id: usize,
     keyword_idx: usize,
-    corpus: &TrialCorpus,
-    session: &mut TrialSession,
 ) -> Vec<TrialResponseOption> {
     const WEIGHTED_OPTION_COUNTS: &[(usize, i32)] = &[(1, 1), (2, 3), (3, 4), (4, 2)];
 

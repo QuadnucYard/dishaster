@@ -1,7 +1,11 @@
-use dishaster_views::{Feedback, FeedbackView};
+use dishaster_trial::{PsychImpact, ReputationImpact};
+use dishaster_views::{Feedback, FeedbackView, PsychImpactView, ReputationView, TrialImpactView};
 
 use super::prelude::*;
-use crate::systems::hint::{HintEmitter, hints};
+use crate::{
+    events::ApplyTrialImpact,
+    systems::hint::{HintEmitter, hints},
+};
 
 // For now, we use simple emoji strings as feedback indicators.
 pub mod feedbacks {
@@ -82,5 +86,92 @@ pub fn feedback_present_system(
                 reputation.apply_feedback_impact(base_impact, 0.0, &reputation_config);
             }
         }
+    }
+}
+
+pub fn apply_trial_impact(
+    event: On<ApplyTrialImpact>,
+    mut diner_query: Query<&mut DinerPsychState>,
+    mut reputation: ResMut<ReputationStateRes>,
+    reputation_config: Res<ReputationConfigRes>,
+    mut events: ResMut<EventQueue>,
+) {
+    let Ok(mut psych_state) = diner_query.get_mut(event.diner) else {
+        return;
+    };
+
+    let psych_impact_view = apply_psych_impact(&mut psych_state, &event.psych_impact);
+    let reputation_impact = apply_reputation_impact(
+        &mut reputation,
+        &reputation_config,
+        &event.reputation_impact,
+    );
+
+    let impact_view = TrialImpactView {
+        psych_impact: Some(psych_impact_view),
+        reputation_impact: Some(reputation_impact),
+    };
+
+    events.push(SimEvent::TrialImpact(impact_view.into()));
+}
+
+fn apply_reputation_impact(
+    reputation: &mut ReputationState,
+    reputation_config: &ReputationConfigRes,
+    reputation_impact: &ReputationImpact,
+) -> ReputationView {
+    let base_impact = reputation_config.base_impacts[FeedbackTopic::Quality];
+    let old_reputation = reputation.reputation;
+    let response_score = reputation_impact.response_score;
+
+    reputation.apply_feedback_impact(base_impact, response_score, reputation_config);
+
+    let reputation_delta = reputation.reputation - old_reputation;
+
+    log::info!(
+        "Trial response impact on reputation: {:.2} (score: {:.2})",
+        reputation_delta,
+        response_score
+    );
+
+    ReputationView {
+        reputation: reputation.reputation,
+        reputation_delta,
+        fsri: reputation.fsri,
+        food_quality: reputation.food_quality,
+    }
+}
+
+fn apply_psych_impact(psych_state: &mut PsychState, psych_impact: &PsychImpact) -> PsychImpactView {
+    let old_mood = psych_state.mood;
+    let old_trust = psych_state.trust;
+    let old_patience = psych_state.patience;
+
+    let PsychImpact {
+        mood_change,
+        trust_change,
+        patience_change,
+    } = psych_impact;
+
+    // Apply changes with clamping
+    psych_state.mood = (psych_state.mood + mood_change).clamp(-1.0, 1.0);
+    psych_state.trust = (psych_state.trust + trust_change).clamp(0.0, 1.0);
+    psych_state.patience = (psych_state.patience + patience_change).max(0.0);
+
+    let mood_delta = psych_state.mood - old_mood;
+    let trust_delta = psych_state.trust - old_trust;
+    let patience_delta = psych_state.patience - old_patience;
+
+    log::info!(
+        "Trial impact on diner psych: mood={:+.2} trust={:+.2} patience={:+.2}",
+        mood_delta,
+        trust_delta,
+        patience_delta
+    );
+
+    PsychImpactView {
+        mood_delta,
+        trust_delta,
+        patience_delta,
     }
 }

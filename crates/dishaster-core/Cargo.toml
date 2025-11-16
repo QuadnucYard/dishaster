@@ -15,6 +15,7 @@ dishaster-save-models.workspace = true
 dishaster-views.workspace = true
 dishaster-interface.workspace = true
 dishaster-navigation.workspace = true
+dishaster-trial.workspace = true
 
 bevy_ecs.workspace = true
 log.workspace = true

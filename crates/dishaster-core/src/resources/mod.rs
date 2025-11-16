@@ -5,9 +5,7 @@ mod time;
 
 use std::{collections::VecDeque, sync::Arc};
 
-use dishaster_models::FeedbackTopic;
 use dishaster_save_models::PermanentEffects;
-use dishaster_views::TrialResponseOption;
 
 pub use self::{buffers::*, time::Time};
 use crate::{components::*, models::*, prelude::*};
@@ -148,124 +146,7 @@ impl DailyDinerSchedule {
     }
 }
 
-/// Trial session state tracking to avoid repetition and improve coherence
-#[derive(Resource)]
-pub struct TrialSession {
-    /// Pseudorandom number generator for trial session
-    pub rng: Prng,
-    /// Whether the trial has ever been triggered in this run
-    pub ever_triggered: bool,
-    /// The diner entity that triggered this trial (for applying psych state impacts)
-    pub diner_entity: Option<Entity>,
-    /// Indices of questions already asked in this trial
-    asked_questions: Vec<usize>,
-    /// Cached response options for (speech_id, keyword_index) pairs
-    pub cached_options: FxHashMap<(usize, usize), Vec<TrialResponseOption>>,
-    /// The most recent response corpus index selected by the player
-    pub last_response_id: Option<usize>,
-    /// The most recent diner speech index
-    pub last_diner_speech_id: Option<usize>,
-    /// The most recent diner speech index that the player is responding to (for context evaluation)
-    pub current_question_index: Option<usize>,
-    /// Current continuation depth (consecutive speeches by same speaker)
-    pub continuation_depth: u32,
-    /// Maximum allowed continuation depth before forcing speaker alternation
-    pub max_continuation_depth: u32,
-    /// Temperature parameter for sampling (higher = more random, lower = more deterministic)
-    pub temperature: f32,
-    /// Topic that triggered this trial (for filtering relevant speeches)
-    pub trigger_topic: Option<FeedbackTopic>,
-}
-
-impl TrialSession {
-    /// Create a new trial session with default temperature
-    pub fn new(seed: u64) -> Self {
-        Self {
-            rng: Prng::new(seed),
-            ever_triggered: false,
-            diner_entity: None,
-            asked_questions: Vec::new(),
-            cached_options: Default::default(),
-            last_response_id: None,
-            last_diner_speech_id: None,
-            current_question_index: None,
-            continuation_depth: 0,
-            max_continuation_depth: 3,
-            temperature: 0.8,
-            trigger_topic: None,
-        }
-    }
-
-    /// Reset the session for a new trial
-    pub fn reset(&mut self) {
-        self.diner_entity = None;
-        self.asked_questions.clear();
-        self.cached_options.clear();
-        self.last_response_id = None;
-        self.last_diner_speech_id = None;
-        self.current_question_index = None;
-        self.continuation_depth = 0;
-        self.trigger_topic = None;
-    }
-
-    /// Check if a question has been asked
-    pub fn has_asked(&self, question_index: usize) -> bool {
-        self.asked_questions.contains(&question_index)
-    }
-
-    /// Mark a question as asked
-    pub fn mark_asked(&mut self, question_index: usize) {
-        if !self.has_asked(question_index) {
-            self.asked_questions.push(question_index);
-        }
-    }
-
-    /// Record the player's response choice
-    pub fn set_last_response(&mut self, response_index: usize) {
-        self.last_response_id = Some(response_index);
-        // Reset continuation depth when speaker alternates
-        self.continuation_depth = 0;
-    }
-
-    /// Record a diner speech
-    pub fn set_last_diner_speech(&mut self, speech_index: usize) {
-        self.last_diner_speech_id = Some(speech_index);
-    }
-
-    /// Set the current question index (the question player is responding to)
-    pub fn set_current_question(&mut self, question_index: usize) {
-        self.current_question_index = Some(question_index);
-    }
-
-    /// Increment continuation depth
-    #[allow(unused)]
-    pub fn increment_continuation(&mut self) {
-        self.continuation_depth += 1;
-    }
-
-    /// Check if continuation is allowed (not at max depth)
-    pub fn can_continue(&self) -> bool {
-        self.continuation_depth < self.max_continuation_depth
-    }
-
-    /// Reset continuation depth (when alternating speakers)
-    pub fn reset_continuation(&mut self) {
-        self.continuation_depth = 0;
-    }
-
-    /// Decide whether to continue based on best continuation score
-    /// Uses the score as probability (higher score = more likely to continue)
-    pub fn should_continue(&mut self, best_score: f32) -> bool {
-        if !self.can_continue() {
-            return false;
-        }
-
-        // Use score directly as probability (already normalized 0-1 from embedding similarity)
-        // Low scores (<0.3) rarely continue, high scores (>0.7) usually continue
-        let prob = best_score.clamp(0.0, 1.0);
-        self.rng.random_bool(prob as f64)
-    }
-}
+pub type TrialSession = ResWrapper<dishaster_trial::TrialSession>;
 
 #[derive(Resource)]
 pub struct ManagementDecisions {

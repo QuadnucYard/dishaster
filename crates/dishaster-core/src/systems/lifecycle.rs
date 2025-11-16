@@ -21,7 +21,8 @@ pub fn register_lifecycle_systems(world: &mut World) {
     world.add_observer(systems::roll_management_decisions);
     world.add_observer(systems::apply_management_decision);
     world.add_observer(systems::roll_management_incident);
-    world.add_observer(systems::roll_management_incident);
+
+    world.add_observer(systems::apply_trial_impact);
 
     systems::register_management_decision_systems(world);
     systems::register_management_incident_systems(world);

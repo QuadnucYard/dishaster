@@ -33,6 +33,7 @@ dishaster-models = { path = "crates/dishaster-models" }
 dishaster-save-models = { path = "crates/dishaster-save-models" }
 dishaster-views = { path = "crates/dishaster-views" }
 dishaster-interface = { path = "crates/dishaster-interface" }
+dishaster-trial = { path = "crates/dishaster-trial" }
 dishaster-core = { path = "crates/dishaster-core" }
 dishaster-opening-models = { path = "crates/dishaster-opening-models" }
 dishaster-opening = { path = "crates/dishaster-opening" }

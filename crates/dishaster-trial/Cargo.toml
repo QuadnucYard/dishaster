@@ -1,0 +1,18 @@
+[package]
+name = "dishaster-trial"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dishrupt-core.workspace = true
+dishrupt-rng.workspace = true
+dishaster-models.workspace = true
+dishaster-views.workspace = true
+
+log.workspace = true
+rustc-hash.workspace = true
+
+[lints]
+workspace = true

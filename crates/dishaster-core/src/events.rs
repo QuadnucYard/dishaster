@@ -1,3 +1,5 @@
+use dishaster_trial::{PsychImpact, ReputationImpact};
+
 use crate::prelude::*;
 
 /// Event signaling the start of a run
@@ -27,3 +29,10 @@ pub struct RollManagementIncident;
 /// Event to dispatch a selected management decision
 #[derive(Event)]
 pub struct DispatchManagement<T>(pub T);
+
+#[derive(Event)]
+pub struct ApplyTrialImpact {
+    pub diner: Entity,
+    pub psych_impact: PsychImpact,
+    pub reputation_impact: ReputationImpact,
+}
