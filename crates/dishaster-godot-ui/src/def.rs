@@ -22,6 +22,7 @@ pub fn register_guis(registry: &mut GuiRegistry, catalog: &AssetCatalog) {
     register_gui!(
         StartMenuGui => "start/start_menu",
         CreditsGui => "start/credits",
+        EndingGalleryGui => "start/ending_gallery",
         GamingLayout => "gaming/layout",
         DishPricePopup => "gaming/price_editor",
         SettlementGui => "gaming/settlement",

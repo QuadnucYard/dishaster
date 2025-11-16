@@ -1,0 +1,68 @@
+[gd_scene load_steps=4 format=3 uid="uid://cm15ftdyxvh0u"]
+
+[ext_resource type="Texture2D" uid="uid://cf8pafdaadfge" path="res://assets/sprites/endings/bad_reputation.png" id="1_nd4vg"]
+[ext_resource type="Texture2D" uid="uid://1j31hmx16qhd" path="res://assets/gui/textures/illustration_frame.png" id="2_28ts4"]
+[ext_resource type="FontVariation" uid="uid://b8xlji4sfc38j" path="res://assets/fonts/serif_semibold.tres" id="2_hfabw"]
+
+[node name="EndingGallery" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 144
+theme_override_constants/margin_top = 81
+theme_override_constants/margin_right = 144
+theme_override_constants/margin_bottom = 81
+
+[node name="Illustration" type="TextureButton" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("1_nd4vg")
+ignore_texture_size = true
+stretch_mode = 6
+
+[node name="Frame" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_28ts4")
+
+[node name="Top" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Top"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 47.0
+grow_horizontal = 2
+theme_override_constants/margin_top = 40
+
+[node name="TitleLabel" type="Label" parent="Top/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8750814, 0.51480377, 0.26244184, 1)
+theme_override_colors/font_outline_color = Color(0.45877427, 0.24348515, 0.055418864, 1)
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = ExtResource("2_hfabw")
+theme_override_font_sizes/font_size = 40
+text = "{臭名昭著}"
+horizontal_alignment = 1

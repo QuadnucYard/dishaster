@@ -2,7 +2,7 @@ use std::{any::Any, sync::LazyLock};
 
 use dishaster_core::views::{CreditSectionView, CreditsView};
 use dishaster_godot_opening::Opening;
-use dishaster_godot_ui::{CreditsGui, StartMenuGui};
+use dishaster_godot_ui::{CreditsGui, EndingGalleryGui, EndingGalleryView, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_core::asset::AudioRef;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
@@ -55,6 +55,18 @@ impl Scene for StartScene {
             ctx.gui
                 .get_mut::<StartMenuGui>()
                 .update_from_preferences(audio_prefs.music_mute, audio_prefs.sound_mute);
+        }
+
+        // Update ending gallery buttons based on unlocked endings
+        {
+            let profile = services
+                .user_service
+                .profiles
+                .load()
+                .expect("failed to load profile");
+            ctx.gui
+                .get_mut::<StartMenuGui>()
+                .update_endings_unlocked(&profile.achieved_endings.iter().cloned().collect());
         }
 
         if self.opening.is_none() {
@@ -113,8 +125,24 @@ impl StartScene {
                 gui.get_mut::<CreditsGui>().set_view(credits_view);
                 gui.show::<CreditsGui>();
             }
+            AppRequest::ViewEnding(ending_id) => {
+                godot_print!("Viewing ending: {:?}", ending_id);
+
+                if let Some(ending_model) = game_services().data.endings.get(&ending_id) {
+                    let ending_view = EndingGalleryView {
+                        id: ending_id.clone(),
+                        illustration: ending_model.illustration.clone(),
+                    };
+
+                    gui.get_mut::<EndingGalleryGui>()
+                        .show_ending(ending_view, &game_services().catalog);
+                } else {
+                    godot_error!("Requested unknown ending ID: {}", ending_id);
+                }
+            }
             AppRequest::BackToMenu => {
                 gui.hide::<CreditsGui>();
+                gui.hide::<EndingGalleryGui>();
                 gui.show::<StartMenuGui>();
             }
 

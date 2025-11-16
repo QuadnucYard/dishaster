@@ -15,6 +15,8 @@ pub enum AppRequest {
 
     /// Show credits screen.
     ShowCredits,
+    /// View an ending image (for unlocked endings).
+    ViewEnding(EcoString),
     /// Return to main menu from credits or other screens.
     BackToMenu,
 

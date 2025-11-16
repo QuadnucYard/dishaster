@@ -135,6 +135,10 @@ impl TextureButtonA {
             gd,
         }
     }
+
+    pub fn set_texture_normal(&mut self, texture: &Gd<Texture2D>) {
+        self.gd.set_texture_normal(texture);
+    }
 }
 
 impl Drop for TextureButtonA {

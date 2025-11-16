@@ -264,6 +264,41 @@ toggle_mode = true
 texture_normal = SubResource("AtlasTexture_cfj16")
 texture_pressed = SubResource("AtlasTexture_ipjfq")
 
+[node name="EndingButtonsC" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="EndingButtonsC"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_right = 10
+
+[node name="EndingButtons" type="VBoxContainer" parent="EndingButtonsC/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="GoodReputation" type="Button" parent="EndingButtonsC/MarginContainer/EndingButtons"]
+layout_mode = 2
+text = "A"
+
+[node name="BadReputation" type="Button" parent="EndingButtonsC/MarginContainer/EndingButtons"]
+layout_mode = 2
+text = "B"
+
+[node name="Rectification" type="Button" parent="EndingButtonsC/MarginContainer/EndingButtons"]
+layout_mode = 2
+text = "C"
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_ctnrb")

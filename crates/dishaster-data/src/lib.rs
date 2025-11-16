@@ -6,15 +6,15 @@ mod trial_rank;
 mod trial_speech;
 
 use std::{
-    collections::HashMap,
     path::{Path, PathBuf},
     sync::Arc,
 };
 
 use anyhow::{Context, bail};
 use dishaster_models::{GameModelRegistry, TrialCorpus};
-use dishaster_opening_models::{CreditsData, OpeningConfig};
-use dishrupt_core::model_registry::*;
+use dishaster_opening_models::{CreditsData, EndingModel, OpeningConfig};
+use dishrupt_core::{model_registry::*, prelude::EcoString};
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -24,6 +24,8 @@ use thiserror::Error;
 pub struct GameDataAssets {
     /// Game model definitions used in the simulation
     pub models: Arc<GameModelRegistry>,
+    /// Ending definitions
+    pub endings: FxHashMap<EcoString, EndingModel>,
     /// Opening animation configuration
     pub opening_config: OpeningConfig,
     /// Credits data
@@ -56,7 +58,7 @@ pub enum DataError {
 pub struct DataLoader {
     assets_path: PathBuf,
 
-    index: HashMap<String, String>,
+    index: FxHashMap<String, String>,
 }
 
 impl DataLoader {
@@ -165,6 +167,10 @@ impl DataLoader {
             rr_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_rr.txt")?, "RR")?,
         };
 
+        let endings = self
+            .load_ron_file(&self.assets_path.join("endings.ron"))
+            .context("Loading endings data")?;
+
         let opening_config = self
             .load_ron_file(&self.assets_path.join("opening.ron"))
             .context("Loading opening configuration")?;
@@ -175,6 +181,7 @@ impl DataLoader {
 
         Ok(GameDataAssets {
             models: registry.into(),
+            endings,
             opening_config,
             credits,
         })
