@@ -19,6 +19,7 @@ pub fn spawn_static_objects(
     reputation: Res<ReputationStateRes>,
     mut events: ResMut<EventQueue>,
 ) {
+    spawn_entrances(&mut commands, &canteen, &display_root);
     spawn_windows(
         &mut commands,
         &canteen,
@@ -50,15 +51,31 @@ pub fn spawn_static_objects(
     );
 }
 
+fn spawn_entrances(commands: &mut Commands, canteen: &Canteen, display_root: &DisplayRoot) {
+    for (i, ent) in canteen.model.entrances.iter().enumerate() {
+        commands.spawn((
+            DisplayState {
+                proto: PrefabRef::new("furnishings/entrance"),
+                name: Some(eco_format!("Entrance_{i}")),
+            },
+            Transform {
+                position: vec3(ent.center(), canteen.model.entrances_y, 0.0),
+                parent: Some(display_root.0),
+                ..Default::default()
+            },
+        ));
+    }
+}
+
 fn spawn_windows(
     commands: &mut Commands,
-    canteen: &Res<Canteen>,
+    canteen: &Canteen,
     level: &CanteenLayoutState,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
     rng: &mut Prng,
     food_quality: f32,
-    events: &mut ResMut<EventQueue>,
+    events: &mut EventQueue,
 ) {
     let mut last_window_x = 0.0;
 
@@ -170,7 +187,7 @@ fn spawn_dishes(
     dish_assignments: &[DishAssignment],
     service_model: &WindowServiceModel,
     registry: &GameModelRegistry,
-    events: &mut ResMut<EventQueue>,
+    events: &mut EventQueue,
     food_quality: f32,
 ) {
     let layout = &service_model.layout;
@@ -308,7 +325,7 @@ fn spawn_dispensers(
     placements: &CanteenPlacements,
     registry: &GameModelRegistry,
     display_root: &DisplayRoot,
-    events: &mut ResMut<EventQueue>,
+    events: &mut EventQueue,
 ) {
     for (placements, ty) in [
         (&placements.tray_dispensers, DispenserType::Tray),
@@ -333,7 +350,7 @@ fn spawn_dispenser(
     placement: &Placement,
     dispenser_type: DispenserType,
     display_root: &DisplayRoot,
-    events: &mut ResMut<EventQueue>,
+    events: &mut EventQueue,
 ) {
     let dispenser_handle = registry
         .dispensers

@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://cfs8ryndxmp60"]
+
+[ext_resource type="Texture2D" uid="uid://bhnipm0qp7jt7" path="res://assets/sprites/canteen/gray_ground.png" id="1_0k1i6"]
+[ext_resource type="Texture2D" uid="uid://c6rxw0t68tdjx" path="res://assets/sprites/canteen/door_frame.png" id="1_1h268"]
+
+[node name="Entrance" type="Node2D"]
+
+[node name="GrayGround" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(0, -40)
+texture = ExtResource("1_0k1i6")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_1h268")
+offset = Vector2(0, -40)

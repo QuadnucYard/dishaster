@@ -4,6 +4,6 @@
         size: (width: 1.0, height: 0.5),
         seats: 2,
         comfort_level: 0.6,
-        display: (res: "tables/normal_table")
+        display: (res: "furnishings/normal_table")
     ),
 ]

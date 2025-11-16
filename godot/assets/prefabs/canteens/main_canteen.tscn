@@ -1,39 +1,35 @@
-[gd_scene load_steps=5 format=3 uid="uid://36l52q5huwsf"]
+[gd_scene load_steps=4 format=3 uid="uid://36l52q5huwsf"]
 
-[sub_resource type="Gradient" id="Gradient_h745r"]
-offsets = PackedFloat32Array(0)
-colors = PackedColorArray(0.75739485, 0.8286915, 0.9685703, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_swfgw"]
-gradient = SubResource("Gradient_h745r")
-width = 1800
-height = 1000
-
-[sub_resource type="Gradient" id="Gradient_swfgw"]
-offsets = PackedFloat32Array(0)
-colors = PackedColorArray(0.9465758, 0.6289757, 0.8427548, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_m0x1g"]
-gradient = SubResource("Gradient_swfgw")
-width = 120
-height = 20
+[ext_resource type="Texture2D" uid="uid://d1n411xq3bupu" path="res://assets/sprites/canteen/clear.png" id="1_cakfy"]
+[ext_resource type="Texture2D" uid="uid://d4e0juuhgvdh1" path="res://assets/sprites/canteen/wall_paper.png" id="1_m0x1g"]
+[ext_resource type="Texture2D" uid="uid://2b51230cakm7" path="res://assets/sprites/canteen/floor_tile.png" id="1_swfgw"]
 
 [node name="MainCanteen" type="Node2D"]
 
-[node name="Floor" type="Sprite2D" parent="."]
-position = Vector2(60, 6)
-texture = SubResource("GradientTexture2D_swfgw")
-centered = false
-
-[node name="Entrance1" type="Sprite2D" parent="Floor"]
-position = Vector2(480, -10)
-texture = SubResource("GradientTexture2D_m0x1g")
-centered = false
-
-[node name="Entrance2" type="Sprite2D" parent="Floor"]
-position = Vector2(1200, -10)
-texture = SubResource("GradientTexture2D_m0x1g")
-centered = false
-
-[node name="Origin" type="Marker2D" parent="Floor"]
+[node name="Origin" type="Marker2D" parent="."]
 unique_name_in_owner = true
+
+[node name="Clear" type="Sprite2D" parent="Origin"]
+z_index = -100
+position = Vector2(763.5, 449.5)
+scale = Vector2(7.6914063, 4.4414063)
+texture = ExtResource("1_cakfy")
+
+[node name="WallPaper" type="Sprite2D" parent="Origin"]
+z_index = -1
+texture_repeat = 2
+position = Vector2(0, -100)
+texture = ExtResource("1_m0x1g")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1500, 128)
+
+[node name="Floor" type="Sprite2D" parent="Origin"]
+texture_repeat = 2
+texture = ExtResource("1_swfgw")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1500, 800)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(757, 457)

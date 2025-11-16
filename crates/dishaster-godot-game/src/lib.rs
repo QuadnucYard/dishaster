@@ -139,7 +139,7 @@ impl Game {
 
         // Set up stage
         let display_ctx = DisplayContext2D {
-            view_scale: Vec3::new(60.0, 50.0, 50.0),
+            view_scale: Vec3::new(50.0, 40.0, 40.0),
         };
         let mut stage = Stage::new(display_ctx, asset_catalog.clone());
         stage.set_root(root_entity, GdNode2D::new(display_root_node));

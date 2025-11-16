@@ -6,7 +6,7 @@
         capacity: 150,
         initial_stock: 120,
         processing_time: 3.0,
-        display: (res: "dispensers/tray_dispenser"),
+        display: (res: "furnishings/tray_dispenser"),
         item_display: (res: "tableware/tray"),
     ),
     (
@@ -16,7 +16,7 @@
         capacity: 300,
         initial_stock: 250,
         processing_time: 2.0,
-        display: (res: "dispensers/chopstick_dispenser"),
+        display: (res: "furnishings/chopstick_dispenser"),
         item_display: (res: "tableware/chopsticks"),
     ),
 ]
