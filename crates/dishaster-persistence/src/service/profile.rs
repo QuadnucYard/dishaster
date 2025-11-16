@@ -108,6 +108,14 @@ impl ProfileService {
         Ok(())
     }
 
+    /// Add an ending to the seen endings set.
+    pub fn update_achieved_ending(&self, ending_id: EcoString) -> Result<()> {
+        self.update(|profile| {
+            profile.achieved_endings.insert(ending_id);
+            Ok(())
+        })
+    }
+
     /// Add a hint to the seen hints set.
     pub fn update_seen_hint(&self, new_hint: EcoString) -> Result<()> {
         self.update(|profile| {
@@ -133,6 +141,7 @@ fn new_profile() -> PlayerProfile {
         diner_pool: Default::default(),
         permanent_effects: Default::default(),
         seen_hints: Default::default(),
+        achieved_endings: Default::default(),
     }
 }
 

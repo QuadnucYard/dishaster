@@ -177,23 +177,21 @@ pub struct PsychImpactView {
 }
 
 /// Type of game ending reached.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EndingType {
     /// Bad ending: Reputation dropped to 0 (forced).
     BadReputation,
     /// Good ending: Reputation reached 100 (optional).
     GoodReputation,
     /// Bad ending: Food safety shutdown (forced).
-    FoodSafety,
+    Rectification,
 }
 
-impl EndingType {
-    /// Get string identifier for this ending type.
-    pub fn id(self) -> &'static str {
-        match self {
-            EndingType::BadReputation => "bad_reputation",
-            EndingType::GoodReputation => "good_reputation",
-            EndingType::FoodSafety => "food_safety",
-        }
-    }
+/// View data for an ending, including display information.
+#[derive(Debug, Clone)]
+pub struct EndingView {
+    /// String identifier for this ending (for localization).
+    pub id: EcoString,
+    /// Whether the player can continue playing after this ending.
+    pub can_continue: bool,
 }

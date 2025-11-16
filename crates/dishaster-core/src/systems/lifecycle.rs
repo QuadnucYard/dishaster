@@ -1,22 +1,22 @@
-use dishaster_interface::{SimEvent, event::HintCondition};
-use dishaster_models::Seed;
-use dishaster_views::EndingType;
-
 use crate::{
     components::Diner,
     events::*,
+    interface::{SimEvent, event::HintCondition},
+    models::{EndingType, Seed},
     prelude::*,
     resources::*,
     systems::{
         self,
         hint::{HintEmitter, hints},
     },
+    views::EndingView,
 };
 
 pub fn register_lifecycle_systems(world: &mut World) {
     world.add_observer(on_run_started);
     world.add_observer(on_run_ended);
     world.add_observer(on_advance_day);
+    world.add_observer(on_achieve_ending);
 
     world.add_observer(systems::roll_management_decisions);
     world.add_observer(systems::apply_management_decision);
@@ -39,7 +39,6 @@ fn on_run_started(
     reputation: Res<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
     mut rng: ResMut<WorldRng>,
-    mut events: ResMut<EventQueue>,
 ) {
     day_status.started = true;
 
@@ -57,7 +56,7 @@ fn on_run_started(
             reputation.fsri,
             incident_prob
         );
-        events.push(SimEvent::ShowEnding(EndingType::FoodSafety));
+        commands.trigger(AchieveEnding(EndingType::Rectification));
         return; // Don't roll regular incidents if shutdown occurs
     }
 
@@ -91,6 +90,7 @@ fn on_run_ended(
 
 fn on_advance_day(
     _event: On<AdvanceDay>,
+    mut commands: Commands,
     mut day_status: ResMut<DayStatus>,
     mut perma_effects: ResMut<PermanentEffectsRes>,
     mut reputation: ResMut<ReputationStateRes>,
@@ -114,10 +114,10 @@ fn on_advance_day(
     // Check for reputation-based endings
     if reputation.reputation <= 0.0 {
         log::info!("Reputation dropped to 0 - triggering bad ending");
-        events.push(SimEvent::ShowEnding(EndingType::BadReputation));
+        commands.trigger(AchieveEnding(EndingType::BadReputation));
     } else if reputation.reputation >= 100.0 {
         log::info!("Reputation reached 100 - potential good ending");
-        events.push(SimEvent::ShowEnding(EndingType::GoodReputation));
+        commands.trigger(AchieveEnding(EndingType::GoodReputation));
     }
 
     // Update day status for next day. This will be used when persisting progress.
@@ -135,4 +135,13 @@ fn advance_seed(seed: Seed) -> Seed {
             .wrapping_mul(6_364_136_223_846_793_005)
             .wrapping_add(1_442_695_040_888_963_407),
     )
+}
+
+fn on_achieve_ending(event: On<AchieveEnding>, mut events: ResMut<EventQueue>) {
+    let ending = event.0;
+
+    events.push(SimEvent::ShowEnding(Box::new(EndingView {
+        id: ending.id().into(),
+        can_continue: matches!(ending, EndingType::GoodReputation),
+    })));
 }

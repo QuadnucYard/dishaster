@@ -141,7 +141,7 @@ pub enum UiCommand {
     },
 
     /// Show ending screen.
-    ShowEnding(EndingType),
+    ShowEnding(Box<EndingView>),
 
     /// Audio command: Play phase-specific background music with cross-fade.
     PlayPhaseMusic(PhaseMusic),

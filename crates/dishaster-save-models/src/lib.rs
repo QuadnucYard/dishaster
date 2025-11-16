@@ -9,7 +9,6 @@ mod preference;
 
 pub use cosmetic::*;
 pub use diner_pool::*;
-use dishrupt_core::ModelId;
 pub use level::*;
 pub use perma_effects::*;
 pub use player::*;
@@ -24,8 +23,11 @@ mod prelude {
     pub use serde::{Deserialize, Serialize};
 }
 
+use dishrupt_core::ModelId;
+use serde::{Deserialize, Serialize};
+
 /// Seed wrapper for RNG seeds
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Seed(u64);
 
 impl Seed {

@@ -209,9 +209,13 @@ impl Game {
                     }
                 }
 
-                SimEvent::ShowEnding(ending_type) => {
-                    godot_print!("Received ending: {:?}", ending_type);
-                    self.ui_commands.push(UiCommand::ShowEnding(ending_type));
+                SimEvent::ShowEnding(ending) => {
+                    godot_print!("Received ending: {:?}", ending);
+
+                    // Save the ending to profile
+                    let _ = self.profile_svc.update_achieved_ending(ending.id.clone());
+
+                    self.ui_commands.push(UiCommand::ShowEnding(ending));
                 }
             }
         }

@@ -1,14 +1,22 @@
+//! Adapter traits and implementations for converting between models and views.
+
 use crate::{models, views};
 
+/// Trait for converting a model to its corresponding view.
 pub trait ToView {
+    /// The corresponding view type.
     type View;
 
+    /// Convert the model to its corresponding view.
     fn to_view(&self) -> Self::View;
 }
 
+/// Trait for converting a view to its corresponding model.
 pub trait ToModel {
+    /// The corresponding model type.
     type Model;
 
+    /// Convert the view to its corresponding model.
     fn to_model(&self) -> Self::Model;
 }
 

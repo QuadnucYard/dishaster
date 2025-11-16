@@ -1,3 +1,4 @@
+use dishaster_models::EndingType;
 use dishaster_trial::{PsychImpact, ReputationImpact};
 
 use crate::prelude::*;
@@ -13,6 +14,10 @@ pub struct RunEnded;
 /// Event to advance to the next day
 #[derive(Event)]
 pub struct AdvanceDay;
+
+/// Event to achieve a game ending
+#[derive(Event)]
+pub struct AchieveEnding(pub EndingType);
 
 /// Event to roll management decisions
 #[derive(Event)]

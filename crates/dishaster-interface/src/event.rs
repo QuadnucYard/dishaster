@@ -1,7 +1,7 @@
 //! Presentation events emitted by the core simulation for client display.
 
 use dishaster_views::{
-    Appearance, DishView, EndingType, FeedbackView, ManagementDecisionsView,
+    Appearance, DishView, EndingView, FeedbackView, ManagementDecisionsView,
     ManagementIncidentView, PricingMethod, ReputationView, TrialImpactView, TrialIntro,
     TrialResponseOption, TrialStatement,
 };
@@ -83,7 +83,7 @@ pub enum SimEvent {
     ShowManagementIncident(Box<ManagementIncidentView>),
 
     /// Show ending screen.
-    ShowEnding(EndingType),
+    ShowEnding(Box<EndingView>),
 
     /// Show a hint to the player for first-time events.
     ShowHint {

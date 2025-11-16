@@ -1,4 +1,4 @@
-use dishaster_views::EndingType;
+use dishaster_views::EndingView;
 
 use crate::prelude::*;
 
@@ -40,14 +40,13 @@ impl Gui for EndingGui {
 
 impl EndingGui {
     /// Show ending screen with the given type
-    pub fn show_ending(&mut self, ending: EndingType) {
-        let id = ending.id();
+    pub fn show_ending(&mut self, ending: EndingView) {
+        let id = ending.id;
         self.title_label.set_text(&tr!("ending--{}.title", id));
         self.desc_label.set_text(&tr!("ending--{}.desc", id));
 
         // Good ending: optional, show continue button; others: forced exit, no continue
-        self.continue_btn
-            .set_visible(ending == EndingType::GoodReputation);
+        self.continue_btn.set_visible(ending.can_continue);
 
         self.show();
     }

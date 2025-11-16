@@ -1,4 +1,4 @@
-use crate::{CanteenLayoutState, Day, DinerPool, Seed, prelude::*};
+use crate::{CanteenLayoutState, Day, DinerPool, PermanentEffects, Seed, prelude::*};
 
 /// Current version of the progress schema stored on disk.
 pub const USER_PROGRESS_VERSION: u32 = 1;
@@ -32,11 +32,15 @@ pub struct PlayerProfile {
 
     /// Permanent effects from management decisions.
     #[serde(default)]
-    pub permanent_effects: crate::PermanentEffects,
+    pub permanent_effects: PermanentEffects,
 
     /// Set of hint IDs that have been shown to the player (persisted).
     #[serde(default)]
     pub seen_hints: FxHashSet<EcoString>,
+
+    /// Set of endings that have been unlocked by the player.
+    #[serde(default)]
+    pub achieved_endings: FxHashSet<EcoString>,
 }
 
 /// Metadata stored alongside the progress payload.
@@ -105,5 +109,28 @@ impl AggregateStats {
         self.lifetime_served += day_stats.completed_diners;
         self.lifetime_revenue += day_stats.revenue as f64;
         self.lifetime_consumption_kg += day_stats.consumption_kg as f64;
+    }
+}
+
+/// Type of game ending reached.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EndingType {
+    /// Bad ending: Reputation dropped to 0 (forced).
+    BadReputation,
+    /// Good ending: Reputation reached 100 (optional).
+    GoodReputation,
+    /// Bad ending: Food safety shutdown (forced).
+    Rectification,
+}
+
+impl EndingType {
+    /// Get string identifier for this ending type (for localization).
+    pub fn id(self) -> &'static str {
+        match self {
+            EndingType::BadReputation => "bad_reputation",
+            EndingType::GoodReputation => "good_reputation",
+            EndingType::Rectification => "rectification",
+        }
     }
 }

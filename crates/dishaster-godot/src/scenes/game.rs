@@ -315,8 +315,8 @@ impl GameScene {
                 gui.get_mut::<ManageIncidentGui>().show();
             }
 
-            UiCommand::ShowEnding(ending_type) => {
-                gui.get_mut::<EndingGui>().show_ending(ending_type);
+            UiCommand::ShowEnding(ending) => {
+                gui.get_mut::<EndingGui>().show_ending(*ending);
             }
 
             UiCommand::ShowHint { message } => {
