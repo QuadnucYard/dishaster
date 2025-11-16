@@ -599,6 +599,7 @@ dependencies = [
  "dishrupt-core",
  "dishrupt-godot-ui",
  "dishrupt-godot-ui-macros",
+ "dishrupt-godot-utils",
  "dishrupt-godot-widgets",
  "dishrupt-l10n-godot",
  "godot",

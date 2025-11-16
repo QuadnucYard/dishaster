@@ -1,4 +1,5 @@
 use dishaster_views::TrialImpactView;
+use dishrupt_godot_utils::AnimationPlayerExt;
 use godot::{
     classes::{AnimationPlayer, Label},
     prelude::*,
@@ -160,7 +161,7 @@ impl TrialImpactGui {
         label_instance.set_visible(true);
 
         let mut anim_player = label_instance.get_node_as::<AnimationPlayer>("AnimationPlayer");
-        anim_player.play_ex().name("in").done();
+        anim_player.play_by_name("in");
 
         // Add to container
         self.impact_container.gd().add_child(&label_instance);

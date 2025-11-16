@@ -2,6 +2,7 @@ use dishaster_ui_protocol::UiCommand;
 use dishaster_views::{Feedback, FeedbackTopic};
 use dishrupt_core::EntityId;
 use dishrupt_godot_input::event::MouseButtonEvent;
+use dishrupt_godot_utils::AnimationPlayerExt;
 use godot::{
     classes::{AnimationPlayer, Label, Node2D},
     prelude::*,
@@ -81,7 +82,7 @@ impl FeedbackPresenter {
         self.lifetime = Some(BALLOON_LIFETIME);
 
         if can_trigger {
-            self.anim_player.play_ex().name("bounce").done();
+            self.anim_player.play_by_name("bounce");
         }
     }
 

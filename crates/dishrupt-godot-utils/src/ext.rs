@@ -1,7 +1,7 @@
 //! Utilities for extending Godot types with additional functionality.
 
 use godot::{
-    classes::{Node, Object},
+    classes::Node,
     obj::{Bounds, bounds, cap},
     prelude::*,
 };
@@ -12,7 +12,7 @@ pub trait ObjectExt {
     fn clear_connections(&mut self, signal: &str);
 }
 
-impl ObjectExt for Object {
+impl ObjectExt for godot::classes::Object {
     fn clear_connections(&mut self, signal: &str) {
         for conn in self.get_signal_connection_list(signal).iter_shared() {
             self.disconnect(
@@ -146,5 +146,17 @@ impl NodeExt for Node {
             self.add_child(&child);
             child
         })
+    }
+}
+
+/// Extension trait for Godot AnimationPlayer.
+pub trait AnimationPlayerExt {
+    /// Play an animation by name.
+    fn play_by_name(&mut self, name: &str);
+}
+
+impl AnimationPlayerExt for godot::classes::AnimationPlayer {
+    fn play_by_name(&mut self, name: &str) {
+        self.play_ex().name(name).done();
     }
 }

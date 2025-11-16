@@ -2,8 +2,9 @@ use dishaster_interface::event::DinerItemsChange;
 use dishaster_views::{Appearance, BodyPart};
 use dishrupt_core::EntityId;
 use dishrupt_godot_display::{GdNode2D, Stage};
+use dishrupt_godot_utils::AnimationPlayerExt;
 use godot::{
-    classes::{CanvasItem, Label, Node2D},
+    classes::{AnimationPlayer, CanvasItem, Label, Node2D},
     prelude::*,
 };
 
@@ -16,6 +17,9 @@ pub struct AgentPresenter {
 
     root: GdNode2D,
     body: Option<GdNode2D>,
+
+    anim_player: Option<Gd<AnimationPlayer>>,
+
     pub feedback: Option<FeedbackPresenter>,
     debug: Option<AgentDebugPresenter>,
 
@@ -39,9 +43,16 @@ impl AgentPresenter {
                 .map(|node| DinerItemsPresenter::new(entity, GdNode2D::new(node)))
         });
 
+        let anim_player = body
+            .as_ref()
+            .and_then(|body| body.try_get_node_as("AnimationPlayer"));
+
         Self {
             entity,
             body,
+
+            anim_player,
+
             feedback,
             root: node,
             debug,
@@ -72,6 +83,18 @@ impl AgentPresenter {
 
     /// Handle incremental changes to diner items
     pub fn handle_item_change(&mut self, change: DinerItemsChange, stage: &mut Stage) {
+        if let Some(anim_player) = &mut self.anim_player {
+            match &change {
+                DinerItemsChange::StartEating(_, _) => {
+                    anim_player.play_by_name("eat");
+                }
+                DinerItemsChange::FinishEating => {
+                    anim_player.play_by_name("walk");
+                }
+                _ => {}
+            }
+        }
+
         if let Some(diner_items) = &mut self.diner_items {
             diner_items.handle_item_change(change, stage);
         } else {
@@ -100,6 +123,11 @@ impl AgentPresenter {
         Self::apply_to_sprite(body, "RightHand", &appearance.hands);
         Self::apply_to_sprite(body, "LeftShoe", &appearance.shoes);
         Self::apply_to_sprite(body, "RightShoe", &appearance.shoes);
+
+        if let Some(anim_player) = &mut self.anim_player {
+            anim_player.set_speed_scale(godot::global::randf_range(1.5, 2.5) as f32);
+            anim_player.play_by_name("walk");
+        }
     }
 
     fn apply_to_sprite(body: &GdNode2D, sprite_name: &str, body_part: &BodyPart) {

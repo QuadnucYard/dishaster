@@ -6,4 +6,4 @@ mod ext;
 
 pub use bind::{BindGodot, FromGodot, IntoGodot, IntoSim};
 pub use call::*;
-pub use ext::{NodeExt, ObjectExt};
+pub use ext::{AnimationPlayerExt, NodeExt, ObjectExt};

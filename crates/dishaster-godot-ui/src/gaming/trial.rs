@@ -3,6 +3,7 @@ use dishaster_views::{
     TrialSpeechItem, TrialStatement,
 };
 use dishrupt_core::prelude::*;
+use dishrupt_godot_utils::AnimationPlayerExt;
 use godot::{classes::AnimationPlayer, prelude::*};
 
 use crate::prelude::*;
@@ -71,7 +72,7 @@ impl TrialGui {
         self.thought.set_visible(false);
 
         // Play intro animation
-        self.anim_player.play_ex().name("intro").done();
+        self.anim_player.play_by_name("intro");
         self.anim_player.seek(0.0);
     }
 
