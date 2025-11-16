@@ -4,7 +4,7 @@ use dishrupt_core::EntityId;
 use dishrupt_godot_display::{GdNode2D, Stage};
 use dishrupt_godot_utils::AnimationPlayerExt;
 use godot::{
-    classes::{AnimationPlayer, CanvasItem, Label, Node2D},
+    classes::{AnimationPlayer, CanvasItem, Label, Node2D, Sprite2D},
     prelude::*,
 };
 
@@ -135,30 +135,28 @@ impl AgentPresenter {
             return;
         };
 
-        // Load texture based on body part and variant
-        // Expected file structure: res://assets/sprites/agents/head_00.tres, head_01.tres, etc.
-        // let texture_path = format!(
-        //     "res://assets/sprites/agents/{}_{:02}.tres",
-        //     sprite_name.to_lowercase(),
-        //     body_part.variant.index()
-        // );
-
-        // if let Ok(texture) = try_load::<Texture2D>(&texture_path) {
-        //     sprite.set_texture(&texture);
-        // } else {
-        //     godot_warn!(
-        //         "Failed to load texture variant {} for {}",
-        //         body_part.variant.index(),
-        //         sprite_name
-        //     );
-        // }
-
         // Set shader parameters from ColorTransform (now per-part)
         let ct = &body_part.color_transform;
         sprite.set_instance_shader_parameter("hue_shift", &ct.hue_shift.to_variant());
         sprite.set_instance_shader_parameter("saturation", &ct.saturation.to_variant());
         sprite.set_instance_shader_parameter("value", &ct.value.to_variant());
         sprite.set_instance_shader_parameter("alpha", &ct.alpha.to_variant());
+
+        // Set sprite frame to variant index
+        if let Ok(mut sprite) = sprite.try_cast::<Sprite2D>() {
+            let variant_index = body_part.variant.index() as i32;
+            let max_variants = sprite.get_hframes() * sprite.get_vframes();
+            if variant_index < max_variants {
+                sprite.set_frame(variant_index);
+            } else {
+                godot_warn!(
+                    "Sprite '{}' variant index {} out of bounds (max {})",
+                    sprite_name,
+                    variant_index,
+                    max_variants - 1
+                );
+            }
+        }
     }
 }
 

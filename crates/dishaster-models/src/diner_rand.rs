@@ -71,6 +71,7 @@ pub struct DiningRanges {
 
 /// Ranges for randomizing appearance parts
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct AppearanceRanges {
     /// Number of available head variants
     pub head_variants: u8,
@@ -87,11 +88,11 @@ pub struct AppearanceRanges {
 impl Default for AppearanceRanges {
     fn default() -> Self {
         Self {
-            head_variants: 4,
-            upper_garment_variants: 5,
-            lower_garment_variants: 4,
-            hand_variants: 3,
-            shoe_variants: 3,
+            head_variants: 1,
+            upper_garment_variants: 1,
+            lower_garment_variants: 1,
+            hand_variants: 1,
+            shoe_variants: 1,
         }
     }
 }

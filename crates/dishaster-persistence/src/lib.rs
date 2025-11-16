@@ -55,8 +55,7 @@ impl PersistenceFormat for RonFormat {
     }
 
     fn dump_bytes<T: serde::Serialize>(value: &T) -> Result<Vec<u8>> {
-        let ron_str = ron::ser::to_string_pretty(value, Default::default())
-            .context("failed to serialize data to RON")?;
+        let ron_str = ron::ser::to_string(value).context("failed to serialize data to RON")?;
         Ok(ron_str.into_bytes())
     }
 }

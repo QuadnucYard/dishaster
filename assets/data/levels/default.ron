@@ -16,10 +16,16 @@
             max_satiation: (80.0, 130.0),    // Appetite variation (small to large)
             eating_speed: (0.5, 1.5),        // Eating speed multiplier
         ),
-        movement: (
+        movement: ( // unused
             movement_speed: (1.0, 3.0),
             avoidance_speed: (0.5, 2.0),
             arrival_threshold: (0.1, 0.5),
+        ),
+        appearance: (
+            head_variants: 63,
+            upper_garment_variants: 2,
+            hand_variants: 16,
+            shoe_variants: 2,
         ),
     ),
 
