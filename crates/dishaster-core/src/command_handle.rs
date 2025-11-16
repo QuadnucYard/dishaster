@@ -100,7 +100,7 @@ impl Simulation {
                     SystemState::new(&mut self.world);
                 let (session,) = system_state.get_mut(&mut self.world);
 
-                let impact = trial::get_trial_timeout_penalty();
+                let impact = trial::get_trial_timeout_penalty(&session.config);
 
                 if let Some(diner_entity) = session.target_entity {
                     self.world.trigger(ApplyTrialImpact {

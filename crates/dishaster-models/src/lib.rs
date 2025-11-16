@@ -83,4 +83,7 @@ pub struct GameModelRegistry {
 
     /// Trial corpus
     pub trial: TrialCorpus,
+
+    /// Trial system configuration
+    pub trial_config: TrialConfig,
 }

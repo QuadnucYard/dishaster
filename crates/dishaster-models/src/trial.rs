@@ -2,6 +2,81 @@ use dishrupt_core::prelude::*;
 
 use super::{FeedbackTopic, prelude::*};
 
+/// Configuration parameters for trial speech generation and impact calculations.
+///
+/// These values control various aspects of trial behavior including:
+/// - Speech continuation probabilities and multipliers
+/// - Relevance scoring thresholds
+/// - Psychological impact scaling factors
+/// - Timeout penalties
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct TrialConfig {
+    /// Multiplier for RR (response-response) continuation scores.
+    /// Lower values make manager responses more concise.
+    pub rr_continuation_multiplier: f32,
+
+    /// Multiplier for QQ (question-question) continuation scores.
+    /// Lower values make diner speeches more concise.
+    pub qq_continuation_multiplier: f32,
+
+    /// Base probability for continuing dialogue when no rank data available.
+    pub no_rank_continuation_prob: f32,
+
+    /// Score threshold for highly relevant responses (no penalty).
+    pub relevance_high_threshold: f32,
+
+    /// Score threshold for somewhat relevant responses (small penalty).
+    pub relevance_medium_threshold: f32,
+
+    /// Penalty for somewhat relevant responses.
+    pub relevance_medium_penalty: f32,
+
+    /// Penalty for irrelevant responses.
+    pub relevance_low_penalty: f32,
+
+    /// Response score used when trial times out.
+    pub timeout_response_score: f32,
+
+    /// Mood change when trial times out.
+    pub timeout_mood_penalty: f32,
+
+    /// Trust change when trial times out.
+    pub timeout_trust_penalty: f32,
+
+    /// Patience change when trial times out.
+    pub timeout_patience_penalty: f32,
+
+    /// Scaling factor for mood change based on response score.
+    pub mood_scale: f32,
+
+    /// Scaling factor for trust change based on response score.
+    pub trust_scale: f32,
+
+    /// Scaling factor for patience change based on response score.
+    pub patience_scale: f32,
+}
+
+impl Default for TrialConfig {
+    fn default() -> Self {
+        Self {
+            rr_continuation_multiplier: 0.2,
+            qq_continuation_multiplier: 0.3,
+            no_rank_continuation_prob: 0.3,
+            relevance_high_threshold: 0.8,
+            relevance_medium_threshold: 0.6,
+            relevance_medium_penalty: -0.2,
+            relevance_low_penalty: -0.5,
+            timeout_response_score: -0.8,
+            timeout_mood_penalty: -0.15,
+            timeout_trust_penalty: -0.1,
+            timeout_patience_penalty: -5.0,
+            mood_scale: 0.1,
+            trust_scale: 0.05,
+            patience_scale: 2.0,
+        }
+    }
+}
+
 /// The corpus of trial speeches and responses.
 #[derive(Debug, Default)]
 pub struct TrialCorpus {

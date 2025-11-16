@@ -4,14 +4,9 @@ use dishaster_views::{
     TrialSpeech, TrialStatement,
 };
 
-use crate::{PsychImpact, ReputationImpact, TrialImpact, TrialSession, adapter::*, prelude::*};
-
-/// Continuation probability multiplier for RR (response-response) sequences.
-///
-/// When generating multi-statement manager responses, the best RR rank score is
-/// multiplied by this factor before being used as the continuation probability.
-/// Lower values make continuations less likely, keeping responses more concise.
-const RR_CONTINUATION_MULTIPLIER: f32 = 0.2;
+use crate::{
+    PsychImpact, ReputationImpact, TrialConfig, TrialImpact, TrialSession, adapter::*, prelude::*,
+};
 
 /// Creates introductory trial information with random participant appearances.
 ///
@@ -108,9 +103,10 @@ pub fn trial_respond(
     session.set_last_response(resp_id);
 
     // Contextual evaluation: check if response is relevant to the current question
-    // Use QA ranks to measure relevance (higher rank = more relevant)
+    // Use QA ranks to measure relevance (higher score = more relevant)
     if let Some(question_idx) = current_question_idx {
-        let relevance_penalty = calculate_relevance_penalty(corpus, question_idx, resp_id);
+        let relevance_penalty =
+            calculate_relevance_penalty(corpus, question_idx, resp_id, &session.config);
 
         if relevance_penalty < 0.0 {
             log::info!(
@@ -124,7 +120,7 @@ pub fn trial_respond(
     }
 
     // Apply impacts and emit event
-    let impact = get_trial_impacts(response_score, false);
+    let impact = get_trial_impacts(response_score, false, &session.config);
 
     (TrialStatement { speech_sequence }, impact)
 }
@@ -151,7 +147,9 @@ pub fn trial_should_continue(session: &mut TrialSession, corpus: &TrialCorpus) -
         session.should_continue(best_score)
     } else {
         // No response history or ranks - randomly decide
-        session.rng.random_bool(0.3)
+        session
+            .rng
+            .random_bool(session.config.no_rank_continuation_prob as f64)
     }
 }
 
@@ -160,10 +158,8 @@ pub fn trial_should_continue(session: &mut TrialSession, corpus: &TrialCorpus) -
 /// This affects both reputation and psychological state:
 /// - Reputation: Negative impact (ignoring customer concerns)
 /// - Psych state: Mood and trust penalties for the trial diner
-pub fn get_trial_timeout_penalty() -> TrialImpact {
-    // Use a more severe response score for timeout
-    let timeout_response_score = -0.8; // Worse than a poor response
-    get_trial_impacts(timeout_response_score, true)
+pub fn get_trial_timeout_penalty(config: &TrialConfig) -> TrialImpact {
+    get_trial_impacts(config.timeout_response_score, true, config)
 }
 
 /// Apply impacts from trial interactions to both reputation and diner psychology
@@ -173,12 +169,12 @@ pub fn get_trial_timeout_penalty() -> TrialImpact {
 /// - Diner's mood, trust, and patience based on how they were treated
 ///
 /// Returns a view of the impacts for GUI display.
-fn get_trial_impacts(response_score: f32, is_timeout: bool) -> TrialImpact {
+fn get_trial_impacts(response_score: f32, is_timeout: bool, config: &TrialConfig) -> TrialImpact {
     // Apply reputation impact
     let reputation_impact = ReputationImpact { response_score };
 
     // Apply psychological impact to the diner
-    let psych_impact = get_psych_impact(response_score, is_timeout);
+    let psych_impact = get_psych_impact(response_score, is_timeout, config);
 
     TrialImpact {
         reputation: reputation_impact,
@@ -186,25 +182,25 @@ fn get_trial_impacts(response_score: f32, is_timeout: bool) -> TrialImpact {
     }
 }
 
-fn get_psych_impact(response_score: f32, is_timeout: bool) -> PsychImpact {
+fn get_psych_impact(response_score: f32, is_timeout: bool, config: &TrialConfig) -> PsychImpact {
     // Calculate psychological impacts based on response quality
     // Good responses (positive score) improve mood/trust, bad ones decrease
     let mood_change = if is_timeout {
-        -0.15 // Significant mood penalty for being ignored
+        config.timeout_mood_penalty
     } else {
-        response_score * 0.1 // Scale response score to mood change
+        response_score * config.mood_scale
     };
 
     let trust_change = if is_timeout {
-        -0.1 // Trust penalty for being ignored
+        config.timeout_trust_penalty
     } else {
-        response_score * 0.05 // Smaller trust impact
+        response_score * config.trust_scale
     };
 
     let patience_change = if is_timeout {
-        -5.0 // Reduce patience significantly for timeout
+        config.timeout_patience_penalty
     } else {
-        response_score * 2.0 // Patience affected by response quality
+        response_score * config.patience_scale
     };
 
     PsychImpact {
@@ -247,7 +243,7 @@ fn generate_speech_sequence(session: &mut TrialSession, corpus: &TrialCorpus) ->
             break;
         }
 
-        let best_score = available_ranks[0].score;
+        let best_score = available_ranks[0].score * session.config.qq_continuation_multiplier;
 
         // Use score as probability: higher similarity = more likely to continue
         if !session.should_continue(best_score) {
@@ -326,7 +322,7 @@ fn generate_response_sequence(
             break;
         }
 
-        let best_score = available_ranks[0].score * RR_CONTINUATION_MULTIPLIER;
+        let best_score = available_ranks[0].score * session.config.rr_continuation_multiplier;
 
         // Use score as probability: higher similarity = more likely to continue
         if !session.should_continue(best_score) {
@@ -366,40 +362,46 @@ fn generate_response_sequence(
 ///
 /// Checks if the player's response is relevant to the current question using QA ranks.
 /// Returns 0.0 if relevant, negative penalty if irrelevant.
+/// Uses score-based thresholds rather than position for more accurate relevance assessment.
 fn calculate_relevance_penalty(
     corpus: &TrialCorpus,
     question_id: usize,
     response_id: usize,
+    config: &TrialConfig,
 ) -> f32 {
     // Get QA ranks for this question
     let Some(question_ranks) = corpus.qa_ranks.get(question_id) else {
         return 0.0;
     };
 
-    // Check all keywords in this question
-    for keyword_ranks in question_ranks {
-        // Check if response is in the top ranks for any keyword
-        if keyword_ranks.iter().any(|r| r.answer_index == response_id) {
-            // Found in ranks - check position
-            let position = keyword_ranks
-                .iter()
-                .position(|r| r.answer_index == response_id)
-                .unwrap();
+    // Find the best score for this response across all keywords
+    let mut best_score: Option<f32> = None;
 
-            // FIXME: should use score instead of position
-            if position < 5 {
-                // Top 5 - highly relevant, no penalty
-                return 0.0;
-            } else if position < 10 {
-                // Top 10 - somewhat relevant, small penalty
-                return -0.2;
-            }
+    for keyword_ranks in question_ranks {
+        if let Some(rank) = keyword_ranks.iter().find(|r| r.answer_index == response_id) {
+            best_score = Some(best_score.map_or(rank.score, |s| s.max(rank.score)));
         }
     }
 
-    // Response not found in top ranks for any keyword - irrelevant
-    // Apply significant penalty
-    -0.5
+    // Apply penalty based on best relevance score
+    match best_score {
+        Some(score) if score >= config.relevance_high_threshold => {
+            // Highly relevant - no penalty
+            0.0
+        }
+        Some(score) if score >= config.relevance_medium_threshold => {
+            // Somewhat relevant - small penalty
+            config.relevance_medium_penalty
+        }
+        Some(_) => {
+            // Low relevance score - significant penalty
+            config.relevance_low_penalty
+        }
+        None => {
+            // Response not found in ranks for any keyword - irrelevant
+            config.relevance_low_penalty
+        }
+    }
 }
 
 /// Select the next question to ask based on previous interactions

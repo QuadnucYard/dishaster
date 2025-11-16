@@ -1,0 +1,80 @@
+// Trial system configuration
+//
+// This file controls trial dialogue generation, relevance checking,
+// and psychological/reputation impact calculations.
+
+(
+    // Speech continuation multipliers control how likely multi-turn dialogues continue
+
+    /// Multiplier for RR (response-response) continuation scores.
+    /// Lower values make manager responses more concise.
+    /// Range: 0.0-1.0. Default: 0.2
+    rr_continuation_multiplier: 0.2,
+
+    /// Multiplier for QQ (question-question) continuation scores.
+    /// Lower values make diner speeches more concise.
+    /// Range: 0.0-1.0. Default: 0.3
+    qq_continuation_multiplier: 0.3,
+
+    /// Base probability for continuing dialogue when no rank data available.
+    /// Range: 0.0-1.0. Default: 0.3
+    no_rank_continuation_prob: 0.3,
+
+    // Relevance scoring thresholds (based on embedding similarity scores)
+
+    /// Score threshold for highly relevant responses (no penalty).
+    /// Responses with score ≥ this value are considered highly relevant.
+    /// Range: 0.0-1.0. Default: 0.8
+    relevance_high_threshold: 0.8,
+
+    /// Score threshold for somewhat relevant responses (small penalty).
+    /// Responses with score ≥ this value but < high threshold get small penalty.
+    /// Range: 0.0-1.0. Default: 0.6
+    relevance_medium_threshold: 0.6,
+
+    /// Penalty for somewhat relevant responses.
+    /// Applied when relevance is between medium and high thresholds.
+    /// Negative value. Default: -0.2
+    relevance_medium_penalty: -0.2,
+
+    /// Penalty for irrelevant responses.
+    /// Applied when relevance is below medium threshold.
+    /// Negative value. Default: -0.5
+    relevance_low_penalty: -0.5,
+
+    // Timeout penalties (when player doesn't respond in time)
+
+    /// Response score used when trial times out.
+    /// Treated as worse than a poor response.
+    /// Range: -1.0-0.0. Default: -0.8
+    timeout_response_score: -0.8,
+
+    /// Mood change when trial times out (ignoring customer).
+    /// Negative value for penalty. Default: -0.15
+    timeout_mood_penalty: -0.15,
+
+    /// Trust change when trial times out (ignoring customer).
+    /// Negative value for penalty. Default: -0.1
+    timeout_trust_penalty: -0.1,
+
+    /// Patience change when trial times out (ignoring customer).
+    /// Negative value for penalty. Default: -5.0
+    timeout_patience_penalty: -5.0,
+
+    // Psychological impact scaling factors
+
+    /// Scaling factor for mood change based on response score.
+    /// mood_change = response_score × mood_scale
+    /// Default: 0.1
+    mood_scale: 0.1,
+
+    /// Scaling factor for trust change based on response score.
+    /// trust_change = response_score × trust_scale
+    /// Default: 0.05
+    trust_scale: 0.05,
+
+    /// Scaling factor for patience change based on response score.
+    /// patience_change = response_score × patience_scale
+    /// Default: 2.0
+    patience_scale: 2.0,
+)

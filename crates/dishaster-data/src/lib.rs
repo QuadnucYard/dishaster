@@ -143,6 +143,11 @@ impl DataLoader {
             .load_ron_file(&self.assets_path.join("decision.ron"))
             .context("Loading decision configuration")?;
 
+        // Load trial configuration
+        registry.trial_config = self
+            .load_ron_file(&self.assets_path.join("trial.ron"))
+            .context("Loading trial configuration")?;
+
         registry.trial = TrialCorpus {
             diner_speeches: {
                 let mut diner_speeches = self.load_corpus("trial/corpus.toml")?;

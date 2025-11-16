@@ -3,7 +3,7 @@
 mod adapter;
 mod speech;
 
-use dishaster_models::FeedbackTopic;
+use dishaster_models::{FeedbackTopic, TrialConfig};
 use dishaster_views::TrialResponseOption;
 use dishrupt_core::EntityId;
 
@@ -52,6 +52,8 @@ pub struct PsychImpact {
 
 /// Trial session state tracking to avoid repetition and improve coherence
 pub struct TrialSession {
+    /// Configuration parameters for trial behavior
+    pub config: TrialConfig,
     /// Pseudorandom number generator for trial session
     pub rng: Prng,
     /// Whether the trial has ever been triggered in this run
@@ -82,6 +84,7 @@ impl TrialSession {
     /// Create a new trial session with default temperature
     pub fn new(seed: u64) -> Self {
         Self {
+            config: TrialConfig::default(),
             rng: Prng::new(seed),
             ever_triggered: false,
             target_entity: None,
