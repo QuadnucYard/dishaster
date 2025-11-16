@@ -1,7 +1,5 @@
 //! Dishaster core logic and data structures
 
-#![feature(vec_deque_pop_if)]
-
 mod adapter;
 mod command_handle;
 pub(crate) mod components;
