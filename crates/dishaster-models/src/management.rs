@@ -69,7 +69,11 @@ macro_rules! define_sum_model {
     }};
 }
 
-define_sum_model!(ManagementIncident { MislabelPrice });
+define_sum_model!(ManagementIncident {
+    MislabelPrice,
+    AttractionChange,
+    TemporaryCrowd,
+});
 
 define_sum_model!(ManagementDecision {
     AddTables,

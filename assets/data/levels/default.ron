@@ -2,6 +2,9 @@
     id: "sample_level",
     run_length: 3600.0,
     seed: 42,
+    diner_pool: (
+        initial_pool_size: 500,
+    ),
     diner_randomizer: (
         personality: (
             frugality: (0.1, 0.5),       // Price sensitivity

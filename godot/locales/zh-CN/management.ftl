@@ -109,3 +109,27 @@ mgmt--mislabel_price =
     .effects =
         • 顾客满意度 -5%
         • 抱怨概率 +10%
+
+mgmt--increase_attraction =
+    .title = 校园美食节
+    .desc = 学校举办美食节活动，食堂客流量显著增加。
+    .flavor = 美食节的宣传海报贴满了整个校园，食堂一夜之间成了网红打卡地。
+    .effects =
+        • 顾客吸引力增加
+        • 客流量明显增加
+
+mgmt--decrease_attraction =
+    .title = 校外餐饮竞争
+    .desc = 校园周边新开了几家餐厅，分流了部分食堂顾客。
+    .flavor = 隔壁奶茶店的开业活动搞得有声有色，食堂门口冷清了不少。
+    .effects =
+        • 顾客吸引力降低
+        • 客流量有所下降
+
+mgmt--temporary_crowd =
+    .title = 校园参访团
+    .desc = 有其他学校的参访团来食堂用餐，短时间内涌入大量顾客。
+    .flavor = 隔壁学校的参访团突然涌入，食堂瞬间人满为患。服务员们手忙脚乱，但至少今天的营业额不用愁。
+    .effects =
+        • 某个时段涌入大量顾客
+        • 可能造成拥挤和排队

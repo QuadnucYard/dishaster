@@ -144,6 +144,18 @@ impl DailyDinerSchedule {
         self.scheduled_diners
             .pop_front_if(|next| current_time >= next.arrival_time)
     }
+
+    /// Add multiple scheduled diners to the schedule
+    pub fn add_many(&mut self, diners: Vec<ScheduledDiner>) {
+        for diner in diners {
+            self.scheduled_diners.push_back(diner);
+        }
+        self.scheduled_diners.make_contiguous().sort_by(|a, b| {
+            a.arrival_time
+                .partial_cmp(&b.arrival_time)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+    }
 }
 
 pub type TrialSession = ResWrapper<dishaster_trial::TrialSession>;

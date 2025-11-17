@@ -18,6 +18,10 @@ pub struct PermanentEffects {
 
     /// Luxury dishes that have been unlocked (can only unlock once per dish)
     pub luxury_dishes: FxHashSet<ModelId>,
+
+    /// Daily incident: attraction multiplier (reset each day)
+    #[serde(skip)]
+    pub daily_attraction_multiplier: f32,
 }
 
 /// Effect from playing music decision
@@ -94,14 +98,18 @@ impl PermanentEffects {
             .unwrap_or(0.0)
     }
 
-    /// Get total attraction boost for canteen
+    /// Get total attraction boost for canteen (includes daily incident effects)
     pub fn get_canteen_attraction_boost(&self) -> f32 {
-        self.campaigns
+        let campaign_boost = self
+            .campaigns
             .iter()
             .filter(|c| matches!(c.target, CampaignTarget::Canteen))
             .map(|c| c.current_boost - 1.0) // Convert multiplier to additive bonus
             .sum::<f32>()
-            + 1.0 // Convert back to multiplier
+            + 1.0; // Convert back to multiplier
+
+        // Apply daily incident multiplier
+        campaign_boost * self.daily_attraction_multiplier
     }
 
     /// Get attraction boost for a specific window
@@ -140,5 +148,10 @@ impl PermanentEffects {
         }
         // Remove expired campaigns
         self.campaigns.retain(|c| !c.is_expired());
+    }
+
+    /// Reset daily incident effects (called at start of new day)
+    pub fn reset_daily_effects(&mut self) {
+        self.daily_attraction_multiplier = 1.0;
     }
 }

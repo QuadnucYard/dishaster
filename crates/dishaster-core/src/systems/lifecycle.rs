@@ -28,8 +28,14 @@ pub fn register_lifecycle_systems(world: &mut World) {
     systems::register_management_incident_systems(world);
 }
 
-pub fn on_day_started(mut events: ResMut<EventQueue>) {
+pub fn on_day_started(
+    mut perma_effects: ResMut<PermanentEffectsRes>,
+    mut events: ResMut<EventQueue>,
+) {
     events.emit_hint(hints::ADJUST_PRICE, HintCondition::OnceLocal);
+
+    // Reset daily incident effects at the start of each day
+    perma_effects.reset_daily_effects();
 }
 
 fn on_run_started(

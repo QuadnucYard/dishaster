@@ -4,6 +4,7 @@ use super::prelude::*;
 
 /// Configuration for pool behavior and decision-making
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct DinerPoolConfig {
     /// Initial pool size when creating from scratch
     pub initial_pool_size: usize,

@@ -133,5 +133,5 @@ pub fn roll_management_incident(
         };
     }
 
-    dispatch!(MislabelPrice,);
+    dispatch!(MislabelPrice, AttractionChange, TemporaryCrowd,);
 }

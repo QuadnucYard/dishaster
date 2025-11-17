@@ -28,7 +28,7 @@ impl TemplateRealize for ManagementDecisionTemplateDef {
         macro_rules! dispatch {
             ($($variant:ident),* $(,)?) => {
             match self {
-                    $( ManagementDecisionTemplateDef::$variant(def) => ManagementDecisionModel::$variant(def.realize(ctx)), )*
+                    $( Self::$variant(def) => Self::Model::$variant(def.realize(ctx)), )*
                 }
             };
         }
@@ -53,7 +53,7 @@ impl ViewParams for ManagementDecisionModel {
         macro_rules! dispatch {
             ($($variant:ident),* $(,)?) => {
                 match self {
-                    $( ManagementDecisionModel::$variant(model) => model.params(), )*
+                    $( Self::$variant(model) => model.params(), )*
                 }
             };
         }
@@ -290,21 +290,29 @@ impl TemplateRealize for ManagementIncidentTemplateDef {
     type Model = ManagementIncidentModel;
 
     fn realize(&self, ctx: RealizationContext) -> Self::Model {
-        use ManagementIncidentTemplateDef::*;
-        type M = ManagementIncidentModel;
-
-        match self {
-            MislabelPrice(def) => M::MislabelPrice(def.realize(ctx)),
+        macro_rules! dispatch {
+            ($($variant:ident),* $(,)?) => {
+            match self {
+                    $( Self::$variant(def) => Self::Model::$variant(def.realize(ctx)), )*
+                }
+            };
         }
+
+        dispatch!(MislabelPrice, AttractionChange, TemporaryCrowd,)
     }
 }
 
 impl ViewParams for ManagementIncidentModel {
     fn params(&self) -> ParamsMap {
-        use ManagementIncidentModel::*;
-        match self {
-            MislabelPrice(model) => model.params(),
+        macro_rules! dispatch {
+            ($($variant:ident),* $(,)?) => {
+                match self {
+                    $( Self::$variant(model) => model.params(), )*
+                }
+            };
         }
+
+        dispatch!(MislabelPrice, AttractionChange, TemporaryCrowd,)
     }
 }
 
@@ -329,6 +337,47 @@ impl TemplateRealize for MislabelPriceTemplate {
 impl ViewParams for MislabelPriceModel {
     fn params(&self) -> ParamsMap {
         // we do not provide any specific params for this incident
+        params! {}
+    }
+}
+
+impl TemplateRealize for AttractionChangeTemplate {
+    type Model = AttractionChangeModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        Self::Model {
+            attraction_multiplier: ctx
+                .rng
+                .random_range(self.attraction_multiplier_range.clone()),
+        }
+    }
+}
+
+impl ViewParams for AttractionChangeModel {
+    fn params(&self) -> ParamsMap {
+        // Notification doesn't need to display the parameter
+        params! {}
+    }
+}
+
+impl TemplateRealize for TemporaryCrowdTemplate {
+    type Model = TemporaryCrowdModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        let num_diners = ctx.rng.random_range(self.num_diners_range.clone());
+        let peak_time = ctx.rng.random_range(self.peak_time_range.clone());
+
+        Self::Model {
+            peak_time,
+            num_diners,
+            time_stddev: self.time_stddev,
+        }
+    }
+}
+
+impl ViewParams for TemporaryCrowdModel {
+    fn params(&self) -> ParamsMap {
+        // Notification doesn't need to display the parameter
         params! {}
     }
 }
