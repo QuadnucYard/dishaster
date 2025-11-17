@@ -25,6 +25,8 @@ pub enum AppRequest {
     /// Toggle sound effects on/off.
     ToggleSound(bool),
 
+    /// Roll a new random seed for the player profile.
+    RollSeed,
     /// Delete player profile (reset progress).
     DeleteProfile,
 }

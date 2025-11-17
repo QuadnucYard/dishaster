@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://bysf0t5mnvqm"]
+[gd_scene load_steps=18 format=3 uid="uid://bysf0t5mnvqm"]
 
 [ext_resource type="Texture2D" uid="uid://g0xpfig3igsc" path="res://assets/gui/textures/start_menu_bg.png" id="1_lw2g1"]
 [ext_resource type="Theme" uid="uid://c6spuadyswnvj" path="res://assets/themes/rect_button.tres" id="2_ctnrb"]
@@ -8,6 +8,8 @@
 [ext_resource type="Texture2D" uid="uid://lug64y7fy7ga" path="res://assets/gui/textures/ending_buttons_0.tres" id="5_ctnrb"]
 [ext_resource type="Texture2D" uid="uid://dx57bypxijagn" path="res://assets/gui/textures/ending_buttons_2.tres" id="7_ji7db"]
 [ext_resource type="Texture2D" uid="uid://dljdcnrn7q3k8" path="res://assets/gui/textures/ending_buttons_3.tres" id="8_j1oba"]
+[ext_resource type="Texture2D" uid="uid://br4vjh13nbjlu" path="res://assets/gui/icons/casino_24dp_714216_FILL0_wght400_GRAD0_opsz24.svg" id="8_xmao1"]
+[ext_resource type="Texture2D" uid="uid://d3ulfg24jrsb0" path="res://assets/gui/icons/delete_24dp_714216_FILL0_wght400_GRAD0_opsz24.svg" id="9_iqmya"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ctnrb"]
 atlas = ExtResource("4_cfj16")
@@ -253,6 +255,30 @@ theme = ExtResource("2_ctnrb")
 theme_override_font_sizes/font_size = 48
 text = "Start"
 
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/Start"]
+layout_mode = 0
+offset_left = 319.0
+offset_right = 359.0
+offset_bottom = 80.0
+size_flags_horizontal = 0
+theme_override_constants/separation = 0
+
+[node name="RollSeed" type="Button" parent="PanelContainer/VBoxContainer/Start/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+theme = ExtResource("2_ctnrb")
+icon = ExtResource("8_xmao1")
+icon_alignment = 1
+
+[node name="DeleteProfile" type="Button" parent="PanelContainer/VBoxContainer/Start/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+theme = ExtResource("2_ctnrb")
+icon = ExtResource("9_iqmya")
+icon_alignment = 1
+
 [node name="Credits" type="LocalizedButton" parent="PanelContainer/VBoxContainer"]
 message_id = "credits.label"
 unique_name_in_owner = true
@@ -307,27 +333,3 @@ libraries = {
 &"": SubResource("AnimationLibrary_ctnrb")
 }
 autoplay = "intro"
-
-[node name="Control" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -40.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="DeleteProfile" type="Button" parent="Control"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 24
-text = "×"

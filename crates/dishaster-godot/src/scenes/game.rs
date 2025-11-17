@@ -128,6 +128,7 @@ impl GameScene {
             | AppRequest::ShowCredits
             | AppRequest::BackToMenu
             | AppRequest::ViewEnding(_)
+            | AppRequest::RollSeed
             | AppRequest::DeleteProfile => {
                 panic!("should be handled in main menu")
             }

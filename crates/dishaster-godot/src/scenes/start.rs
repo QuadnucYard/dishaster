@@ -1,6 +1,9 @@
 use std::{any::Any, sync::LazyLock};
 
-use dishaster_core::views::{CreditSectionView, CreditsView};
+use dishaster_core::{
+    models::Seed,
+    views::{CreditSectionView, CreditsView},
+};
 use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, EndingGalleryGui, EndingGalleryView, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
@@ -171,6 +174,21 @@ impl StartScene {
                 });
                 if let Err(e) = res {
                     godot_error!("Failed to save preferences: {}", e);
+                }
+            }
+            AppRequest::RollSeed => {
+                godot_print!("Rolling new seed for player profile");
+                let new_seed = godot::global::randi() as u64;
+                let svc = &game_services().user_service.profiles;
+                if let Err(e) = svc.update(|profile| {
+                    if let Some(progress) = &mut profile.progress {
+                        progress.rng_seed = Seed::new(new_seed);
+                    }
+                    Ok(())
+                }) {
+                    godot_error!("Failed to roll new seed: {e}");
+                } else {
+                    godot_print!("New seed rolled successfully: {new_seed}");
                 }
             }
             AppRequest::DeleteProfile => {
