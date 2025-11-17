@@ -96,11 +96,10 @@ impl StartMenuGui {
     }
 
     /// Update ending buttons based on which endings are unlocked
-    pub fn update_endings_unlocked(&mut self, _achieved_endings: &HashSet<EcoString>) {
-        for (&_ending_id, button) in &mut self.ending_buttons {
+    pub fn update_endings_unlocked(&mut self, achieved_endings: &HashSet<EcoString>) {
+        for (&ending_id, button) in &mut self.ending_buttons {
             // For testing, enable all endings
-            button.set_enabled(true);
-            // button.set_enabled(achieved_endings.contains(ending_id));
+            button.set_enabled(achieved_endings.contains(ending_id));
         }
     }
 }
