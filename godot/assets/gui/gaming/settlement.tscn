@@ -38,17 +38,21 @@ grow_vertical = 2
 theme = ExtResource("1_ea4ck")
 theme_override_styles/panel = ExtResource("1_qpv0l")
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_bottom = -24
+
+[node name="VBox" type="VBoxContainer" parent="Panel/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="DayHeading" type="Label" parent="Panel/VBox"]
+[node name="DayHeading" type="Label" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Day 1 Settlement"
 
-[node name="SummaryLabel" type="RichTextLabel" parent="Panel/VBox"]
+[node name="SummaryLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -56,19 +60,19 @@ bbcode_enabled = true
 text = "Service finished in 03:00."
 scroll_active = false
 
-[node name="GuidanceLabel" type="RichTextLabel" parent="Panel/VBox"]
+[node name="GuidanceLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 bbcode_enabled = true
 text = "Press Next Day to continue."
 scroll_active = false
 
-[node name="ButtonRow" type="HBoxContainer" parent="Panel/VBox"]
+[node name="ButtonRow" type="HBoxContainer" parent="Panel/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="ConfirmButton" type="LocalizedButton" parent="Panel/VBox/ButtonRow"]
+[node name="ConfirmButton" type="LocalizedButton" parent="Panel/MarginContainer/VBox/ButtonRow"]
 message_id = "confirm.label"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 90)

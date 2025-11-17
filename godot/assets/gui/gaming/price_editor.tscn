@@ -1,4 +1,9 @@
-[gd_scene format=3 uid="uid://bc23f423gt7p2"]
+[gd_scene load_steps=5 format=3 uid="uid://bc23f423gt7p2"]
+
+[ext_resource type="Theme" uid="uid://r4reuheu2fem" path="res://assets/themes/panel_text.tres" id="1_k6sgi"]
+[ext_resource type="StyleBox" uid="uid://cbrpkgkeg2mch" path="res://assets/themes/panel.tres" id="2_ej4oq"]
+[ext_resource type="Theme" uid="uid://c6spuadyswnvj" path="res://assets/themes/rect_button.tres" id="3_ej4oq"]
+[ext_resource type="Theme" uid="uid://c5h27pdjsc30" path="res://assets/themes/round_button.tres" id="3_uqvaj"]
 
 [node name="PriceEditor" type="Control"]
 layout_mode = 3
@@ -23,13 +28,12 @@ offset_right = 217.0
 offset_bottom = 138.5
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_k6sgi")
+theme_override_styles/panel = ExtResource("2_ej4oq")
 
 [node name="MarginContainer" type="MarginContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_bottom = -24
 
 [node name="VBox" type="VBoxContainer" parent="Panel/MarginContainer"]
 layout_mode = 2
@@ -52,7 +56,7 @@ horizontal_alignment = 1
 [node name="GridContainer" type="GridContainer" parent="Panel/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_constants/h_separation = 16
-theme_override_constants/v_separation = 16
+theme_override_constants/v_separation = 8
 columns = 3
 
 [node name="OriginalValueLabel" type="Label" parent="Panel/MarginContainer/VBox/GridContainer"]
@@ -90,7 +94,9 @@ virtual_keyboard_type = 3
 [node name="ModeButton" type="LocalizedButton" parent="Panel/MarginContainer/VBox/GridContainer"]
 message_id = "price-by-portion.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
+theme = ExtResource("3_ej4oq")
 theme_override_font_sizes/font_size = 22
 text = "/kg"
 
@@ -102,13 +108,17 @@ alignment = 1
 [node name="ConfirmButton" type="LocalizedButton" parent="Panel/MarginContainer/VBox/ButtonRow"]
 message_id = "apply.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
+theme = ExtResource("3_uqvaj")
 theme_override_font_sizes/font_size = 24
 text = "Apply"
 
 [node name="CancelButton" type="LocalizedButton" parent="Panel/MarginContainer/VBox/ButtonRow"]
 message_id = "cancel.label"
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
+theme = ExtResource("3_uqvaj")
 theme_override_font_sizes/font_size = 24
 text = "Cancel"

@@ -1,0 +1,16 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://quax61mpru57"]
+
+[ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="1_8ndr0"]
+
+[resource]
+Label/colors/font_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
+Label/font_sizes/font_size = 24
+Label/fonts/font = ExtResource("1_8ndr0")
+RichTextLabel/colors/default_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
+RichTextLabel/constants/line_separation = -8
+RichTextLabel/font_sizes/bold_font_size = 24
+RichTextLabel/font_sizes/bold_italics_font_size = 24
+RichTextLabel/font_sizes/italics_font_size = 24
+RichTextLabel/font_sizes/mono_font_size = 24
+RichTextLabel/font_sizes/normal_font_size = 24
+RichTextLabel/fonts/normal_font = ExtResource("1_8ndr0")
