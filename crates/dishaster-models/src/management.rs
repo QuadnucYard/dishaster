@@ -73,6 +73,7 @@ define_sum_model!(ManagementIncident {
     MislabelPrice,
     AttractionChange,
     TemporaryCrowd,
+    InspectorVisit,
 });
 
 define_sum_model!(ManagementDecision {

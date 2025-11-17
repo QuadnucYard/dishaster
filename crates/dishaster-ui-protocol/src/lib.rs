@@ -74,6 +74,8 @@ pub enum GameRequest {
     SelectDecision(usize),
     /// Confirm incident notification and continue to preparation phase.
     ConfirmIncident,
+    /// Confirm inspector result and continue.
+    ConfirmInspectorResult,
 }
 
 impl UiRequest for GameRequest {}
@@ -134,8 +136,8 @@ pub enum UiCommand {
     ShowDecisionSelection(Box<ManagementDecisionsView>),
     /// Show incident notification at day start (random incident auto-applied).
     ShowIncidentNotification(Box<ManagementIncidentView>),
-    // /// Close incident/decision UI and return to normal flow.
-    // CloseIncidentDecisionUI,
+    /// Show inspector visit result (pass/fail with boosts).
+    ShowInspectorResult(Box<InspectorResultView>),
     /// Show a hint notification to the player.
     ShowHint {
         /// Localized hint message.

@@ -58,3 +58,32 @@ pub struct TemporaryCrowdModel {
     /// Standard deviation for arrival time distribution
     pub time_stddev: f32,
 }
+
+/// Template for inspector visit incident
+/// If inspection passes, reputation and trust increase permanently.
+/// If fails, triggers food safety bad ending.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "InspectorVisit")]
+pub struct InspectorVisitTemplate {
+    /// FSRI threshold above which bad ending is possible
+    pub fsri_threshold: f32,
+    /// Probability multiplier based on FSRI excess (probability = (fsri - threshold) * multiplier)
+    pub probability_multiplier: f32,
+    /// Reputation increase if inspection passes
+    pub reputation_boost: f32,
+    /// Trust increase for all diners if inspection passes (permanent)
+    pub trust_boost: f32,
+}
+
+/// Model for inspector visit incident
+#[derive(Debug, Clone)]
+pub struct InspectorVisitModel {
+    /// FSRI threshold above which bad ending is possible
+    pub fsri_threshold: f32,
+    /// Probability multiplier based on FSRI excess (probability = (fsri - threshold) * multiplier)
+    pub probability_multiplier: f32,
+    /// Reputation increase if inspection passes
+    pub reputation_boost: f32,
+    /// Trust increase for all diners if inspection passes (permanent)
+    pub trust_boost: f32,
+}

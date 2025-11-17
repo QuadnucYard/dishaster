@@ -37,3 +37,12 @@ pub struct ManagementIncidentView {
     /// Parameters for localization formatting
     pub params: ParamsMap,
 }
+
+/// View model for inspector visit result display (when passed)
+#[derive(Debug, Clone)]
+pub struct InspectorResultView {
+    /// Reputation boost if passed (0 if failed)
+    pub reputation_boost: f32,
+    /// Trust boost if passed (0 if failed)
+    pub trust_boost: f32,
+}

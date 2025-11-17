@@ -54,4 +54,6 @@ pub enum SimCommand {
 
     /// [DEV] Adjust reputation by a delta value.
     DevAdjustReputation(f32),
+    /// [DEV] Trigger inspector visit.
+    DevInspectorVisit(bool),
 }

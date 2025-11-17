@@ -298,7 +298,12 @@ impl TemplateRealize for ManagementIncidentTemplateDef {
             };
         }
 
-        dispatch!(MislabelPrice, AttractionChange, TemporaryCrowd,)
+        dispatch!(
+            MislabelPrice,
+            AttractionChange,
+            TemporaryCrowd,
+            InspectorVisit,
+        )
     }
 }
 
@@ -312,7 +317,12 @@ impl ViewParams for ManagementIncidentModel {
             };
         }
 
-        dispatch!(MislabelPrice, AttractionChange, TemporaryCrowd,)
+        dispatch!(
+            MislabelPrice,
+            AttractionChange,
+            TemporaryCrowd,
+            InspectorVisit,
+        )
     }
 }
 
@@ -376,6 +386,27 @@ impl TemplateRealize for TemporaryCrowdTemplate {
 }
 
 impl ViewParams for TemporaryCrowdModel {
+    fn params(&self) -> ParamsMap {
+        // Notification doesn't need to display the parameter
+        params! {}
+    }
+}
+
+impl TemplateRealize for InspectorVisitTemplate {
+    type Model = InspectorVisitModel;
+
+    fn realize(&self, _ctx: RealizationContext) -> Self::Model {
+        // Since the execution is deferred until later, we just copy the parameters here
+        Self::Model {
+            fsri_threshold: self.fsri_threshold,
+            probability_multiplier: self.probability_multiplier,
+            reputation_boost: self.reputation_boost,
+            trust_boost: self.trust_boost,
+        }
+    }
+}
+
+impl ViewParams for InspectorVisitModel {
     fn params(&self) -> ParamsMap {
         // Notification doesn't need to display the parameter
         params! {}

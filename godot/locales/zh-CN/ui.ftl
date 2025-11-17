@@ -66,6 +66,16 @@ select-option =
 continue-run =
     .label = 继续运营
 
+inspector-visit-result =
+    .title = 卫生检查结果
+    .desc =
+        您的食堂通过了卫生检查！
+        但是……好事会一直持续下去吗？
+
+inspector-visit-effects =
+    • 信任度 +{ PCT($trust_boost, maxfd: 1) }（食品安全提升）
+    • 声誉 +{ NUM($reputation_boost, maxfd: 1) }（公众形象改善）
+
 trial-agreement = 赞同
 trial-objection = 反对
 trial-perjury = 伪证

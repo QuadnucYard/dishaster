@@ -1,6 +1,10 @@
+use dishaster_views::InspectorResultView;
 use rand_distr::Normal;
 
-use crate::{events::DispatchManagement, systems::prelude::*};
+use crate::{
+    events::{AchieveEnding, DispatchManagement, InspectorVisit},
+    systems::prelude::*,
+};
 
 pub fn register_management_incident_systems(world: &mut World) {
     macro_rules! add_observers {
@@ -13,6 +17,8 @@ pub fn register_management_incident_systems(world: &mut World) {
         apply_mislabel_price,
         apply_attraction_change,
         apply_temporary_crowd,
+        apply_inspector_visit,
+        handle_inspector_visit,
     };
 }
 
@@ -143,4 +149,74 @@ fn apply_temporary_crowd(
         model.num_diners,
         model.peak_time
     );
+}
+
+fn apply_inspector_visit(
+    event: On<DispatchManagement<InspectorVisitModel>>,
+    mut commands: Commands,
+) {
+    let model = &event.0;
+
+    // Trigger the inspector visit event
+    commands.trigger(InspectorVisit(model.clone()));
+}
+
+/// Handle inspector visit event (can be triggered from incident or dev command)
+fn handle_inspector_visit(
+    event: On<InspectorVisit>,
+    mut commands: Commands,
+    mut reputation: ResMut<ReputationStateRes>,
+    mut pool: ResMut<ResWrapper<DinerPool>>,
+    mut events: ResMut<EventQueue>,
+    mut rng: ResMut<WorldRng>,
+) {
+    log::info!("Inspector visit incident triggered");
+    let InspectorVisitModel {
+        fsri_threshold,
+        probability_multiplier,
+        reputation_boost,
+        trust_boost,
+    } = event.0;
+
+    let triggers_bad_ending = {
+        let excess = reputation.fsri - fsri_threshold;
+        let probability = (excess * probability_multiplier).clamp(0.0, 1.0);
+        log::info!(
+            "Inspector visit check: FSRI = {:.2}, threshold = {:.2}, excess = {:.2}, probability = {:.2}%",
+            reputation.fsri,
+            fsri_threshold,
+            excess,
+            probability * 100.0
+        );
+        rng.random_bool(probability as f64)
+    };
+
+    if triggers_bad_ending {
+        log::warn!("Inspector visit failed - triggering bad ending!");
+        commands.trigger(AchieveEnding(EndingType::Rectification));
+        return;
+    }
+
+    // Inspection passed - apply reputation and trust boosts (permanent)
+    reputation.reputation = (reputation.reputation + reputation_boost).min(100.0);
+
+    // Apply trust boost to existing diners in pool (permanent, affects overall_like)
+    for profile in &mut pool.profiles {
+        profile.long_term_memory.overall_like =
+            (profile.long_term_memory.overall_like + trust_boost).min(1.0);
+    }
+
+    log::info!(
+        "Inspector visit passed! Reputation +{:.2}, trust +{:.2}",
+        reputation_boost,
+        trust_boost
+    );
+
+    // Show inspector result to player
+    events.push(SimEvent::ShowInspectorResult(Box::new(
+        InspectorResultView {
+            reputation_boost,
+            trust_boost,
+        },
+    )));
 }

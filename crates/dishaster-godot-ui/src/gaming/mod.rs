@@ -1,5 +1,6 @@
 mod ending;
 mod hint;
+mod inspector_result;
 mod layout;
 mod manage_decision;
 mod manage_incident;
@@ -12,6 +13,7 @@ mod trial_impact;
 
 pub use ending::EndingGui;
 pub use hint::HintNotification;
+pub use inspector_result::InspectorResultGui;
 pub use layout::GamingLayout;
 pub use manage_decision::ManageDecisionGui;
 pub use manage_incident::ManageIncidentGui;

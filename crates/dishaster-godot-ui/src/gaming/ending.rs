@@ -1,6 +1,8 @@
 use dishaster_views::EndingView;
+use dishrupt_asset::AssetCatalog;
+use dishrupt_core::asset::SpriteRef;
 
-use crate::prelude::*;
+use crate::{load::load_texture_sync, prelude::*};
 
 /// Ending screen showing game conclusion
 #[derive(UITree)]
@@ -11,6 +13,9 @@ pub struct EndingGui {
 
     #[child("%DescriptionLabel")]
     desc_label: LabelA,
+
+    #[child("%Picture")]
+    picture: TextureRectA,
 
     #[child("%ContinueButton")]
     continue_btn: ButtonA,
@@ -39,7 +44,12 @@ impl Gui for EndingGui {
 }
 
 impl EndingGui {
-    /// Show ending screen with the given type
+    pub fn set_ending_picture(&mut self, picture: &SpriteRef, catalog: &AssetCatalog) {
+        let texture = load_texture_sync(picture, catalog);
+        self.picture.set_texture(texture);
+    }
+
+    /// Show ending screen with the given view
     pub fn show_ending(&mut self, ending: EndingView) {
         let id = ending.id;
         self.title_label.set_text(&tr!("ending--{}.title", id));

@@ -218,6 +218,9 @@ impl GameScene {
             GameRequest::ConfirmIncident => {
                 gui.hide::<ManageIncidentGui>();
             }
+            GameRequest::ConfirmInspectorResult => {
+                gui.hide::<InspectorResultGui>();
+            }
         }
     }
 
@@ -315,8 +318,18 @@ impl GameScene {
                 gui.get_mut::<ManageIncidentGui>().set_view(&view, catalog);
                 gui.get_mut::<ManageIncidentGui>().show();
             }
+            UiCommand::ShowInspectorResult(view) => {
+                gui.get_mut::<InspectorResultGui>().set_view(&view);
+                gui.get_mut::<InspectorResultGui>().show();
+            }
 
             UiCommand::ShowEnding(ending) => {
+                if let Some(ending_model) = game_services().data.endings.get(&ending.id) {
+                    gui.get_mut::<EndingGui>()
+                        .set_ending_picture(&ending_model.illustration, &game_services().catalog);
+                } else {
+                    godot_error!("Requested unknown ending ID: {}", ending.id);
+                }
                 gui.get_mut::<EndingGui>().show_ending(*ending);
             }
 

@@ -195,6 +195,10 @@ impl Game {
                     self.ui_commands
                         .push(UiCommand::ShowIncidentNotification(view));
                 }
+                SimEvent::ShowInspectorResult(view) => {
+                    godot_print!("Process SimEvent: ShowInspectorResult");
+                    self.ui_commands.push(UiCommand::ShowInspectorResult(view));
+                }
 
                 SimEvent::ShowHint {
                     id: hint_id,

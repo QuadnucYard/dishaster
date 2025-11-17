@@ -1,4 +1,4 @@
-use dishaster_models::EndingType;
+use dishaster_models::{EndingType, InspectorVisitModel};
 use dishaster_trial::{PsychImpact, ReputationImpact};
 
 use crate::prelude::*;
@@ -34,6 +34,10 @@ pub struct RollManagementIncident;
 /// Event to dispatch a selected management decision
 #[derive(Event)]
 pub struct DispatchManagement<T>(pub T);
+
+/// Event to trigger an inspector visit (can be from incident, dev command, etc.)
+#[derive(Event)]
+pub struct InspectorVisit(pub InspectorVisitModel);
 
 #[derive(Event)]
 pub struct ApplyTrialImpact {

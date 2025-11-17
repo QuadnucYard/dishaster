@@ -42,9 +42,6 @@ fn on_run_started(
     _event: On<RunStarted>,
     mut commands: Commands,
     mut day_status: ResMut<DayStatus>,
-    reputation: Res<ReputationStateRes>,
-    reputation_config: Res<ReputationConfigRes>,
-    mut rng: ResMut<WorldRng>,
 ) {
     day_status.started = true;
 
@@ -53,18 +50,6 @@ fn on_run_started(
         day_status.current_day.0,
         day_status.start_day.0
     );
-
-    // Check for FSRI-based incident (food safety shutdown)
-    let incident_prob = reputation.incident_probability(&reputation_config);
-    if rng.random_bool(incident_prob as f64) {
-        log::error!(
-            "Food safety incident triggered! FSRI: {:.1}, probability: {:.3}",
-            reputation.fsri,
-            incident_prob
-        );
-        commands.trigger(AchieveEnding(EndingType::Rectification));
-        return; // Don't roll regular incidents if shutdown occurs
-    }
 
     if day_status.current_day != day_status.start_day {
         // emit incident for new day

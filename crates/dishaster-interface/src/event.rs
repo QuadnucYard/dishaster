@@ -1,7 +1,7 @@
 //! Presentation events emitted by the core simulation for client display.
 
 use dishaster_views::{
-    Appearance, DishView, EndingView, FeedbackView, ManagementDecisionsView,
+    Appearance, DishView, EndingView, FeedbackView, InspectorResultView, ManagementDecisionsView,
     ManagementIncidentView, PricingMethod, ReputationView, TrialImpactView, TrialIntro,
     TrialResponseOption, TrialStatement,
 };
@@ -81,6 +81,8 @@ pub enum SimEvent {
     ShowManagementDecisions(Box<ManagementDecisionsView>),
     /// Show incident notification at day start.
     ShowManagementIncident(Box<ManagementIncidentView>),
+    /// Show inspector visit result.
+    ShowInspectorResult(Box<InspectorResultView>),
 
     /// Show ending screen.
     ShowEnding(Box<EndingView>),

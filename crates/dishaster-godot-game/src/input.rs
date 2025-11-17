@@ -89,6 +89,15 @@ impl Game {
                 self.send_sim_command(SimCommand::DevAdjustReputation(-5.0));
             }
 
+            Key::N => {
+                godot_print!("Dev: Trigger inspector visit");
+                self.send_sim_command(SimCommand::DevInspectorVisit(false));
+            }
+            Key::M => {
+                godot_print!("Dev: Trigger inspector visit (fail)");
+                self.send_sim_command(SimCommand::DevInspectorVisit(true));
+            }
+
             _ => {}
         }
     }

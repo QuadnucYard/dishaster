@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://lcua5x56lq68"]
+[gd_scene load_steps=6 format=3 uid="uid://lcua5x56lq68"]
 
 [ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="1_ending"]
 [ext_resource type="Theme" uid="uid://r4reuheu2fem" path="res://assets/themes/panel_text.tres" id="1_fgs30"]
 [ext_resource type="StyleBox" uid="uid://cbrpkgkeg2mch" path="res://assets/themes/panel.tres" id="2_n147k"]
 [ext_resource type="Theme" uid="uid://c5h27pdjsc30" path="res://assets/themes/round_button.tres" id="2_x241y"]
+[ext_resource type="Texture2D" uid="uid://cf8pafdaadfge" path="res://assets/sprites/endings/bad_reputation.png" id="4_mqna1"]
 
 [node name="Ending" type="Control"]
 layout_mode = 3
@@ -43,7 +44,7 @@ theme_override_constants/margin_bottom = -32
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 40
+theme_override_constants/separation = 20
 
 [node name="TitleLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
@@ -52,6 +53,13 @@ theme_override_fonts/font = ExtResource("1_ending")
 theme_override_font_sizes/font_size = 56
 text = "结局标题"
 horizontal_alignment = 1
+
+[node name="Picture" type="TextureRect" parent="CenterContainer/Panel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+texture = ExtResource("4_mqna1")
+expand_mode = 2
 
 [node name="DescriptionLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true

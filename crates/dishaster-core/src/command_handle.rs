@@ -1,5 +1,6 @@
 use bevy_ecs::system::SystemState;
 use dishaster_interface::{event::*, response::*, *};
+use dishaster_models::InspectorVisitModel;
 use dishaster_navigation::*;
 use dishaster_trial as trial;
 
@@ -182,6 +183,26 @@ impl Simulation {
                 // Emit event to update UI
                 let mut events = self.world.resource_mut::<EventQueue>();
                 events.push(SimEvent::ReputationUpdate(Box::new(rep_view)));
+            }
+            SimCommand::DevInspectorVisit(fail) => {
+                // [DEV] Trigger inspector visit event
+                log::info!("DEV: Triggering inspector visit");
+                let model = if fail {
+                    InspectorVisitModel {
+                        fsri_threshold: 0.0,
+                        probability_multiplier: 100.0,
+                        reputation_boost: 10.0,
+                        trust_boost: 0.15,
+                    }
+                } else {
+                    InspectorVisitModel {
+                        fsri_threshold: 15.0,
+                        probability_multiplier: 0.05,
+                        reputation_boost: 10.0,
+                        trust_boost: 0.15,
+                    }
+                };
+                self.world.trigger(InspectorVisit(model));
             }
         }
     }

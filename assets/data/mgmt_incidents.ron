@@ -34,4 +34,15 @@
             time_stddev: 0.25,  // Standard deviation in hours
         )
     ),
+    (
+        id: "inspector_visit",
+        weight: 100,
+        icon: "management/sample_1.png",
+        def: InspectorVisit(
+            fsri_threshold: 15.0,  // Only risky if FSRI > 15
+            probability_multiplier: 0.05,  // 5% chance per point above threshold
+            reputation_boost: 10.0,  // Reputation increase if passed
+            trust_boost: 0.15,  // Permanent trust increase if passed
+        )
+    ),
 ]

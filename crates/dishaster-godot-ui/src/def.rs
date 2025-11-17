@@ -28,6 +28,7 @@ pub fn register_guis(registry: &mut GuiRegistry, catalog: &AssetCatalog) {
         SettlementGui => "gaming/settlement",
         ManageDecisionGui => "gaming/decision_selection",
         ManageIncidentGui => "gaming/incident_notification",
+        InspectorResultGui => "gaming/inspector_result",
         EndingGui => "gaming/ending",
         TimeStatsGui => "gaming/time_stats",
         ReputationGui => "gaming/reputation",
