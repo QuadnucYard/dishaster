@@ -82,7 +82,10 @@ impl FeedbackPresenter {
         self.lifetime = Some(BALLOON_LIFETIME);
 
         if can_trigger {
+            self.root.set_modulate(Color::WHITE.with_alpha(1.0));
             self.anim_player.play_by_name("bounce");
+        } else {
+            self.root.set_modulate(Color::WHITE.with_alpha(0.8));
         }
     }
 
