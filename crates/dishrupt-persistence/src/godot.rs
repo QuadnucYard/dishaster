@@ -42,4 +42,23 @@ impl PersistentStorage for GodotUserStorage {
         }
         Ok(())
     }
+
+    fn delete(&self, path: &str) -> Result<()> {
+        let file_path = Path::new("user://").join(path);
+        let path_str = file_path
+            .to_str()
+            .with_context(|| format!("invalid path string: {:?}", file_path))?;
+
+        if FileAccess::file_exists(path_str) {
+            let mut da = godot::classes::DirAccess::open("user://")
+                .with_context(|| "failed to open user:// directory")?;
+            let err = da.remove(path);
+            if err != godot::global::Error::OK {
+                return Err(anyhow!(
+                    "failed to delete file: {path_str} (error: {err:?})"
+                ));
+            }
+        }
+        Ok(())
+    }
 }

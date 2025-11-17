@@ -27,6 +27,10 @@ impl PersistentStorage for MemoryStorage {
     fn write_atomic(&self, _path: &str, _bytes: &[u8]) -> Result<()> {
         Ok(()) // Do nothing on write
     }
+
+    fn delete(&self, _path: &str) -> Result<()> {
+        Ok(()) // Do nothing on delete
+    }
 }
 
 /// Extension trait to run multiple simulation steps.

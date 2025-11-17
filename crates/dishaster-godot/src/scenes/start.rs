@@ -173,6 +173,18 @@ impl StartScene {
                     godot_error!("Failed to save preferences: {}", e);
                 }
             }
+            AppRequest::DeleteProfile => {
+                godot_print!("Deleting player profile");
+                let svc = &game_services().user_service.profiles;
+                if let Err(e) = svc.delete() {
+                    godot_error!("Failed to delete profile: {}", e);
+                } else {
+                    godot_print!("Profile deleted successfully");
+                    // Refresh the UI to show default state
+                    gui.get_mut::<StartMenuGui>()
+                        .update_endings_unlocked(&Default::default());
+                }
+            }
             AppRequest::ExitLevel => panic!("should not happen in start menu"),
         }
     }

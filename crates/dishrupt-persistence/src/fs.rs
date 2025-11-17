@@ -56,4 +56,13 @@ impl PersistentStorage for FsStorage {
                 .with_context(|| format!("failed to move temp save {tmp:?} -> {file_path:?}")),
         }
     }
+
+    fn delete(&self, path: &str) -> Result<()> {
+        let file_path = self.root_dir.join(path);
+        match fs::remove_file(&file_path) {
+            Ok(_) => Ok(()),
+            Err(err) if err.kind() == ErrorKind::NotFound => Ok(()),
+            Err(err) => Err(err).with_context(|| format!("failed to delete file {file_path:?}")),
+        }
+    }
 }

@@ -127,7 +127,8 @@ impl GameScene {
             | AppRequest::EnterLevel
             | AppRequest::ShowCredits
             | AppRequest::BackToMenu
-            | AppRequest::ViewEnding(_) => {
+            | AppRequest::ViewEnding(_)
+            | AppRequest::DeleteProfile => {
                 panic!("should be handled in main menu")
             }
             AppRequest::ExitLevel => {

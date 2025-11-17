@@ -123,6 +123,15 @@ impl ProfileService {
             Ok(())
         })
     }
+
+    /// Delete the profile file and clear the cache.
+    pub fn delete(&self) -> Result<()> {
+        self.storage.delete(Self::FILE)?;
+        if let Ok(mut cache) = self.cache.write() {
+            *cache = None;
+        }
+        Ok(())
+    }
 }
 
 /// Create a new player profile with default values.

@@ -24,6 +24,9 @@ pub enum AppRequest {
     ToggleMusic(bool),
     /// Toggle sound effects on/off.
     ToggleSound(bool),
+
+    /// Delete player profile (reset progress).
+    DeleteProfile,
 }
 
 impl UiRequest for AppRequest {}

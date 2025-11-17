@@ -25,6 +25,8 @@ pub struct StartMenuGui {
     credits_btn: ButtonA,
     #[child("%Quit")]
     quit_btn: ButtonA,
+    #[child("%DeleteProfile")]
+    delete_profile_btn: ButtonA,
 
     // NOTE: when the button is PRESSED, the audio is MUTED
     #[child("%MusicToggle")]
@@ -59,6 +61,11 @@ impl Gui for StartMenuGui {
         let cmd = commands.clone();
         self.quit_btn.on_click.connect(move || {
             cmd.push_req(AppRequest::Quit);
+        });
+
+        let cmd = commands.clone();
+        self.delete_profile_btn.on_click.connect(move || {
+            cmd.push_req(AppRequest::DeleteProfile);
         });
 
         let cmd = commands.clone();

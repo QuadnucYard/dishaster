@@ -25,4 +25,7 @@ pub trait PersistentStorage: Send + Sync + 'static {
 
     /// Write raw bytes to storage path atomically.
     fn write_atomic(&self, path: &str, bytes: &[u8]) -> Result<()>;
+
+    /// Delete file at storage path. Returns `Ok(())` even if file doesn't exist.
+    fn delete(&self, path: &str) -> Result<()>;
 }
