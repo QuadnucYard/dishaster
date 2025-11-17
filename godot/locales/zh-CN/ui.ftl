@@ -24,6 +24,11 @@ skip =
 exit =
     .label = 退出
 
+roll-seed =
+    .tooltip = 为当前玩家档案重新生成随机种子
+delete-profile =
+    .tooltip = 删除当前玩家档案及其所有进度
+
 ## In Game
 
 start-run =

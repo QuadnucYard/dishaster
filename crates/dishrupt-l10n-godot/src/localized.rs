@@ -30,3 +30,12 @@ pub struct LocalizedLineEdit {
     #[export]
     pub placeholder_message_id: GString,
 }
+
+/// A marker for localized tooltips.
+#[derive(GodotClass)]
+#[class(base=Node, init)]
+pub struct LocalizedTooltip {
+    /// The message id to use for its parent's tooltip text.
+    #[export]
+    pub message_id: GString,
+}
