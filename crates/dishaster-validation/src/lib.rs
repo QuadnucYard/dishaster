@@ -53,4 +53,31 @@ pub enum ValidationError {
 }
 
 /// Result type for validation operations
-pub type ValidationResult<T = ()> = Result<T, ValidationError>;
+pub type ValidationResult<T = ()> = Result<T, Vec<ValidationError>>;
+
+/// Helper to collect validation errors
+pub(crate) struct ErrorSink(Vec<ValidationError>);
+
+impl ErrorSink {
+    pub(crate) fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    pub(crate) fn push(&mut self, error: ValidationError) {
+        self.0.push(error);
+    }
+
+    pub(crate) fn collect(&mut self, result: ValidationResult) {
+        if let Err(mut errors) = result {
+            self.0.append(&mut errors);
+        }
+    }
+
+    pub(crate) fn finish(self) -> ValidationResult {
+        if self.0.is_empty() {
+            Ok(())
+        } else {
+            Err(self.0)
+        }
+    }
+}

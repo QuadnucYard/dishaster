@@ -3,7 +3,7 @@
 use dishaster_models::*;
 use dishrupt_core::prelude::{HasId, ModelRegistry};
 
-use crate::{ValidationError, ValidationResult};
+use crate::{ErrorSink, ValidationError, ValidationResult};
 
 /// Validates a player profile against the game model registry
 ///
@@ -12,11 +12,13 @@ pub fn validate_player_profile(
     profile: &dishaster_save_models::PlayerProfile,
     registry: &GameModelRegistry,
 ) -> ValidationResult {
+    let mut sink = ErrorSink::new();
+
     // Validate level reference
     if let Some(progress) = &profile.progress
         && !registry.levels.contains_id(&progress.level_id)
     {
-        return Err(ValidationError::MissingReference {
+        sink.push(ValidationError::MissingReference {
             model_type: "level",
             id: progress.level_id.clone(),
             context: "PlayerProgress.level_id".to_string(),
@@ -24,17 +26,20 @@ pub fn validate_player_profile(
     }
 
     // Validate canteen layout
-    validate_canteen_layout(&profile.layout, registry)?;
+    sink.collect(validate_canteen_layout(&profile.layout, registry));
 
     // Validate diner pool
     for (idx, diner) in profile.diner_pool.profiles.iter().enumerate() {
-        validate_diner_profile(diner, registry, idx)?;
+        sink.collect(validate_diner_profile(diner, registry, idx));
     }
 
     // Validate permanent effects
-    validate_permanent_effects(&profile.permanent_effects, registry)?;
+    sink.collect(validate_permanent_effects(
+        &profile.permanent_effects,
+        registry,
+    ));
 
-    Ok(())
+    sink.finish()
 }
 
 /// Validates canteen layout state references
@@ -42,13 +47,15 @@ fn validate_canteen_layout(
     layout: &dishaster_save_models::CanteenLayoutState,
     registry: &GameModelRegistry,
 ) -> ValidationResult {
+    let mut sink = ErrorSink::new();
+
     // Validate window configurations
     for (idx, window_config) in layout.window_configurations.iter().enumerate() {
         let context = format!("window_configurations[{}]", idx);
 
         // Validate service reference
         if !registry.window_services.contains_id(&window_config.service) {
-            return Err(ValidationError::MissingReference {
+            sink.push(ValidationError::MissingReference {
                 model_type: "window_service",
                 id: window_config.service.clone(),
                 context: format!("{}.service", context),
@@ -58,7 +65,7 @@ fn validate_canteen_layout(
         // Validate price override dish references
         for dish_id in window_config.price_override.keys() {
             if !registry.dishes.contains_id(dish_id) {
-                return Err(ValidationError::MissingReference {
+                sink.push(ValidationError::MissingReference {
                     model_type: "dish",
                     id: dish_id.clone(),
                     context: format!("{}.price_override", context),
@@ -68,32 +75,32 @@ fn validate_canteen_layout(
     }
 
     // Validate placement references
-    validate_placement_refs(
+    sink.collect(validate_placement_refs(
         &layout.placement.tables,
         "table",
         registry,
         &registry.tables,
-    )?;
-    validate_placement_refs(
+    ));
+    sink.collect(validate_placement_refs(
         &layout.placement.tray_dispensers,
         "dispenser",
         registry,
         &registry.dispensers,
-    )?;
-    validate_placement_refs(
+    ));
+    sink.collect(validate_placement_refs(
         &layout.placement.chopstick_dispensers,
         "dispenser",
         registry,
         &registry.dispensers,
-    )?;
-    validate_placement_refs(
+    ));
+    sink.collect(validate_placement_refs(
         &layout.placement.collectors,
         "collector",
         registry,
         &registry.collectors,
-    )?;
+    ));
 
-    Ok(())
+    sink.finish()
 }
 
 /// Validates placement model references
@@ -103,16 +110,17 @@ fn validate_placement_refs<T: HasId>(
     _registry: &GameModelRegistry,
     models: &ModelRegistry<T>,
 ) -> ValidationResult {
+    let mut sink = ErrorSink::new();
     for (idx, placement) in placements.iter().enumerate() {
         if !models.contains_id(&placement.model) {
-            return Err(ValidationError::MissingReference {
+            sink.push(ValidationError::MissingReference {
                 model_type,
                 id: placement.model.clone(),
                 context: format!("placement[{}]", idx),
             });
         }
     }
-    Ok(())
+    sink.finish()
 }
 
 /// Validates a diner profile's model references
@@ -121,10 +129,12 @@ fn validate_diner_profile(
     registry: &GameModelRegistry,
     index: usize,
 ) -> ValidationResult {
+    let mut sink = ErrorSink::new();
+
     // Validate dish experience references
     for dish_id in diner.long_term_memory.dish_experience.keys() {
         if !registry.dishes.contains_id(dish_id) {
-            return Err(ValidationError::MissingReference {
+            sink.push(ValidationError::MissingReference {
                 model_type: "dish",
                 id: dish_id.clone(),
                 context: format!(
@@ -135,7 +145,7 @@ fn validate_diner_profile(
         }
     }
 
-    Ok(())
+    sink.finish()
 }
 
 /// Validates permanent effects model references
@@ -143,10 +153,12 @@ fn validate_permanent_effects(
     effects: &dishaster_save_models::PermanentEffects,
     registry: &GameModelRegistry,
 ) -> ValidationResult {
+    let mut sink = ErrorSink::new();
+
     // Validate luxury dish references
     for dish_id in &effects.luxury_dishes {
         if !registry.dishes.contains_id(dish_id) {
-            return Err(ValidationError::MissingReference {
+            sink.push(ValidationError::MissingReference {
                 model_type: "dish",
                 id: dish_id.clone(),
                 context: "permanent_effects.luxury_dishes".to_string(),
@@ -159,7 +171,7 @@ fn validate_permanent_effects(
         if let dishaster_save_models::CampaignTarget::Window(window_id) = &campaign.target
             && !registry.window_services.contains_id(window_id)
         {
-            return Err(ValidationError::MissingReference {
+            sink.push(ValidationError::MissingReference {
                 model_type: "window_service",
                 id: window_id.clone(),
                 context: format!("permanent_effects.campaigns[{}].target", idx),
@@ -167,5 +179,5 @@ fn validate_permanent_effects(
         }
     }
 
-    Ok(())
+    sink.finish()
 }

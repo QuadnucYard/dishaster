@@ -1,6 +1,5 @@
 //! Example program to test loading data from the assets directory
 
-use anyhow::Context;
 use dishaster_data::DataLoader;
 
 #[test]
@@ -55,7 +54,8 @@ fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
     println!("Decision config: {:#?}", registry.decision_config);
 
     // Validate all loaded data
-    dishaster_validation::validate_registry(&registry).context("validating game model registry")?;
+    dishaster_validation::validate_registry(&registry)
+        .map_err(|errors| anyhow::anyhow!("Validation failed with {} error(s)", errors.len()))?;
     println!("✓ Data validation passed");
 
     Ok(())

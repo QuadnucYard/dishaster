@@ -132,22 +132,22 @@ impl DataLoader {
 
         // Load reputation configuration
         registry.reputation_config = self
-            .load_ron_file(&self.assets_path.join("reputation.ron"))
+            .load_ron_file(&self.assets_path.join("configs/reputation.ron"))
             .context("Loading reputation configuration")?;
 
         // Load ordering configuration
         registry.ordering_config = self
-            .load_ron_file(&self.assets_path.join("ordering.ron"))
+            .load_ron_file(&self.assets_path.join("configs/ordering.ron"))
             .context("Loading ordering configuration")?;
 
         // Load decision configuration
         registry.decision_config = self
-            .load_ron_file(&self.assets_path.join("decision.ron"))
+            .load_ron_file(&self.assets_path.join("configs/decision.ron"))
             .context("Loading decision configuration")?;
 
         // Load trial configuration
         registry.trial_config = self
-            .load_ron_file(&self.assets_path.join("trial.ron"))
+            .load_ron_file(&self.assets_path.join("configs/trial.ron"))
             .context("Loading trial configuration")?;
 
         registry.trial = TrialCorpus {
@@ -172,7 +172,7 @@ impl DataLoader {
             .context("Loading endings data")?;
 
         let opening_config = self
-            .load_ron_file(&self.assets_path.join("opening.ron"))
+            .load_ron_file(&self.assets_path.join("configs/opening.ron"))
             .context("Loading opening configuration")?;
 
         let credits: CreditsData = self

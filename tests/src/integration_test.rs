@@ -79,12 +79,16 @@ fn main() -> Result<()> {
     let data = loader.load_all_data()?;
     let registry = data.models;
 
-    dishaster_validation::validate_registry(&registry)?;
+    dishaster_validation::validate_registry(&registry)
+        .map_err(|errors| anyhow::anyhow!("Validation failed with {} error(s)", errors.len()))?;
     println!("✓ Data validation passed");
 
     let service = UserDataService::new(Arc::new(MemoryStorage));
     let profile_svc = &service.profiles;
-    dishaster_validation::validate_player_profile(&profile_svc.load().unwrap(), &registry)?;
+    dishaster_validation::validate_player_profile(&profile_svc.load().unwrap(), &registry)
+        .map_err(|errors| {
+            anyhow::anyhow!("Profile validation failed with {} error(s)", errors.len())
+        })?;
     println!("✓ Player profile validation passed");
 
     let level = level_for_current_day(profile_svc, &registry)?;

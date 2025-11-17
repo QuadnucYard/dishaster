@@ -1,3 +1,4 @@
+/// IMPORTANT: When adding new dishes, also add localization entries in locales.
 [
     // ==================== 套餐窗口 (Combo Windows) ====================
     // Quick service with complete combo meals
@@ -83,6 +84,8 @@
             (dish_id: "green_pepper_pork", pricing: PerPortion(4.0)),
             (dish_id: "potato_shreds", pricing: PerPortion(2.0)),
             (dish_id: "spinach_garlic", pricing: PerPortion(2.5)),
+            (dish_id: "stir_fried_water_spinach", pricing: PerPortion(2.0)),
+            (dish_id: "stir_fried_bean_sprouts", pricing: PerPortion(1.5)),
         ],
         display: (res: "windows/sample_window"),
     ),
@@ -129,6 +132,29 @@
             (dish_id: "salt_pepper_ribs", pricing: ByWeight(60.0)),
             (dish_id: "stir_fried_bok_choy", pricing: PerPortion(1.5)),
             (dish_id: "braised_eggplant", pricing: PerPortion(2.5)),
+        ],
+        display: (res: "windows/sample_window"),
+    ),
+    // Soup window (汤菜窗口)
+    (
+        id: "main_window_soup",
+        window_type: General,
+        layout: (
+            size: (width: 2.0, height: 3.0),
+            queue_x: [0.5, 1.5],
+            dish_slots: [
+                (min: (0.5, 0.0), max: (1.0, 0.5)),
+                (min: (1.0, 0.0), max: (1.5, 0.5)),
+                (min: (0.5, 0.5), max: (1.0, 1.0)),
+                (min: (1.0, 0.5), max: (1.5, 1.0)),
+            ],
+        ),
+        dish_options: [
+            (dish_id: "rice", pricing: ByWeight(2.0)),
+            (dish_id: "egg_drop_soup", pricing: PerPortion(2.0)),
+            (dish_id: "seaweed_egg_soup", pricing: PerPortion(2.5)),
+            (dish_id: "tomato_egg_soup", pricing: PerPortion(3.0)),
+            (dish_id: "winter_melon_soup", pricing: PerPortion(2.5)),
         ],
         display: (res: "windows/sample_window"),
     ),

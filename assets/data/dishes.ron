@@ -1,3 +1,4 @@
+/// IMPORTANT: When adding new dishes, also add localization entries in locales.
 [
     // ==================== 主食类 (Staples) ====================
     (
