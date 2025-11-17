@@ -6,6 +6,7 @@ rust-version.workspace = true
 edition.workspace = true
 
 [lib]
+name = "dishaster"
 crate-type = ["cdylib"] # Compile this crate to a dynamic C library.
 test = false
 
