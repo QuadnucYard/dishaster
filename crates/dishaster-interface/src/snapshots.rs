@@ -4,6 +4,8 @@ use dishrupt_core::prelude::*;
 
 /// Simulation state snapshot for rendering
 pub struct Snapshot {
+    /// Current simulation tick count.
+    pub tick: Tick,
     /// Statistics and metrics for the current simulation state.
     pub stats: DayStats,
     /// Display graph data for rendering the current frame.
@@ -13,11 +15,14 @@ pub struct Snapshot {
 }
 
 /// Statistics and metrics for the current simulation state.
+#[derive(Debug)]
 pub struct DayStats {
-    /// Simulation timestamp in seconds.
-    pub time_seconds: f64,
     /// Total simulation ticks since start.
     pub tick: Tick,
+    /// Simulation timestamp in seconds.
+    pub time_seconds: f64,
+    /// World clock time in seconds since midnight.
+    pub world_time: f64,
 
     /// Current number of live diners in the simulation.
     pub live_diners: u32,

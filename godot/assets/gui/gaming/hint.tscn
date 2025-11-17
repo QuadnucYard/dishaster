@@ -23,7 +23,7 @@ offset_right = 418.0
 offset_bottom = 78.0
 grow_horizontal = 2
 mouse_filter = 2
-theme_override_constants/margin_top = 40
+theme_override_constants/margin_top = 80
 
 [node name="Panel" type="PanelContainer" parent="."]
 unique_name_in_owner = true

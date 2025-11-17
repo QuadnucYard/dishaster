@@ -7,6 +7,8 @@ pub struct TimeStatsGui {
     pub perf_label: LabelA,
     #[child("%TimeLabel")]
     pub time_label: LabelA,
+    #[child("%ClockLabel")]
+    pub clock_label: LabelA,
     #[child("%DinerStatsLabel")]
     pub diner_stats_label: LabelA,
     #[child("%TpsSlider")]
@@ -18,15 +20,22 @@ pub struct TimeStatsGui {
 }
 
 impl TimeStatsGui {
-    pub fn update_time(&mut self, sim_tick: u32, sim_time: f64) {
+    pub fn update_time(&mut self, sim_tick: u32, sim_time: f64, world_time: f64) {
+        // Show simulation elapsed time
         let total_seconds = sim_time as u32;
         let hours = total_seconds / 3600;
         let minutes = (total_seconds % 3600) / 60;
         let seconds = total_seconds % 60;
-
         let text = format!("Sim: {hours:02}:{minutes:02}:{seconds:02} (tick {sim_tick})");
-
         self.time_label.set_text(&text);
+
+        // Show world clock (HH:MM:SS)
+        let clock_seconds = world_time as u32;
+        let clock_hours = (clock_seconds / 3600) % 24;
+        let clock_minutes = (clock_seconds % 3600) / 60;
+        let clock_secs = clock_seconds % 60;
+        let clock_text = format!("{clock_hours:02}:{clock_minutes:02}:{clock_secs:02}");
+        self.clock_label.set_text(&clock_text);
     }
 
     pub fn update_perf(&mut self, fps: f32, ups: f32) {

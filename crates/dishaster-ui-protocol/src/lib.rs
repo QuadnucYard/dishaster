@@ -173,6 +173,7 @@ pub enum PhaseMusic {
 pub struct StatsView {
     pub sim_tick: u32,
     pub sim_time: f64,
+    pub world_time: f64,
 
     pub fps: f32,
     pub ups: f32,

@@ -250,7 +250,7 @@ impl GameScene {
             }
             UiCommand::UpdateStats(view) => {
                 let stats_gui = gui.get_mut::<TimeStatsGui>();
-                stats_gui.update_time(view.sim_tick, view.sim_time);
+                stats_gui.update_time(view.sim_tick, view.sim_time, view.world_time);
                 stats_gui.update_perf(view.fps, view.ups);
                 stats_gui.update_diner_stats(
                     view.current_diners,

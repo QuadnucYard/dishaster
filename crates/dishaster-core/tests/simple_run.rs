@@ -1,77 +1,10 @@
 //! Test running a basic simulation loop to verify no panics and basic lifecycle
 
-use std::sync::Arc;
+mod fixture;
 
-use dishaster_core::{models::*, sim::*};
-use dishrupt_core::display::DisplayModel;
+use dishaster_core::sim::*;
 use dishrupt_simulation::ISimulation;
-
-/// Create a minimal game model registry for testing
-fn create_test_registry() -> GameModelRegistry {
-    let mut registry = GameModelRegistry::default();
-
-    // Add a basic canteen model
-    let canteen_model = CanteenModel {
-        id: ModelId::new("test_canteen"),
-        width: 20.0,
-        height: 15.0,
-        entrances_y: 0.0,
-        entrances: vec![XRange::new(8.0, 12.0)],
-        windows_y: 12.0,
-        windows: vec![XRange::new(5.0, 15.0)],
-        display: DisplayModel::default(),
-    };
-    registry
-        .canteens
-        .intern(canteen_model.id.clone(), canteen_model);
-
-    let level_config = LevelConfig {
-        id: ModelId::new("test_level"),
-        canteen: ModelId::new("test_canteen"),
-        start_day: Day(0),
-        run_length: 600.0,
-        diner_randomizer: DinerRandomizerModel {
-            personality: PersonalityRanges {
-                frugality: MinMax::new(0.1, 0.5),
-                adventurous: MinMax::new(0.2, 0.8),
-                confrontational: MinMax::new(0.1, 0.6),
-                patience_base: MinMax::new(60.0, 300.0),
-                decisiveness: MinMax::new(0.2, 0.8),
-                adaptiveness: MinMax::new(0.1, 0.6),
-            },
-            dining: DiningRanges {
-                economic_capacity: MinMax::new(10.0, 20.0), // Student range
-                max_satiation: MinMax::new(80.0, 130.0),    // Small to large appetite
-                eating_speed: MinMax::new(0.5, 1.5),
-            },
-            appearance: Default::default(),
-        },
-        seed: Default::default(),
-        diner_pool: Default::default(),
-        window_configurations: vec![],
-        table_placements: vec![],
-        tray_dispenser_placements: vec![],
-        chopstick_dispenser_placements: vec![],
-        collector_placements: vec![],
-    };
-    registry
-        .levels
-        .intern(level_config.id.clone(), level_config);
-
-    registry
-}
-
-/// Create a minimal test level configuration
-fn create_test_level() -> LevelSetupState {
-    LevelSetupState {
-        level_id: ModelId::new("test_level"),
-        day: Default::default(),
-        seed: Default::default(),
-        canteen: Default::default(),
-        diner_pool: Default::default(),
-        permanent_effects: Default::default(),
-    }
-}
+use fixture::{create_test_level, create_test_registry};
 
 #[test]
 fn test_simulation_basic_lifecycle() {
@@ -87,7 +20,7 @@ fn test_simulation_basic_lifecycle() {
     );
 
     // Create and initialize simulation
-    let mut sim = Simulation::new(Arc::new(registry));
+    let mut sim = Simulation::new(registry);
     sim.start(level);
 
     // The simulation should not be complete at start
@@ -149,7 +82,7 @@ fn test_spawning_stops_after_run_length() {
     let registry = create_test_registry();
     let level = create_test_level();
 
-    let mut sim = Simulation::new(Arc::new(registry));
+    let mut sim = Simulation::new(registry);
     sim.start(level);
 
     // Run past the spawner run length (10 seconds)

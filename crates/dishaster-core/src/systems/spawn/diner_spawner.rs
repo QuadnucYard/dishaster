@@ -11,12 +11,8 @@ pub fn update_diner_spawner(
     canteen: Res<Canteen>,
     display_root: Res<DisplayRoot>,
 ) {
-    if !day_status.started {
-        // Wait for the service phase to begin before spawning diners.
-        return;
-    }
-
-    let current_time = time.current_time as f32;
+    // Use relative time for arrival time checks
+    let current_time = time.world_time as f32 - day_status.start_time;
 
     // Spawn all diners whose arrival time has passed
     while let Some(scheduled) = schedule.next_diner_if_ready(current_time) {

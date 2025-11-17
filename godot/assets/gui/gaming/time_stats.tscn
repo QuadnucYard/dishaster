@@ -1,8 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://djdcse6v6o5h0"]
+[gd_scene load_steps=10 format=3 uid="uid://djdcse6v6o5h0"]
 
 [ext_resource type="Theme" uid="uid://quax61mpru57" path="res://assets/themes/panel_text_sm.tres" id="1_ecx8e"]
 [ext_resource type="StyleBox" uid="uid://cdh3642aa61kf" path="res://assets/themes/panel_compact.tres" id="2_xrvir"]
 [ext_resource type="Texture2D" uid="uid://cgbgmwp03khh2" path="res://assets/gui/textures/slider_grabber.png" id="3_ecx8e"]
+[ext_resource type="Texture2D" uid="uid://u13odlqnrhwc" path="res://assets/gui/textures/clock_bg.png" id="4_0nkai"]
+[ext_resource type="FontVariation" uid="uid://c2qn650okphc0" path="res://assets/fonts/sans_extrabold.tres" id="5_3ggn1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_03vi5"]
 content_margin_left = 8.0
@@ -27,24 +29,27 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ecx8e"]
-content_margin_left = 8.0
-content_margin_top = 8.0
-content_margin_right = 8.0
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ecx8e"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_70kmr"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
 content_margin_bottom = 8.0
-bg_color = Color(0.7295856, 0.84629714, 0.62692976, 0.7490196)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+texture = ExtResource("4_0nkai")
+texture_margin_left = 28.0
+texture_margin_top = 28.0
+texture_margin_right = 28.0
+texture_margin_bottom = 28.0
 
 [node name="TimeStats" type="Control"]
 layout_mode = 3
-anchors_preset = 1
-anchor_left = 1.0
+anchors_preset = 15
 anchor_right = 1.0
-grow_horizontal = 0
-mouse_filter = 1
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -67,24 +72,6 @@ theme_override_styles/panel = ExtResource("2_xrvir")
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer"]
 layout_mode = 2
 
-[node name="PerfLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "FPS:   --  UPS:   --"
-horizontal_alignment = 2
-
-[node name="TimeLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Sim: 00:00:00 (tick 0)"
-horizontal_alignment = 2
-
-[node name="DinerStatsLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Diners: 0 / 0"
-horizontal_alignment = 2
-
 [node name="TpsRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -104,7 +91,7 @@ theme_override_icons/grabber_highlight = ExtResource("3_ecx8e")
 theme_override_icons/grabber_disabled = ExtResource("3_ecx8e")
 theme_override_styles/slider = SubResource("StyleBoxFlat_03vi5")
 theme_override_styles/grabber_area = SubResource("StyleBoxFlat_xrvir")
-theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_ecx8e")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxEmpty_ecx8e")
 max_value = 600.0
 value = 60.0
 
@@ -113,6 +100,25 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "60"
 horizontal_alignment = 1
+
+[node name="DinerStatsLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Diners: 0 / 0"
+horizontal_alignment = 2
+
+[node name="PerfLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "FPS:   --  UPS:   --"
+horizontal_alignment = 2
+
+[node name="TimeLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Sim: 00:00:00 (tick 0)"
+horizontal_alignment = 2
 
 [node name="DebugSwitch" type="CheckButton" parent="MarginContainer/PanelContainer/VBoxContainer"]
 unique_name_in_owner = true
@@ -123,3 +129,31 @@ theme_override_colors/font_pressed_color = Color(0.6627451, 0.40392157, 0.149019
 theme_override_colors/font_hover_color = Color(0.6627451, 0.40392157, 0.14901961, 1)
 theme_override_colors/font_hover_pressed_color = Color(0.6627451, 0.40392157, 0.14901961, 1)
 text = "Debug"
+
+[node name="MarginContainer2" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_right = 20.0
+offset_bottom = 40.0
+grow_horizontal = 2
+theme_override_constants/margin_top = 4
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer2"]
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_70kmr")
+
+[node name="ClockLabel" type="Label" parent="MarginContainer2/PanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92859197, 0.8668494, 0.7312467, 1)
+theme_override_colors/font_outline_color = Color(0.3372549, 0.2901961, 0.21176471, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("5_3ggn1")
+theme_override_font_sizes/font_size = 36
+text = "11:45:14"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -15,6 +15,12 @@ pub struct LevelConfig {
     pub run_length: Seconds,
     /// Random seed for reproducible gameplay
     pub seed: Seed,
+    /// Entry time when player enters preparation phase (default 11:00:00 = 39600)
+    #[serde(default = "default_entry_time")]
+    pub entry_time: Seconds,
+    /// Start time when service begins (default 11:30:00 = 41400)
+    #[serde(default = "default_start_time")]
+    pub start_time: Seconds,
     /// Diner generation parameters
     pub diner_randomizer: DinerRandomizerModel,
 
@@ -42,4 +48,14 @@ impl HasId for LevelConfig {
     fn id(&self) -> &ModelId {
         &self.id
     }
+}
+
+/// Default entry time: 11:00:00 (39600 seconds since midnight)
+fn default_entry_time() -> Seconds {
+    11.0 * 3600.0
+}
+
+/// Default start time: 11:30:00 (41400 seconds since midnight)
+fn default_start_time() -> Seconds {
+    11.5 * 3600.0
 }

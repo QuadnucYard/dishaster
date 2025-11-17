@@ -105,8 +105,6 @@ impl Simulation {
     pub fn start(&mut self, level: LevelSetupState) {
         const DEFAULT_TIMESTEP_S: f64 = 0.1;
 
-        self.world.insert_resource(Time::new(DEFAULT_TIMESTEP_S));
-
         let mut world_rng = WorldRng::new(level.seed.get());
 
         let db = Arc::clone(self.world.resource::<GameModelRegistryRes>());
@@ -114,6 +112,12 @@ impl Simulation {
             .levels
             .get_by_id(&level.level_id)
             .expect("Invalid level ID");
+
+        self.world.insert_resource(Time::new(
+            DEFAULT_TIMESTEP_S,
+            level_config.entry_time as f64,
+        ));
+
         let canteen = db
             .canteens
             .get_by_id(&level_config.canteen)
@@ -144,6 +148,7 @@ impl Simulation {
             seed: level.seed,
             current_day: level.day,
             start_day: level_config.start_day,
+            start_time: level_config.start_time,
             ..Default::default()
         });
         self.world.insert_resource(DailyStats::default());
@@ -239,6 +244,7 @@ impl ISimulation<CoreSimulationFeat> for Simulation {
         let debug = self.snapshot_debug();
 
         Snapshot {
+            tick: stats.tick,
             stats,
             display,
             debug,

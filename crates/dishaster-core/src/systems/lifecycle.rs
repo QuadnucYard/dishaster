@@ -41,9 +41,10 @@ pub fn on_day_started(
 fn on_run_started(
     _event: On<RunStarted>,
     mut commands: Commands,
-    mut day_status: ResMut<DayStatus>,
+    mut time: ResMut<Time>,
+    day_status: Res<DayStatus>,
 ) {
-    day_status.started = true;
+    time.fast_forward_to(day_status.start_time as f64);
 
     log::info!(
         "Run started for day {} from {}",

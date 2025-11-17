@@ -10,8 +10,9 @@ impl Simulation {
         let daily_stats = self.world.resource::<DailyStats>();
 
         DayStats {
+            tick: time.current_tick,
             time_seconds: time.current_time,
-            tick: time.total_ticks,
+            world_time: time.world_time,
             live_diners: day_status.live_diner_count,
             total_visits: daily_stats.total_visits,
             completed_diners: daily_stats.completed_diners,

@@ -44,6 +44,7 @@ struct DayTelemetry {
     day: u32,
     tick: u32,
     seconds: f64,
+    world_time: f64,
     /// Current number of live diners in the canteen
     live_diners: u32,
     /// Total number of diners that have visited this day
@@ -99,19 +100,21 @@ impl Game {
         level: LevelSetupState,
         sim_creator: impl FnOnce(LevelSetupState) -> Box<dyn ISimulation<CoreSimulationFeat>>,
     ) -> Self {
-        let telemetry = DayTelemetry {
-            seed: level.seed.get(),
-            day: level.day.0,
-            ..Default::default()
-        };
-
-        let levle_config = db
+        let level_config = db
             .levels
             .get_by_id(&level.level_id)
             .expect("failed to get level");
+
+        let telemetry = DayTelemetry {
+            seed: level.seed.get(),
+            day: level.day.0,
+            world_time: level_config.entry_time as f64,
+            ..Default::default()
+        };
+
         let map_prefab = &db
             .canteens
-            .get_by_id(&levle_config.canteen)
+            .get_by_id(&level_config.canteen)
             .expect("failed to get canteen")
             .display
             .res;
@@ -196,6 +199,7 @@ impl Game {
 
             self.telemetry.tick = snapshot.stats.tick;
             self.telemetry.seconds = snapshot.stats.time_seconds;
+            self.telemetry.world_time = snapshot.stats.world_time;
             self.telemetry.live_diners = snapshot.stats.live_diners;
             self.telemetry.total_visits = snapshot.stats.total_visits;
             self.telemetry.consumption_kg = snapshot.stats.consumption_kg;
@@ -279,6 +283,7 @@ impl Game {
         let view = Box::new(StatsView {
             sim_tick: self.telemetry.tick,
             sim_time: self.telemetry.seconds,
+            world_time: self.telemetry.world_time,
             fps: self.perf_tracker.last_fps,
             ups: self.perf_tracker.last_ups,
             current_diners: self.telemetry.live_diners,

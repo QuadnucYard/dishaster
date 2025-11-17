@@ -49,9 +49,9 @@ pub struct DayStatus {
     pub current_day: Day,
     /// Starting day index
     pub start_day: Day,
+    /// Simulation time when service begins (seconds since midnight)
+    pub start_time: Seconds,
 
-    /// Whether the spawning period has begun for the current day
-    pub started: bool,
     /// Whether the current day has reached completion criteria
     pub completed: bool,
     /// Whether the day completion event has been emitted
