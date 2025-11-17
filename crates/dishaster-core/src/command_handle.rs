@@ -1,8 +1,6 @@
-use bevy_ecs::system::SystemState;
 use dishaster_interface::{event::*, response::*, *};
 use dishaster_models::InspectorVisitModel;
 use dishaster_navigation::*;
-use dishaster_trial as trial;
 
 use crate::{
     components::*, events::*, messages::*, prelude::*, resources::*, sim::Simulation, views::*,
@@ -51,111 +49,31 @@ impl Simulation {
             }
 
             SimCommand::TrialStart { diner, topic } => {
-                // Reset trial session for new trial
-                let mut trial_session = self.world.resource_mut::<TrialSession>();
-                trial_session.start(diner, topic.as_ref().map(ToModel::to_model));
-
-                let intro = trial::create_trial_intro(&mut trial_session);
-
-                let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialIntro(intro.into()));
+                self.world.trigger(TrialStart {
+                    diner: diner.to_entity(),
+                    topic: topic.as_ref().map(ToModel::to_model),
+                });
             }
             SimCommand::TrialLaunch => {
-                let mut system_state: SystemState<(
-                    ResMut<TrialSession>,
-                    Res<GameModelRegistryRes>,
-                )> = SystemState::new(&mut self.world);
-                let (mut session, registry) = system_state.get_mut(&mut self.world);
-
-                let statement = trial::create_diner_statement(&mut session, &registry.trial);
-
-                let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialLeftSpeak(statement.into()));
+                self.world.trigger(TrialLaunch);
             }
             SimCommand::TrialRespond(resp_corpus_index) => {
-                // Respond with the selected speech
-                let mut system_state: SystemState<(
-                    ResMut<TrialSession>,
-                    Res<GameModelRegistryRes>,
-                )> = SystemState::new(&mut self.world);
-                let (mut session, registry) = system_state.get_mut(&mut self.world);
-
-                let (speech, impact) =
-                    trial::trial_respond(&mut session, &registry.trial, resp_corpus_index);
-
-                if let Some(diner_entity) = session.target_entity {
-                    self.world.trigger(ApplyTrialImpact {
-                        diner: diner_entity.to_entity(),
-                        psych_impact: impact.psych,
-                        reputation_impact: impact.reputation,
-                    });
-                }
-
-                let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialRightSpeak(speech.into()));
+                self.world.trigger(TrialRespond(resp_corpus_index));
             }
-
             SimCommand::TrialTimeout => {
-                // Apply timeout penalty before ending trial
-                let mut system_state: SystemState<(Res<TrialSession>,)> =
-                    SystemState::new(&mut self.world);
-                let (session,) = system_state.get_mut(&mut self.world);
-
-                let impact = trial::get_trial_timeout_penalty(&session.config);
-
-                if let Some(diner_entity) = session.target_entity {
-                    self.world.trigger(ApplyTrialImpact {
-                        diner: diner_entity.to_entity(),
-                        psych_impact: impact.psych,
-                        reputation_impact: impact.reputation,
-                    });
-                }
-
-                let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialEnd { timeout: true });
+                self.world.trigger(TrialTimeout);
             }
             SimCommand::TrialRequestCandidates {
                 speech_id,
                 keyword_index,
             } => {
-                let mut system_state: SystemState<(
-                    ResMut<TrialSession>,
-                    Res<GameModelRegistryRes>,
-                )> = SystemState::new(&mut self.world);
-                let (mut session, registry) = system_state.get_mut(&mut self.world);
-
-                // Generate response candidates for this keyword
-                let options = trial::generate_trial_response_candidates(
-                    &mut session,
-                    &registry.trial,
+                self.world.trigger(TrialRequestCandidates {
                     speech_id,
                     keyword_index,
-                );
-
-                // Emit event with the candidates
-                let mut events = self.world.resource_mut::<EventQueue>();
-                events.push(SimEvent::TrialResponseCandidates(options));
+                });
             }
             SimCommand::TrialProceed => {
-                let mut system_state: SystemState<(
-                    ResMut<TrialSession>,
-                    Res<GameModelRegistryRes>,
-                )> = SystemState::new(&mut self.world);
-                let (mut session, registry) = system_state.get_mut(&mut self.world);
-
-                let should_continue = trial::trial_should_continue(&mut session, &registry.trial);
-
-                if should_continue {
-                    // Generate new speech sequence on a related topic
-                    let statement = trial::create_diner_statement(&mut session, &registry.trial);
-
-                    let mut events = self.world.resource_mut::<EventQueue>();
-                    events.push(SimEvent::TrialLeftSpeak(statement.into()));
-                } else {
-                    // End of trial
-                    let mut events = self.world.resource_mut::<EventQueue>();
-                    events.push(SimEvent::TrialEnd { timeout: false });
-                }
+                self.world.trigger(TrialProceed);
             }
 
             SimCommand::ApplyManagementDecision(index) => {

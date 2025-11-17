@@ -46,6 +46,7 @@ impl Simulation {
         world.insert_resource(db.into_res());
 
         systems::register_lifecycle_systems(&mut world);
+        systems::register_trial_systems(&mut world);
         schedule.add_systems(
             (
                 // Recompute soft crowd costs for pathfinding

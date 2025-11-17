@@ -12,6 +12,7 @@ mod queueing;
 mod refill;
 mod serving;
 mod spawn;
+mod trials;
 
 pub use dining::*;
 pub use feedback::*;
@@ -24,6 +25,7 @@ pub use queueing::*;
 pub use refill::*;
 pub use serving::*;
 pub use spawn::*;
+pub use trials::*;
 
 /// Common imports for systems
 mod prelude {
