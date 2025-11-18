@@ -7,7 +7,8 @@ use dishaster_core::{
 use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, EndingGalleryGui, EndingGalleryView, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
-use dishrupt_core::asset::AudioRef;
+use dishrupt_core::asset::{AudioRef, PrefabRef};
+use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
 use dishrupt_godot_utils::BindGodot;
 use godot::{
@@ -16,7 +17,7 @@ use godot::{
     obj::Gd,
 };
 
-use crate::{game_main::game_services, scenes::proc::EnterLevelProcedure};
+use crate::{effect::pend_effect, game_main::game_services, scenes::proc::EnterLevelProcedure};
 
 static MAIN_THEME_MUSIC: LazyLock<AudioRef> = LazyLock::new(|| AudioRef::new("main_theme.ogg"));
 
@@ -94,6 +95,14 @@ impl Scene for StartScene {
             let req = req.downcast::<AppRequest>().expect("app request");
 
             self.handle_app_request(ctx, *req);
+        }
+    }
+
+    fn input(&mut self, _ctx: &mut SceneContext, event: GodotInputEvent) {
+        if let GodotInputEvent::Button(e) = event
+            && e.pressed
+        {
+            pend_effect(PrefabRef::new("heart_break"), None);
         }
     }
 }
@@ -204,6 +213,10 @@ impl StartScene {
                 }
             }
             AppRequest::ExitLevel => panic!("should not happen in start menu"),
+
+            AppRequest::SpawnEffectAtMouse(prefab) => {
+                pend_effect(prefab, None);
+            }
         }
     }
 }

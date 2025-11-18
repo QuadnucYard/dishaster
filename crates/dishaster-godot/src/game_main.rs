@@ -19,6 +19,7 @@ use dishrupt_persistence::GodotUserStorage;
 use godot::{classes::CanvasLayer, prelude::*};
 
 use crate::{
+    effect::EffectOverlay,
     panic::{get_panic_message, has_panic_occurred, init_backtrace_handle},
     panic_overlay::PanicOverlay,
     scenes::{DefaultSceneLoader, proc::*},
@@ -40,6 +41,7 @@ struct Inner {
     audio: AudioManager,
     l10n: LocalizationManager,
     input_listener: Gd<InputListener>,
+    effect_overlay: EffectOverlay,
     panic_overlay: PanicOverlay,
 
     services: Arc<GameServices>,
@@ -110,6 +112,10 @@ impl Inner {
         let l10n = Default::default();
         let input_listener = root.get_or_add_node_of_type::<InputListener>();
 
+        let effect_overlay = EffectOverlay::new(
+            root.get_or_add_node_as("EffectOverlay"),
+            services.catalog.clone(),
+        );
         let panic_overlay = PanicOverlay::new(root.get_node_as("%PanicOverlay"));
 
         Self {
@@ -118,6 +124,7 @@ impl Inner {
             audio,
             l10n,
             input_listener,
+            effect_overlay,
             panic_overlay,
 
             services,
@@ -204,6 +211,8 @@ impl Inner {
                 self.scene_manager.schedule1(proc);
             }
         }
+
+        self.effect_overlay.process();
     }
 
     fn physics_process(&mut self, delta: f64) {

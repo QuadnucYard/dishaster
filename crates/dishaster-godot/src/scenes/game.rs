@@ -12,6 +12,7 @@ use dishrupt_godot_utils::BindGodot;
 use godot::{classes::Node, prelude::*};
 
 use crate::{
+    effect::pend_effect,
     game_main::{GameServices, game_services},
     scenes::proc::*,
 };
@@ -137,6 +138,9 @@ impl GameScene {
             }
             AppRequest::ToggleMusic(_mute) => {}
             AppRequest::ToggleSound(_mute) => {}
+            AppRequest::SpawnEffectAtMouse(prefab) => {
+                pend_effect(prefab, None);
+            }
         }
     }
 

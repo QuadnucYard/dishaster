@@ -1,4 +1,7 @@
-use godot::{classes::*, prelude::*};
+use godot::{
+    classes::{CanvasLayer, Label},
+    prelude::*,
+};
 
 /// Panic overlay that displays panic information
 pub struct PanicOverlay {

@@ -21,6 +21,7 @@ prefix = "res://assets/music"
 prefix = "res://assets/sounds"
 
 [kinds.prefab.aliases]
+heart_break = "effects/heart_break"
 dish_price_label = "price_label"
 
 [kinds.music.aliases]

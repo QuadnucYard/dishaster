@@ -29,6 +29,9 @@ pub enum AppRequest {
     RollSeed,
     /// Delete player profile (reset progress).
     DeleteProfile,
+
+    /// Create an effect at the current mouse position.
+    SpawnEffectAtMouse(PrefabRef),
 }
 
 impl UiRequest for AppRequest {}

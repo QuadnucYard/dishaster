@@ -178,7 +178,13 @@ impl Gui for TrialGui {
         let cmd = commands.clone();
         self.thought.on_select_option.connect(move |corpus_index| {
             godot_print!("Thought option selected: {}", corpus_index);
+
             cmd.push_req(GameRequest::TrialRespond(corpus_index));
+
+            // Spawn click effect at mouse position
+            cmd.push_req(AppRequest::SpawnEffectAtMouse(PrefabRef::new(
+                "heart_break",
+            )));
         });
     }
 
