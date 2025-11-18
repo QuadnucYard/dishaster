@@ -154,19 +154,17 @@ pub struct AddMotivationalSloganModel {
     pub satisfaction_penalty: f32,
 }
 
-/// Template for adding luxury dish decision
+/// Template for supplying crab dish decision
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename = "AddLuxuryDish")]
-pub struct AddLuxuryDishTemplate {
-    /// The luxury dish to add (e.g., "king_crab")
-    pub dish_id: ModelId,
+#[serde(rename = "SupplyCrab")]
+pub struct SupplyCrabTemplate {
+    /// Probability for diners to trigger crab topic trial (0.0..1.0)
+    pub trial_probability: f32,
 }
 
-/// Model for adding luxury dish decision
+/// Model for supplying crab dish decision
 #[derive(Debug, Clone)]
-pub struct AddLuxuryDishModel {
-    /// The luxury dish that was added
-    pub dish_id: ModelId,
-    /// Whether this decision has been applied
-    pub applied: bool,
+pub struct SupplyCrabModel {
+    /// Probability for diners to trigger crab topic trial
+    pub trial_probability: f32,
 }

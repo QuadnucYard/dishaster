@@ -23,6 +23,7 @@ pub fn register_management_decision_systems(world: &mut World) {
         apply_play_music,
         apply_advertise_campaign,
         apply_add_motivational_slogan,
+        apply_supply_crab,
     );
 }
 
@@ -243,4 +244,20 @@ fn apply_add_motivational_slogan(
         satisfaction_boost: model.satisfaction_boost,
         satisfaction_penalty: model.satisfaction_penalty,
     });
+}
+
+/// Apply supply crab decision effect
+fn apply_supply_crab(
+    event: On<DispatchManagement<SupplyCrabModel>>,
+    mut permanent_effects: ResMut<PermanentEffectsRes>,
+) {
+    let model = &event.0;
+
+    log::info!(
+        "Applying supply crab effect: trial_probability={:.2}",
+        model.trial_probability
+    );
+
+    // Set crab trial probability for next day's diners
+    permanent_effects.crab_trial_probability = Some(model.trial_probability);
 }

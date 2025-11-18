@@ -19,35 +19,117 @@ turns:
         keywords:
           - keyword: 菜名
             options:
-              - id: 244
-                kind: objection
-                summary: 应自行询问
-              - id: 82
-                kind: objection
-                summary: 解释出品差异
-              - id: 243
-                kind: agreement
-                summary: 优化标签
+              - id: 229
+                kind: question
+                summary: 对比菜单
               - id: 267
                 kind: agreement
                 summary: 放大标签
+              - id: 243
+                kind: agreement
+                summary: 优化标签
+              - id: 185
+                kind: question
+                summary: 看清了吗
     selected_response:
       speech_id: 8
       keyword_idx: 0
       option_idx: 1
     manager_speeches:
-      - id: 82
-        summary: 解释出品差异
-        text: "关于口味与图片不符，\\我会向厨师确认出品标准\\并说明是否为配方调整，\\并在必要时恢复原配方。"
-        emotion: 🙂
+      - id: 267
+        summary: 放大标签
+        text: "感谢提醒，\\我们将重新设计菜品标识牌，\\采用大号字体并增加背光显示，\\方便所有顾客清晰阅读。"
+        emotion: 😊
     impact:
-      reputation_score: -1.5
-      mood_change: -0.15
-      trust_change: -0.075
-      patience_change: -3
+      reputation_score: 0.5
+      mood_change: 0.05
+      trust_change: 0.025
+      patience_change: 1
+    continuation_decision: true
+  - turn_number: 2
+    diner_speeches:
+      - id: 84
+        text: "今天的[番茄炒蛋]太咸了，\\根本没法下口，\\你们是不是把盐罐打翻了？"
+        emotion: 😤
+        topic: taste
+    response_options:
+      - speech_id: 84
+        keywords:
+          - keyword: 番茄炒蛋
+            options:
+              - id: 0
+                kind: agreement
+                summary: 立即处理
+              - id: 182
+                kind: perjury
+                summary: 新厨师
+              - id: 213
+                kind: question
+                summary: 能吃辣吗
+    selected_response:
+      speech_id: 84
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 0
+        summary: 立即处理
+        text: "抱歉给您带来不便，\\我这就为您处理\\并更换一份新的菜品。"
+        emotion: 😔
+        gesture: 🙏
+    impact:
+      reputation_score: 0.24400002
+      mood_change: 0.024400001
+      trust_change: 0.012200001
+      patience_change: 0.48800004
+    continuation_decision: true
+  - turn_number: 3
+    diner_speeches:
+      - id: 4
+        text: "这[菜]有股怪味，\\可能是[油]放久了，\\我要一份新的或者退钱。"
+        emotion: 😰
+        gesture: 🤏
+        topic: taste
+    response_options:
+      - speech_id: 4
+        keywords:
+          - keyword: 菜
+            options:
+              - id: 85
+                kind: objection
+                summary: 检验油品
+              - id: 46
+                kind: question
+                summary: 希望怎样处理？
+              - id: 0
+                kind: agreement
+                summary: 立即处理
+          - keyword: 油
+            options:
+              - id: 154
+                kind: agreement
+                summary: 凭证拿来
+              - id: 0
+                kind: agreement
+                summary: 立即处理
+    selected_response:
+      speech_id: 4
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 85
+        summary: 检验油品
+        text: "关于油品变味\\我们会抽样检验\\并核查存储记录，\\如确认问题会更换批次\\并处理赔偿。"
+        emotion: 🤨
+    impact:
+      reputation_score: -0.866
+      mood_change: -0.0866
+      trust_change: -0.0433
+      patience_change: -1.732
     continuation_decision: false
 final_state:
-  total_turns: 1
+  total_turns: 3
   asked_questions:
     - 8
+    - 84
+    - 4
   continuation_depth: 0

@@ -24,6 +24,8 @@ pub enum FeedbackTopic {
     Hunger,
     /// Positive feedback
     Praise,
+    /// Special topic
+    Crab,
 }
 
 /// Configuration thresholds for triggering feedback
@@ -118,6 +120,7 @@ impl Default for ReputationConfig {
                 Hygiene => -12.0, // Most severe
                 Taste => -3.5,
                 Hunger => -2.0,
+                Crab => 0.0,
             },
             display_probabilities: enum_map! {
                 Praise => 0.2,    // Show 20% of praise
@@ -129,6 +132,7 @@ impl Default for ReputationConfig {
                 Hygiene => 1.0,   // Always show hygiene (critical)
                 Taste => 0.3,     // Show 30% of taste complaints
                 Hunger => 0.2,    // Show 20% of hunger complaints
+                Crab => 0.0,
             },
             impact_probabilities: enum_map! {
                 Praise => 1.0,    // Always apply positive feedback
@@ -140,6 +144,7 @@ impl Default for ReputationConfig {
                 Hygiene => 1.0,   // Always apply hygiene (critical)
                 Taste => 0.4,     // Apply 40% of taste complaints
                 Hunger => 0.3,    // Apply 30% of hunger complaints
+                Crab => 1.0,
             },
             feedback_thresholds: FeedbackThresholds::default(),
             response_factor: 0.6,

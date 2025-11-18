@@ -19,23 +19,23 @@ turns:
         keywords:
           - keyword: 菜价
             options:
-              - id: 262
+              - id: 274
                 kind: perjury
-                summary: 临时补贴
+                summary: 即将降价
     selected_response:
       speech_id: 72
       keyword_idx: 0
       option_idx: 0
     manager_speeches:
-      - id: 262
-        summary: 临时补贴
-        text: "这次调价是因为临时取消了运营补贴，\\等财政拨款到位后会回调价格。"
+      - id: 274
+        summary: 即将降价
+        text: "其实财务部门已经审批了一份调价单，\\下个月就会有至少五款畅销菜恢复原价。"
         emotion: 😅
     impact:
-      reputation_score: -1.025
-      mood_change: -0.1025
-      trust_change: -0.05125
-      patience_change: -2.05
+      reputation_score: -0.15900001
+      mood_change: -0.0159
+      trust_change: -0.00795
+      patience_change: -0.31800002
     continuation_decision: false
 final_state:
   total_turns: 1

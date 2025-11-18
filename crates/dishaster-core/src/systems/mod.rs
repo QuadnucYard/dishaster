@@ -1,5 +1,6 @@
 //! Bevy ECS systems for game logic processing
 
+mod crab;
 mod dining;
 mod feedback;
 mod hint;
@@ -14,6 +15,7 @@ mod serving;
 mod spawn;
 mod trials;
 
+pub use crab::*;
 pub use dining::*;
 pub use feedback::*;
 pub use lifecycle::*;

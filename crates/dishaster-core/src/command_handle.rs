@@ -122,6 +122,15 @@ impl Simulation {
                 };
                 self.world.trigger(InspectorVisit(model));
             }
+            SimCommand::DevCrab => {
+                // [DEV] Trigger crab turmoil event
+                log::info!("DEV: Triggering crab turmoil");
+                self.world.insert_resource(CrabTurmoil {
+                    probability: 0.001,
+                    trigger_limit: 5,
+                    triggered_diners: Default::default(),
+                });
+            }
         }
     }
 

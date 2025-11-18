@@ -616,3 +616,74 @@ topic = "price"
 text = '你们[菜品分量]越来越少了，\同样的价格，现在盘子都快空了，\明显缩水。'
 emotion = "🤢"
 topic = "quality"
+
+[[item]]
+text = '你们这[帝王蟹]卖999元一只，\是不是[价格]疯了？\学生食堂还搞这么贵？'
+emotion = "😡"
+gesture = "👊"
+topic = "crab"
+
+[[item]]
+text = '别的菜都涨价了，就因为这个[帝王蟹]！\我们又不是来吃[豪华宴]的，\要这么多[高端菜]干嘛？'
+emotion = "😤"
+gesture = "👎"
+topic = "crab"
+
+[[item]]
+text = '为了拍短视频宣传，\你们把[帝王蟹]当道具摆着，\结果真有人买，吃得出来是[表演]吧！'
+emotion = "😏"
+topic = "crab"
+
+[[item]]
+text = '这[帝王蟹]真是999元一只？\是不是扫码扫错了，\还是你们趁机宰学生？'
+emotion = "😠"
+gesture = "👊"
+topic = "crab"
+
+[[item]]
+text = '就这半只[帝王蟹]还999元？\壳都比肉多，\你们当学生是提款机啊！'
+emotion = "😤"
+gesture = "👎"
+topic = "crab"
+
+[[item]]
+text = '你们搞个[帝王蟹]999元，\是不是想上热搜？\食堂都快成米其林了！'
+emotion = "😏"
+gesture = "🤙"
+topic = "crab"
+
+[[item]]
+text = '我刷完卡发现扣了999元买[帝王蟹]，\但根本没点这个菜！\你们系统有问题吧？'
+emotion = "😱"
+gesture = "✊"
+topic = "crab"
+
+[[item]]
+text = '食堂推999元[帝王蟹]，\是想刺激消费攀比吗？\学生之间还要比谁吃得起豪华餐？'
+emotion = "😠"
+gesture = "✊"
+topic = "crab"
+
+[[item]]
+text = '普通学生连20块的菜都要省着点，\你们上999元[帝王蟹]，\这不是制造阶级对立吗？'
+emotion = "😤"
+gesture = "👎"
+topic = "crab"
+
+[[item]]
+text = '学校一边宣传勤俭节约，\一边卖999元[帝王蟹]，\这不是双标吗？\价值观教育去哪儿了！'
+emotion = "🙄"
+gesture = "✋"
+topic = "crab"
+
+[[item]]
+text = '我觉得上[帝王蟹]挺好的，\学校餐厅也能吃到高端 seafood，\说明食堂在进步啊！'
+emotion = "😊"
+gesture = "👍"
+topic = "crab"
+
+[[item]]
+text = '999元[帝王蟹]怎么了？\我又不是买不起，花自己的钱提升生活品质，有错吗？'
+emotion = "😎"
+gesture = "💅"
+topic = "crab"

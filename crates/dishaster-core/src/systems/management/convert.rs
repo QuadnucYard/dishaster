@@ -43,7 +43,7 @@ impl TemplateRealize for ManagementDecisionTemplateDef {
             PlayMusic,
             AdvertiseCampaign,
             AddMotivationalSlogan,
-            AddLuxuryDish,
+            SupplyCrab,
         )
     }
 }
@@ -68,7 +68,7 @@ impl ViewParams for ManagementDecisionModel {
             PlayMusic,
             AdvertiseCampaign,
             AddMotivationalSlogan,
-            AddLuxuryDish,
+            SupplyCrab,
         )
     }
 }
@@ -264,23 +264,19 @@ impl ViewParams for AddMotivationalSloganModel {
     }
 }
 
-impl TemplateRealize for AddLuxuryDishTemplate {
-    type Model = AddLuxuryDishModel;
+impl TemplateRealize for SupplyCrabTemplate {
+    type Model = SupplyCrabModel;
 
     fn realize(&self, _ctx: RealizationContext) -> Self::Model {
         Self::Model {
-            dish_id: self.dish_id.clone(),
-            applied: false,
+            trial_probability: self.trial_probability,
         }
     }
 }
 
-impl ViewParams for AddLuxuryDishModel {
+impl ViewParams for SupplyCrabModel {
     fn params(&self) -> ParamsMap {
-        params! {
-            dish_id => self.dish_id.clone().to_string(),
-            applied => if self.applied { 1 } else { 0 },
-        }
+        params! {}
     }
 }
 

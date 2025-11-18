@@ -2,7 +2,8 @@
 source: crates/dishaster-trial/tests/snapshot_tests.rs
 ---
 session_info:
-  seed: 2982902689111255716
+  seed: 10637074315653535228
+  trigger_topic: crab
   max_continuation_depth: 3
   temperature: 0.8
 turns:
@@ -13,58 +14,42 @@ turns:
         emotion: 😤
         gesture: 👎
         topic: crab
+      - id: 116
+        text: "食堂推999元[帝王蟹]，\\是想刺激消费攀比吗？\\学生之间还要比谁吃得起豪华餐？"
+        emotion: 😠
+        gesture: ✊
+        topic: crab
     response_options:
       - speech_id: 113
         keywords:
           - keyword: 帝王蟹
             options:
+              - id: 302
+                kind: perjury
+                summary: 试运营阶段
+              - id: 318
+                kind: perjury
+                summary: 领导接待专用
               - id: 281
                 kind: question
                 summary: 觉得贵？
-    selected_response:
-      speech_id: 113
-      keyword_idx: 0
-      option_idx: 0
-    manager_speeches:
-      - id: 281
-        summary: 觉得贵？
-        text: "您之前吃过类似的[帝王蟹]吗？\\可以对比一下品质和分量。"
-        emotion: 🙂
-        gesture: 🤝
-    impact:
-      reputation_score: -0.5
-      mood_change: -0.05
-      trust_change: -0.025
-      patience_change: -1
-    continuation_decision: true
-  - turn_number: 2
-    diner_speeches:
-      - id: 119
-        text: "我觉得上[帝王蟹]挺好的，\\学校餐厅也能吃到高端 seafood，\\说明食堂在进步啊！"
-        emotion: 😊
-        gesture: 👍
-        topic: crab
-    response_options:
-      - speech_id: 119
+              - id: 291
+                kind: agreement
+                summary: 价格属实
+      - speech_id: 116
         keywords:
           - keyword: 帝王蟹
             options:
-              - id: 310
-                kind: perjury
-                summary: 扶贫项目
-              - id: 282
-                kind: perjury
-                summary: 学校定价
               - id: 312
                 kind: objection
                 summary: 市场规律
-              - id: 283
-                kind: agreement
-                summary: 听取意见
+              - id: 318
+                kind: perjury
+                summary: 领导接待专用
     selected_response:
-      speech_id: 119
+      speech_id: 116
       keyword_idx: 0
-      option_idx: 2
+      option_idx: 4
     manager_speeches:
       - id: 312
         summary: 市场规律
@@ -78,8 +63,8 @@ turns:
       patience_change: -1
     continuation_decision: false
 final_state:
-  total_turns: 2
+  total_turns: 1
   asked_questions:
     - 113
-    - 119
+    - 116
   continuation_depth: 0

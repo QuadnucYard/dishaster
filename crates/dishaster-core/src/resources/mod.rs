@@ -25,6 +25,11 @@ pub struct ServingRngTag;
 /// SystemRng specialized for serving systems
 pub type ServingRng = SystemRng<ServingRngTag>;
 
+#[allow(missing_docs)]
+pub struct CrabRngTag;
+/// SystemRng specialized for crab trial systems
+pub type CrabRng = SystemRng<CrabRngTag>;
+
 /// Global canteen configuration and layout information
 ///
 /// Contains the physical layout, dimensions, entrance/exit locations,
@@ -159,6 +164,17 @@ impl DailyDinerSchedule {
 }
 
 pub type TrialSession = ResWrapper<dishaster_trial::TrialSession>;
+
+/// Crab turmoil trial tracking for the current day
+#[derive(Resource)]
+pub struct CrabTurmoil {
+    /// Probability of triggering a crab trial for eligible diners today
+    pub probability: f32,
+    /// Maximum number of diners who can trigger crab trials today
+    pub trigger_limit: u32,
+    /// Set of diners who have already triggered crab trials today
+    pub triggered_diners: FxHashSet<Entity>,
+}
 
 #[derive(Resource)]
 pub struct ManagementDecisions {

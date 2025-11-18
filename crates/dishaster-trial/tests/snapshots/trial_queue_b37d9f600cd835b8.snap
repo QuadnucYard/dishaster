@@ -19,73 +19,33 @@ turns:
         keywords:
           - keyword: 菜品
             options:
-              - id: 185
-                kind: question
-                summary: 看清了吗
+              - id: 299
+                kind: agreement
+                summary: 提升体验
               - id: 249
                 kind: question
                 summary: 高峰时段
-              - id: 273
-                kind: question
-                summary: 关注菜品
+              - id: 311
+                kind: agreement
+                summary: 承认差距
     selected_response:
       speech_id: 49
       keyword_idx: 0
       option_idx: 2
     manager_speeches:
-      - id: 273
-        summary: 关注菜品
-        text: "您提到的“好几道”具体是哪些菜品呢？\\我们很关注老顾客常点的菜品价格体验。"
-        emotion: 🤔
-      - id: 261
-        summary: 关注菜品
-        text: "您最常吃的几道菜是哪些？\\我们可以优先考虑这些菜品的价格策略。"
-        emotion: 🤔
+      - id: 311
+        summary: 承认差距
+        text: "我们意识到菜品结构失衡，\\将尽快推出普惠型营养套餐。"
+        emotion: 😔
+        gesture: 🙏
     impact:
-      reputation_score: 0.19300002
-      mood_change: 0.019300003
-      trust_change: 0.009650001
-      patience_change: 0.38600004
-    continuation_decision: true
-  - turn_number: 2
-    diner_speeches:
-      - id: 69
-        text: "[托盘]放置区没有指示，\\大家乱堆盘子，\\导致通道拥堵。"
-        emotion: 😭
-        gesture: 👊
-        topic: queue
-    response_options:
-      - speech_id: 69
-        keywords:
-          - keyword: 托盘
-            options:
-              - id: 173
-                kind: question
-                summary: 能看看肉吗
-              - id: 237
-                kind: question
-                summary: 记录时间
-              - id: 249
-                kind: question
-                summary: 高峰时段
-    selected_response:
-      speech_id: 69
-      keyword_idx: 0
-      option_idx: 2
-    manager_speeches:
-      - id: 249
-        summary: 高峰时段
-        text: "您通常在哪个时间段遇到这个问题？\\是午间还是晚间用餐高峰？"
-        emotion: 🧐
-    impact:
-      reputation_score: -0.139
-      mood_change: -0.0139
-      trust_change: -0.00695
-      patience_change: -0.278
+      reputation_score: -0.5
+      mood_change: -0.05
+      trust_change: -0.025
+      patience_change: -1
     continuation_decision: false
 final_state:
-  total_turns: 2
+  total_turns: 1
   asked_questions:
     - 49
-    - 69
   continuation_depth: 0

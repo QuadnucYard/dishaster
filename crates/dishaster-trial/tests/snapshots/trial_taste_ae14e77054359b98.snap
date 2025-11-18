@@ -33,9 +33,9 @@ turns:
               - id: 46
                 kind: question
                 summary: 希望怎样处理？
-              - id: 185
-                kind: question
-                summary: 看清了吗
+              - id: 182
+                kind: perjury
+                summary: 新厨师
           - keyword: 油
             options:
               - id: 185
@@ -48,9 +48,9 @@ turns:
         keywords:
           - keyword: 鱼
             options:
-              - id: 82
-                kind: objection
-                summary: 解释出品差异
+              - id: 182
+                kind: perjury
+                summary: 新厨师
               - id: 185
                 kind: question
                 summary: 看清了吗

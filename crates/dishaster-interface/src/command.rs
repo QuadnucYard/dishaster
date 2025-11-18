@@ -56,4 +56,6 @@ pub enum SimCommand {
     DevAdjustReputation(f32),
     /// [DEV] Trigger inspector visit.
     DevInspectorVisit(bool),
+    /// [DEV] Trigger crab.
+    DevCrab,
 }

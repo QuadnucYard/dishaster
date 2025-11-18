@@ -19,6 +19,9 @@ pub struct PermanentEffects {
     /// Luxury dishes that have been unlocked (can only unlock once per dish)
     pub luxury_dishes: FxHashSet<ModelId>,
 
+    /// Probability for diners to actively trigger crab topic trial (from SupplyCrab decision)
+    pub crab_trial_probability: Option<f32>,
+
     /// Daily incident: attraction multiplier (reset each day)
     #[serde(skip)]
     pub daily_attraction_multiplier: f32,

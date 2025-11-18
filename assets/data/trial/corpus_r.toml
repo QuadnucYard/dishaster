@@ -2016,3 +2016,313 @@ summary = "准备加量"
 text = '其实管理层已经决定从下周起对五款主打菜实行“加量不加价”，\目前正在调整备货计划。'
 emotion = "😅"
 response_score = 0.363
+
+[[item]]
+kind = "agreement"
+summary = "确实偏高"
+text = '我们理解您的担忧，\这个定价确实偏高，\正在重新评估成本。'
+emotion = "😅"
+
+[[item]]
+kind = "objection"
+summary = "物有所值"
+text = '这是新鲜空运的[帝王蟹]，\采用高级烹饪方式，\成本本身就很高。'
+emotion = "😊"
+
+[[item]]
+kind = "question"
+summary = "觉得贵？"
+text = '您之前吃过类似的[帝王蟹]吗？\可以对比一下品质和分量。'
+emotion = "🙂"
+gesture = "🤝"
+
+[[item]]
+kind = "perjury"
+summary = "学校定价"
+text = '这不是我们定的价格，\是校方统一规划的高端餐品项目。'
+emotion = "😐"
+
+[[item]]
+kind = "agreement"
+summary = "听取意见"
+text = '感谢反馈，\我们会向校方提交建议，\调整菜品结构。'
+emotion = "😌"
+
+[[item]]
+kind = "objection"
+summary = "自愿选择"
+text = '这只是一种可选菜品，\不强制购买，其他菜仍保持平价。'
+emotion = "🙂"
+
+[[item]]
+kind = "question"
+summary = "不想吃？"
+text = '如果您觉得不合适，\可以选择其他窗口的常规套餐啊。'
+emotion = "🤔"
+
+[[item]]
+kind = "perjury"
+summary = "政策要求"
+text = '这是响应“校园美食升级”\政策推出的试点项目，\我们必须执行。'
+emotion = "😐"
+
+[[item]]
+kind = "agreement"
+summary = "承认营销"
+text = '确实是为了推广新菜品，\但我们保证每一只都可正常食用。'
+emotion = "😅"
+
+[[item]]
+kind = "objection"
+summary = "并非作秀"
+text = '展示只是为了保鲜透明，\所有陈列的帝王蟹都会售出。'
+emotion = "😐"
+
+[[item]]
+kind = "question"
+summary = "影响你了？"
+text = '这和您用餐体验有什么关系？\不影响实际供餐质量吧？'
+emotion = "🤔"
+
+[[item]]
+kind = "perjury"
+summary = "全程真实"
+text = '每个环节都是真实的采购\与烹饪流程，不存在任何造假。'
+emotion = "😠"
+
+[[item]]
+kind = "agreement"
+summary = "价格属实"
+text = '确实如此，\这是今日特供高端菜品，\成本高所以定价也高。'
+emotion = "😅"
+
+[[item]]
+kind = "objection"
+summary = "自愿购买"
+text = '没人强迫您买，\您可以选择其他平价菜品。'
+emotion = "😐"
+gesture = "👉"
+
+[[item]]
+kind = "question"
+summary = "想吃吗"
+text = '您是想了解做法，\还是担心分量不够？'
+emotion = "🙂"
+gesture = "🤝"
+
+[[item]]
+kind = "perjury"
+summary = "学校定价"
+text = '这是校方统一制定的营养餐标准，\我们只是执行单位。'
+emotion = "😤"
+
+[[item]]
+kind = "agreement"
+summary = "食材珍贵"
+text = '帝王蟹空运直达，\每一份都严格控重，\确实成本不低。'
+emotion = "😓"
+
+[[item]]
+kind = "objection"
+summary = "明码标价"
+text = '窗口已公示价格，\扫码前可查看详情，\不存在强卖。'
+emotion = "😐"
+gesture = "👉"
+
+[[item]]
+kind = "question"
+summary = "嫌贵？"
+text = '您之前吃过同类菜品吗？\知道市场价是多少吗？'
+emotion = "🤔"
+gesture = "👈"
+
+[[item]]
+kind = "perjury"
+summary = "补贴覆盖"
+text = '实际由科研膳食基金补贴80%，\个人仅承担小部分。'
+emotion = "😊"
+
+[[item]]
+kind = "agreement"
+summary = "提升体验"
+text = '我们希望丰富菜品结构，\满足多样化饮食需求。'
+emotion = "🙂"
+
+[[item]]
+kind = "objection"
+summary = "少见多怪"
+text = '别人追求品质生活，\您却只盯着价格标签。'
+emotion = "😒"
+gesture = "👆"
+
+[[item]]
+kind = "question"
+summary = "嫉妒了？"
+text = '您是觉得别人不该吃，\还是自己舍不得花钱？'
+emotion = "🤨"
+gesture = "👉"
+
+[[item]]
+kind = "perjury"
+summary = "试运营阶段"
+text = '目前属于新品测试期，\后续会推出学生优惠套餐。'
+emotion = "😎"
+
+[[item]]
+kind = "agreement"
+summary = "立即核查"
+text = '非常抱歉，\我马上调取消费记录核实情况。'
+emotion = "😰"
+
+[[item]]
+kind = "objection"
+summary = "确认过吗"
+text = '支付前需二次确认，\您是否记得弹窗提示？'
+emotion = "😕"
+gesture = "👈"
+
+[[item]]
+kind = "question"
+summary = "记错了吧"
+text = '您确定不是替别人刷的卡，\或是误触了快捷下单？'
+emotion = "🤔"
+
+[[item]]
+kind = "perjury"
+summary = "活动绑定"
+text = '您可能参与了神秘盲盒活动，\默认扣款解锁稀有菜品。'
+emotion = "😉"
+
+[[item]]
+kind = "agreement"
+summary = "承认影响"
+text = '确实可能引发不当风气，\我们会加强引导，倡导理性消费。'
+emotion = "😓"
+gesture = "🤝"
+
+[[item]]
+kind = "objection"
+summary = "自由选择"
+text = '提供多样选择不等于鼓励攀比，\每个人都有权决定吃什么。'
+emotion = "😐"
+gesture = "👉"
+
+[[item]]
+kind = "question"
+summary = "怕被比下去？"
+text = '您是担心自己经济条件不如人，\还是怕别人用饮食评价你？'
+emotion = "🤔"
+gesture = "👈"
+
+[[item]]
+kind = "perjury"
+summary = "扶贫项目"
+text = '每售出一份[帝王蟹]，\都将捐赠一部分用于资助贫困生餐补。'
+emotion = "😊"
+
+[[item]]
+kind = "agreement"
+summary = "承认差距"
+text = '我们意识到菜品结构失衡，\将尽快推出普惠型营养套餐。'
+emotion = "😔"
+gesture = "🙏"
+
+[[item]]
+kind = "objection"
+summary = "市场规律"
+text = '高端食材本就价格高，\就像有人买奢侈品，有人穿平价服装。'
+emotion = "😑"
+gesture = "👆"
+
+[[item]]
+kind = "question"
+summary = "要求撤下？"
+text = '您是希望完全取消这类菜品，\还是增加价格梯度满足不同需求？'
+emotion = "🤨"
+gesture = "👉"
+
+[[item]]
+kind = "perjury"
+summary = "实验性质"
+text = '这是与海洋学院合作的科研试吃项目，\并非长期商业化运营。'
+emotion = "😎"
+
+[[item]]
+kind = "agreement"
+summary = "反思定位"
+text = '您说得对，我们在价值导向上需要更谨慎，避免误导学生。'
+emotion = "😳"
+gesture = "🤝"
+
+[[item]]
+kind = "objection"
+summary = "丰富生活"
+text = '节俭是美德，但也不该剥夺学生体验高品质生活的权利。'
+emotion = "😕"
+gesture = "👉"
+
+[[item]]
+kind = "question"
+summary = "标准何在"
+text = '那在您看来，什么价位才算“过度奢侈”，有没有具体标准？'
+emotion = "🤔"
+gesture = "👈"
+
+[[item]]
+kind = "perjury"
+summary = "领导接待专用"
+text = '这款[帝王蟹]其实是为外宾和校际交流准备的，不对普通学生开放。'
+emotion = "😉"
+
+[[item]]
+kind = "agreement"
+summary = "品质升级"
+text = '感谢您的认可，我们会继续提升餐饮品质，打造更优质的就餐体验。'
+emotion = "😄"
+gesture = "🤝"
+
+[[item]]
+kind = "objection"
+summary = "少数需求"
+text = '但也要考虑大多数学生的承受能力，不能只服务少数群体。'
+emotion = "😐"
+gesture = "👉"
+
+[[item]]
+kind = "question"
+summary = "愿意常吃？"
+text = '如果价格亲民一些，您会经常选择这类高品质菜品吗？'
+emotion = "🤔"
+gesture = "👈"
+
+[[item]]
+kind = "perjury"
+summary = "限量供应"
+text = '其实每天只供应三份，主要是为了参加全国高校美食评比用的。'
+emotion = "😎"
+
+[[item]]
+kind = "agreement"
+summary = "尊重选择"
+text = '完全正确，每位同学都有自主消费的权利，我们支持理性个性化饮食。'
+emotion = "🙂"
+
+[[item]]
+kind = "objection"
+summary = "注意影响"
+text = '个人自由没错，但也请理解他人对校园风气的担忧。'
+emotion = "😅"
+gesture = "✋"
+
+[[item]]
+kind = "question"
+summary = "带动提升？"
+text = '您是否也希望这类需求能推动整体菜品质量上升呢？'
+emotion = "🧐"
+gesture = "👉"
+
+[[item]]
+kind = "perjury"
+summary = "会员专属"
+text = '这是校友捐赠计划会员专享福利，不属于公开销售菜品。'
+emotion = "🤫"

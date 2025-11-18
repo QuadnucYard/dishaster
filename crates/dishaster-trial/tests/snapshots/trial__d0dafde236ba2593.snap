@@ -1,0 +1,47 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 15049620252834538899
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 50
+        text: "这份[牛肉]有难闻的腥味，\\我怀疑没煮熟，\\厨房的食品安全在哪里？"
+        emotion: 😤
+        gesture: 🤏
+        topic: hygiene
+    response_options:
+      - speech_id: 50
+        keywords:
+          - keyword: 牛肉
+            options:
+              - id: 5
+                kind: agreement
+                summary: 立刻下架
+              - id: 221
+                kind: question
+                summary: 哪件餐具
+    selected_response:
+      speech_id: 50
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 5
+        summary: 立刻下架
+        text: "为保证安全我们会\\先下架相关菜品\\并抽样检验，\\并在核实后给出\\处理结果。"
+        emotion: 😠
+        gesture: 🛑
+    impact:
+      reputation_score: -0.52
+      mood_change: -0.051999997
+      trust_change: -0.025999999
+      patience_change: -1.04
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 50
+  continuation_depth: 0

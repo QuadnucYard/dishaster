@@ -31,9 +31,9 @@ impl ToView for models::TrialSpeechItem {
 
     fn to_view(&self) -> Self::View {
         match self {
-            models::TrialSpeechItem::Text(t) => views::TrialSpeechItem::Text(t.clone()),
-            models::TrialSpeechItem::Keyword(k) => views::TrialSpeechItem::Keyword(k.clone()),
-            models::TrialSpeechItem::LineBreak => views::TrialSpeechItem::LineBreak,
+            Self::Text(t) => Self::View::Text(t.clone()),
+            Self::Keyword(k) => Self::View::Keyword(k.clone()),
+            Self::LineBreak => Self::View::LineBreak,
         }
     }
 }
@@ -43,10 +43,10 @@ impl ToView for models::TrialResponseKind {
 
     fn to_view(&self) -> Self::View {
         match self {
-            models::TrialResponseKind::Agreement => views::TrialResponseKind::Agreement,
-            models::TrialResponseKind::Objection => views::TrialResponseKind::Objection,
-            models::TrialResponseKind::Perjury => views::TrialResponseKind::Perjury,
-            models::TrialResponseKind::Question => views::TrialResponseKind::Question,
+            Self::Agreement => Self::View::Agreement,
+            Self::Objection => Self::View::Objection,
+            Self::Perjury => Self::View::Perjury,
+            Self::Question => Self::View::Question,
         }
     }
 }
@@ -55,7 +55,7 @@ impl ToView for models::TrialParticipantAppearance {
     type View = views::TrialParticipantAppearance;
 
     fn to_view(&self) -> Self::View {
-        views::TrialParticipantAppearance {
+        Self::View {
             emotion: self.emotion,
             gesture: self.gesture,
         }

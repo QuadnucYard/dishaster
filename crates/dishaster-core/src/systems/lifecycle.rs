@@ -43,6 +43,7 @@ fn on_run_started(
     mut commands: Commands,
     mut time: ResMut<Time>,
     day_status: Res<DayStatus>,
+    mut perma_effects: ResMut<PermanentEffectsRes>,
 ) {
     time.fast_forward_to(day_status.start_time as f64);
 
@@ -51,6 +52,15 @@ fn on_run_started(
         day_status.current_day.0,
         day_status.start_day.0
     );
+
+    // Apply crab effect if present
+    if let Some(crab) = perma_effects.crab_trial_probability.take() {
+        commands.insert_resource(CrabTurmoil {
+            probability: crab,
+            trigger_limit: 5,
+            triggered_diners: Default::default(),
+        });
+    }
 
     if day_status.current_day != day_status.start_day {
         // emit incident for new day

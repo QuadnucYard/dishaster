@@ -14,10 +14,11 @@ turns:
         emotion: 😢
         gesture: 👎
         topic: appeal
-      - id: 105
-        text: "你们[取餐夹子]容易串味，\\夹过辣菜的夹子又去夹清淡的菜，\\能不能一菜一夹？"
-        emotion: 🤢
-        topic: hygiene
+      - id: 52
+        text: "今天[早饭]的面条都煮烂了，\\口感糟糕，\\不能随便糊弄学生的早餐。"
+        emotion: 😭
+        gesture: 🤝
+        topic: quality
     response_options: ~
     selected_response: ~
     manager_speeches: ~
@@ -27,5 +28,5 @@ final_state:
   total_turns: 1
   asked_questions:
     - 68
-    - 105
+    - 52
   continuation_depth: 0

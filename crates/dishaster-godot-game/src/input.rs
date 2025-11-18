@@ -98,6 +98,11 @@ impl Game {
                 self.send_sim_command(SimCommand::DevInspectorVisit(true));
             }
 
+            Key::C => {
+                godot_print!("Dev: Trigger crab");
+                self.send_sim_command(SimCommand::DevCrab);
+            }
+
             _ => {}
         }
     }

@@ -9,64 +9,76 @@ session_info:
 turns:
   - turn_number: 1
     diner_speeches:
-      - id: 87
-        text: "每次来都只剩[青菜]和[豆腐]，\\想吃的[红烧肉]永远卖光，\\是不是故意少做？"
-        emotion: 😒
-        gesture: 👎
-        topic: appeal
+      - id: 97
+        text: "你们[清真窗口]的标识不清楚，\\我差点就误点了非清真菜品，\\这很不尊重我们的饮食习惯！"
+        emotion: 😤
     response_options:
-      - speech_id: 87
+      - speech_id: 97
         keywords:
-          - keyword: 青菜
+          - keyword: 清真窗口
             options:
-              - id: 165
-                kind: question
-                summary: 能给我看
-              - id: 191
+              - id: 230
+                kind: perjury
+                summary: 标价错误
+              - id: 37
                 kind: agreement
-                summary: 增加供应
-              - id: 185
-                kind: question
-                summary: 看清了吗
-          - keyword: 豆腐
-            options:
-              - id: 165
-                kind: question
-                summary: 能给我看
-              - id: 185
-                kind: question
-                summary: 看清了吗
-              - id: 173
-                kind: question
-                summary: 能看看肉吗
-              - id: 88
-                kind: objection
-                summary: 防止剩菜再售
-          - keyword: 红烧肉
-            options:
-              - id: 191
+                summary: 改进展示
+              - id: 231
                 kind: agreement
-                summary: 增加供应
-              - id: 173
-                kind: question
-                summary: 能看看肉吗
+                summary: 立即整改
     selected_response:
-      speech_id: 87
+      speech_id: 97
       keyword_idx: 0
       option_idx: 0
     manager_speeches:
-      - id: 165
-        summary: 能给我看
-        text: "能让我看看那盘[青菜]吗？\\也许只是个别叶片老了。"
-        emotion: 🤨
+      - id: 230
+        summary: 标价错误
+        text: "可能是某个窗口贴错了价格标签，\\我们马上去检查。"
+        emotion: 😅
     impact:
-      reputation_score: -1.1010001
-      mood_change: -0.11010001
-      trust_change: -0.055050004
-      patience_change: -2.2020001
+      reputation_score: -0.776
+      mood_change: -0.0776
+      trust_change: -0.0388
+      patience_change: -1.552
+    continuation_decision: true
+  - turn_number: 2
+    diner_speeches:
+      - id: 108
+        text: "你们[菜品分量]越来越少了，\\同样的价格，现在盘子都快空了，\\明显缩水。"
+        emotion: 🤢
+        topic: quality
+    response_options:
+      - speech_id: 108
+        keywords:
+          - keyword: 菜品分量
+            options:
+              - id: 297
+                kind: question
+                summary: 嫌贵？
+    selected_response:
+      speech_id: 108
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 297
+        summary: 嫌贵？
+        text: "您之前吃过同类菜品吗？\\知道市场价是多少吗？"
+        emotion: 🤔
+        gesture: 👈
+      - id: 293
+        summary: 想吃吗
+        text: "您是想了解做法，\\还是担心分量不够？"
+        emotion: 🙂
+        gesture: 🤝
+    impact:
+      reputation_score: -0.5
+      mood_change: -0.05
+      trust_change: -0.025
+      patience_change: -1
     continuation_decision: false
 final_state:
-  total_turns: 1
+  total_turns: 2
   asked_questions:
-    - 87
+    - 97
+    - 108
   continuation_depth: 0

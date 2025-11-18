@@ -100,6 +100,8 @@ pub enum FeedbackTopic {
     Hunger,
     /// Positive feedback
     Praise,
+    /// Special topic
+    Crab,
 }
 
 /// Complete appearance configuration for an agent

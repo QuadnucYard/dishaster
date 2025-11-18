@@ -1,0 +1,50 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 8612232180506566011
+  trigger_topic: crab
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 115
+        text: "我刷完卡发现扣了999元买[帝王蟹]，\\但根本没点这个菜！\\你们系统有问题吧？"
+        emotion: 😱
+        gesture: ✊
+        topic: crab
+    response_options:
+      - speech_id: 115
+        keywords:
+          - keyword: 帝王蟹
+            options:
+              - id: 280
+                kind: objection
+                summary: 物有所值
+              - id: 318
+                kind: perjury
+                summary: 领导接待专用
+              - id: 206
+                kind: perjury
+                summary: 系统故障
+    selected_response:
+      speech_id: 115
+      keyword_idx: 0
+      option_idx: 1
+    manager_speeches:
+      - id: 318
+        summary: 领导接待专用
+        text: "这款[帝王蟹]其实是为外宾和校际交流准备的，不对普通学生开放。"
+        emotion: 😉
+    impact:
+      reputation_score: -0.5
+      mood_change: -0.05
+      trust_change: -0.025
+      patience_change: -1
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 115
+  continuation_depth: 0

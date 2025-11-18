@@ -25,9 +25,9 @@ turns:
               - id: 253
                 kind: question
                 summary: 记录消耗
-              - id: 182
-                kind: perjury
-                summary: 新厨师
+              - id: 185
+                kind: question
+                summary: 看清了吗
     selected_response:
       speech_id: 70
       keyword_idx: 0

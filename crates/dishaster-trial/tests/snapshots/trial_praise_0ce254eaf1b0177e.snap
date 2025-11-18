@@ -9,43 +9,39 @@ session_info:
 turns:
   - turn_number: 1
     diner_speeches:
-      - id: 55
-        text: "点了个[便宜菜]结果全是配料，\\几口就没了，\\商家良心在哪？"
-        emotion: 😡
-        gesture: 👎
-        topic: hunger
+      - id: 61
+        text: "这碗[面条]里有焦味，\\可能糊锅了，\\味道让人难以入口。"
+        emotion: 😰
+        gesture: 🤏
+        topic: taste
     response_options:
-      - speech_id: 55
+      - speech_id: 61
         keywords:
-          - keyword: 便宜菜
+          - keyword: 面条
             options:
-              - id: 173
+              - id: 185
                 kind: question
-                summary: 能看看肉吗
-              - id: 244
-                kind: objection
-                summary: 应自行询问
+                summary: 看清了吗
+              - id: 182
+                kind: perjury
+                summary: 新厨师
     selected_response:
-      speech_id: 55
+      speech_id: 61
       keyword_idx: 0
       option_idx: 0
     manager_speeches:
-      - id: 173
-        summary: 能看看肉吗
-        text: "能让我看看您这份[红烧肉]吗？\\可能是分菜不均造成的。"
-        emotion: 🧐
-      - id: 164
-        summary: 光照问题
-        text: "是因为灯光偏黄，\\菜其实很新鲜，刚出锅的。"
-        emotion: 😅
+      - id: 185
+        summary: 看清了吗
+        text: "您能确认清楚吗？\\也许只是来询问菜品。"
+        emotion: 🤔
     impact:
-      reputation_score: -0.758
-      mood_change: -0.0758
-      trust_change: -0.0379
-      patience_change: -1.516
+      reputation_score: -1.135
+      mood_change: -0.1135
+      trust_change: -0.05675
+      patience_change: -2.27
     continuation_decision: false
 final_state:
   total_turns: 1
   asked_questions:
-    - 55
+    - 61
   continuation_depth: 0

@@ -1,0 +1,51 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 9693691992080689692
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 6
+        text: "我[饭卡]被吞了，\\卡里还有钱，\\你们能不能现在查一下并补办？"
+        emotion: 😱
+        gesture: 👉
+    response_options:
+      - speech_id: 6
+        keywords:
+          - keyword: 饭卡
+            options:
+              - id: 34
+                kind: agreement
+                summary: 通知技术
+              - id: 87
+                kind: agreement
+                summary: 查卡并补办
+              - id: 19
+                kind: question
+                summary: 需要临时就餐方案吗？
+              - id: 221
+                kind: question
+                summary: 哪件餐具
+    selected_response:
+      speech_id: 6
+      keyword_idx: 0
+      option_idx: 2
+    manager_speeches:
+      - id: 19
+        summary: 需要临时就餐方案吗？
+        text: "若饭卡或支付出现问题，\\我们可以\\提供临时就餐\\或人工结账方案。"
+        emotion: 🤔
+    impact:
+      reputation_score: 0.40499997
+      mood_change: 0.040499996
+      trust_change: 0.020249998
+      patience_change: 0.80999994
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 6
+  continuation_depth: 0

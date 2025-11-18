@@ -16,6 +16,7 @@
         hygiene: -10.0,     // Reduced from -12.0, still most severe
         taste: -3.5,        // Bad taste
         hunger: -2.0,       // Still hungry after meal
+        crab: 0.0,
     },
 
     // Probability of displaying feedback bubble (reduces visual noise)
@@ -30,6 +31,7 @@
         hygiene: 1.0,       // Always show hygiene (critical)
         taste: 0.25,        // Show 25% of taste complaints
         hunger: 0.15,       // Show 15% of hunger complaints
+        crab: 1.0,
     },
 
     // Probability of applying reputation impact (forgiveness mechanism)
@@ -44,6 +46,7 @@
         hygiene: 1.0,       // Always apply hygiene (critical)
         taste: 0.35,        // Apply 35% of taste complaints
         hunger: 0.25,       // Apply 25% of hunger complaints
+        crab: 1.0,
     },
 
     // Thresholds for triggering different types of feedback

@@ -61,6 +61,7 @@ impl Simulation {
                 on_dish_served,
                 // Agents decide targets and compute paths
                 dining_systems(),
+                crab_trial_system,
                 // Allocate staff and schedule service events
                 drive_serving_sessions,
                 detect_dispenser_stock_change,
@@ -168,6 +169,8 @@ impl Simulation {
             .insert_resource(QueueingRng::new(world_rng.derive_seed()));
         self.world
             .insert_resource(ServingRng::new(world_rng.derive_seed()));
+        self.world
+            .insert_resource(CrabRng::new(world_rng.derive_seed()));
         self.world.insert_resource(world_rng);
 
         self.startup();

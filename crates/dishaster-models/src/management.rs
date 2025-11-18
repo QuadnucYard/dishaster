@@ -86,5 +86,5 @@ define_sum_model!(ManagementDecision {
     PlayMusic,
     AdvertiseCampaign,
     AddMotivationalSlogan,
-    AddLuxuryDish,
+    SupplyCrab,
 });

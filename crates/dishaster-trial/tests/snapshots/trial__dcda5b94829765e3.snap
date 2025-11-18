@@ -8,42 +8,43 @@ session_info:
 turns:
   - turn_number: 1
     diner_speeches:
-      - id: 48
-        text: "你们的[餐具]漂白味道太重，\\我一吃就头疼，\\建议更换清洗剂。"
-        emotion: 😡
-        gesture: 👋
-        topic: tableware
+      - id: 53
+        text: "我点的[甜点]有异物，\\像塑料碎片一样，\\这太可怕了。"
+        emotion: 😰
+        gesture: 👍
+        topic: hygiene
     response_options:
-      - speech_id: 48
+      - speech_id: 53
         keywords:
-          - keyword: 餐具
+          - keyword: 甜点
             options:
-              - id: 3
+              - id: 5
                 kind: agreement
-                summary: 更换或退款
-              - id: 85
-                kind: objection
-                summary: 检验油品
-              - id: 102
+                summary: 立刻下架
+              - id: 301
+                kind: question
+                summary: 嫉妒了？
+              - id: 219
                 kind: agreement
-                summary: 现场换餐并免单
+                summary: 立即更换
     selected_response:
-      speech_id: 48
+      speech_id: 53
       keyword_idx: 0
       option_idx: 1
     manager_speeches:
-      - id: 85
-        summary: 检验油品
-        text: "关于油品变味\\我们会抽样检验\\并核查存储记录，\\如确认问题会更换批次\\并处理赔偿。"
+      - id: 301
+        summary: 嫉妒了？
+        text: "您是觉得别人不该吃，\\还是自己舍不得花钱？"
         emotion: 🤨
+        gesture: 👉
     impact:
-      reputation_score: -0.866
-      mood_change: -0.0866
-      trust_change: -0.0433
-      patience_change: -1.732
+      reputation_score: -0.5
+      mood_change: -0.05
+      trust_change: -0.025
+      patience_change: -1
     continuation_decision: false
 final_state:
   total_turns: 1
   asked_questions:
-    - 48
+    - 53
   continuation_depth: 0

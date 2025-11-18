@@ -14,130 +14,71 @@ turns:
         emotion: 😡
         gesture: 👎
         topic: hunger
+      - id: 100
+        text: "你们[菜品标签]太不明显了，\\很多菜都不知道是什么，\\特别是辣度也没有标注。"
+        emotion: 😤
       - id: 45
         text: "你们把[菜名]写得太模糊，\\我点的口味完全不对，\\能不能标准化一下？"
         emotion: 😰
         gesture: 👎
         topic: quality
-      - id: 8
-        text: "今天的[菜名]怎么变了？\\我点的明明是标注的辣，\\结果一口都不辣，味道全变了。"
-        emotion: 😡
-        gesture: 👍
-        topic: taste
     response_options:
       - speech_id: 55
         keywords:
           - keyword: 便宜菜
             options:
-              - id: 173
-                kind: question
-                summary: 能看看肉吗
-              - id: 41
+              - id: 292
                 kind: objection
-                summary: 安排补救
-              - id: 165
+                summary: 自愿购买
+              - id: 284
+                kind: objection
+                summary: 自愿选择
+              - id: 273
                 kind: question
-                summary: 能给我看
+                summary: 关注菜品
+      - speech_id: 100
+        keywords:
+          - keyword: 菜品标签
+            options:
+              - id: 212
+                kind: objection
+                summary: 很明显
+              - id: 211
+                kind: agreement
+                summary: 完善标识
       - speech_id: 45
         keywords:
           - keyword: 菜名
             options:
-              - id: 37
-                kind: agreement
-                summary: 改进展示
-              - id: 21
-                kind: agreement
-                summary: 改进标识
-      - speech_id: 8
-        keywords:
-          - keyword: 菜名
-            options:
-              - id: 243
-                kind: agreement
-                summary: 优化标签
-              - id: 182
-                kind: perjury
-                summary: 新厨师
-              - id: 0
-                kind: agreement
-                summary: 立即处理
-    selected_response:
-      speech_id: 55
-      keyword_idx: 0
-      option_idx: 2
-    manager_speeches:
-      - id: 165
-        summary: 能给我看
-        text: "能让我看看那盘[青菜]吗？\\也许只是个别叶片老了。"
-        emotion: 🤨
-    impact:
-      reputation_score: -1.1010001
-      mood_change: -0.11010001
-      trust_change: -0.055050004
-      patience_change: -2.2020001
-    continuation_decision: true
-  - turn_number: 2
-    diner_speeches:
-      - id: 3
-        text: "你们的[分量]也太少了，\\别看价格便宜，吃了还饿，\\这算消费体验吗？"
-        emotion: 😭
-        gesture: 🤞
-        topic: hunger
-      - id: 108
-        text: "你们[菜品分量]越来越少了，\\同样的价格，现在盘子都快空了，\\明显缩水。"
-        emotion: 🤢
-        topic: quality
-    response_options:
-      - speech_id: 3
-        keywords:
-          - keyword: 分量
-            options:
-              - id: 185
-                kind: question
-                summary: 看清了吗
               - id: 173
                 kind: question
                 summary: 能看看肉吗
-              - id: 84
+              - id: 275
                 kind: agreement
-                summary: 调整分量与补偿
-      - speech_id: 108
-        keywords:
-          - keyword: 菜品分量
-            options:
-              - id: 277
-                kind: question
-                summary: 具体菜品
-              - id: 273
-                kind: question
-                summary: 关注菜品
-              - id: 276
-                kind: objection
-                summary: 从未减少
-              - id: 185
-                kind: question
-                summary: 看清了吗
+                summary: 标准说明
     selected_response:
-      speech_id: 3
+      speech_id: 55
       keyword_idx: 0
-      option_idx: 0
+      option_idx: 1
     manager_speeches:
-      - id: 185
-        summary: 看清了吗
-        text: "您能确认清楚吗？\\也许只是来询问菜品。"
-        emotion: 🤔
+      - id: 284
+        summary: 自愿选择
+        text: "这只是一种可选菜品，\\不强制购买，其他菜仍保持平价。"
+        emotion: 🙂
+      - id: 66
+        summary: 提供临时餐
+        text: "如需我们可以提供\\临时替代餐品\\以解决燃眉之急，\\并后续处理补偿。"
+        emotion: 🙂
     impact:
-      reputation_score: -1.135
-      mood_change: -0.1135
-      trust_change: -0.05675
-      patience_change: -2.27
+      reputation_score: -0.5
+      mood_change: -0.05
+      trust_change: -0.025
+      patience_change: -1
     continuation_decision: false
 final_state:
-  total_turns: 2
+  total_turns: 1
   asked_questions:
     - 55
+    - 100
     - 45
-    - 8
-    - 3
-    - 108
   continuation_depth: 0

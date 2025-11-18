@@ -332,6 +332,7 @@ fn test_trial_snapshots() {
         FeedbackTopic::Taste,
         FeedbackTopic::Hunger,
         FeedbackTopic::Praise,
+        FeedbackTopic::Crab,
     ];
 
     for i in 0..topics.len() * 2 + 5 {

@@ -8,10 +8,9 @@ session_info:
 turns:
   - turn_number: 1
     diner_speeches:
-      - id: 74
-        text: "你们的[窗口]标签显示错位，\\我以为是另外一种菜，\\结果点错了。"
-        emotion: 😡
-        gesture: 🤏
+      - id: 82
+        text: "这[红烧肉]全是肥肉，\\瘦的都没几块，\\你们是按这个标准配的吗？"
+        emotion: 😤
         topic: quality
     response_options: ~
     selected_response: ~
@@ -21,5 +20,5 @@ turns:
 final_state:
   total_turns: 1
   asked_questions:
-    - 74
+    - 82
   continuation_depth: 0

@@ -19,15 +19,15 @@ turns:
         keywords:
           - keyword: 鸡汤
             options:
-              - id: 275
-                kind: agreement
-                summary: 标准说明
+              - id: 173
+                kind: question
+                summary: 能看看肉吗
+              - id: 254
+                kind: perjury
+                summary: 设备问题
               - id: 96
                 kind: objection
                 summary: 检查清洗流程
-              - id: 164
-                kind: objection
-                summary: 光照问题
           - keyword: 食材
             options:
               - id: 164
@@ -38,15 +38,15 @@ turns:
       keyword_idx: 0
       option_idx: 2
     manager_speeches:
-      - id: 164
-        summary: 光照问题
-        text: "是因为灯光偏黄，\\菜其实很新鲜，刚出锅的。"
-        emotion: 😅
+      - id: 96
+        summary: 检查清洗流程
+        text: "关于粥里沙粒或餐具油渍\\我们会检查清洗流程\\并对相关环节整改，\\同时对受影响的顾客\\提供补偿。"
+        emotion: 🤨
     impact:
-      reputation_score: 0.25599998
-      mood_change: 0.0256
-      trust_change: 0.0128
-      patience_change: 0.51199996
+      reputation_score: -0.06099999
+      mood_change: -0.006099999
+      trust_change: -0.0030499995
+      patience_change: -0.12199998
     continuation_decision: false
 final_state:
   total_turns: 1

@@ -25,8 +25,8 @@ impl ToView for models::PricingMethod {
 
     fn to_view(&self) -> Self::View {
         match *self {
-            models::PricingMethod::PerPortion(v) => views::PricingMethod::PerPortion(v),
-            models::PricingMethod::ByWeight(v) => views::PricingMethod::ByWeight(v),
+            Self::PerPortion(v) => Self::View::PerPortion(v),
+            Self::ByWeight(v) => Self::View::ByWeight(v),
         }
     }
 }
@@ -36,8 +36,8 @@ impl ToModel for views::PricingMethod {
 
     fn to_model(&self) -> Self::Model {
         match *self {
-            views::PricingMethod::PerPortion(v) => models::PricingMethod::PerPortion(v),
-            views::PricingMethod::ByWeight(v) => models::PricingMethod::ByWeight(v),
+            Self::PerPortion(v) => Self::Model::PerPortion(v),
+            Self::ByWeight(v) => Self::Model::ByWeight(v),
         }
     }
 }
@@ -47,15 +47,16 @@ impl ToView for models::FeedbackTopic {
 
     fn to_view(&self) -> Self::View {
         match *self {
-            models::FeedbackTopic::Appeal => views::FeedbackTopic::Appeal,
-            models::FeedbackTopic::Queue => views::FeedbackTopic::Queue,
-            models::FeedbackTopic::Tableware => views::FeedbackTopic::Tableware,
-            models::FeedbackTopic::Quality => views::FeedbackTopic::Quality,
-            models::FeedbackTopic::Price => views::FeedbackTopic::Price,
-            models::FeedbackTopic::Hygiene => views::FeedbackTopic::Hygiene,
-            models::FeedbackTopic::Taste => views::FeedbackTopic::Taste,
-            models::FeedbackTopic::Hunger => views::FeedbackTopic::Hunger,
-            models::FeedbackTopic::Praise => views::FeedbackTopic::Praise,
+            Self::Appeal => Self::View::Appeal,
+            Self::Queue => Self::View::Queue,
+            Self::Tableware => Self::View::Tableware,
+            Self::Quality => Self::View::Quality,
+            Self::Price => Self::View::Price,
+            Self::Hygiene => Self::View::Hygiene,
+            Self::Taste => Self::View::Taste,
+            Self::Hunger => Self::View::Hunger,
+            Self::Praise => Self::View::Praise,
+            Self::Crab => Self::View::Crab,
         }
     }
 }
@@ -65,15 +66,16 @@ impl ToModel for views::FeedbackTopic {
 
     fn to_model(&self) -> Self::Model {
         match *self {
-            views::FeedbackTopic::Appeal => models::FeedbackTopic::Appeal,
-            views::FeedbackTopic::Queue => models::FeedbackTopic::Queue,
-            views::FeedbackTopic::Tableware => models::FeedbackTopic::Tableware,
-            views::FeedbackTopic::Quality => models::FeedbackTopic::Quality,
-            views::FeedbackTopic::Price => models::FeedbackTopic::Price,
-            views::FeedbackTopic::Hygiene => models::FeedbackTopic::Hygiene,
-            views::FeedbackTopic::Taste => models::FeedbackTopic::Taste,
-            views::FeedbackTopic::Hunger => models::FeedbackTopic::Hunger,
-            views::FeedbackTopic::Praise => models::FeedbackTopic::Praise,
+            Self::Appeal => Self::Model::Appeal,
+            Self::Queue => Self::Model::Queue,
+            Self::Tableware => Self::Model::Tableware,
+            Self::Quality => Self::Model::Quality,
+            Self::Price => Self::Model::Price,
+            Self::Hygiene => Self::Model::Hygiene,
+            Self::Taste => Self::Model::Taste,
+            Self::Hunger => Self::Model::Hunger,
+            Self::Praise => Self::Model::Praise,
+            Self::Crab => Self::Model::Crab,
         }
     }
 }
@@ -82,7 +84,7 @@ impl ToView for models::Appearance {
     type View = views::Appearance;
 
     fn to_view(&self) -> Self::View {
-        views::Appearance {
+        Self::View {
             head: self.head.to_view(),
             upper_garment: self.upper_garment.to_view(),
             lower_garment: self.lower_garment.to_view(),
@@ -96,7 +98,7 @@ impl ToView for models::BodyPart {
     type View = views::BodyPart;
 
     fn to_view(&self) -> Self::View {
-        views::BodyPart {
+        Self::View {
             variant: self.variant,
             color_transform: self.color_transform,
         }

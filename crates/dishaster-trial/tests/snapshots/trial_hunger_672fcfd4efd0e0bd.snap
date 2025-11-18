@@ -14,49 +14,48 @@ turns:
         emotion: 😭
         gesture: 🤞
         topic: hunger
-      - id: 104
-        text: "你们[菜品价格]调整得太频繁了，\\上周还卖8块的红烧肉这周就10块，\\能不能稳定一点？"
-        emotion: 😢
-        topic: price
+      - id: 100
+        text: "你们[菜品标签]太不明显了，\\很多菜都不知道是什么，\\特别是辣度也没有标注。"
+        emotion: 😤
     response_options:
       - speech_id: 3
         keywords:
           - keyword: 分量
             options:
-              - id: 173
+              - id: 293
                 kind: question
-                summary: 能看看肉吗
+                summary: 想吃吗
               - id: 84
                 kind: agreement
                 summary: 调整分量与补偿
-              - id: 271
-                kind: agreement
-                summary: 成本说明
-      - speech_id: 104
+              - id: 185
+                kind: question
+                summary: 看清了吗
+      - speech_id: 100
         keywords:
-          - keyword: 菜品价格
+          - keyword: 菜品标签
             options:
-              - id: 271
-                kind: agreement
-                summary: 成本说明
+              - id: 212
+                kind: objection
+                summary: 很明显
     selected_response:
-      speech_id: 104
+      speech_id: 100
       keyword_idx: 0
       option_idx: 3
     manager_speeches:
-      - id: 271
-        summary: 成本说明
-        text: "非常理解您的感受，\\近期因部分食材供应链成本显著上升，\\我们不得不对价格进行适度调整。\\我们会努力优化采购渠道，\\并推出更多高性价比的套餐回馈老顾客。"
-        emotion: 😊
+      - id: 212
+        summary: 很明显
+        text: "那个菜的颜色很明显是辣的，\\您应该自己注意。"
+        emotion: 😐
     impact:
-      reputation_score: 0.5
-      mood_change: 0.05
-      trust_change: 0.025
-      patience_change: 1
+      reputation_score: -1.1110001
+      mood_change: -0.11110001
+      trust_change: -0.055550005
+      patience_change: -2.2220001
     continuation_decision: false
 final_state:
   total_turns: 1
   asked_questions:
     - 3
-    - 104
+    - 100
   continuation_depth: 0
