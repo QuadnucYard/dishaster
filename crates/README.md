@@ -261,6 +261,19 @@ Dishaster is a canteen dining simulation game built with Rust and Godot Engine. 
 - **Dependencies**: `dishrupt-core`, `dishrupt-ecs`, `dishrupt-rng`, `dishrupt-simulation`, `bevy_ecs`
 - **Note**: Independent simulation separate from main game, reuses simulation framework
 
+### dishaster-trial
+
+- **Purpose**: Multi-turn dialogue system between diners and managers
+- **Contains**:
+  - Trial session state machine (intro → question → response → evaluation → outcome)
+  - Dialogue topic categorization and question matching
+  - Manager response selection with filtering logic
+  - Sentiment evaluation and reputation effects
+  - Trial corpus integration (links questions/responses from data files)
+  - State transitions coordinated with `SimEvent` emissions
+- **Dependencies**: `dishrupt-core`, `dishaster-models`, `dishaster-views`
+- **Note**: Implements the conversational agent system where diners can initiate complaints or requests, and managers respond through multi-turn dialogues. Stateful interactions drive reputation changes and narrative outcomes.
+
 ### dishaster-data
 
 - **Purpose**: Asset loading from RON files
@@ -507,6 +520,185 @@ graph TB
     class models,views,data,persist data
     class d-core,d-ecs,d-rng,d-simulation,d-runner,d-godot-display,d-godot-input,d-godot-audio,d-godot-utils,d-godot-ui,d-godot-widgets,d-godot-scene,d-persist,d-asset,d-l10n,d-l10n-godot framework
 ```
+
+## Crate Grouping Structure
+
+The workspace is organized into logical groups based on purpose and responsibility:
+
+```mermaid
+graph TB
+    subgraph entry["🚀 Entry Point"]
+        ext[dishaster-godot-ext<br/>cdylib entry]
+    end
+
+    subgraph integration["🎮 Integration Layer"]
+        godot[dishaster-godot<br/>Scene Management<br/>App Lifecycle]
+    end
+
+    subgraph presentation["🖼️ Presentation Layer"]
+        godot-game[dishaster-godot-game<br/>Simulation Runner<br/>Display Controllers<br/>Event Processing]
+        godot-ui[dishaster-godot-ui<br/>Game UI Components<br/>User Input Handling]
+        godot-opening[dishaster-godot-opening<br/>Title Screen Animation]
+        ui-protocol[dishaster-ui-protocol<br/>UI Interface<br/>GameRequest/UiCommand]
+    end
+
+    subgraph simulation["⚙️ Simulation Core"]
+        core[dishaster-core<br/>Main ECS Simulation<br/>Diner Behaviors<br/>Service Systems]
+        trial[dishaster-trial<br/>Multi-turn Dialogues<br/>Trial State Machine]
+        interface[dishaster-interface<br/>CQRS Interface<br/>Commands/Queries/Events]
+        opening-sim[dishaster-opening<br/>Opening Animation Sim]
+        nav[dishaster-navigation<br/>Pathfinding<br/>Collision Detection]
+    end
+
+    subgraph data-layer["📦 Data & Models"]
+        models[dishaster-models<br/>Core Data Structures<br/>Diner/Dish/Level Models]
+        views[dishaster-views<br/>Presentation View Models<br/>UI-friendly Snapshots]
+        data[dishaster-data<br/>Asset Loader<br/>RON File Parser]
+        save-models[dishaster-save-models<br/>Persistence Structures]
+        opening-models[dishaster-opening-models<br/>Opening Animation Models]
+    end
+
+    subgraph persistence-layer["💾 Persistence"]
+        persist[dishaster-persistence<br/>Save/Load Services<br/>User Data Management]
+        validation[dishaster-validation<br/>Data Validation]
+    end
+
+    subgraph framework-core["🔧 Framework - Core"]
+        d-core[dishrupt-core<br/>EntityId, Registry<br/>Display Traits]
+        d-ecs[dishrupt-ecs<br/>Bevy ECS Utils<br/>Component Wrappers]
+        d-rng[dishrupt-rng<br/>Deterministic RNG]
+        d-simulation[dishrupt-simulation<br/>Simulation Traits<br/>ISimulation Interface]
+        d-runner[dishrupt-runner<br/>Execution Strategies<br/>Sync/Async Runners]
+        d-persist[dishrupt-persistence<br/>Storage Trait<br/>Filesystem Backend]
+        d-asset[dishrupt-asset<br/>Asset Catalog<br/>Path Resolution]
+        d-l10n[dishrupt-l10n<br/>Fluent i18n]
+    end
+
+    subgraph framework-godot["🎨 Framework - Godot"]
+        d-godot-utils[dishrupt-godot-utils<br/>Type Conversions<br/>Node Extensions]
+        d-godot-display[dishrupt-godot-display<br/>Display Stage<br/>Node Pooling]
+        d-godot-input[dishrupt-godot-input<br/>Input Events<br/>Event Listeners]
+        d-godot-audio[dishrupt-godot-audio<br/>Audio Manager<br/>Sound Playback]
+        d-godot-ui[dishrupt-godot-ui<br/>UI Framework<br/>GUI Requests]
+        d-godot-widgets[dishrupt-godot-widgets<br/>Reactive Widgets<br/>Signal Wrappers]
+        d-godot-scene[dishrupt-godot-scene<br/>Scene Stack<br/>Transitions]
+        d-l10n-godot[dishrupt-l10n-godot<br/>Godot i18n Integration]
+    end
+
+    %% Connections between groups
+    entry --> integration
+    integration --> presentation
+    integration --> simulation
+    integration --> data-layer
+    integration --> persistence-layer
+
+    presentation --> simulation
+    presentation --> data-layer
+    presentation --> framework-godot
+    presentation --> framework-core
+
+    simulation --> data-layer
+    simulation --> framework-core
+
+    persistence-layer --> data-layer
+    persistence-layer --> framework-core
+
+    framework-godot --> framework-core
+
+    %% Styling
+    classDef entryStyle fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px,color:#000
+    classDef integrationStyle fill:#e74c3c,stroke:#c0392b,stroke-width:2px,color:#fff
+    classDef presentationStyle fill:#4ecdc4,stroke:#0ca789,stroke-width:2px,color:#000
+    classDef simulationStyle fill:#95e1d3,stroke:#38ada9,stroke-width:2px,color:#000
+    classDef dataStyle fill:#ffd93d,stroke:#f6b93b,stroke-width:2px,color:#000
+    classDef persistStyle fill:#f39c12,stroke:#e67e22,stroke-width:2px,color:#000
+    classDef frameworkStyle fill:#a8dadc,stroke:#457b9d,stroke-width:2px,color:#000
+
+    class ext entryStyle
+    class godot integrationStyle
+    class godot-game,godot-ui,godot-opening,ui-protocol presentationStyle
+    class core,trial,interface,opening-sim,nav simulationStyle
+    class models,views,data,save-models,opening-models dataStyle
+    class persist,validation persistStyle
+    class d-core,d-ecs,d-rng,d-simulation,d-runner,d-persist,d-asset,d-l10n frameworkStyle
+    class d-godot-utils,d-godot-display,d-godot-input,d-godot-audio,d-godot-ui,d-godot-widgets,d-godot-scene,d-l10n-godot frameworkStyle
+```
+
+### Group Descriptions
+
+#### 🚀 Entry Point
+
+- `dishaster-godot-ext`: The cdylib that Godot loads via GDExtension. Minimal entry point that delegates to integration layer.
+
+#### 🎮 Integration Layer
+
+- `dishaster-godot`: Top-level orchestration. Manages scene lifecycle, initializes data assets, sets up persistence services, and coordinates between presentation and simulation layers.
+
+#### 🖼️ Presentation Layer
+
+- Game-specific Godot components that bridge simulation to visual representation
+- `dishaster-godot-game`: Wraps simulation runner, manages display stage, processes events, emits UI commands
+- `dishaster-godot-ui`: UI widgets and components, emits GameRequest/AppRequest based on user input
+- `dishaster-godot-opening`: Self-contained presentation for title screen animation
+- `dishaster-ui-protocol`: Communication interface between game logic and UI (CQRS pattern for presentation)
+
+#### ⚙️ Simulation Core
+
+- Game-specific simulation logic (ECS-based, engine-agnostic except for `dishaster-core`)
+- `dishaster-core`: Main simulation with diner behaviors, service systems, day/run management (only game crate with `bevy_ecs` dependency)
+- `dishaster-trial`: Multi-turn dialogue system for diner-manager conversations
+- `dishaster-interface`: CQRS interface implementation (Commands, Queries, Events, Responses)
+- `dishaster-opening`: Separate lightweight simulation for title screen
+- `dishaster-navigation`: Standalone pathfinding and collision detection
+
+#### 📦 Data & Models
+
+- Pure data structures and asset management (no simulation or UI logic)
+- `dishaster-models`: Core simulation data structures (diner, dish, level, canteen models)
+- `dishaster-views`: Presentation-friendly view models for UI consumption
+- `dishaster-data`: Asset loading from RON files into model registry
+- `dishaster-save-models`: Persistence data structures (player profile, preferences)
+- `dishaster-opening-models`: Data structures for opening animation
+
+#### 💾 Persistence
+
+- Save/load and data validation
+- `dishaster-persistence`: High-level services for user data, preferences, and player progress
+- `dishaster-validation`: Data validation utilities
+
+#### 🔧 Framework - Core
+
+- Reusable engine-agnostic utilities
+- `dishrupt-core`: Core types (EntityId, Registry, Display traits)
+- `dishrupt-ecs`: Bevy ECS integration (only framework crate with ECS dependency)
+- `dishrupt-rng`: Deterministic RNG for reproducible simulations
+- `dishrupt-simulation`: Generic simulation traits and interfaces
+- `dishrupt-runner`: Execution strategies (sync/async simulation runners)
+- `dishrupt-persistence`: Storage abstraction for save/load backends
+- `dishrupt-asset`: Asset catalog and path resolution
+- `dishrupt-l10n`: Fluent-based localization
+
+#### 🎨 Framework - Godot
+
+- Reusable Godot integration utilities
+- `dishrupt-godot-utils`: Type conversions and extension traits for Godot types
+- `dishrupt-godot-display`: Display stage with node management and pooling (ECS-agnostic)
+- `dishrupt-godot-input`: Input event abstractions
+- `dishrupt-godot-audio`: Audio management with asset catalog integration
+- `dishrupt-godot-ui`: Generic UI framework utilities
+- `dishrupt-godot-widgets`: Signal-reactive wrappers for Godot controls
+- `dishrupt-godot-scene`: Scene stack and transition management
+- `dishrupt-l10n-godot`: Godot-specific localization integration
+
+### Key Architectural Principles
+
+1. **Separation of Concerns**: Clear boundaries between simulation, data, presentation, and framework
+2. **ECS Isolation**: Only `dishaster-core` and `dishrupt-ecs` depend on Bevy ECS; all other code is engine-agnostic
+3. **Reusable Framework**: `dishrupt-*` crates are generic and could be extracted for other projects
+4. **CQRS Pattern**: Commands, Queries, Events, Responses for simulation; GameRequest/UiCommand for presentation
+5. **Unidirectional Data Flow**: UI → Requests → Game Logic → Commands → Scene → UI Updates
+6. **Model-View Separation**: `models` for simulation state, `views` for UI-friendly snapshots
+7. **Modular Simulations**: Opening animation demonstrates framework reusability with separate mini-simulation
 
 ## Architecture Layers
 
