@@ -301,7 +301,6 @@ impl SceneStack {
     /// - `transition`: Optional transition effect to use for this scene change
     pub fn change_push_scene(
         &mut self,
-        _ctx: &mut SceneContext,
         scene_id: SceneId,
         transition: Option<Box<dyn SceneTransition>>,
     ) {
@@ -328,7 +327,6 @@ impl SceneStack {
     /// ```rust,ignore
     /// let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
     /// ctx.scene_stack.change_push_scene_with_callback(
-    ///     ctx.base,
     ///     GameScene::ID,
     ///     Some(trans),
     ///     move |scene, ctx| {
@@ -339,7 +337,6 @@ impl SceneStack {
     /// ```
     pub fn change_push_scene_with_callback(
         &mut self,
-        _ctx: &mut SceneContext,
         scene_id: SceneId,
         transition: Option<Box<dyn SceneTransition>>,
         on_loaded: impl FnOnce(&mut dyn Scene, &mut SceneContext) + Send + 'static,
@@ -362,11 +359,7 @@ impl SceneStack {
     ///
     /// # Panics
     /// Panics if there is no previous scene in the history (i.e., popping the root scene).
-    pub fn change_pop_scene(
-        &mut self,
-        _ctx: &mut SceneContext,
-        transition: Option<Box<dyn SceneTransition>>,
-    ) {
+    pub fn change_pop_scene(&mut self, transition: Option<Box<dyn SceneTransition>>) {
         // Store the pending scene change
         self.pending_change = Some(PendingSceneChange {
             change_type: ChangeType::Pop,
@@ -385,7 +378,6 @@ impl SceneStack {
     /// - `transition`: Optional transition effect to use for this scene change
     pub fn replace_scene(
         &mut self,
-        _ctx: &mut SceneContext,
         scene_id: SceneId,
         transition: Option<Box<dyn SceneTransition>>,
     ) {

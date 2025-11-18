@@ -58,7 +58,7 @@ pub struct PopSceneProcedure;
 impl SceneProcedure for PopSceneProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
         let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
-        ctx.scene_stack.change_pop_scene(ctx.base, Some(trans));
+        ctx.scene_stack.change_pop_scene(Some(trans));
         SceneProcedurePoll::Ready
     }
 }

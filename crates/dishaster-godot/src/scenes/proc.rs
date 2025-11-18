@@ -29,7 +29,6 @@ impl SceneProcedure for EnterLevelProcedure {
         // Use callback to initialize game scene after it's loaded
         let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
         ctx.scene_stack.change_push_scene_with_callback(
-            ctx.base,
             GameScene::ID,
             Some(trans),
             move |scene, scene_ctx| {
@@ -50,7 +49,7 @@ pub struct ExitLevelProcedure;
 impl SceneProcedure for ExitLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
         let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
-        ctx.scene_stack.change_pop_scene(ctx.base, Some(trans));
+        ctx.scene_stack.change_pop_scene(Some(trans));
 
         SceneProcedurePoll::Ready
     }
@@ -61,7 +60,7 @@ pub struct AdvanceLevelProcedure;
 impl SceneProcedure for AdvanceLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
         let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
-        ctx.scene_stack.change_pop_scene(ctx.base, Some(trans)); // pop GameScene
+        ctx.scene_stack.change_pop_scene(Some(trans)); // pop GameScene
 
         EnterLevelProcedure.process(ctx) // push new GameScene
     }
