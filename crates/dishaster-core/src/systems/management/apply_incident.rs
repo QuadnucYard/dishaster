@@ -154,11 +154,14 @@ fn apply_temporary_crowd(
 fn apply_inspector_visit(
     event: On<DispatchManagement<InspectorVisitModel>>,
     mut commands: Commands,
+    mut rng: ResMut<WorldRng>,
 ) {
     let model = &event.0;
 
-    // Trigger the inspector visit event
-    commands.trigger(InspectorVisit(model.clone()));
+    commands.insert_resource(PendingInspectorVisit {
+        model: model.clone(),
+        scheduled_time: rng.random_range(0.1..0.3) * 3600.0, // TODO: use actual run length
+    });
 }
 
 /// Handle inspector visit event (can be triggered from incident or dev command)

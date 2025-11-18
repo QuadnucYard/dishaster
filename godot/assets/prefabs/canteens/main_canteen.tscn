@@ -20,7 +20,7 @@ unique_name_in_owner = true
 
 [node name="Clear" type="Sprite2D" parent="Origin"]
 z_index = -100
-position = Vector2(763.5, 449.5)
+position = Vector2(760, 414)
 scale = Vector2(7.6914063, 4.4414063)
 texture = ExtResource("1_cakfy")
 
@@ -65,4 +65,4 @@ unique_name_in_owner = true
 position = Vector2(1473, 781)
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(757, 457)
+position = Vector2(757, 400)

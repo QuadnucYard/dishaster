@@ -176,6 +176,15 @@ pub struct CrabTurmoil {
     pub triggered_diners: FxHashSet<Entity>,
 }
 
+/// Pending inspector visit incident to be applied at some time of the day
+#[derive(Resource)]
+pub struct PendingInspectorVisit {
+    /// Inspector visit model
+    pub model: InspectorVisitModel,
+    /// Scheduled time for the inspector visit (seconds from run start)
+    pub scheduled_time: Seconds,
+}
+
 #[derive(Resource)]
 pub struct ManagementDecisions {
     pub available: Vec<ManagementDecisionModel>,

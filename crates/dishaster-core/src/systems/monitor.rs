@@ -1,6 +1,9 @@
 use dishaster_views::ReputationView;
 
-use crate::{events::RunEnded, systems::prelude::*};
+use crate::{
+    events::{InspectorVisit, RunEnded},
+    systems::prelude::*,
+};
 
 /// System to update the current diner count
 pub fn check_day_completion(
@@ -37,4 +40,25 @@ pub fn monitor_reputation_changes(
         fsri: reputation.fsri,
         food_quality: reputation.food_quality,
     })));
+}
+
+pub fn check_inspector_visit(
+    mut commands: Commands,
+    time: Res<Time>,
+    day_status: Res<DayStatus>,
+    pending_visit: Option<Res<PendingInspectorVisit>>,
+) {
+    let Some(pending_visit) = pending_visit else {
+        return;
+    };
+
+    // Use relative time for arrival time checks
+    let current_time = time.world_time as f32 - day_status.start_time;
+
+    if current_time >= pending_visit.scheduled_time {
+        // Trigger the inspector visit event
+        commands.trigger(InspectorVisit(pending_visit.model.clone()));
+        // Remove the pending visit resource
+        commands.remove_resource::<PendingInspectorVisit>();
+    }
 }

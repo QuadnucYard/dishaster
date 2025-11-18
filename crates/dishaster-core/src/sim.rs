@@ -78,6 +78,7 @@ impl Simulation {
                 // Presentation related systems
                 feedback_present_system,
                 monitor_reputation_changes.run_if(resource_changed::<ReputationStateRes>),
+                check_inspector_visit,
             )
                 .chain(),
         );
