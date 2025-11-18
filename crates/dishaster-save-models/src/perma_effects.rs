@@ -16,9 +16,6 @@ pub struct PermanentEffects {
     /// Active motivational slogans (can stack)
     pub slogans: Vec<SloganEffect>,
 
-    /// Luxury dishes that have been unlocked (can only unlock once per dish)
-    pub luxury_dishes: FxHashSet<ModelId>,
-
     /// Probability for diners to actively trigger crab topic trial (from SupplyCrab decision)
     pub crab_trial_probability: Option<f32>,
 
@@ -137,11 +134,6 @@ impl PermanentEffects {
                 }
             })
             .sum()
-    }
-
-    /// Check if a luxury dish has been unlocked
-    pub fn has_luxury_dish(&self, dish_id: &ModelId) -> bool {
-        self.luxury_dishes.contains(dish_id)
     }
 
     /// Apply daily decay to all campaigns

@@ -7,7 +7,7 @@ mod feedback;
 use dishaster_interface::{snapshots::*, *};
 use dishaster_ui_protocol::{PhaseMusic, UiCommand};
 use dishrupt_l10n::tr;
-use godot::global::godot_print;
+use godot::{classes::Node2D, global::godot_print};
 
 pub use self::{agent::AgentPresenter, dish::DishPresenter, dispenser::DispenserPresenter};
 use super::Game;
@@ -134,6 +134,19 @@ impl Game {
                             feedback.topic,
                             feedback.can_trigger_trial,
                         );
+                    }
+                }
+
+                SimEvent::ShowSlogan => {
+                    if let Some(mut slogan) = self.map_root.try_get_node_as::<Node2D>("%Slogan") {
+                        godot_print!("Making slogan visible");
+                        slogan.set_visible(true);
+                    }
+                }
+                SimEvent::ShowCrab => {
+                    if let Some(mut corro) = self.map_root.try_get_node_as::<Node2D>("%Corro") {
+                        godot_print!("Making crab visible");
+                        corro.set_visible(true);
                     }
                 }
 

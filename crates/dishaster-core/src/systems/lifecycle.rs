@@ -29,6 +29,7 @@ pub fn register_lifecycle_systems(world: &mut World) {
 }
 
 pub fn on_day_started(
+    mut commands: Commands,
     day_status: Res<DayStatus>,
     mut perma_effects: ResMut<PermanentEffectsRes>,
     mut events: ResMut<EventQueue>,
@@ -42,22 +43,11 @@ pub fn on_day_started(
 
     // Reset daily incident effects at the start of each day
     perma_effects.reset_daily_effects();
-}
 
-fn on_run_started(
-    _event: On<RunStarted>,
-    mut commands: Commands,
-    mut time: ResMut<Time>,
-    day_status: Res<DayStatus>,
-    mut perma_effects: ResMut<PermanentEffectsRes>,
-) {
-    time.fast_forward_to(day_status.start_time as f64);
-
-    log::info!(
-        "Run started for day {} from {}",
-        day_status.current_day.0,
-        day_status.start_day.0
-    );
+    // Show active slogans at day start
+    if !perma_effects.slogans.is_empty() {
+        events.push(SimEvent::ShowSlogan);
+    }
 
     // Apply crab effect if present
     if let Some(crab) = perma_effects.crab_trial_probability.take() {
@@ -66,7 +56,23 @@ fn on_run_started(
             trigger_limit: 5,
             triggered_diners: Default::default(),
         });
+        events.push(SimEvent::ShowCrab);
     }
+}
+
+fn on_run_started(
+    _event: On<RunStarted>,
+    mut commands: Commands,
+    mut time: ResMut<Time>,
+    day_status: Res<DayStatus>,
+) {
+    time.fast_forward_to(day_status.start_time as f64);
+
+    log::info!(
+        "Run started for day {} from {}",
+        day_status.current_day.0,
+        day_status.start_day.0
+    );
 
     if day_status.current_day != day_status.start_day {
         // emit incident for new day

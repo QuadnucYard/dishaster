@@ -1,8 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://36l52q5huwsf"]
+[gd_scene load_steps=8 format=3 uid="uid://36l52q5huwsf"]
 
 [ext_resource type="Texture2D" uid="uid://d1n411xq3bupu" path="res://assets/sprites/canteen/clear.png" id="1_cakfy"]
 [ext_resource type="Texture2D" uid="uid://d4e0juuhgvdh1" path="res://assets/sprites/canteen/wall_paper.png" id="1_m0x1g"]
 [ext_resource type="Texture2D" uid="uid://2b51230cakm7" path="res://assets/sprites/canteen/floor_tile.png" id="1_swfgw"]
+[ext_resource type="Texture2D" uid="uid://mtxkrp8gck75" path="res://assets/sprites/canteen/slogan.png" id="4_aexwg"]
+[ext_resource type="PackedScene" uid="uid://ddbfmjsfb5esb" path="res://assets/prefabs/corro.tscn" id="5_fhumt"]
+
+[sub_resource type="Gradient" id="Gradient_fhumt"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0.40281263, 0.286145, 0.19472998, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_jqwuj"]
+gradient = SubResource("Gradient_fhumt")
 
 [node name="MainCanteen" type="Node2D"]
 
@@ -14,6 +23,11 @@ z_index = -100
 position = Vector2(763.5, 449.5)
 scale = Vector2(7.6914063, 4.4414063)
 texture = ExtResource("1_cakfy")
+
+[node name="Border" type="Sprite2D" parent="Origin"]
+position = Vector2(748.49994, 401)
+scale = Vector2(23.640623, 12.71875)
+texture = SubResource("GradientTexture2D_jqwuj")
 
 [node name="WallPaper" type="Sprite2D" parent="Origin"]
 z_index = -1
@@ -30,6 +44,25 @@ texture = ExtResource("1_swfgw")
 centered = false
 region_enabled = true
 region_rect = Rect2(0, 0, 1500, 800)
+
+[node name="Slogan" type="Node2D" parent="Origin"]
+unique_name_in_owner = true
+visible = false
+
+[node name="Left" type="Sprite2D" parent="Origin/Slogan"]
+position = Vector2(252, -38)
+texture = ExtResource("4_aexwg")
+vframes = 2
+
+[node name="Right" type="Sprite2D" parent="Origin/Slogan"]
+position = Vector2(1246, -40)
+texture = ExtResource("4_aexwg")
+vframes = 2
+frame = 1
+
+[node name="Corro" parent="Origin" instance=ExtResource("5_fhumt")]
+unique_name_in_owner = true
+position = Vector2(1473, 781)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(757, 457)

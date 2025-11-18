@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddbfmjsfb5esb"]
+
+[ext_resource type="Texture2D" uid="uid://rsjkwee82yvf" path="res://assets/sprites/canteen/corro.svg" id="1_idaww"]
+
+[node name="Corro" type="Sprite2D"]
+texture = ExtResource("1_idaww")
+offset = Vector2(0, -25)

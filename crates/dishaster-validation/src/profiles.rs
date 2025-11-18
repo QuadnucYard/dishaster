@@ -156,17 +156,6 @@ fn validate_permanent_effects(
 ) -> ValidationResult {
     let mut sink = ErrorSink::new();
 
-    // Validate luxury dish references
-    for dish_id in &effects.luxury_dishes {
-        if !registry.dishes.contains_id(dish_id) {
-            sink.push(ValidationError::MissingReference {
-                model_type: "dish",
-                id: dish_id.clone(),
-                context: "permanent_effects.luxury_dishes".to_string(),
-            });
-        }
-    }
-
     // Validate campaign window references
     for (idx, campaign) in effects.campaigns.iter().enumerate() {
         if let dishaster_save_models::CampaignTarget::Window(window_id) = &campaign.target

@@ -59,6 +59,7 @@ struct DayTelemetry {
 
 pub struct Game {
     root: Gd<Node>,
+    map_root: Gd<Node>,
 
     sim_runner: Box<dyn SimulationRunner<CoreSimulationFeat>>,
     stage: Stage,
@@ -156,6 +157,7 @@ impl Game {
 
         Self {
             root: gd,
+            map_root: map_scene,
             sim_runner: Box::new(sim_runner),
             stage,
             stage_origin: origin,

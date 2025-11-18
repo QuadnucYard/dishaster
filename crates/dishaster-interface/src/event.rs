@@ -61,6 +61,11 @@ pub enum SimEvent {
     /// Agent feedback.
     Feedback(FeedbackView),
 
+    /// Show slogan at day start.
+    ShowSlogan,
+    /// Show crab at day start.
+    ShowCrab,
+
     /// Show trial intro.
     TrialIntro(Box<TrialIntro>),
     /// Trial diner speaks.
