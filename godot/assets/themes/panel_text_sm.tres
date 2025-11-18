@@ -1,6 +1,7 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://quax61mpru57"]
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://quax61mpru57"]
 
 [ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="1_8ndr0"]
+[ext_resource type="FontVariation" uid="uid://c2qn650okphc0" path="res://assets/fonts/sans_extrabold.tres" id="2_5gddo"]
 
 [resource]
 Label/colors/font_color = Color(0.38039216, 0.16862746, 0.047058824, 1)
@@ -13,4 +14,5 @@ RichTextLabel/font_sizes/bold_italics_font_size = 24
 RichTextLabel/font_sizes/italics_font_size = 24
 RichTextLabel/font_sizes/mono_font_size = 24
 RichTextLabel/font_sizes/normal_font_size = 24
+RichTextLabel/fonts/bold_font = ExtResource("2_5gddo")
 RichTextLabel/fonts/normal_font = ExtResource("1_8ndr0")

@@ -24,6 +24,15 @@ pub struct LocalizedLabel {
 
 /// A label with a localization key.
 #[derive(GodotClass)]
+#[class(base=RichTextLabel, init)]
+pub struct LocalizedRichLabel {
+    /// The message id to use for this Label's text.
+    #[export]
+    pub message_id: GString,
+}
+
+/// A label with a localization key.
+#[derive(GodotClass)]
 #[class(base=LineEdit, init)]
 pub struct LocalizedLineEdit {
     /// The message id to use for this LineEdit's placeholder text.

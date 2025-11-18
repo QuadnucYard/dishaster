@@ -145,6 +145,8 @@ pub enum UiCommand {
         message: String,
     },
 
+    /// Show tutorial dialog on first day.
+    ShowTutorial,
     /// Show ending screen.
     ShowEnding(Box<EndingView>),
 

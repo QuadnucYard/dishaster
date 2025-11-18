@@ -5,10 +5,11 @@ use godot::{
     prelude::*,
 };
 
-use crate::localized::{LocalizedButton, LocalizedLabel, LocalizedTooltip};
+use crate::localized::{LocalizedButton, LocalizedLabel, LocalizedRichLabel, LocalizedTooltip};
 
 enum Localizable {
     Label(Gd<LocalizedLabel>),
+    RichLabel(Gd<LocalizedRichLabel>),
     Button(Gd<LocalizedButton>),
     Tooltip(Gd<LocalizedTooltip>),
 }
@@ -17,6 +18,7 @@ impl Localizable {
     fn node_name(&self) -> StringName {
         match self {
             Localizable::Label(a) => a.get_name(),
+            Localizable::RichLabel(a) => a.get_name(),
             Localizable::Button(a) => a.get_name(),
             Localizable::Tooltip(a) => a.get_name(),
         }
@@ -25,6 +27,7 @@ impl Localizable {
     fn node_path(&self) -> NodePath {
         match self {
             Localizable::Label(a) => a.get_path(),
+            Localizable::RichLabel(a) => a.get_path(),
             Localizable::Button(a) => a.get_path(),
             Localizable::Tooltip(a) => a.get_path(),
         }
@@ -58,6 +61,15 @@ impl LocalizationManager {
                     } else {
                         self.items
                             .push((Localizable::Label(label.clone()), key.to_string()));
+                    }
+                },
+                label @ LocalizedRichLabel  => {
+                    let key = &label.bind().message_id;
+                    if key.is_empty() {
+                        push_warning(vslice![format!("The key for node `{}` is empty!", label.get_path())]);
+                    } else {
+                        self.items
+                            .push((Localizable::RichLabel(label.clone()), key.to_string()));
                     }
                 },
                 button @ LocalizedButton  => {
@@ -96,6 +108,7 @@ impl LocalizationManager {
             };
             match loc {
                 Localizable::Label(label) => label.set_text(&value),
+                Localizable::RichLabel(label) => label.set_text(&value),
                 Localizable::Button(button) => button.set_text(&value),
                 Localizable::Tooltip(tooltip) => {
                     if let Some(parent) = tooltip.get_parent()

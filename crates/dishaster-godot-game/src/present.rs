@@ -213,6 +213,10 @@ impl Game {
                     }
                 }
 
+                SimEvent::ShowTutorial => {
+                    godot_print!("Process SimEvent: ShowTutorial");
+                    self.ui_commands.push(UiCommand::ShowTutorial);
+                }
                 SimEvent::ShowEnding(ending) => {
                     godot_print!("Received ending: {:?}", ending);
 

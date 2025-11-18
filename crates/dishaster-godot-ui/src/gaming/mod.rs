@@ -10,6 +10,7 @@ mod settlement;
 mod time_stats;
 mod trial;
 mod trial_impact;
+mod tutorial;
 
 pub use ending::EndingGui;
 pub use hint::HintNotification;
@@ -23,3 +24,4 @@ pub use settlement::SettlementGui;
 pub use time_stats::TimeStatsGui;
 pub use trial::TrialGui;
 pub use trial_impact::TrialImpactGui;
+pub use tutorial::TutorialGui;

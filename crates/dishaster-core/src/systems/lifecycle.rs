@@ -29,9 +29,15 @@ pub fn register_lifecycle_systems(world: &mut World) {
 }
 
 pub fn on_day_started(
+    day_status: Res<DayStatus>,
     mut perma_effects: ResMut<PermanentEffectsRes>,
     mut events: ResMut<EventQueue>,
 ) {
+    // Show tutorial dialog on the first day
+    if day_status.current_day == day_status.start_day {
+        events.push(SimEvent::ShowTutorial);
+    }
+
     events.emit_hint(hints::ADJUST_PRICE, HintCondition::OnceLocal);
 
     // Reset daily incident effects at the start of each day

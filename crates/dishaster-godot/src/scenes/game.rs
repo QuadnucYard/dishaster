@@ -319,6 +319,10 @@ impl GameScene {
                 gui.get_mut::<InspectorResultGui>().show();
             }
 
+            UiCommand::ShowTutorial => {
+                gui.show::<TutorialGui>();
+            }
+
             UiCommand::ShowEnding(ending) => {
                 if let Some(ending_model) = game_services().data.endings.get(&ending.id) {
                     gui.get_mut::<EndingGui>()

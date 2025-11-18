@@ -35,6 +35,7 @@ pub fn register_guis(registry: &mut GuiRegistry, catalog: &AssetCatalog) {
         TrialGui => "gaming/trial",
         TrialImpactGui => "gaming/trial_impact",
         HintNotification => "gaming/hint",
+        TutorialGui => "gaming/tutorial",
     );
 }
 

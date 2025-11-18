@@ -84,6 +84,8 @@ pub enum SimEvent {
     /// Show inspector visit result.
     ShowInspectorResult(Box<InspectorResultView>),
 
+    /// Show tutorial dialog on first day.
+    ShowTutorial,
     /// Show ending screen.
     ShowEnding(Box<EndingView>),
 
