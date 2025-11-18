@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://cw2awl2nlcs44"]
+
+[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_uq8l4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uq8l4"]
+atlas = ExtResource("1_uq8l4")
+region = Rect2(320, 128, 64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1n1dj"]
+size = Vector2(32, 24)
+
+[node name="CrispyDuck" type="Area2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = SubResource("AtlasTexture_uq8l4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_1n1dj")

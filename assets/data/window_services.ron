@@ -300,7 +300,6 @@
         ),
         dish_options: [
             (dish_id: "rice", pricing: ByWeight(2.0)),
-            (dish_id: "spicy_hotpot", pricing: PerPortion(20.0)),
             (dish_id: "boiled_fish_chili", pricing: PerPortion(18.0)),
             (dish_id: "twice_cooked_pork", pricing: PerPortion(4.5)),
         ],
@@ -515,7 +514,7 @@
         ),
         dish_options: [
             (dish_id: "sichuan_spicy_hot_pot", pricing: PerPortion(12.0)),
-            (dish_id: "mala_xiang_guo", pricing: PerPortion(18.0)),
+            (dish_id: "spicy_hotpot", pricing: PerPortion(18.0)),
             (dish_id: "spicy_grilled_fish", pricing: PerPortion(35.0)),
         ],
         display: (res: "windows/sample_window"),

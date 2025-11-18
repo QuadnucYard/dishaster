@@ -20,6 +20,9 @@ prefix = "res://assets/music"
 [kinds.sound]
 prefix = "res://assets/sounds"
 
+[kinds.prefab.aliases]
+dish_price_label = "price_label"
+
 [kinds.music.aliases]
 main_theme = "main_theme.ogg"
 canteen_preparation_theme = "A Fresh Start.ogg"

@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://4jbe3641u3dk"]
+
+[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_c3m8j"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c3m8j"]
+atlas = ExtResource("1_c3m8j")
+region = Rect2(448, 448, 64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pyrtb"]
+size = Vector2(32, 24)
+
+[node name="ShrimpWontonNoodles" type="Area2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = SubResource("AtlasTexture_c3m8j")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_pyrtb")

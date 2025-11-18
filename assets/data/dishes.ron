@@ -25,7 +25,7 @@
             satiation_per_kg: 160.0, // More filling than rice
             eating_time_per_kg: 2200.0, // Needs chewing: 100g in ~3.5 min
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/mantou"),
     ),
     (
         id: "congee", // 白粥
@@ -38,7 +38,7 @@
             satiation_per_kg: 60.0, // Very light (mostly water)
             eating_time_per_kg: 3500.0, // Sipping hot liquid: 300ml in ~17 min
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/congee"),
     ),
 
     // ==================== 套餐类 (Combo Meals) ====================
@@ -57,7 +57,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0, // Combo meal: 350g in ~15 min at normal speed
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/char_siu_rice"),
     ),
     (
         id: "roast_duck_rice", // 烧鸭饭
@@ -71,7 +71,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/roast_duck_rice"),
     ),
     (
         id: "roast_pork_rice", // 烧肉饭
@@ -85,7 +85,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/roast_pork_rice"),
     ),
     (
         id: "roast_chicken_rice", // 烧鸡饭
@@ -99,7 +99,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/roast_chicken_rice"),
     ),
     (
         id: "braised_chicken_rice", // 卤鸡饭
@@ -113,7 +113,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/braised_chicken_rice"),
     ),
     (
         id: "soy_sauce_chicken_rice", // 豉油鸡饭
@@ -127,7 +127,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/soy_sauce_chicken_rice"),
     ),
     (
         id: "curry_chicken_rice", // 咖喱鸡饭
@@ -141,7 +141,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/curry_chicken_rice"),
     ),
     (
         id: "curry_beef_rice", // 咖喱牛肉饭
@@ -155,7 +155,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/curry_beef_rice"),
     ),
     (
         id: "pork_chop_rice", // 猪扒饭
@@ -169,7 +169,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/pork_chop_rice"),
     ),
     (
         id: "chicken_cutlet_rice", // 鸡排饭
@@ -183,7 +183,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/chicken_cutlet_rice"),
     ),
     (
         id: "beef_brisket_rice", // 牛腩饭
@@ -197,7 +197,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/beef_brisket_rice"),
     ),
     (
         id: "braised_pork_rice", // 卤肉饭
@@ -211,7 +211,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/braised_pork_rice"),
     ),
     (
         id: "fish_fillet_rice", // 鱼片饭
@@ -225,7 +225,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/fish_fillet_rice"),
     ),
     (
         id: "kung_pao_chicken_rice", // 宫保鸡丁盖饭
@@ -239,7 +239,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/kung_pao_chicken_rice"),
     ),
     (
         id: "mapo_tofu_rice", // 麻婆豆腐盖饭
@@ -252,7 +252,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/mapo_tofu_rice"),
     ),
     (
         id: "tomato_egg_rice", // 番茄鸡蛋盖饭
@@ -265,7 +265,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/tomato_egg_rice"),
     ),
 
     // 炒饭类 (Fried Rice)
@@ -280,7 +280,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/egg_fried_rice"),
     ),
     (
         id: "yangzhou_fried_rice", // 扬州炒饭
@@ -293,7 +293,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/yangzhou_fried_rice"),
     ),
     (
         id: "shrimp_fried_rice", // 虾仁炒饭
@@ -307,7 +307,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/shrimp_fried_rice"),
     ),
     (
         id: "beef_fried_rice", // 牛肉炒饭
@@ -321,7 +321,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/beef_fried_rice"),
     ),
     (
         id: "ham_fried_rice", // 火腿炒饭
@@ -334,7 +334,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/ham_fried_rice"),
     ),
     (
         id: "pineapple_fried_rice", // 菠萝炒饭
@@ -347,7 +347,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/pineapple_fried_rice"),
     ),
 
     // ==================== 荤菜类 (Meat Dishes - 按重量) ====================
@@ -364,7 +364,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2700.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/kung_pao_chicken"),
     ),
     (
         id: "sweet_sour_pork", // 糖醋里脊
@@ -378,7 +378,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/sweet_sour_pork"),
     ),
     (
         id: "braised_pork_belly", // 红烧肉
@@ -392,7 +392,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/braised_pork_belly"),
     ),
     (
         id: "cola_chicken_wings", // 可乐鸡翅
@@ -406,7 +406,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/cola_chicken_wings"),
     ),
     (
         id: "black_pepper_beef", // 黑椒牛柳
@@ -420,7 +420,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/black_pepper_beef"),
     ),
     (
         id: "beef_potato_stew", // 土豆烧牛肉
@@ -434,7 +434,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/beef_potato_stew"),
     ),
     (
         id: "fried_pork_cutlet", // 炸猪排
@@ -448,7 +448,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/fried_pork_cutlet"),
     ),
     (
         id: "salt_pepper_ribs", // 椒盐排骨
@@ -462,7 +462,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/salt_pepper_ribs"),
     ),
 
     // ==================== 半荤半素类 (Meat & Veg - 按份) ====================
@@ -478,7 +478,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/mapo_tofu"),
     ),
     (
         id: "fish_fragrant_eggplant", // 鱼香茄子
@@ -491,7 +491,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/fish_fragrant_eggplant"),
     ),
     (
         id: "green_pepper_pork", // 青椒肉丝
@@ -504,7 +504,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/green_pepper_pork"),
     ),
     (
         id: "twice_cooked_pork", // 回锅肉
@@ -518,7 +518,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/twice_cooked_pork"),
     ),
     (
         id: "scrambled_eggs_tomato", // 西红柿炒鸡蛋
@@ -531,7 +531,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/scrambled_eggs_tomato"),
     ),
     (
         id: "scrambled_eggs_cucumber", // 黄瓜炒鸡蛋
@@ -544,7 +544,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/scrambled_eggs_cucumber"),
     ),
 
     // ==================== 素菜类 (Vegetable Dishes - 按份) ====================
@@ -560,7 +560,7 @@
             satiation_per_kg: 140.0, // Vegetables slightly less filling
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/stir_fried_cabbage"),
     ),
     (
         id: "stir_fried_bok_choy", // 清炒小白菜
@@ -573,7 +573,7 @@
             satiation_per_kg: 140.0,
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/stir_fried_bok_choy"),
     ),
     (
         id: "potato_shreds", // 炒土豆丝
@@ -586,7 +586,7 @@
             satiation_per_kg: 145.0, // Potato more filling
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/potato_shreds"),
     ),
     (
         id: "spinach_garlic", // 蒜蓉菠菜
@@ -599,7 +599,7 @@
             satiation_per_kg: 140.0,
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/spinach_garlic"),
     ),
     (
         id: "chinese_broccoli_garlic", // 蒜蓉芥兰
@@ -612,7 +612,7 @@
             satiation_per_kg: 140.0,
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/chinese_broccoli_garlic"),
     ),
     (
         id: "stir_fried_bean_sprouts", // 炒豆芽
@@ -625,7 +625,7 @@
             satiation_per_kg: 130.0, // Very light
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/stir_fried_bean_sprouts"),
     ),
     (
         id: "stir_fried_water_spinach", // 炒空心菜
@@ -638,7 +638,7 @@
             satiation_per_kg: 140.0,
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/stir_fried_water_spinach"),
     ),
     (
         id: "braised_eggplant", // 红烧茄子
@@ -651,7 +651,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 2300.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/braised_eggplant"),
     ),
 
     // ==================== 汤类 (Soups) ====================
@@ -666,7 +666,7 @@
             satiation_per_kg: 70.0, // Soup is mostly water
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/egg_drop_soup"),
     ),
     (
         id: "seaweed_egg_soup", // 紫菜蛋花汤
@@ -679,7 +679,7 @@
             satiation_per_kg: 70.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/seaweed_egg_soup"),
     ),
     (
         id: "tomato_egg_soup", // 西红柿蛋汤
@@ -692,7 +692,7 @@
             satiation_per_kg: 75.0, // Slightly more filling
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/tomato_egg_soup"),
     ),
     (
         id: "winter_melon_soup", // 冬瓜汤
@@ -705,7 +705,7 @@
             satiation_per_kg: 65.0, // Very light
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/winter_melon_soup"),
     ),
 
     // ==================== 面食类 (Noodle Dishes - 套餐) ====================
@@ -720,7 +720,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2400.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/dan_dan_noodles"),
     ),
     (
         id: "beef_noodle_soup", // 牛肉面
@@ -734,7 +734,7 @@
             satiation_per_kg: 140.0, // Soup-based, less dense
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/beef_noodle_soup"),
     ),
     (
         id: "zhajiang_noodles", // 炸酱面
@@ -747,7 +747,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/zhajiang_noodles"),
     ),
     (
         id: "tomato_egg_noodles", // 西红柿鸡蛋面
@@ -760,7 +760,7 @@
             satiation_per_kg: 140.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/tomato_egg_noodles"),
     ),
     (
         id: "fried_noodles", // 炒面
@@ -773,7 +773,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/fried_noodles"),
     ),
     (
         id: "wonton_noodles", // 馄饨面
@@ -786,7 +786,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/wonton_noodles"),
     ),
     (
         id: "hot_dry_noodles", // 热干面
@@ -799,7 +799,7 @@
             satiation_per_kg: 155.0, // Dense, no soup
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/hot_dry_noodles"),
     ),
     (
         id: "lanzhou_beef_noodles", // 兰州拉面
@@ -813,7 +813,7 @@
             satiation_per_kg: 140.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/lanzhou_beef_noodles"),
     ),
     (
         id: "chongqing_noodles", // 重庆小面
@@ -826,7 +826,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/chongqing_noodles"),
     ),
     (
         id: "crossing_bridge_noodles", // 过桥米线
@@ -840,7 +840,7 @@
             satiation_per_kg: 135.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/crossing_bridge_noodles"),
     ),
     (
         id: "cold_noodles", // 凉面
@@ -853,7 +853,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/cold_noodles"),
     ),
     (
         id: "shrimp_wonton_noodles", // 虾仁云吞面
@@ -867,7 +867,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/shrimp_wonton_noodles"),
     ),
     (
         id: "pork_chop_noodles", // 排骨面
@@ -881,7 +881,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 4000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/pork_chop_noodles"),
     ),
 
     // ==================== 小吃类 (Snacks - 水饺等套餐) ====================
@@ -896,7 +896,7 @@
             satiation_per_kg: 160.0, // Dumplings very filling
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/pork_dumplings"),
     ),
     (
         id: "vegetable_dumplings", // 素水饺
@@ -909,7 +909,7 @@
             satiation_per_kg: 155.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/vegetable_dumplings"),
     ),
     (
         id: "pork_cabbage_dumplings", // 猪肉白菜饺子
@@ -922,7 +922,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/pork_cabbage_dumplings"),
     ),
     (
         id: "pork_chive_dumplings", // 猪肉韭菜饺子
@@ -935,7 +935,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/pork_chive_dumplings"),
     ),
     (
         id: "three_delicacy_dumplings", // 三鲜饺子
@@ -949,7 +949,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/three_delicacy_dumplings"),
     ),
     (
         id: "shrimp_dumplings", // 虾仁饺子
@@ -963,7 +963,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/shrimp_dumplings"),
     ),
     (
         id: "beef_dumplings", // 牛肉饺子
@@ -977,7 +977,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/beef_dumplings"),
     ),
     (
         id: "pan_fried_buns", // 生煎包
@@ -990,7 +990,7 @@
             satiation_per_kg: 165.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/pan_fried_buns"),
     ),
     (
         id: "steamed_pork_buns", // 猪肉包子
@@ -1003,7 +1003,7 @@
             satiation_per_kg: 165.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/steamed_pork_buns"),
     ),
     (
         id: "steamed_veggie_buns", // 素菜包子
@@ -1016,7 +1016,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/steamed_veggie_buns"),
     ),
     (
         id: "spring_rolls", // 春卷
@@ -1029,7 +1029,7 @@
             satiation_per_kg: 155.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/spring_rolls"),
     ),
     (
         id: "fried_dough_sticks", // 油条
@@ -1042,7 +1042,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/fried_dough_sticks"),
     ),
     (
         id: "sesame_pancake", // 烧饼
@@ -1055,7 +1055,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/sesame_pancake"),
     ),
     (
         id: "scallion_pancake", // 葱油饼
@@ -1068,7 +1068,7 @@
             satiation_per_kg: 160.0,
             eating_time_per_kg: 3000.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/scallion_pancake"),
     ),
 
     // ==================== 特色套餐 (Specialty Combos) ====================
@@ -1084,7 +1084,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/clay_pot_rice"),
     ),
     (
         id: "sausage_clay_pot_rice", // 腊味煲仔饭
@@ -1097,7 +1097,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/sausage_clay_pot_rice"),
     ),
     (
         id: "chicken_clay_pot_rice", // 滑鸡煲仔饭
@@ -1111,7 +1111,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/chicken_clay_pot_rice"),
     ),
     (
         id: "sichuan_spicy_hot_pot", // 麻辣烫
@@ -1124,21 +1124,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
-    ),
-    (
-        id: "mala_xiang_guo", // 麻辣香锅
-        characteristics: (
-            quality_range: (0.7, 0.95),
-            serving_time: 18.0,
-            risk_level: 0.1,
-            tags: ["combo", "stir_fry", "spicy", "sichuan"],
-            base_price: 18.0,
-            weight_distrib: (mean: 0.35, stddev: 0.06),
-            satiation_per_kg: 150.0,
-            eating_time_per_kg: 2600.0,
-        ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/sichuan_spicy_hot_pot"),
     ),
     (
         id: "spicy_grilled_fish", // 烤鱼
@@ -1152,7 +1138,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/spicy_grilled_fish"),
     ),
     (
         id: "stone_pot_bibimbap", // 石锅拌饭
@@ -1165,7 +1151,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2600.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/stone_pot_bibimbap"),
     ),
 
     // ==================== 特色菜 (Specialty Dishes) ====================
@@ -1181,7 +1167,7 @@
             satiation_per_kg: 140.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/boiled_fish_chili"),
     ),
     (
         id: "spicy_hotpot", // 麻辣香锅
@@ -1195,7 +1181,7 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/spicy_hotpot"),
     ),
     (
         id: "steamed_fish", // 清蒸鱼
@@ -1209,7 +1195,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/steamed_fish"),
     ),
     (
         id: "braised_fish", // 红烧鱼
@@ -1223,7 +1209,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/braised_fish"),
     ),
     (
         id: "sweet_sour_fish", // 糖醋鱼
@@ -1237,7 +1223,7 @@
             satiation_per_kg: 145.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/sweet_sour_fish"),
     ),
     (
         id: "crispy_duck", // 香酥鸭
@@ -1251,6 +1237,6 @@
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
         ),
-        display: (res: "dishes/rice"),
+        display: (res: "dishes/crispy_duck"),
     ),
 ]

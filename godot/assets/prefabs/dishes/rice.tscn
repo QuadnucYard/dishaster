@@ -1,16 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://cbf870wwfwjop"]
+[gd_scene load_steps=4 format=3 uid="uid://ksb7a351ppd"]
 
-[ext_resource type="Texture2D" uid="uid://tj2psheu4xjk" path="res://assets/sprites/emojis/rice.svg" id="1_rcp1t"]
+[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_rcp1t"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_rcp1t"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_rcp1t"]
+atlas = ExtResource("1_rcp1t")
+region = Rect2(128, 384, 64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ckqwl"]
 size = Vector2(32, 24)
 
-[node name="SteamedRice" type="Area2D"]
+[node name="Rice" type="Area2D"]
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -8)
-texture = ExtResource("1_rcp1t")
+scale = Vector2(0.5, 0.5)
+texture = SubResource("AtlasTexture_rcp1t")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)
-shape = SubResource("RectangleShape2D_rcp1t")
+shape = SubResource("RectangleShape2D_ckqwl")

@@ -6,7 +6,6 @@ use dishaster_views::DishView;
 use crate::systems::prelude::*;
 
 const PRICE_LABEL_OFFSET: Vec3 = vec3(0.0, 0.2, 0.05);
-const PRICE_LABEL_PREFAB: &str = "dishes/price_label";
 
 /// System that spawns all static objects (windows, tables, dispensers, collectors) at level start
 pub fn spawn_static_objects(
@@ -253,7 +252,7 @@ fn spawn_dishes(
         // Price label
         commands.spawn((
             DisplayState {
-                proto: PrefabRef::new(PRICE_LABEL_PREFAB),
+                proto: PrefabRef::new("dish_price_label"),
                 name: Some("Price".into()), // required for referencing in scripts
             },
             Transform {

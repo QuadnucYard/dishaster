@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://0ghqglrv2dg8"]
+
+[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_fglya"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fglya"]
+atlas = ExtResource("1_fglya")
+region = Rect2(0, 384, 64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_st3sp"]
+size = Vector2(32, 24)
+
+[node name="PorkDumplings" type="Area2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = SubResource("AtlasTexture_fglya")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_st3sp")

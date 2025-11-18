@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://cvq81br4gx2ll"]
+
+[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_kjdvr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kjdvr"]
+atlas = ExtResource("1_kjdvr")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fslg0"]
+size = Vector2(32, 24)
+
+[node name="BraisedChickenRice" type="Area2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = SubResource("AtlasTexture_kjdvr")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_fslg0")
