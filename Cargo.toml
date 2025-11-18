@@ -55,6 +55,7 @@ godot = "0.4.2"
 anyhow = "1.0"
 as-any = "0.3"
 backtrace = "0.3"
+bincode = "2.0"
 codespan-reporting = "0.13"
 color-backtrace = "0.7"
 derive_more = { version = "2", features = ["deref", "deref_mut"] }

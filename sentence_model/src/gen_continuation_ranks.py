@@ -16,6 +16,8 @@ import torch
 from sentence_transformers import CrossEncoder, SentenceTransformer
 from tqdm import tqdm
 
+from binencode import encode_aq_ranks_bincode
+
 
 def load_models() -> tuple[SentenceTransformer, CrossEncoder]:
     """Load embedding and reranking models for Chinese text"""
@@ -169,13 +171,21 @@ def generate_rr_ranks(corpus_path: Path, top_k: int = 10) -> list[list[tuple[int
 
 
 def save_ranks(ranks: list[list[tuple[int, float]]], output_path: Path) -> None:
-    """Save ranks to file in the same format as existing rank files"""
+    """Save ranks in both bincode (production) and txt (debug) formats"""
+    # Save bincode format for production
+    bincode_data = encode_aq_ranks_bincode(ranks)
+    bincode_path = output_path.with_suffix(".bin")
+    bincode_path.write_bytes(bincode_data)
+    print(f"\n✓ Saved ranks (bincode) to {bincode_path}")
+
+    # Save txt format for debugging (local to sentence_model)
     result_text = "\n".join(
         ",".join(f"{idx}:{score:.6f}" for idx, score in rank_list) for rank_list in ranks
     )
-
-    output_path.write_text(result_text, encoding="utf-8", newline="\n")
-    print(f"\nSaved ranks to {output_path}")
+    debug_path = Path("debug_output") / output_path.name
+    debug_path.parent.mkdir(exist_ok=True)
+    debug_path.write_text(result_text, encoding="utf-8", newline="\n")
+    print(f"✓ Saved ranks (txt debug) to {debug_path}")
 
 
 def main() -> None:
@@ -203,8 +213,10 @@ def main() -> None:
     print("Done! Generated continuation ranks for multi-turn dialogue.")
     print("=" * 70)
     print("\nFiles created:")
-    print(f"  - {corpus_root / 'ranks_qq.txt'} (question continuations)")
-    print(f"  - {corpus_root / 'ranks_rr.txt'} (response continuations)")
+    print(f"  - {corpus_root / 'ranks_qq.bin'} (question continuations - bincode)")
+    print(f"  - {corpus_root / 'ranks_rr.bin'} (response continuations - bincode)")
+    print("  - debug_output/ranks_qq.txt (debug text format)")
+    print("  - debug_output/ranks_rr.txt (debug text format)")
     print("\nThese enable natural multi-turn conversations without forced alternation.")
 
 

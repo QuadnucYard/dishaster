@@ -2,7 +2,6 @@
 
 #[cfg(feature = "codespan")]
 mod codespan;
-mod trial_rank;
 mod trial_speech;
 
 use std::{
@@ -161,10 +160,10 @@ impl DataLoader {
                 trial_speech::populate_trial_response_items(&mut responses)?;
                 responses
             },
-            qa_ranks: trial_rank::parse_qa_ranks(&self.load_string("trial/ranks_qa.txt")?)?,
-            aq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_aq.txt")?, "AQ")?,
-            qq_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_qq.txt")?, "QQ")?,
-            rr_ranks: trial_rank::parse_aq_ranks(&self.load_string("trial/ranks_rr.txt")?, "RR")?,
+            qa_ranks: self.load_bincode("trial/ranks_qa.bin")?,
+            aq_ranks: self.load_bincode("trial/ranks_aq.bin")?,
+            qq_ranks: self.load_bincode("trial/ranks_qq.bin")?,
+            rr_ranks: self.load_bincode("trial/ranks_rr.bin")?,
         };
 
         let endings = self
@@ -308,11 +307,18 @@ impl DataLoader {
         Ok(data.item)
     }
 
-    fn load_string(&self, filename: &str) -> anyhow::Result<String> {
+    fn load_bincode<T: bincode::Decode<()>>(&self, filename: &str) -> anyhow::Result<T> {
         let path: PathBuf = self.assets_path.join(filename);
-        let content = std::fs::read_to_string(&path)
-            .with_context(|| format!("Loading text file {path:?}"))?;
-        Ok(content)
+        let file =
+            std::fs::File::open(&path).with_context(|| format!("Opening bincode file {path:?}"))?;
+        let reader = std::io::BufReader::new(file);
+        bincode::decode_from_reader(
+            reader,
+            bincode::config::standard()
+                .with_little_endian()
+                .with_variable_int_encoding(),
+        )
+        .with_context(|| format!("Decoding bincode file {path:?}"))
     }
 }
 

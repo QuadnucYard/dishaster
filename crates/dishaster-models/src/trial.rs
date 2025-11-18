@@ -123,6 +123,15 @@ pub enum TrialSpeechItem {
     LineBreak,
 }
 
+impl TrialSpeech {
+    /// Iterator over keywords in the speech.
+    pub fn keywords(&self) -> impl Iterator<Item = &TrialSpeechItem> {
+        self.items
+            .iter()
+            .filter(|item| matches!(item, TrialSpeechItem::Keyword(_)))
+    }
+}
+
 /// The appearance of a trial participant.
 #[derive(Debug, Clone, Deserialize)]
 pub struct TrialParticipantAppearance {
@@ -162,7 +171,7 @@ pub enum TrialResponseKind {
 }
 
 /// A single QA rank entry.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, bincode::Decode)]
 pub struct TrialQARank {
     /// Index of the answer in the corpus.
     pub answer_index: usize,

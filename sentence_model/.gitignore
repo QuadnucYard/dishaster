@@ -214,3 +214,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Debug output (generated txt files for debugging bincode)
+debug_output/

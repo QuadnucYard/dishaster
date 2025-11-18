@@ -63,8 +63,10 @@ python src/gen_ranks.py
 
 Generates:
 
-- `assets/data/trial/ranks_qa.txt` - Question to answer mappings
-- `assets/data/trial/ranks_aq.txt` - Answer to question mappings
+- `assets/data/trial/ranks_qa.bin` - Question to answer mappings (bincode)
+- `assets/data/trial/ranks_aq.bin` - Answer to question mappings (bincode)
+- `debug_output/ranks_qa.txt` - Debug text format (not committed)
+- `debug_output/ranks_aq.txt` - Debug text format (not committed)
 
 #### Generate Sentiment Scores
 
@@ -85,8 +87,10 @@ python src/gen_continuation_ranks.py
 
 Generates:
 
-- `assets/data/trial/ranks_qq.txt` - Question continuations (multi-turn diner)
-- `assets/data/trial/ranks_rr.txt` - Response continuations (multi-turn player)
+- `assets/data/trial/ranks_qq.bin` - Question continuations (bincode)
+- `assets/data/trial/ranks_rr.bin` - Response continuations (bincode)
+- `debug_output/ranks_qq.txt` - Debug text format (not committed)
+- `debug_output/ranks_rr.txt` - Debug text format (not committed)
 
 ## Models Used
 
@@ -98,11 +102,15 @@ Generates:
 
 All generated files go to `../assets/data/trial/`:
 
-- `ranks_qa.txt` - Question → Answer mappings
-- `ranks_aq.txt` - Answer → Question mappings
-- `ranks_qq.txt` - Question → Question continuations ⭐ NEW
-- `ranks_rr.txt` - Response → Response continuations ⭐ NEW
+- `ranks_qa.bin` - Question → Answer mappings (bincode format)
+- `ranks_aq.bin` - Answer → Question mappings (bincode format)
+- `ranks_qq.bin` - Question → Question continuations (bincode format) ⭐ NEW
+- `ranks_rr.bin` - Response → Response continuations (bincode format) ⭐ NEW
 - `corpus_r.toml` - Updated with `response_score` values ⭐ NEW
+
+Debug text files (not committed, in `debug_output/`):
+
+- `ranks_qa.txt`, `ranks_aq.txt`, `ranks_qq.txt`, `ranks_rr.txt` - Human-readable debug format
 
 ## How It Works
 

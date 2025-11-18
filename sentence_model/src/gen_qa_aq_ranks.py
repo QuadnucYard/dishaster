@@ -7,8 +7,10 @@ This script creates the foundational semantic mappings for the trial dialogue sy
 - AQ ranks: Maps answers to follow-up questions for dialogue flow
 
 Output files:
-- ../assets/data/trial/ranks_qa.txt - Question to answer mappings
-- ../assets/data/trial/ranks_aq.txt - Answer to question mappings
+- ../assets/data/trial/ranks_qa.bin - Question to answer mappings (bincode)
+- ../assets/data/trial/ranks_aq.bin - Answer to question mappings (bincode)
+- debug_output/ranks_qa.txt - Debug text format (local to sentence_model)
+- debug_output/ranks_aq.txt - Debug text format (local to sentence_model)
 
 The ranks use a two-stage approach:
 1. First pass: BGE embeddings for fast retrieval (top-20)
@@ -23,6 +25,8 @@ from typing import cast
 import torch
 from sentence_transformers import CrossEncoder, SentenceTransformer
 from tqdm import tqdm
+
+from binencode import encode_aq_ranks_bincode, encode_qa_ranks_bincode
 
 # Configuration
 FIRST_PASS_TOP_K = 20  # Initial retrieval count
@@ -129,17 +133,23 @@ def generate_qa_ranks(
 
         all_ranks.append(result_ranks)
 
-    # Format output: one line per keyword, empty line between questions
+    # Save bincode format for production
+    bincode_data = encode_qa_ranks_bincode(all_ranks)
+    bincode_path = corpus_root / "ranks_qa.bin"
+    bincode_path.write_bytes(bincode_data)
+    print(f"✓ Saved QA ranks (bincode) to {bincode_path}")
+
+    # Save txt format for debugging (local to sentence_model)
     result_text = "\n".join(
         "".join(
             ",".join(f"{cid}:{score:.6f}" for cid, score in ranks) + "\n" for ranks in result_ranks
         )
         for result_ranks in all_ranks
     )
-
-    output_path = corpus_root / "ranks_qa.txt"
-    output_path.write_text(result_text, encoding="utf-8", newline="\n")
-    print(f"✓ Saved QA ranks to {output_path}")
+    debug_path = Path("debug_output/ranks_qa.txt")
+    debug_path.parent.mkdir(exist_ok=True)
+    debug_path.write_text(result_text, encoding="utf-8", newline="\n")
+    print(f"✓ Saved QA ranks (txt debug) to {debug_path}")
 
 
 def generate_aq_ranks(
@@ -193,14 +203,20 @@ def generate_aq_ranks(
             ]
         )
 
-    # Format output: one line per answer
+    # Save bincode format for production
+    bincode_data = encode_aq_ranks_bincode(all_ranks)
+    bincode_path = corpus_root / "ranks_aq.bin"
+    bincode_path.write_bytes(bincode_data)
+    print(f"✓ Saved AQ ranks (bincode) to {bincode_path}")
+
+    # Save txt format for debugging (local to sentence_model)
     result_text = "\n".join(
         ",".join(f"{cid}:{score:.6f}" for cid, score in ranks) for ranks in all_ranks
     )
-
-    output_path = corpus_root / "ranks_aq.txt"
-    output_path.write_text(result_text, encoding="utf-8", newline="\n")
-    print(f"✓ Saved AQ ranks to {output_path}")
+    debug_path = Path("debug_output/ranks_aq.txt")
+    debug_path.parent.mkdir(exist_ok=True)
+    debug_path.write_text(result_text, encoding="utf-8", newline="\n")
+    print(f"✓ Saved AQ ranks (txt debug) to {debug_path}")
 
 
 def main() -> None:

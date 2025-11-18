@@ -24,6 +24,7 @@ pub fn validate_registry(registry: &GameModelRegistry) -> ValidationResult {
     sink.collect(validate_window_services(registry));
     sink.collect(validate_dishes(registry));
     sink.collect(validate_canteens(registry));
+    sink.collect(validate_trial_corpus(registry));
 
     // Check for unused dishes (warnings only)
     let _ = validate_dish_usage(registry);
@@ -503,6 +504,73 @@ fn validate_range(
                 range.min, range.max, absolute_min, absolute_max
             ),
         });
+    }
+
+    sink.finish()
+}
+
+fn validate_trial_corpus(registry: &GameModelRegistry) -> ValidationResult {
+    let mut sink = ErrorSink::new();
+
+    let corpus = &registry.trial;
+
+    if corpus.qa_ranks.len() != corpus.diner_speeches.len() {
+        sink.push(ValidationError::InvalidValue {
+            field: "diner_speeches vs qa_ranks length",
+            context: "trial_corpus".to_string(),
+            reason: format!(
+                "mismatched lengths: diner_speeches ({}) vs qa_ranks ({})",
+                corpus.diner_speeches.len(),
+                corpus.qa_ranks.len()
+            ),
+        });
+    }
+    if corpus.aq_ranks.len() != corpus.responses.len() {
+        sink.push(ValidationError::InvalidValue {
+            field: "responses vs aq_ranks length",
+            context: "trial_corpus".to_string(),
+            reason: format!(
+                "mismatched lengths: responses ({}) vs aq_ranks ({})",
+                corpus.responses.len(),
+                corpus.aq_ranks.len()
+            ),
+        });
+    }
+    if corpus.qq_ranks.len() != corpus.diner_speeches.len() {
+        sink.push(ValidationError::InvalidValue {
+            field: "diner_speeches vs qq_ranks length",
+            context: "trial_corpus".to_string(),
+            reason: format!(
+                "mismatched lengths: diner_speeches ({}) vs qq_ranks ({})",
+                corpus.diner_speeches.len(),
+                corpus.qq_ranks.len()
+            ),
+        });
+    }
+    if corpus.rr_ranks.len() != corpus.responses.len() {
+        sink.push(ValidationError::InvalidValue {
+            field: "responses vs rr_ranks length",
+            context: "trial_corpus".to_string(),
+            reason: format!(
+                "mismatched lengths: responses ({}) vs rr_ranks ({})",
+                corpus.responses.len(),
+                corpus.rr_ranks.len()
+            ),
+        });
+    }
+
+    for (idx, speech) in corpus.diner_speeches.iter().enumerate() {
+        if corpus.qa_ranks[idx].len() != speech.keywords().count() {
+            sink.push(ValidationError::InvalidValue {
+                field: "diner_speech keywords vs qa_ranks length",
+                context: format!("trial_corpus, diner_speeches[{}]", idx),
+                reason: format!(
+                    "mismatched lengths: keywords ({}) vs qa_ranks ({})",
+                    speech.keywords().count(),
+                    corpus.qa_ranks[idx].len()
+                ),
+            });
+        }
     }
 
     sink.finish()
