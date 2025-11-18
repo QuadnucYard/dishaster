@@ -276,6 +276,13 @@ impl ISimulation<CoreSimulationFeat> for Simulation {
     }
 
     fn persist(&mut self) -> SimProfile {
+        // Sync diner memory from components to pool before persisting
+        let mut sync_memory_system = IntoSystem::into_system(systems::sync_diner_memory_system);
+        sync_memory_system.initialize(&mut self.world);
+        sync_memory_system
+            .run((), &mut self.world)
+            .expect("failed to sync diner memory");
+
         let mut persist_system = IntoSystem::into_system(systems::persist_system);
         persist_system.initialize(&mut self.world);
         persist_system

@@ -17,6 +17,13 @@ impl<T> From<T> for CompWrapper<T> {
     }
 }
 
+impl<T: Clone> CompWrapper<T> {
+    /// Clone the inner value
+    pub fn clone_inner(&self) -> T {
+        self.0.clone()
+    }
+}
+
 /// Extension trait to convert any type into a CompWrapper
 pub trait IntoComponent {
     /// Wrap this value in a CompWrapper for use as a Bevy resource
@@ -37,6 +44,13 @@ pub struct ResWrapper<T>(T);
 impl<T> From<T> for ResWrapper<T> {
     fn from(value: T) -> Self {
         Self(value)
+    }
+}
+
+impl<T: Clone> ResWrapper<T> {
+    /// Clone the inner value
+    pub fn clone_inner(&self) -> T {
+        self.0.clone()
     }
 }
 

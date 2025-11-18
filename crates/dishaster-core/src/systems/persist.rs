@@ -1,5 +1,27 @@
 use crate::systems::prelude::*;
 
+/// Sync diner long-term memory from active entities back to the persistent pool
+///
+/// This must run before persist_system to ensure memory changes during gameplay
+/// are saved. It updates DinerProfile.long_term_memory for each active diner.
+pub fn sync_diner_memory_system(
+    diner_query: Query<(&Diner, &DinerLongTermMemory)>,
+    mut diner_pool: ResMut<ResWrapper<DinerPool>>,
+) {
+    let mut profiles = diner_pool
+        .profiles
+        .iter_mut()
+        .map(|profile| (profile.id, profile))
+        .collect::<FxHashMap<_, _>>();
+    for (diner, ltm) in diner_query.iter() {
+        // Find the matching profile in the pool by ID
+        if let Some(profile) = profiles.get_mut(&diner.id) {
+            // Update the profile's long-term memory with current component state
+            profile.long_term_memory = ltm.clone_inner();
+        }
+    }
+}
+
 pub fn persist_system(
     window_query: Query<(&Window, &WindowDishes)>,
     dish_query: Query<&Dish>,
@@ -94,7 +116,7 @@ pub fn persist_system(
         window_configurations,
         placement,
         diner_profiles,
-        permanent_effects: (**perma_effects).clone(),
+        permanent_effects: perma_effects.clone_inner(),
         day_stats,
     }
 }
