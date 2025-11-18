@@ -1,4 +1,3 @@
-use dishaster_ui_protocol::GameRequest;
 use dishaster_views::InspectorResultView;
 
 use crate::prelude::*;
@@ -21,7 +20,7 @@ impl Gui for InspectorResultGui {
     fn start(&mut self, commands: GuiCommands) {
         let cmd = commands.clone();
         self.confirm_button.on_click.connect(move || {
-            cmd.push_req(GameRequest::ConfirmInspectorResult);
+            cmd.hide::<Self>();
         });
     }
 }

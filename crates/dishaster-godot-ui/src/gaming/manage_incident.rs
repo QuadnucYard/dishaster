@@ -27,7 +27,7 @@ impl Gui for ManageIncidentGui {
     fn start(&mut self, commands: GuiCommands) {
         let cmd = commands.clone();
         self.confirm_btn.on_click.connect(move || {
-            cmd.push_req(GameRequest::ConfirmIncident);
+            cmd.hide::<Self>();
         });
     }
 }

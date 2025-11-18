@@ -77,10 +77,6 @@ pub enum GameRequest {
     ConfirmSettlement,
     /// Select a decision from the available options.
     SelectDecision(usize),
-    /// Confirm incident notification and continue to preparation phase.
-    ConfirmIncident,
-    /// Confirm inspector result and continue.
-    ConfirmInspectorResult,
 }
 
 impl UiRequest for GameRequest {}

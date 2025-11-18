@@ -217,12 +217,6 @@ impl GameScene {
 
                 gui.hide::<ManageDecisionGui>();
             }
-            GameRequest::ConfirmIncident => {
-                gui.hide::<ManageIncidentGui>();
-            }
-            GameRequest::ConfirmInspectorResult => {
-                gui.hide::<InspectorResultGui>();
-            }
         }
     }
 

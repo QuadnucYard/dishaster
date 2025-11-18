@@ -86,6 +86,20 @@ impl GuiCommands {
         Self::default()
     }
 
+    /// Show the specified GUI.
+    pub fn show<G: Gui + 'static>(&self) {
+        self.push_cmd(|registry| {
+            registry.show::<G>();
+        });
+    }
+
+    /// Hide the specified GUI.
+    pub fn hide<G: Gui + 'static>(&self) {
+        self.push_cmd(|registry| {
+            registry.hide::<G>();
+        });
+    }
+
     pub fn push_cmd<F>(&self, f: F)
     where
         F: FnOnce(&mut GuiRegistry) + Send + 'static,
