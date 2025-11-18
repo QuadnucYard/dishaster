@@ -13,44 +13,31 @@ pub fn spawn_static_objects(
     canteen: Res<Canteen>,
     level: Res<ResWrapper<LevelSetupState>>,
     registry: Res<GameModelRegistryRes>,
-    display_root: Res<DisplayRoot>,
     mut rng: ResMut<WorldRng>,
     reputation: Res<ReputationStateRes>,
     mut events: ResMut<EventQueue>,
 ) {
-    spawn_entrances(&mut commands, &canteen, &display_root);
+    spawn_entrances(&mut commands, &canteen);
     spawn_windows(
         &mut commands,
         &canteen,
         &level.canteen,
         &registry,
-        &display_root,
         &mut rng.derive_prng(),
         reputation.food_quality,
         &mut events,
     );
-    spawn_tables(
-        &mut commands,
-        &level.canteen.placement,
-        &registry,
-        &display_root,
-    );
+    spawn_tables(&mut commands, &level.canteen.placement, &registry);
     spawn_dispensers(
         &mut commands,
         &level.canteen.placement,
         &registry,
-        &display_root,
         &mut events,
     );
-    spawn_collectors(
-        &mut commands,
-        &level.canteen.placement,
-        &registry,
-        &display_root,
-    );
+    spawn_collectors(&mut commands, &level.canteen.placement, &registry);
 }
 
-fn spawn_entrances(commands: &mut Commands, canteen: &Canteen, display_root: &DisplayRoot) {
+fn spawn_entrances(commands: &mut Commands, canteen: &Canteen) {
     for (i, ent) in canteen.model.entrances.iter().enumerate() {
         commands.spawn((
             DisplayState {
@@ -59,7 +46,6 @@ fn spawn_entrances(commands: &mut Commands, canteen: &Canteen, display_root: &Di
             },
             Transform {
                 position: vec3(ent.center(), canteen.model.entrances_y, 0.0),
-                parent: Some(display_root.0),
                 ..Default::default()
             },
         ));
@@ -71,7 +57,6 @@ fn spawn_windows(
     canteen: &Canteen,
     level: &CanteenLayoutState,
     registry: &GameModelRegistry,
-    display_root: &DisplayRoot,
     rng: &mut Prng,
     food_quality: f32,
     events: &mut EventQueue,
@@ -111,7 +96,6 @@ fn spawn_windows(
                 },
                 Transform {
                     position: window_location.center().extend(0.0), // align by top-center
-                    parent: Some(display_root.0),
                     ..Default::default()
                 },
             ))
@@ -275,19 +259,13 @@ fn spawn_tables(
     commands: &mut Commands,
     placements: &CanteenPlacements,
     registry: &GameModelRegistry,
-    display_root: &DisplayRoot,
 ) {
     for placement in &placements.tables {
-        spawn_table(placement, commands, registry, display_root);
+        spawn_table(placement, commands, registry);
     }
 }
 
-pub fn spawn_table(
-    placement: &Placement,
-    commands: &mut Commands,
-    registry: &GameModelRegistry,
-    display_root: &DisplayRoot,
-) {
+pub fn spawn_table(placement: &Placement, commands: &mut Commands, registry: &GameModelRegistry) {
     let model = registry
         .tables
         .get_by_id(&placement.model)
@@ -313,7 +291,6 @@ pub fn spawn_table(
         },
         Transform {
             position: placement.center_pos.extend(0.0),
-            parent: Some(display_root.0),
             ..Default::default()
         },
     ));
@@ -323,7 +300,6 @@ fn spawn_dispensers(
     commands: &mut Commands,
     placements: &CanteenPlacements,
     registry: &GameModelRegistry,
-    display_root: &DisplayRoot,
     events: &mut EventQueue,
 ) {
     for (placements, ty) in [
@@ -331,14 +307,7 @@ fn spawn_dispensers(
         (&placements.chopstick_dispensers, DispenserType::Chopstick),
     ] {
         for dispenser_placement in placements {
-            spawn_dispenser(
-                commands,
-                registry,
-                dispenser_placement,
-                ty,
-                display_root,
-                events,
-            );
+            spawn_dispenser(commands, registry, dispenser_placement, ty, events);
         }
     }
 }
@@ -348,7 +317,6 @@ fn spawn_dispenser(
     registry: &GameModelRegistry,
     placement: &Placement,
     dispenser_type: DispenserType,
-    display_root: &DisplayRoot,
     events: &mut EventQueue,
 ) {
     let dispenser_handle = registry
@@ -378,7 +346,6 @@ fn spawn_dispenser(
         },
         Transform {
             position: placement.center_pos.extend(0.0),
-            parent: Some(display_root.0),
             ..Default::default()
         },
     ));
@@ -399,7 +366,6 @@ fn spawn_collectors(
     commands: &mut Commands,
     placements: &CanteenPlacements,
     registry: &GameModelRegistry,
-    display_root: &DisplayRoot,
 ) {
     // Spawn dish collectors
     for placement in &placements.collectors {
@@ -425,7 +391,6 @@ fn spawn_collectors(
             },
             Transform {
                 position: placement.center_pos.extend(0.0),
-                parent: Some(display_root.0),
                 ..Default::default()
             },
         ));

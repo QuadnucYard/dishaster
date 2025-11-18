@@ -9,24 +9,18 @@ pub fn update_diner_spawner(
     day_status: Res<DayStatus>,
     mut schedule: ResMut<DailyDinerSchedule>,
     canteen: Res<Canteen>,
-    display_root: Res<DisplayRoot>,
 ) {
     // Use relative time for arrival time checks
     let current_time = time.world_time as f32 - day_status.start_time;
 
     // Spawn all diners whose arrival time has passed
     while let Some(scheduled) = schedule.next_diner_if_ready(current_time) {
-        spawn_scheduled_diner(scheduled, &mut commands, &canteen, &display_root);
+        spawn_scheduled_diner(scheduled, &mut commands, &canteen);
     }
 }
 
 /// Spawn a scheduled diner entity at the canteen entrance
-fn spawn_scheduled_diner(
-    scheduled: ScheduledDiner,
-    commands: &mut Commands,
-    canteen: &Canteen,
-    display_root: &DisplayRoot,
-) {
+fn spawn_scheduled_diner(scheduled: ScheduledDiner, commands: &mut Commands, canteen: &Canteen) {
     let diner_id = scheduled.id;
 
     // Sample spawn position from entrance
@@ -82,7 +76,6 @@ fn spawn_scheduled_diner(
         },
         Transform {
             position: pos.extend(0.0),
-            parent: Some(display_root.0),
             ..Default::default()
         },
         EntityRng::new(diner_id as u64),

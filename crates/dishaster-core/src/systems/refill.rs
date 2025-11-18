@@ -32,7 +32,6 @@ pub fn handle_refill_request(
     mut messages: MessageReader<RefillDispenser>,
     dispenser_query: Query<&Stock, Without<RefillPending>>,
     canteen: Res<Canteen>,
-    display_root: Res<DisplayRoot>,
 ) {
     for message in messages.read() {
         let dispenser_entity = message.0;
@@ -79,7 +78,6 @@ pub fn handle_refill_request(
             },
             Transform {
                 position: spawn_pos.extend(0.0),
-                parent: Some(display_root.0),
                 ..Default::default()
             },
         ));

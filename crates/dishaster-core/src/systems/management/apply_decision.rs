@@ -33,7 +33,6 @@ fn apply_add_tables(
     mut commands: Commands,
     registry: Res<GameModelRegistryRes>,
     canteen: Res<Canteen>,
-    display_root: Res<DisplayRoot>,
     mut rng: ResMut<WorldRng>,
 ) {
     let model = &event.0;
@@ -52,7 +51,7 @@ fn apply_add_tables(
             model: table_model_id,
             center_pos,
         };
-        spawn_table(&placement, &mut commands, &registry, &display_root);
+        spawn_table(&placement, &mut commands, &registry);
     }
 }
 

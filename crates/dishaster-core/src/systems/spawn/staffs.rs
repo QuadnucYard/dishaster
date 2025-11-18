@@ -6,7 +6,6 @@ pub fn spawn_serving_staffs(
     windows: Query<(Entity, &Window, &LaneOwner)>,
     canteen: Res<Canteen>,
     registry: Res<GameModelRegistryRes>,
-    display_root: Res<DisplayRoot>,
 ) {
     for (window_entity, window, lane_owner) in windows.iter() {
         // Spawn serving staff associated with this window.
@@ -40,7 +39,6 @@ pub fn spawn_serving_staffs(
                 },
                 Transform {
                     position: staff_pos.extend(0.0),
-                    parent: Some(display_root.0),
                     ..Default::default()
                 },
             ));
