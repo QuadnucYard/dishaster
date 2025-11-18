@@ -19,7 +19,8 @@ use dishrupt_persistence::GodotUserStorage;
 use godot::{classes::CanvasLayer, prelude::*};
 
 use crate::{
-    panic::{has_panic_occurred, init_backtrace_handle},
+    panic::{get_panic_message, has_panic_occurred, init_backtrace_handle},
+    panic_overlay::PanicOverlay,
     scenes::{DefaultSceneLoader, proc::*},
 };
 
@@ -39,10 +40,12 @@ struct Inner {
     audio: AudioManager,
     l10n: LocalizationManager,
     input_listener: Gd<InputListener>,
+    panic_overlay: PanicOverlay,
 
     services: Arc<GameServices>,
 
     late_initialized: bool,
+    panic_displayed: bool,
 }
 
 #[godot_api]
@@ -107,16 +110,20 @@ impl Inner {
         let l10n = Default::default();
         let input_listener = root.get_or_add_node_of_type::<InputListener>();
 
+        let panic_overlay = PanicOverlay::new(root.get_node_as("%PanicOverlay"));
+
         Self {
             scene_manager,
             gui,
             audio,
             l10n,
             input_listener,
+            panic_overlay,
 
             services,
 
             late_initialized: false,
+            panic_displayed: false,
         }
     }
 
@@ -148,6 +155,16 @@ impl Inner {
 
     fn process(&mut self, delta: f64) {
         if has_panic_occurred() {
+            if self.panic_displayed {
+                return;
+            }
+            self.panic_displayed = true;
+            if let Some(message) = get_panic_message() {
+                self.panic_overlay.show_panic(&message);
+            } else {
+                self.panic_overlay
+                    .show_panic("A panic occurred but no message was captured.");
+            }
             return;
         }
         init_backtrace_handle();

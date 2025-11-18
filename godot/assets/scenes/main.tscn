@@ -1,3 +1,9 @@
-[gd_scene format=3 uid="uid://clow4hmvvd6pr"]
+[gd_scene load_steps=2 format=3 uid="uid://clow4hmvvd6pr"]
+
+[ext_resource type="PackedScene" uid="uid://6qp63w12jijn" path="res://assets/panic_overlay.tscn" id="1_mr7gh"]
 
 [node name="Main" type="GameMain"]
+
+[node name="PanicOverlay" parent="." instance=ExtResource("1_mr7gh")]
+unique_name_in_owner = true
+visible = false

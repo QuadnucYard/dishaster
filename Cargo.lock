@@ -540,6 +540,7 @@ name = "dishaster-godot"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "backtrace",
  "color-backtrace",
  "dishaster-core",
  "dishaster-data",
