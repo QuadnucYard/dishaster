@@ -113,7 +113,7 @@
 
     (
         id: "supply_crab",
-        weight: 100000,
+        weight: 100,
         icon: "management/crab.svg",
         def: SupplyCrab(
             trial_probability: 0.001,

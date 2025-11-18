@@ -181,8 +181,8 @@ impl StartScene {
                 let new_seed = godot::global::randi() as u64;
                 let svc = &game_services().user_service.profiles;
                 if let Err(e) = svc.update(|profile| {
-                    if let Some(progress) = &mut profile.progress {
-                        progress.rng_seed = Seed::new(new_seed);
+                    if let Some(level_progress) = &mut profile.level_progress {
+                        level_progress.rng_seed = Seed::new(new_seed);
                     }
                     Ok(())
                 }) {

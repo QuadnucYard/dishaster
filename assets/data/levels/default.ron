@@ -1,5 +1,6 @@
 (
     id: "sample_level",
+    start_reputation: 50.0,
     run_length: 3600.0,
     seed: 42,
     diner_pool: (

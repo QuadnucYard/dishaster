@@ -217,6 +217,17 @@ impl GameScene {
 
                 gui.hide::<ManageDecisionGui>();
             }
+
+            GameRequest::ClearLevel => {
+                // Clear level progress only when exiting after an ending
+                godot_print!("Clearing current level progress");
+                let svc = &game_services().user_service.profiles;
+                if let Err(e) = svc.clear_level_progress() {
+                    godot_error!("Failed to clear level progress: {e}");
+                } else {
+                    godot_print!("Level progress cleared successfully");
+                }
+            }
         }
     }
 

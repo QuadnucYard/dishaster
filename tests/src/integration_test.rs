@@ -202,11 +202,13 @@ fn main() -> Result<()> {
         "Total served: {} diners",
         profile.aggregates.lifetime_served
     );
-    println!("Days of history: {}", profile.daily_history.len());
+
+    let level_progress = profile.level_progress.as_ref().unwrap();
+    println!("Days of history: {}", level_progress.daily_history.len());
 
     // Show last 5 days stats
     println!("\nLast 5 days:");
-    for day_stats in profile.daily_history.iter().rev().take(5).rev() {
+    for day_stats in level_progress.daily_history.iter().rev().take(5).rev() {
         println!(
             "  Day {}: {:.2}kg, ¥{:.0}, {}/{} completed",
             day_stats.day.0,

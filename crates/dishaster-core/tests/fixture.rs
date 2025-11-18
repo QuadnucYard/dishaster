@@ -28,6 +28,7 @@ pub fn create_test_registry() -> Arc<GameModelRegistry> {
         id: ModelId::new("test_level"),
         canteen: ModelId::new("test_canteen"),
         start_day: Day(0),
+        start_reputation: 50.0,
         entry_time: 39600.0, // 11:00:00
         start_time: 41400.0, // 11:30:00
         run_length: 600.0,

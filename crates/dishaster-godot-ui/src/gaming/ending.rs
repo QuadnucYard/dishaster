@@ -39,6 +39,7 @@ impl Gui for EndingGui {
         let cmd = commands.clone();
         self.exit_btn.on_click.connect(move || {
             cmd.push_req(AppRequest::ExitLevel);
+            cmd.push_req(GameRequest::ClearLevel);
         });
     }
 }

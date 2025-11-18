@@ -12,6 +12,6 @@ fn new_user_receives_first_day_level() -> Result<()> {
     let dir = tempdir()?;
     let service = UserDataService::new(Arc::new(FsStorage::new(dir.path().to_path_buf()).unwrap()));
 
-    assert!(service.profiles.load().unwrap().progress.is_none());
+    assert!(service.profiles.load().unwrap().level_progress.is_none());
     Ok(())
 }

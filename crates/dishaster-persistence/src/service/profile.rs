@@ -124,6 +124,29 @@ impl ProfileService {
         })
     }
 
+    /// Clear level-specific progress while preserving player achievements.
+    ///
+    /// This removes the entire `level_progress` field, which includes:
+    /// - Current day, reputation, seed
+    /// - Canteen layout customizations
+    /// - Diner pool
+    /// - Permanent effects from management decisions
+    /// - Daily history
+    ///
+    /// This preserves:
+    /// - Achieved endings
+    /// - Seen hints
+    /// - Aggregate statistics
+    ///
+    /// Used when player exits after bad ending or chooses not to continue after good ending,
+    /// allowing a fresh level start while keeping player-wide achievements.
+    pub fn clear_level_progress(&self) -> Result<()> {
+        self.update(|profile| {
+            profile.level_progress = None;
+            Ok(())
+        })
+    }
+
     /// Delete the profile file and clear the cache.
     pub fn delete(&self) -> Result<()> {
         self.storage.delete(Self::FILE)?;
@@ -143,12 +166,8 @@ fn new_profile() -> PlayerProfile {
             created_at_utc: now,
             updated_at_utc: now,
         },
-        progress: None,
+        level_progress: None,
         aggregates: Default::default(),
-        daily_history: Vec::new(),
-        layout: Default::default(),
-        diner_pool: Default::default(),
-        permanent_effects: Default::default(),
         seen_hints: Default::default(),
         achieved_endings: Default::default(),
     }

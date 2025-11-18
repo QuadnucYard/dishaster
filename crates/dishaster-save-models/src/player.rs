@@ -5,42 +5,64 @@ pub const USER_PROGRESS_VERSION: u32 = 1;
 
 /// Persistent representation of the player's long-term progress.
 ///
-/// The structure only contains stable data that must survive across sessions.
-/// Transient entities live solely inside the simulation and never appear here.
+/// This structure is split into two parts:
+/// 1. Persistent player data: achievements, hints, aggregate stats (never cleared)
+/// 2. Level progress: current level state (cleared after endings)
 #[derive(Clone, Serialize, Deserialize)]
 pub struct PlayerProfile {
     /// Metadata describing file format and timestamps.
     pub meta: ProfileMeta,
 
-    /// Player-specific counters and unlock tracking.
-    pub progress: Option<PlayerProgress>,
+    /// Current level progress (cleared after bad ending or when exiting after good ending).
+    #[serde(default)]
+    pub level_progress: Option<LevelProgress>,
 
-    /// Cumulative statistics for analytics and balancing.
+    /// Cumulative statistics for analytics and balancing (persistent across level resets).
     #[serde(default)]
     pub aggregates: AggregateStats,
 
-    /// Day-by-day statistics history.
+    /// Set of hint IDs that have been shown to the player (persistent across level resets).
     #[serde(default)]
-    pub daily_history: Vec<DayStats>,
+    pub seen_hints: FxHashSet<EcoString>,
+
+    /// Set of endings that have been unlocked by the player (persistent across level resets).
+    #[serde(default)]
+    pub achieved_endings: FxHashSet<EcoString>,
+}
+
+/// Level-specific progress that gets cleared after endings.
+///
+/// Contains all state related to the current level run, including:
+/// - Current day, reputation, and seed
+/// - Canteen layout customizations
+/// - Diner pool and history
+/// - Management decision effects
+/// - Daily statistics history
+#[derive(Clone, Serialize, Deserialize)]
+pub struct LevelProgress {
+    /// The level being played.
+    pub level_id: ModelId,
+
+    /// Current day index.
+    pub current_day: Day,
+
+    /// Reputation score used for balancing future systems.
+    pub reputation: f32,
+
+    /// Base seed for deterministic day generation.
+    pub rng_seed: Seed,
 
     /// Customized canteen layout modifications.
     pub layout: CanteenLayoutState,
 
     /// Aggregated memory about diners to drive future generation.
-    #[serde(default)]
     pub diner_pool: DinerPool,
 
     /// Permanent effects from management decisions.
-    #[serde(default)]
     pub permanent_effects: PermanentEffects,
 
-    /// Set of hint IDs that have been shown to the player (persisted).
-    #[serde(default)]
-    pub seen_hints: FxHashSet<EcoString>,
-
-    /// Set of endings that have been unlocked by the player.
-    #[serde(default)]
-    pub achieved_endings: FxHashSet<EcoString>,
+    /// Day-by-day statistics history.
+    pub daily_history: Vec<DayStats>,
 }
 
 /// Metadata stored alongside the progress payload.
@@ -52,22 +74,6 @@ pub struct ProfileMeta {
     pub created_at_utc: u64,
     /// Last updated timestamp in UTC seconds.
     pub updated_at_utc: u64,
-}
-
-/// Player-centric state that drives level selection.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PlayerProgress {
-    /// The level played.
-    pub level_id: ModelId,
-
-    /// Day index.
-    pub current_day: Day,
-
-    /// Reputation score used for balancing future systems.
-    pub reputation: f32,
-
-    /// Base seed for deterministic day generation.
-    pub rng_seed: Seed,
 }
 
 /// Lifetime statistics collected for dashboards and analytics.

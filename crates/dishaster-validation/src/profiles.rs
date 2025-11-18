@@ -14,30 +14,31 @@ pub fn validate_player_profile(
 ) -> ValidationResult {
     let mut sink = ErrorSink::new();
 
-    // Validate level reference
-    if let Some(progress) = &profile.progress
-        && !registry.levels.contains_id(&progress.level_id)
-    {
-        sink.push(ValidationError::MissingReference {
-            model_type: "level",
-            id: progress.level_id.clone(),
-            context: "PlayerProgress.level_id".to_string(),
-        });
+    // Validate level progress if exists
+    if let Some(level_progress) = &profile.level_progress {
+        // Validate level reference
+        if !registry.levels.contains_id(&level_progress.level_id) {
+            sink.push(ValidationError::MissingReference {
+                model_type: "level",
+                id: level_progress.level_id.clone(),
+                context: "LevelProgress.level_id".to_string(),
+            });
+        }
+
+        // Validate canteen layout
+        sink.collect(validate_canteen_layout(&level_progress.layout, registry));
+
+        // Validate diner pool
+        for (idx, diner) in level_progress.diner_pool.profiles.iter().enumerate() {
+            sink.collect(validate_diner_profile(diner, registry, idx));
+        }
+
+        // Validate permanent effects
+        sink.collect(validate_permanent_effects(
+            &level_progress.permanent_effects,
+            registry,
+        ));
     }
-
-    // Validate canteen layout
-    sink.collect(validate_canteen_layout(&profile.layout, registry));
-
-    // Validate diner pool
-    for (idx, diner) in profile.diner_pool.profiles.iter().enumerate() {
-        sink.collect(validate_diner_profile(diner, registry, idx));
-    }
-
-    // Validate permanent effects
-    sink.collect(validate_permanent_effects(
-        &profile.permanent_effects,
-        registry,
-    ));
 
     sink.finish()
 }

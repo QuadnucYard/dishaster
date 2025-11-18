@@ -77,6 +77,9 @@ pub enum GameRequest {
     ConfirmSettlement,
     /// Select a decision from the available options.
     SelectDecision(usize),
+
+    /// Clear current level progress.
+    ClearLevel,
 }
 
 impl UiRequest for GameRequest {}

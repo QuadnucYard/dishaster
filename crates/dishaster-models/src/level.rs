@@ -11,6 +11,8 @@ pub struct LevelConfig {
     /// Starting day index
     #[serde(default)]
     pub start_day: Day,
+    /// Starting reputation
+    pub start_reputation: f32,
     /// Total duration of the simulation run
     pub run_length: Seconds,
     /// Random seed for reproducible gameplay
