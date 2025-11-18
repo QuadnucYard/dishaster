@@ -1,5 +1,8 @@
 use dishrupt_core::prelude::*;
 
+/// Unique identifier for a speech in the trial corpus.
+pub type SpeechId = u32;
+
 /// Introduction data for a trial.
 #[derive(Debug)]
 pub struct TrialIntro {
@@ -21,7 +24,7 @@ pub struct TrialStatement {
 #[derive(Debug)]
 pub struct TrialSpeech {
     /// The index of the speech in the corpus.
-    pub id: usize,
+    pub id: SpeechId,
     /// The text of the statement.
     pub text: EcoString,
     /// The breakdown of the statement into items.
@@ -45,7 +48,7 @@ pub enum TrialSpeechItem {
 #[derive(Debug, Clone)]
 pub struct TrialResponseOption {
     /// Index into the corpus responses.
-    pub id: usize,
+    pub id: SpeechId,
     /// The kind of trial response.
     pub kind: TrialResponseKind,
     /// A brief summary of the response, displayed in the options list.

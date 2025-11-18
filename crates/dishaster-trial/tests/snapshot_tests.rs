@@ -12,6 +12,7 @@ use dishaster_trial::{
     TrialSession, create_diner_statement, create_trial_intro, generate_trial_response_candidates,
     trial_respond, trial_should_continue,
 };
+use dishaster_views::SpeechId;
 use dishrupt_core::{EntityId, prelude::EcoString};
 use serde::Serialize;
 
@@ -66,7 +67,7 @@ struct TurnSnapshot {
 
 #[derive(Debug, Serialize)]
 struct ResponseOptionsForSpeech {
-    speech_id: usize,
+    speech_id: SpeechId,
     keywords: Vec<ResponseOptionsForKeyword>,
 }
 
@@ -78,14 +79,14 @@ struct ResponseOptionsForKeyword {
 
 #[derive(Debug, Serialize)]
 struct ResponseSelection {
-    speech_id: usize,
+    speech_id: SpeechId,
     keyword_idx: usize,
-    option_idx: usize,
+    option_idx: SpeechId,
 }
 
 #[derive(Debug, Serialize)]
 struct SpeechSnapshot {
-    id: usize,
+    id: SpeechId,
     #[serde(skip_serializing_if = "Option::is_none")]
     summary: Option<EcoString>,
     text: EcoString,
@@ -98,7 +99,7 @@ struct SpeechSnapshot {
 
 #[derive(Debug, Serialize)]
 struct ResponseOptionSnapshot {
-    id: usize,
+    id: SpeechId,
     kind: TrialResponseKind,
     summary: EcoString,
 }
@@ -114,7 +115,7 @@ struct ImpactSnapshot {
 #[derive(Debug, Serialize)]
 struct FinalState {
     total_turns: usize,
-    asked_questions: Vec<usize>,
+    asked_questions: Vec<SpeechId>,
     continuation_depth: u32,
 }
 
@@ -160,7 +161,7 @@ fn run_trial_snapshot(seed: u64, topic: Option<FeedbackTopic>) -> TrialSnapshot 
                 text: s.text.clone(),
                 emotion: s.appearance.emotion,
                 gesture: s.appearance.gesture,
-                topic: corpus.diner_speeches[s.id].topic,
+                topic: corpus.diner_speeches[s.id as usize].topic,
             })
             .collect();
 
@@ -186,7 +187,7 @@ fn run_trial_snapshot(seed: u64, topic: Option<FeedbackTopic>) -> TrialSnapshot 
         let mut flat_options = Vec::new(); // For random selection
 
         for speech in &diner_speeches {
-            let speech_data = &corpus.diner_speeches[speech.id];
+            let speech_data = &corpus.diner_speeches[speech.id as usize];
 
             // Count keywords in this speech
             let keywords = speech_data
@@ -269,7 +270,7 @@ fn run_trial_snapshot(seed: u64, topic: Option<FeedbackTopic>) -> TrialSnapshot 
             .iter()
             .map(|s| SpeechSnapshot {
                 id: s.id,
-                summary: Some(corpus.responses[s.id].summary.clone()),
+                summary: Some(corpus.responses[s.id as usize].summary.clone()),
                 text: s.text.clone(),
                 emotion: s.appearance.emotion,
                 gesture: s.appearance.gesture,
@@ -293,7 +294,7 @@ fn run_trial_snapshot(seed: u64, topic: Option<FeedbackTopic>) -> TrialSnapshot 
             selected_response: Some(ResponseSelection {
                 speech_id: selected_speech_id,
                 keyword_idx: selected_keyword_idx,
-                option_idx: selected_idx,
+                option_idx: selected_idx as SpeechId,
             }),
             manager_speeches: Some(manager_speeches),
             impact: Some(impact_snap),

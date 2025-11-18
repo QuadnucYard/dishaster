@@ -1,5 +1,5 @@
 use dishaster_models as models;
-use dishaster_views as views;
+use dishaster_views::{self as views, SpeechId};
 
 pub trait ToView {
     type View;
@@ -10,14 +10,14 @@ pub trait ToView {
 pub trait ToViewWithId {
     type View;
 
-    fn to_view_with_id(&self, index: usize) -> Self::View;
+    fn to_view_with_id(&self, index: SpeechId) -> Self::View;
 }
 
 impl ToViewWithId for models::TrialSpeech {
     type View = views::TrialSpeech;
 
-    fn to_view_with_id(&self, id: usize) -> Self::View {
-        views::TrialSpeech {
+    fn to_view_with_id(&self, id: SpeechId) -> Self::View {
+        Self::View {
             id,
             text: self.text.clone(),
             items: self.items.iter().map(|item| item.to_view()).collect(),

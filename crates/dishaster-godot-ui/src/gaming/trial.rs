@@ -1,6 +1,6 @@
 use dishaster_views::{
-    TrialIntro, TrialParticipantAppearance, TrialResponseKind, TrialResponseOption, TrialSpeech,
-    TrialSpeechItem, TrialStatement,
+    SpeechId, TrialIntro, TrialParticipantAppearance, TrialResponseKind, TrialResponseOption,
+    TrialSpeech, TrialSpeechItem, TrialStatement,
 };
 use dishrupt_core::prelude::*;
 use dishrupt_godot_utils::AnimationPlayerExt;
@@ -346,7 +346,7 @@ struct TrialThoughtGui {
     #[child("%BackButton")]
     back_button: ButtonA,
 
-    on_select_option: signals2::Signal<(usize,)>,
+    on_select_option: signals2::Signal<(SpeechId,)>,
 }
 
 impl TrialThoughtGui {

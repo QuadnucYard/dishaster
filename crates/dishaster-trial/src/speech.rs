@@ -1,7 +1,7 @@
-use dishaster_models::{TrialCorpus, TrialQARank};
+use dishaster_models::{TrialCorpus, TrialRank};
 use dishaster_views::{
-    TrialIntro, TrialParticipantAppearance as TrialParticipantAppearanceView, TrialResponseOption,
-    TrialSpeech, TrialStatement,
+    SpeechId, TrialIntro, TrialParticipantAppearance as TrialParticipantAppearanceView,
+    TrialResponseOption, TrialSpeech, TrialStatement,
 };
 
 use crate::{
@@ -57,7 +57,7 @@ pub fn create_diner_statement(session: &mut TrialSession, corpus: &TrialCorpus) 
 pub fn generate_trial_response_candidates(
     session: &mut TrialSession,
     corpus: &TrialCorpus,
-    speech_id: usize,
+    speech_id: SpeechId,
     keyword_index: usize,
 ) -> Vec<TrialResponseOption> {
     // Check cache first
@@ -85,18 +85,18 @@ pub fn generate_trial_response_candidates(
 pub fn trial_respond(
     session: &mut TrialSession,
     corpus: &TrialCorpus,
-    resp_id: usize,
+    resp_id: SpeechId,
 ) -> (TrialStatement, TrialImpact) {
     // Get current question index and response data, then build speech sequence
-    let (current_question_idx, mut response_score, speech_sequence) = {
-        let current_question_idx = session.current_question_index;
-        let response = &corpus.responses[resp_id];
+    let (current_question_id, mut response_score, speech_sequence) = {
+        let current_question_id = session.current_question_id;
+        let response = &corpus.responses[resp_id as usize];
         let response_score = response.response_score;
 
         // Build speech sequence: start with the main response, then follow RR ranks for continuations
         let speech_sequence = generate_response_sequence(session, corpus, resp_id);
 
-        (current_question_idx, response_score, speech_sequence)
+        (current_question_id, response_score, speech_sequence)
     };
 
     // Record the player's response choice
@@ -104,15 +104,15 @@ pub fn trial_respond(
 
     // Contextual evaluation: check if response is relevant to the current question
     // Use QA ranks to measure relevance (higher score = more relevant)
-    if let Some(question_idx) = current_question_idx {
+    if let Some(question_id) = current_question_id {
         let relevance_penalty =
-            calculate_relevance_penalty(corpus, question_idx, resp_id, &session.config);
+            calculate_relevance_penalty(corpus, question_id, resp_id, &session.config);
 
         if relevance_penalty < 0.0 {
             log::info!(
                 "Response {} to question {} is irrelevant (penalty: {:.3})",
                 resp_id,
-                question_idx,
+                question_id,
                 relevance_penalty
             );
             response_score += relevance_penalty; // Apply penalty
@@ -129,13 +129,13 @@ pub fn trial_respond(
 /// This uses AQ ranks to select questions related to the player's last response.
 pub fn trial_should_continue(session: &mut TrialSession, corpus: &TrialCorpus) -> bool {
     // Check if there are available follow-up questions based on player's response
-    if let Some(last_response_idx) = session.last_response_id
-        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_idx)
+    if let Some(last_response_id) = session.last_response_id
+        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_id as usize)
     {
         // Filter available questions (not yet asked)
         let available_ranks: Vec<_> = aq_rank
             .iter()
-            .filter(|rank| !session.has_asked(rank.answer_index))
+            .filter(|rank| !session.has_asked(rank.answer_id))
             .cloned()
             .collect();
 
@@ -217,7 +217,7 @@ fn get_psych_impact(response_score: f32, is_timeout: bool, config: &TrialConfig)
 /// 2. Following QQ continuation chains based on semantic similarity
 /// 3. Using probabilistic decision (score as probability) to continue or stop
 /// 4. Limiting sequence length to avoid overly long monologues
-fn generate_speech_sequence(session: &mut TrialSession, corpus: &TrialCorpus) -> Vec<usize> {
+fn generate_speech_sequence(session: &mut TrialSession, corpus: &TrialCorpus) -> Vec<SpeechId> {
     let mut sequence = Vec::new();
 
     // Select initial question
@@ -228,14 +228,14 @@ fn generate_speech_sequence(session: &mut TrialSession, corpus: &TrialCorpus) ->
     let mut current_speech = first_speech;
 
     while sequence.len() <= session.max_continuation_depth as usize {
-        let Some(qq_rank) = corpus.qq_ranks.get(current_speech) else {
+        let Some(qq_rank) = corpus.qq_ranks.get(current_speech as usize) else {
             break;
         };
 
         // Filter available continuations (not yet asked)
         let available_ranks: Vec<_> = qq_rank
             .iter()
-            .filter(|rank| !session.has_asked(rank.answer_index))
+            .filter(|rank| !session.has_asked(rank.answer_id))
             .cloned()
             .collect();
 
@@ -293,13 +293,13 @@ fn generate_speech_sequence(session: &mut TrialSession, corpus: &TrialCorpus) ->
 fn generate_response_sequence(
     session: &mut TrialSession,
     corpus: &TrialCorpus,
-    resp_id: usize,
+    resp_id: SpeechId,
 ) -> Vec<TrialSpeech> {
     let mut sequence = Vec::new();
     let mut used_responses = FxHashSet::default();
 
     // Start with the main response
-    let response = &corpus.responses[resp_id];
+    let response = &corpus.responses[resp_id as usize];
     sequence.push(response.content.to_view_with_id(resp_id));
     used_responses.insert(resp_id);
 
@@ -307,14 +307,14 @@ fn generate_response_sequence(
     let mut current_response = resp_id;
 
     while sequence.len() <= session.max_continuation_depth as usize {
-        let Some(rr_rank) = corpus.rr_ranks.get(current_response) else {
+        let Some(rr_rank) = corpus.rr_ranks.get(current_response as usize) else {
             break;
         };
 
         // Filter available continuations (exclude already used responses to avoid repetition)
         let available_ranks: Vec<_> = rr_rank
             .iter()
-            .filter(|rank| !used_responses.contains(&rank.answer_index))
+            .filter(|rank| !used_responses.contains(&rank.answer_id))
             .cloned()
             .collect();
 
@@ -337,7 +337,7 @@ fn generate_response_sequence(
             break;
         };
 
-        let next_response_content = &corpus.responses[next_response].content;
+        let next_response_content = &corpus.responses[next_response as usize].content;
         sequence.push(next_response_content.to_view_with_id(next_response));
         used_responses.insert(next_response);
         current_response = next_response;
@@ -365,12 +365,12 @@ fn generate_response_sequence(
 /// Uses score-based thresholds rather than position for more accurate relevance assessment.
 fn calculate_relevance_penalty(
     corpus: &TrialCorpus,
-    question_id: usize,
-    response_id: usize,
+    question_id: SpeechId,
+    response_id: SpeechId,
     config: &TrialConfig,
 ) -> f32 {
     // Get QA ranks for this question
-    let Some(question_ranks) = corpus.qa_ranks.get(question_id) else {
+    let Some(question_ranks) = corpus.qa_ranks.get(question_id as usize) else {
         return 0.0;
     };
 
@@ -378,7 +378,7 @@ fn calculate_relevance_penalty(
     let mut best_score: Option<f32> = None;
 
     for keyword_ranks in question_ranks {
-        if let Some(rank) = keyword_ranks.iter().find(|r| r.answer_index == response_id) {
+        if let Some(rank) = keyword_ranks.iter().find(|r| r.answer_id == response_id) {
             best_score = Some(best_score.map_or(rank.score, |s| s.max(rank.score)));
         }
     }
@@ -412,32 +412,30 @@ fn calculate_relevance_penalty(
 /// 3. Filtering by topic if the trial was triggered by specific feedback
 /// 4. Applying temperature-weighted sampling for variety while maintaining relevance
 /// 5. Falling back to random selection if no history or ranks available
-fn select_next_question(session: &mut TrialSession, corpus: &TrialCorpus) -> usize {
+fn select_next_question(session: &mut TrialSession, corpus: &TrialCorpus) -> SpeechId {
     // Reset continuation depth for new topic
     session.reset_continuation();
 
     // Helper to check if a speech matches the trigger topic
-    let matches_topic = |speech_id: usize| -> bool {
+    let matches_topic = |speech_id: SpeechId| -> bool {
         // Speech must either have matching topic or no topic (general)
         // General speeches can be used for any topic
         session.trigger_topic.is_none_or(|trigger_topic| {
             corpus
                 .diner_speeches
-                .get(speech_id)
+                .get(speech_id as usize)
                 .is_some_and(|speech| speech.topic.is_none_or(|topic| topic == trigger_topic))
         })
     };
 
     // If there's a previous player response, use AQ ranks to select related question
     if let Some(last_response_id) = session.last_response_id
-        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_id)
+        && let Some(aq_rank) = corpus.aq_ranks.get(last_response_id as usize)
     {
         // Filter available questions (not yet asked AND matching topic)
         let available_ranks: Vec<_> = aq_rank
             .iter()
-            .filter(|rank| {
-                !session.has_asked(rank.answer_index) && matches_topic(rank.answer_index)
-            })
+            .filter(|rank| !session.has_asked(rank.answer_id) && matches_topic(rank.answer_id))
             .cloned()
             .collect();
 
@@ -446,17 +444,17 @@ fn select_next_question(session: &mut TrialSession, corpus: &TrialCorpus) -> usi
             let selected =
                 sample_weighted_indices(&available_ranks, session.temperature, 1, &mut session.rng);
 
-            if let Some(&question_idx) = selected.first() {
-                session.mark_asked(question_idx);
-                return question_idx;
+            if let Some(&question_id) = selected.first() {
+                session.mark_asked(question_id);
+                return question_id;
             }
         }
     }
 
     // Fallback: random available question (filtered by topic)
-    let num_questions = corpus.diner_speeches.len();
+    let num_questions = corpus.diner_speeches.len() as SpeechId;
     let available_questions: Vec<_> = (0..num_questions)
-        .filter(|&idx| !session.has_asked(idx) && matches_topic(idx))
+        .filter(|&id| !session.has_asked(id) && matches_topic(id))
         .collect();
 
     // Pick a random available question.
@@ -467,7 +465,7 @@ fn select_next_question(session: &mut TrialSession, corpus: &TrialCorpus) -> usi
         .unwrap_or_else(|| {
             // No topic-matching questions - fall back to any available or any random
             let all_available: Vec<_> = (0..num_questions)
-                .filter(|&idx| !session.has_asked(idx))
+                .filter(|&id| !session.has_asked(id))
                 .collect();
 
             all_available
@@ -482,13 +480,13 @@ fn select_next_question(session: &mut TrialSession, corpus: &TrialCorpus) -> usi
 }
 
 fn create_diner_statement_with_sequence(
-    speech_ids: Vec<usize>,
+    speech_ids: Vec<SpeechId>,
     corpus: &TrialCorpus,
 ) -> TrialStatement {
     // Convert speech indices to view speeches
     let speech_sequence: Vec<_> = speech_ids
         .into_iter()
-        .map(|id| corpus.diner_speeches[id].to_view_with_id(id))
+        .map(|id| corpus.diner_speeches[id as usize].to_view_with_id(id))
         .collect();
 
     log::info!(
@@ -506,7 +504,7 @@ fn create_diner_statement_with_sequence(
 fn generate_response_options(
     session: &mut TrialSession,
     corpus: &TrialCorpus,
-    speech_id: usize,
+    speech_id: SpeechId,
     keyword_idx: usize,
 ) -> Vec<TrialResponseOption> {
     const WEIGHTED_OPTION_COUNTS: &[(usize, i32)] = &[(1, 1), (2, 3), (3, 4), (4, 2)];
@@ -524,7 +522,7 @@ fn generate_response_options(
         keyword_idx
     );
 
-    let selected = if let Some(question_ranks) = corpus.qa_ranks.get(speech_id)
+    let selected = if let Some(question_ranks) = corpus.qa_ranks.get(speech_id as usize)
         && let Some(ranks) = question_ranks.get(keyword_idx)
     {
         log::debug!("> Using QA ranks with {} candidates", ranks.len());
@@ -537,13 +535,13 @@ fn generate_response_options(
             speech_id,
             keyword_idx
         );
-        (0..corpus.responses.len()).choose_multiple(&mut session.rng, options_count)
+        (0..corpus.responses.len() as SpeechId).choose_multiple(&mut session.rng, options_count)
     };
 
     selected
         .into_iter()
         .map(|id| {
-            let response = &corpus.responses[id];
+            let response = &corpus.responses[id as usize];
             TrialResponseOption {
                 id,
                 kind: response.kind.to_view(),
@@ -555,11 +553,11 @@ fn generate_response_options(
 
 /// Sample indices from ranks using temperature-weighted softmax
 fn sample_weighted_indices(
-    ranks: &[TrialQARank],
+    ranks: &[TrialRank],
     temperature: f32,
     count: usize,
     rng: &mut impl Rng,
-) -> Vec<usize> {
+) -> Vec<SpeechId> {
     if ranks.is_empty() {
         return Vec::new();
     }
@@ -576,7 +574,7 @@ fn sample_weighted_indices(
         .map(|r| {
             let scaled = (r.score - max_score) / temp; // Subtract max for numerical stability
             let weight = scaled.exp() as f64;
-            (r.answer_index, weight)
+            (r.answer_id, weight)
         })
         .collect();
 

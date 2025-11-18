@@ -57,8 +57,8 @@ impl Simulation {
             SimCommand::TrialLaunch => {
                 self.world.trigger(TrialLaunch);
             }
-            SimCommand::TrialRespond(resp_corpus_index) => {
-                self.world.trigger(TrialRespond(resp_corpus_index));
+            SimCommand::TrialRespond(resp_id) => {
+                self.world.trigger(TrialRespond(resp_id));
             }
             SimCommand::TrialTimeout => {
                 self.world.trigger(TrialTimeout);

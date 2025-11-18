@@ -1,6 +1,6 @@
 //! Simulation commands and control interfaces.
 
-use dishaster_views::{FeedbackTopic, PricingMethod};
+use dishaster_views::{FeedbackTopic, PricingMethod, SpeechId};
 use dishrupt_core::EntityId;
 
 use crate::snapshots::DebugFlags;
@@ -36,13 +36,13 @@ pub enum SimCommand {
     /// Launch the trial after intro is complete.
     TrialLaunch,
     /// Choose a response during the trial.
-    TrialRespond(usize),
+    TrialRespond(SpeechId),
     /// Timeout the current trial response.
     TrialTimeout,
     /// Request response candidates for a specific keyword (lazy loading).
     TrialRequestCandidates {
         /// Id of the current speech in the trial.
-        speech_id: usize,
+        speech_id: SpeechId,
         /// Index of the keyword within the current speech.
         keyword_index: usize,
     },

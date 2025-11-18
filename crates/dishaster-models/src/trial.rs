@@ -86,13 +86,13 @@ pub struct TrialCorpus {
     pub responses: Vec<TrialResponse>,
 
     /// Question->Answer ranks for trial speeches.
-    pub qa_ranks: Vec<Vec<Vec<TrialQARank>>>,
+    pub qa_ranks: Vec<Vec<Vec<TrialRank>>>,
     /// Answer->Question ranks for trial speeches.
-    pub aq_ranks: Vec<Vec<TrialQARank>>,
+    pub aq_ranks: Vec<Vec<TrialRank>>,
     /// Question->Question continuation ranks (for multi-turn diner speeches).
-    pub qq_ranks: Vec<Vec<TrialQARank>>,
+    pub qq_ranks: Vec<Vec<TrialRank>>,
     /// Response->Response continuation ranks (for multi-turn player responses).
-    pub rr_ranks: Vec<Vec<TrialQARank>>,
+    pub rr_ranks: Vec<Vec<TrialRank>>,
 }
 
 /// A single speech made by a trial participant.
@@ -170,22 +170,22 @@ pub enum TrialResponseKind {
     Question,
 }
 
-/// A single QA rank entry.
+/// A single trial rank entry.
 #[derive(Clone, Copy, bincode::Decode)]
-pub struct TrialQARank {
+pub struct TrialRank {
     /// Index of the answer in the corpus.
-    pub answer_index: usize,
+    pub answer_id: u32,
     /// The score of the answer.
     pub score: f32,
 }
 
-impl std::fmt::Display for TrialQARank {
+impl std::fmt::Display for TrialRank {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}", self.answer_index, self.score)
+        write!(f, "{}:{}", self.answer_id, self.score)
     }
 }
 
-impl std::fmt::Debug for TrialQARank {
+impl std::fmt::Debug for TrialRank {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self, f)
     }

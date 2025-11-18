@@ -50,9 +50,9 @@ fn on_trial_respond(
     registry: Res<GameModelRegistryRes>,
     mut events: ResMut<EventQueue>,
 ) {
-    let resp_corpus_index = event.0;
+    let resp_id = event.0;
 
-    let (speech, impact) = trial::trial_respond(&mut session, &registry.trial, resp_corpus_index);
+    let (speech, impact) = trial::trial_respond(&mut session, &registry.trial, resp_id);
 
     if let Some(diner_entity) = session.target_entity {
         commands.trigger(ApplyTrialImpact {

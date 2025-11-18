@@ -60,14 +60,14 @@ pub enum GameRequest {
     /// Check a keyword during trial interaction.
     TrialCheckKeyword {
         /// Index of the speech in the corpus (for generating appropriate responses).
-        speech_id: usize,
+        speech_id: SpeechId,
         /// Index of the keyword within that speech.
         keyword_index: usize,
     },
     /// Navigate back from thought display in trial.
     TrialBackFromThought,
     /// Submit a response choice during trial.
-    TrialRespond(usize),
+    TrialRespond(SpeechId),
     /// Mark trial response as done and proceed.
     TrialResponseDone,
     /// Handle trial timeout.

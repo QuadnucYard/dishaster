@@ -4,7 +4,7 @@ mod adapter;
 mod speech;
 
 use dishaster_models::{FeedbackTopic, TrialConfig};
-use dishaster_views::TrialResponseOption;
+use dishaster_views::{SpeechId, TrialResponseOption};
 use dishrupt_core::EntityId;
 
 pub use self::speech::*;
@@ -61,15 +61,15 @@ pub struct TrialSession {
     /// The diner entity that triggered this trial (for applying psych state impacts)
     pub target_entity: Option<EntityId>,
     /// Indices of questions already asked in this trial
-    asked_questions: Vec<usize>,
+    asked_questions: Vec<SpeechId>,
     /// Cached response options for (speech_id, keyword_index) pairs
-    pub cached_options: FxHashMap<(usize, usize), Vec<TrialResponseOption>>,
+    pub cached_options: FxHashMap<(SpeechId, usize), Vec<TrialResponseOption>>,
     /// The most recent response corpus index selected by the player
-    pub last_response_id: Option<usize>,
+    pub last_response_id: Option<SpeechId>,
     /// The most recent diner speech index
-    pub last_diner_speech_id: Option<usize>,
+    pub last_diner_speech_id: Option<SpeechId>,
     /// The most recent diner speech index that the player is responding to (for context evaluation)
-    pub current_question_index: Option<usize>,
+    pub current_question_id: Option<SpeechId>,
     /// Current continuation depth (consecutive speeches by same speaker)
     pub continuation_depth: u32,
     /// Maximum allowed continuation depth before forcing speaker alternation
@@ -92,7 +92,7 @@ impl TrialSession {
             cached_options: Default::default(),
             last_response_id: None,
             last_diner_speech_id: None,
-            current_question_index: None,
+            current_question_id: None,
             continuation_depth: 0,
             max_continuation_depth: 3,
             temperature: 0.8,
@@ -107,7 +107,7 @@ impl TrialSession {
         self.cached_options.clear();
         self.last_response_id = None;
         self.last_diner_speech_id = None;
-        self.current_question_index = None;
+        self.current_question_id = None;
         self.continuation_depth = 0;
         self.trigger_topic = None;
     }
@@ -124,37 +124,37 @@ impl TrialSession {
     }
 
     /// Check if a question has been asked
-    pub fn has_asked(&self, question_index: usize) -> bool {
-        self.asked_questions.contains(&question_index)
+    pub fn has_asked(&self, question_id: u32) -> bool {
+        self.asked_questions.contains(&question_id)
     }
 
     /// Get the list of asked question indices
-    pub fn get_asked_questions(&self) -> &[usize] {
+    pub fn get_asked_questions(&self) -> &[u32] {
         &self.asked_questions
     }
 
     /// Mark a question as asked
-    pub fn mark_asked(&mut self, question_index: usize) {
-        if !self.has_asked(question_index) {
-            self.asked_questions.push(question_index);
+    pub fn mark_asked(&mut self, question_id: SpeechId) {
+        if !self.has_asked(question_id) {
+            self.asked_questions.push(question_id);
         }
     }
 
     /// Record the player's response choice
-    pub fn set_last_response(&mut self, response_index: usize) {
-        self.last_response_id = Some(response_index);
+    pub fn set_last_response(&mut self, response_id: SpeechId) {
+        self.last_response_id = Some(response_id);
         // Reset continuation depth when speaker alternates
         self.continuation_depth = 0;
     }
 
     /// Record a diner speech
-    pub fn set_last_diner_speech(&mut self, speech_index: usize) {
-        self.last_diner_speech_id = Some(speech_index);
+    pub fn set_last_diner_speech(&mut self, speech_id: SpeechId) {
+        self.last_diner_speech_id = Some(speech_id);
     }
 
     /// Set the current question index (the question player is responding to)
-    pub fn set_current_question(&mut self, question_index: usize) {
-        self.current_question_index = Some(question_index);
+    pub fn set_current_question(&mut self, question_id: SpeechId) {
+        self.current_question_id = Some(question_id);
     }
 
     /// Increment continuation depth

@@ -1,5 +1,6 @@
 use dishaster_models::{EndingType, FeedbackTopic, InspectorVisitModel};
 use dishaster_trial::{PsychImpact, ReputationImpact};
+use dishaster_views::SpeechId;
 
 use crate::prelude::*;
 
@@ -52,7 +53,7 @@ pub struct TrialLaunch;
 
 /// Event to choose a response during the trial
 #[derive(Event)]
-pub struct TrialRespond(pub usize);
+pub struct TrialRespond(pub SpeechId);
 
 /// Event to timeout the current trial response
 #[derive(Event)]
@@ -61,7 +62,7 @@ pub struct TrialTimeout;
 /// Event to request response candidates for a specific keyword (lazy loading)
 #[derive(Event)]
 pub struct TrialRequestCandidates {
-    pub speech_id: usize,
+    pub speech_id: SpeechId,
     pub keyword_index: usize,
 }
 
