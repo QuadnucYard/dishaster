@@ -1,0 +1,41 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 2982902689111255716
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 102
+        text: "你们[免费汤品]的供应时间太短了，\\刚开餐十分钟就没有了，\\能不能延长补汤频率？"
+        emotion: 😢
+    response_options:
+      - speech_id: 102
+        keywords:
+          - keyword: 免费汤品
+            options:
+              - id: 253
+                kind: question
+                summary: 记录消耗
+    selected_response:
+      speech_id: 102
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 253
+        summary: 记录消耗
+        text: "您能帮忙留意一下汤品大概在几点钟耗尽吗？\\这有助于我们精准调整。"
+        emotion: 🤔
+    impact:
+      reputation_score: 0.291
+      mood_change: 0.0291
+      trust_change: 0.01455
+      patience_change: 0.582
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 102
+  continuation_depth: 0

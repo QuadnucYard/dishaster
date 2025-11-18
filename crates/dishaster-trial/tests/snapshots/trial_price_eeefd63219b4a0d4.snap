@@ -1,0 +1,44 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 17217215411128672468
+  trigger_topic: price
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 72
+        text: "今天的[菜价]突然上涨，\\没有任何通知，\\学生们都很不满。"
+        emotion: 😱
+        gesture: 👋
+        topic: price
+    response_options:
+      - speech_id: 72
+        keywords:
+          - keyword: 菜价
+            options:
+              - id: 262
+                kind: perjury
+                summary: 临时补贴
+    selected_response:
+      speech_id: 72
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 262
+        summary: 临时补贴
+        text: "这次调价是因为临时取消了运营补贴，\\等财政拨款到位后会回调价格。"
+        emotion: 😅
+    impact:
+      reputation_score: -1.025
+      mood_change: -0.1025
+      trust_change: -0.05125
+      patience_change: -2.05
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 72
+  continuation_depth: 0

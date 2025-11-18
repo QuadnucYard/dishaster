@@ -1,0 +1,62 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 7435390023275438269
+  trigger_topic: hunger
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 3
+        text: "你们的[分量]也太少了，\\别看价格便宜，吃了还饿，\\这算消费体验吗？"
+        emotion: 😭
+        gesture: 🤞
+        topic: hunger
+      - id: 104
+        text: "你们[菜品价格]调整得太频繁了，\\上周还卖8块的红烧肉这周就10块，\\能不能稳定一点？"
+        emotion: 😢
+        topic: price
+    response_options:
+      - speech_id: 3
+        keywords:
+          - keyword: 分量
+            options:
+              - id: 173
+                kind: question
+                summary: 能看看肉吗
+              - id: 84
+                kind: agreement
+                summary: 调整分量与补偿
+              - id: 271
+                kind: agreement
+                summary: 成本说明
+      - speech_id: 104
+        keywords:
+          - keyword: 菜品价格
+            options:
+              - id: 271
+                kind: agreement
+                summary: 成本说明
+    selected_response:
+      speech_id: 104
+      keyword_idx: 0
+      option_idx: 3
+    manager_speeches:
+      - id: 271
+        summary: 成本说明
+        text: "非常理解您的感受，\\近期因部分食材供应链成本显著上升，\\我们不得不对价格进行适度调整。\\我们会努力优化采购渠道，\\并推出更多高性价比的套餐回馈老顾客。"
+        emotion: 😊
+    impact:
+      reputation_score: 0.5
+      mood_change: 0.05
+      trust_change: 0.025
+      patience_change: 1
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 3
+    - 104
+  continuation_depth: 0

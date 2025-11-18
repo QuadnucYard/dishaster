@@ -1,0 +1,51 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 928397841245673342
+  trigger_topic: praise
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 55
+        text: "点了个[便宜菜]结果全是配料，\\几口就没了，\\商家良心在哪？"
+        emotion: 😡
+        gesture: 👎
+        topic: hunger
+    response_options:
+      - speech_id: 55
+        keywords:
+          - keyword: 便宜菜
+            options:
+              - id: 173
+                kind: question
+                summary: 能看看肉吗
+              - id: 244
+                kind: objection
+                summary: 应自行询问
+    selected_response:
+      speech_id: 55
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 173
+        summary: 能看看肉吗
+        text: "能让我看看您这份[红烧肉]吗？\\可能是分菜不均造成的。"
+        emotion: 🧐
+      - id: 164
+        summary: 光照问题
+        text: "是因为灯光偏黄，\\菜其实很新鲜，刚出锅的。"
+        emotion: 😅
+    impact:
+      reputation_score: -0.758
+      mood_change: -0.0758
+      trust_change: -0.0379
+      patience_change: -1.516
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 55
+  continuation_depth: 0

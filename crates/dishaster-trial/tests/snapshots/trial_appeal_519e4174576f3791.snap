@@ -2,17 +2,18 @@
 source: crates/dishaster-trial/tests/snapshot_tests.rs
 ---
 session_info:
-  seed: 3831705504650218695
+  seed: 5881210131331364753
+  trigger_topic: appeal
   max_continuation_depth: 3
   temperature: 0.8
 turns:
   - turn_number: 1
     diner_speeches:
-      - id: 37
-        text: "我点的[素菜]竟然有肉，\\我是[素食者]，\\这差错太严重了！"
-        emotion: 😢
-        gesture: 🤚
-        topic: quality
+      - id: 87
+        text: "每次来都只剩[青菜]和[豆腐]，\\想吃的[红烧肉]永远卖光，\\是不是故意少做？"
+        emotion: 😒
+        gesture: 👎
+        topic: appeal
     response_options: ~
     selected_response: ~
     manager_speeches: ~
@@ -21,5 +22,5 @@ turns:
 final_state:
   total_turns: 1
   asked_questions:
-    - 37
+    - 87
   continuation_depth: 0

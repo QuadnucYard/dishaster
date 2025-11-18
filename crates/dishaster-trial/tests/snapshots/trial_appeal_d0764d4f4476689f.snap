@@ -1,0 +1,31 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 15021278609987233951
+  trigger_topic: appeal
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 68
+        text: "你们的[午休]时间配菜少，\\很多学生吃不上饭，\\能不能[提前]准备多一些？"
+        emotion: 😢
+        gesture: 👎
+        topic: appeal
+      - id: 105
+        text: "你们[取餐夹子]容易串味，\\夹过辣菜的夹子又去夹清淡的菜，\\能不能一菜一夹？"
+        emotion: 🤢
+        topic: hygiene
+    response_options: ~
+    selected_response: ~
+    manager_speeches: ~
+    impact: ~
+    continuation_decision: ~
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 68
+    - 105
+  continuation_depth: 0

@@ -418,13 +418,13 @@ fn select_next_question(session: &mut TrialSession, corpus: &TrialCorpus) -> Spe
 
     // Helper to check if a speech matches the trigger topic
     let matches_topic = |speech_id: SpeechId| -> bool {
-        // Speech must either have matching topic or no topic (general)
-        // General speeches can be used for any topic
+        // If no trigger topic, any speech is acceptable
+        // If trigger topic is provided, speech must have that exact topic
         session.trigger_topic.is_none_or(|trigger_topic| {
             corpus
                 .diner_speeches
                 .get(speech_id as usize)
-                .is_some_and(|speech| speech.topic.is_none_or(|topic| topic == trigger_topic))
+                .is_some_and(|speech| speech.topic == Some(trigger_topic))
         })
     };
 

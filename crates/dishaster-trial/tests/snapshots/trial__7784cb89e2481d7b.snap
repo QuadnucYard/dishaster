@@ -1,0 +1,48 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 8612232180506566011
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 59
+        text: "你们把[菜名]改了又不公告，\\学生根本不知道，\\管理要透明一点。"
+        emotion: 😢
+        gesture: 👋
+    response_options:
+      - speech_id: 59
+        keywords:
+          - keyword: 菜名
+            options:
+              - id: 0
+                kind: agreement
+                summary: 立即处理
+              - id: 259
+                kind: agreement
+                summary: 价格公示
+              - id: 21
+                kind: agreement
+                summary: 改进标识
+    selected_response:
+      speech_id: 59
+      keyword_idx: 0
+      option_idx: 1
+    manager_speeches:
+      - id: 259
+        summary: 价格公示
+        text: "理解您的困扰，\\我们会提前一周公示调价信息，\\并尽量保持核心菜品价格稳定。"
+        emotion: 😅
+    impact:
+      reputation_score: 0.48900002
+      mood_change: 0.048900004
+      trust_change: 0.024450002
+      patience_change: 0.97800004
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 59
+  continuation_depth: 0

@@ -323,24 +323,32 @@ fn test_trial_snapshots() {
     let mut rng = rand_xoshiro::Xoshiro256PlusPlus::seed_from_u64(42);
 
     let topics = [
-        None,
-        Some(FeedbackTopic::Quality),
-        Some(FeedbackTopic::Hygiene),
-        Some(FeedbackTopic::Price),
-        Some(FeedbackTopic::Queue),
-        Some(FeedbackTopic::Taste),
-        Some(FeedbackTopic::Appeal),
-        Some(FeedbackTopic::Tableware),
+        FeedbackTopic::Appeal,
+        FeedbackTopic::Queue,
+        FeedbackTopic::Tableware,
+        FeedbackTopic::Quality,
+        FeedbackTopic::Price,
+        FeedbackTopic::Hygiene,
+        FeedbackTopic::Taste,
+        FeedbackTopic::Hunger,
+        FeedbackTopic::Praise,
     ];
 
-    for i in 0..20 {
+    for i in 0..topics.len() * 2 + 5 {
         let seed = rng.random();
-        let topic = topics[i % topics.len()];
+        let topic = if i / 2 < topics.len() {
+            Some(topics[i / 2])
+        } else {
+            None
+        };
 
         let snapshot = run_trial_snapshot(seed, topic);
 
         // Create unique snapshot name for each iteration
-        let snapshot_name = format!("trial_{:016x}", seed);
+        let topic_name = topic
+            .map(|t| format!("{:?}", t).to_lowercase())
+            .unwrap_or_else(|| "".to_string());
+        let snapshot_name = format!("trial_{topic_name}_{seed:016x}");
         insta::with_settings!({prepend_module_to_snapshot => false, omit_expression => true}, {
             insta::assert_yaml_snapshot!(snapshot_name, snapshot);
         });

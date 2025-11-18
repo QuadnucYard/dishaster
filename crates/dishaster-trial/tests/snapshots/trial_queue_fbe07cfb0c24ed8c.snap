@@ -1,0 +1,47 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 18149643915985481100
+  trigger_topic: queue
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 69
+        text: "[托盘]放置区没有指示，\\大家乱堆盘子，\\导致通道拥堵。"
+        emotion: 😭
+        gesture: 👊
+        topic: queue
+    response_options:
+      - speech_id: 69
+        keywords:
+          - keyword: 托盘
+            options:
+              - id: 181
+                kind: question
+                summary: 别人没说
+              - id: 250
+                kind: perjury
+                summary: 已有规定
+    selected_response:
+      speech_id: 69
+      keyword_idx: 0
+      option_idx: 1
+    manager_speeches:
+      - id: 250
+        summary: 已有规定
+        text: "其实我们有张贴“高峰时段优先拼桌”的提示，\\只是可能您没注意到。"
+        emotion: 😅
+    impact:
+      reputation_score: -0.389
+      mood_change: -0.0389
+      trust_change: -0.01945
+      patience_change: -0.778
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 69
+  continuation_depth: 0

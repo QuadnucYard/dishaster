@@ -1,0 +1,49 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 15914132926671316451
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 48
+        text: "你们的[餐具]漂白味道太重，\\我一吃就头疼，\\建议更换清洗剂。"
+        emotion: 😡
+        gesture: 👋
+        topic: tableware
+    response_options:
+      - speech_id: 48
+        keywords:
+          - keyword: 餐具
+            options:
+              - id: 3
+                kind: agreement
+                summary: 更换或退款
+              - id: 85
+                kind: objection
+                summary: 检验油品
+              - id: 102
+                kind: agreement
+                summary: 现场换餐并免单
+    selected_response:
+      speech_id: 48
+      keyword_idx: 0
+      option_idx: 1
+    manager_speeches:
+      - id: 85
+        summary: 检验油品
+        text: "关于油品变味\\我们会抽样检验\\并核查存储记录，\\如确认问题会更换批次\\并处理赔偿。"
+        emotion: 🤨
+    impact:
+      reputation_score: -0.866
+      mood_change: -0.0866
+      trust_change: -0.0433
+      patience_change: -1.732
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 48
+  continuation_depth: 0

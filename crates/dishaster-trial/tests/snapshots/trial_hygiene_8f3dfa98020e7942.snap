@@ -1,0 +1,57 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 10321681451779520834
+  trigger_topic: hygiene
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 70
+        text: "这汤里有像[胶状]的东西，\\舀起来黏糊糊的，\\我根本不敢喝。"
+        emotion: 😰
+        gesture: 🤚
+        topic: hygiene
+    response_options:
+      - speech_id: 70
+        keywords:
+          - keyword: 胶状
+            options:
+              - id: 175
+                kind: agreement
+                summary: 立刻换汤
+              - id: 226
+                kind: perjury
+                summary: 临时调整
+              - id: 170
+                kind: perjury
+                summary: 你站太近了
+              - id: 178
+                kind: perjury
+                summary: 看错了
+    selected_response:
+      speech_id: 70
+      keyword_idx: 0
+      option_idx: 1
+    manager_speeches:
+      - id: 226
+        summary: 临时调整
+        text: "因为今天汤的供应量紧张，\\所以临时调整了续汤政策。"
+        emotion: 😅
+      - id: 262
+        summary: 临时补贴
+        text: "这次调价是因为临时取消了运营补贴，\\等财政拨款到位后会回调价格。"
+        emotion: 😅
+    impact:
+      reputation_score: -0.151
+      mood_change: -0.0150999995
+      trust_change: -0.0075499997
+      patience_change: -0.302
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 70
+  continuation_depth: 0

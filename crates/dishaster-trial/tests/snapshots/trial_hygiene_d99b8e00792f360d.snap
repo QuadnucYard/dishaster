@@ -1,0 +1,90 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 15680282660304795149
+  trigger_topic: hygiene
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 70
+        text: "这汤里有像[胶状]的东西，\\舀起来黏糊糊的，\\我根本不敢喝。"
+        emotion: 😰
+        gesture: 🤚
+        topic: hygiene
+    response_options:
+      - speech_id: 70
+        keywords:
+          - keyword: 胶状
+            options:
+              - id: 170
+                kind: perjury
+                summary: 你站太近了
+              - id: 253
+                kind: question
+                summary: 记录消耗
+              - id: 182
+                kind: perjury
+                summary: 新厨师
+    selected_response:
+      speech_id: 70
+      keyword_idx: 0
+      option_idx: 0
+    manager_speeches:
+      - id: 170
+        summary: 你站太近了
+        text: "可能是您靠得太近，\\才被汤汁溅到，不是故意的。"
+        emotion: 🙄
+      - id: 176
+        summary: 可能是顾客的
+        text: "有时候顾客自己的头发也会掉进去，\\我们厨师都戴帽子的。"
+        emotion: 😅
+    impact:
+      reputation_score: -1.0910001
+      mood_change: -0.10910001
+      trust_change: -0.054550003
+      patience_change: -2.1820002
+    continuation_decision: true
+  - turn_number: 2
+    diner_speeches:
+      - id: 83
+        text: "这[汤]里面怎么有头发，\\我都喝了一口才发现，\\你们后厨卫生谁管的？"
+        emotion: 🤮
+        topic: hygiene
+    response_options:
+      - speech_id: 83
+        keywords:
+          - keyword: 汤
+            options:
+              - id: 96
+                kind: objection
+                summary: 检查清洗流程
+              - id: 176
+                kind: objection
+                summary: 可能是顾客的
+              - id: 182
+                kind: perjury
+                summary: 新厨师
+    selected_response:
+      speech_id: 83
+      keyword_idx: 0
+      option_idx: 2
+    manager_speeches:
+      - id: 182
+        summary: 新厨师
+        text: "今天换了新厨师，\\可能调味还不熟练。"
+        emotion: 😅
+    impact:
+      reputation_score: 0.045000017
+      mood_change: 0.0045000017
+      trust_change: 0.0022500008
+      patience_change: 0.09000003
+    continuation_decision: false
+final_state:
+  total_turns: 2
+  asked_questions:
+    - 70
+    - 83
+  continuation_depth: 0

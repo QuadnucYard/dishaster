@@ -1,0 +1,25 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 3831705504650218695
+  trigger_topic: price
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 96
+        text: "你们的[菜品价格]涨了好多，\\比上周贵了两块，\\这也涨得太快了吧！"
+        emotion: 😮
+        topic: price
+    response_options: ~
+    selected_response: ~
+    manager_speeches: ~
+    impact: ~
+    continuation_decision: ~
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 96
+  continuation_depth: 0

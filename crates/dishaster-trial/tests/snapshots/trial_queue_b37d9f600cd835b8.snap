@@ -1,0 +1,91 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 12933668939759105464
+  trigger_topic: queue
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 49
+        text: "自助区的[菜品]经常空着，\\补菜补得又慢，\\我们得等很久才能吃上。"
+        emotion: 😠
+        gesture: 🤞
+        topic: queue
+    response_options:
+      - speech_id: 49
+        keywords:
+          - keyword: 菜品
+            options:
+              - id: 185
+                kind: question
+                summary: 看清了吗
+              - id: 249
+                kind: question
+                summary: 高峰时段
+              - id: 273
+                kind: question
+                summary: 关注菜品
+    selected_response:
+      speech_id: 49
+      keyword_idx: 0
+      option_idx: 2
+    manager_speeches:
+      - id: 273
+        summary: 关注菜品
+        text: "您提到的“好几道”具体是哪些菜品呢？\\我们很关注老顾客常点的菜品价格体验。"
+        emotion: 🤔
+      - id: 261
+        summary: 关注菜品
+        text: "您最常吃的几道菜是哪些？\\我们可以优先考虑这些菜品的价格策略。"
+        emotion: 🤔
+    impact:
+      reputation_score: 0.19300002
+      mood_change: 0.019300003
+      trust_change: 0.009650001
+      patience_change: 0.38600004
+    continuation_decision: true
+  - turn_number: 2
+    diner_speeches:
+      - id: 69
+        text: "[托盘]放置区没有指示，\\大家乱堆盘子，\\导致通道拥堵。"
+        emotion: 😭
+        gesture: 👊
+        topic: queue
+    response_options:
+      - speech_id: 69
+        keywords:
+          - keyword: 托盘
+            options:
+              - id: 173
+                kind: question
+                summary: 能看看肉吗
+              - id: 237
+                kind: question
+                summary: 记录时间
+              - id: 249
+                kind: question
+                summary: 高峰时段
+    selected_response:
+      speech_id: 69
+      keyword_idx: 0
+      option_idx: 2
+    manager_speeches:
+      - id: 249
+        summary: 高峰时段
+        text: "您通常在哪个时间段遇到这个问题？\\是午间还是晚间用餐高峰？"
+        emotion: 🧐
+    impact:
+      reputation_score: -0.139
+      mood_change: -0.0139
+      trust_change: -0.00695
+      patience_change: -0.278
+    continuation_decision: false
+final_state:
+  total_turns: 2
+  asked_questions:
+    - 49
+    - 69
+  continuation_depth: 0

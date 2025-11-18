@@ -1,0 +1,25 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 12037529929179472949
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 74
+        text: "你们的[窗口]标签显示错位，\\我以为是另外一种菜，\\结果点错了。"
+        emotion: 😡
+        gesture: 🤏
+        topic: quality
+    response_options: ~
+    selected_response: ~
+    manager_speeches: ~
+    impact: ~
+    continuation_decision: ~
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 74
+  continuation_depth: 0

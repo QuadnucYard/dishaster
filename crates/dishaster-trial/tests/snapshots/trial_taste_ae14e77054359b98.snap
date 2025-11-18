@@ -1,0 +1,78 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 12543905331768826776
+  trigger_topic: taste
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 4
+        text: "这[菜]有股怪味，\\可能是[油]放久了，\\我要一份新的或者退钱。"
+        emotion: 😰
+        gesture: 🤏
+        topic: taste
+      - id: 16
+        text: "这[鱼]明显不新鲜，\\吃起来有股腥味，\\你们确定供应商没问题？"
+        emotion: 😠
+        gesture: 👈
+        topic: quality
+    response_options:
+      - speech_id: 4
+        keywords:
+          - keyword: 菜
+            options:
+              - id: 85
+                kind: objection
+                summary: 检验油品
+              - id: 0
+                kind: agreement
+                summary: 立即处理
+              - id: 46
+                kind: question
+                summary: 希望怎样处理？
+              - id: 185
+                kind: question
+                summary: 看清了吗
+          - keyword: 油
+            options:
+              - id: 185
+                kind: question
+                summary: 看清了吗
+              - id: 165
+                kind: question
+                summary: 能给我看
+      - speech_id: 16
+        keywords:
+          - keyword: 鱼
+            options:
+              - id: 82
+                kind: objection
+                summary: 解释出品差异
+              - id: 185
+                kind: question
+                summary: 看清了吗
+    selected_response:
+      speech_id: 4
+      keyword_idx: 0
+      option_idx: 2
+    manager_speeches:
+      - id: 46
+        summary: 希望怎样处理？
+        text: "请问您倾向于换餐、\\退款还是其他补偿方式？"
+        emotion: 🤔
+        gesture: ❓
+    impact:
+      reputation_score: -1.0799999
+      mood_change: -0.107999995
+      trust_change: -0.053999998
+      patience_change: -2.1599998
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 4
+    - 16
+  continuation_depth: 0

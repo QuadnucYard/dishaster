@@ -1,0 +1,55 @@
+---
+source: crates/dishaster-trial/tests/snapshot_tests.rs
+---
+session_info:
+  seed: 11162538943635311430
+  trigger_topic: quality
+  max_continuation_depth: 3
+  temperature: 0.8
+turns:
+  - turn_number: 1
+    diner_speeches:
+      - id: 36
+        text: "这碗[鸡汤]浮着油腻，\\喝一口就觉得不对，\\你们的[食材]到底哪里来的？"
+        emotion: 😤
+        gesture: 👎
+        topic: quality
+    response_options:
+      - speech_id: 36
+        keywords:
+          - keyword: 鸡汤
+            options:
+              - id: 275
+                kind: agreement
+                summary: 标准说明
+              - id: 96
+                kind: objection
+                summary: 检查清洗流程
+              - id: 164
+                kind: objection
+                summary: 光照问题
+          - keyword: 食材
+            options:
+              - id: 164
+                kind: objection
+                summary: 光照问题
+    selected_response:
+      speech_id: 36
+      keyword_idx: 0
+      option_idx: 2
+    manager_speeches:
+      - id: 164
+        summary: 光照问题
+        text: "是因为灯光偏黄，\\菜其实很新鲜，刚出锅的。"
+        emotion: 😅
+    impact:
+      reputation_score: 0.25599998
+      mood_change: 0.0256
+      trust_change: 0.0128
+      patience_change: 0.51199996
+    continuation_decision: false
+final_state:
+  total_turns: 1
+  asked_questions:
+    - 36
+  continuation_depth: 0

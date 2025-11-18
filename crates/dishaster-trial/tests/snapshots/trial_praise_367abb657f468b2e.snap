@@ -3,6 +3,7 @@ source: crates/dishaster-trial/tests/snapshot_tests.rs
 ---
 session_info:
   seed: 3925656069808229166
+  trigger_topic: praise
   max_continuation_depth: 3
   temperature: 0.8
 turns:
@@ -59,10 +60,10 @@ turns:
         text: "能让我看看那盘[青菜]吗？\\也许只是个别叶片老了。"
         emotion: 🤨
     impact:
-      reputation_score: -0.601
-      mood_change: -0.0601
-      trust_change: -0.03005
-      patience_change: -1.202
+      reputation_score: -1.1010001
+      mood_change: -0.11010001
+      trust_change: -0.055050004
+      patience_change: -2.2020001
     continuation_decision: false
 final_state:
   total_turns: 1
