@@ -21,3 +21,6 @@ config/windows_native_icon="res://icon.ico"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
+mouse_cursor/custom_image="uid://c3ydo1nt8djxq"
+mouse_cursor/custom_image_hotspot=Vector2(2, 2)
+mouse_cursor/tooltip_position_offset=Vector2(10, -30)
