@@ -30,6 +30,8 @@ jobs:
           do_not_skip: '["workflow_dispatch"]'
 
   test:
+    needs: [pre_job]
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Check and Test
     runs-on: ${{ matrix.os }}
     strategy:
