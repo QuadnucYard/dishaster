@@ -223,7 +223,7 @@ impl ReputationState {
         self.reputation = (self.reputation + clamped).clamp(0.0, 100.0);
 
         // Reset accumulator
-        self.daily_accumulated = 0.0;
+        // self.daily_accumulated = 0.0; // Commented out for debugging
     }
 
     /// Calculate incident probability for current FSRI

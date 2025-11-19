@@ -171,7 +171,7 @@ impl Simulation {
             SimQuery::FeedbackStats => {
                 let reputation = self.world.resource::<ReputationStateRes>();
                 let config = self.world.resource::<ReputationConfigRes>();
-                let stats = format_feedback_stats(reputation, config);
+                let stats = format_feedback_stats(reputation, config).unwrap();
                 SimResponse::FeedbackStats(stats)
             }
         }

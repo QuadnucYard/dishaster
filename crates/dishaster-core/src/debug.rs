@@ -1,18 +1,20 @@
 use dishaster_models::{ReputationConfig, ReputationState};
 
 /// Get formatted feedback statistics summary
-pub fn format_feedback_stats(reputation: &ReputationState, config: &ReputationConfig) -> String {
+pub fn format_feedback_stats(
+    reputation: &ReputationState,
+    config: &ReputationConfig,
+) -> Result<String, std::fmt::Error> {
     use std::fmt::Write;
     let mut output = String::new();
 
-    writeln!(&mut output, "\n=== Feedback Statistics ===").unwrap();
+    writeln!(&mut output, "\n=== Feedback Statistics ===")?;
     writeln!(
         &mut output,
         "{:<12} {:>8} {:>12} {:>10} {:>10}",
         "Topic", "Triggers", "Total Impact", "Base", "Impact%"
-    )
-    .unwrap();
-    writeln!(&mut output, "{:-<62}", "").unwrap();
+    )?;
+    writeln!(&mut output, "{:-<62}", "")?;
 
     for (topic, stats) in &reputation.feedback_stats {
         if stats.trigger_count > 0 {
@@ -26,18 +28,16 @@ pub fn format_feedback_stats(reputation: &ReputationState, config: &ReputationCo
                 stats.total_reputation_impact,
                 base_impact,
                 impact_prob * 100.0
-            )
-            .unwrap();
+            )?;
         }
     }
 
-    writeln!(&mut output, "{:-<62}", "").unwrap();
+    writeln!(&mut output, "{:-<62}", "")?;
     writeln!(
         &mut output,
         "Total accumulated: {:.2}",
         reputation.daily_accumulated
-    )
-    .unwrap();
+    )?;
 
-    output
+    Ok(output)
 }

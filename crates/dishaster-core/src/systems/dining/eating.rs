@@ -149,12 +149,13 @@ pub fn handle_eat_goal(
                 .unwrap_or(&[]);
 
             // Use base price from model if available
+            // Note: base_price in model is per-kg, need to multiply by served_weight
             let base_price = registry
                 .dishes
                 .get_by_id(&served_dish.dish_id)
                 .and_then(|m| {
                     if m.characteristics.base_price > 0.0 {
-                        Some(m.characteristics.base_price)
+                        Some(m.characteristics.base_price * served_dish.served_weight)
                     } else {
                         None
                     }

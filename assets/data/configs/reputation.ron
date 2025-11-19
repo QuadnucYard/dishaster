@@ -7,59 +7,59 @@
     // Base reputation impact values for each feedback topic
     // Positive values increase reputation, negative values decrease it
     base_impacts: {
-        praise: 4.0,        // Increased from 3.0 to reward good service
-        appeal: -2.0,       // No appealing dishes available
+        praise: 0.35,       // Increased to reward good service more
+        appeal: -0.05,      // No appealing dishes available
         queue: -3.0,        // Queue too long
-        tableware: -2.5,    // Missing tray/chopsticks
-        quality: -4.0,      // Dish quality below expectation
-        price: -3.0,        // Pricing complaints
-        hygiene: -10.0,     // Reduced from -12.0, still most severe
-        taste: -3.5,        // Bad taste
-        hunger: -2.0,       // Still hungry after meal
+        tableware: -0.15,   // Missing tray/chopsticks
+        quality: -0.05,     // Dish quality below expectation
+        price: -0.05,       // Pricing complaints
+        hygiene: -0.25,      // Still most severe
+        taste: -0.05,       // Bad taste
+        hunger: -0.1,      // Still hungry after meal
         crab: 0.0,
     },
 
     // Probability of displaying feedback bubble (reduces visual noise)
     // With 500 diners/day, lower values prevent overwhelming the player
     display_probabilities: {
-        praise: 0.15,       // Show 15% of praise (75 praise events → 11 shown)
-        appeal: 0.25,       // Show 25% of appeal issues
-        queue: 0.35,        // Show 35% of queue complaints (more visible)
-        tableware: 0.25,    // Show 25% of tableware issues
-        quality: 0.25,      // Show 25% of quality issues
-        price: 0.40,        // Show 40% of price complaints
-        hygiene: 1.0,       // Always show hygiene (critical)
-        taste: 0.25,        // Show 25% of taste complaints
-        hunger: 0.15,       // Show 15% of hunger complaints
+        praise: 0.2,
+        appeal: 0.25,
+        queue: 0.35,
+        tableware: 1.0,
+        quality: 0.25,
+        price: 0.40,
+        hygiene: 1.0,
+        taste: 0.25,
+        hunger: 0.15,
         crab: 1.0,
     },
 
     // Probability of applying reputation impact (forgiveness mechanism)
     // Lower values make the game more forgiving by ignoring some complaints
     impact_probabilities: {
-        praise: 1.0,        // Always apply positive feedback
-        appeal: 0.35,       // Apply 35% of appeal issues
-        queue: 0.50,        // Apply 50% of queue complaints
-        tableware: 0.40,    // Apply 40% of tableware issues
-        quality: 0.35,      // Apply 35% of quality issues
-        price: 0.50,        // Apply 50% of price complaints
-        hygiene: 1.0,       // Always apply hygiene (critical)
-        taste: 0.35,        // Apply 35% of taste complaints
-        hunger: 0.25,       // Apply 25% of hunger complaints
+        praise: 0.5,
+        appeal: 0.35,
+        queue: 0.50,
+        tableware: 0.5,
+        quality: 0.2,
+        price: 0.25,
+        hygiene: 0.5,
+        taste: 0.2,
+        hunger: 0.25,
         crab: 1.0,
     },
 
     // Thresholds for triggering different types of feedback
     feedback_thresholds: (
         min_appealing_score: -0.3,      // Below this triggers NoAppealingDish
-        contamination_threshold: 0.1,   // Minimum contamination to detect
-        bad_taste_threshold: -0.3,      // Below this triggers BadTaste
-        still_hungry_threshold: 0.3,    // Above this triggers StillHungry
+        contamination_threshold: 0.01,  // Minimum contamination to detect (lowered drastically to trigger)
+        bad_taste_threshold: -0.5,      // Below this triggers BadTaste (require very poor satisfaction)
+        still_hungry_threshold: 0.15,   // Above this triggers StillHungry
         base_quality_tolerance: 0.2,    // Quality mismatch tolerance
         memory_weight: 0.6,             // Weight for historical memory
         base_quality_weight: 0.4,       // Weight for dish base quality
-        max_price_ratio: 1.3,           // Maximum price/base_price ratio (triggers price complaint)
-        praise_threshold: 0.4,          // Minimum satisfaction to trigger praise feedback
+        max_price_ratio: 1.6,           // Maximum price/base_price ratio (60% markup needed)
+        praise_threshold: 0.25,         // Minimum satisfaction to trigger praise feedback (lowered to trigger more)
     ),
 
     // How much player trial responses affect reputation impact (0.0-1.0)

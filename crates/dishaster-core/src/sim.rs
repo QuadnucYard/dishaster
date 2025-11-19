@@ -61,6 +61,8 @@ impl Simulation {
                 process_serving_messages,
                 // Handle dish served events
                 on_dish_served,
+                // Update dish contamination levels based on FSRI and risk
+                update_dish_contamination,
                 // Agents decide targets and compute paths
                 dining_systems(),
                 crab_trial_system,

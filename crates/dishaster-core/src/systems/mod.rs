@@ -1,5 +1,6 @@
 //! Bevy ECS systems for game logic processing
 
+mod contamination;
 mod crab;
 mod dining;
 mod feedback;
@@ -15,6 +16,7 @@ mod serving;
 mod spawn;
 mod trials;
 
+pub use contamination::*;
 pub use crab::*;
 pub use dining::*;
 pub use feedback::*;

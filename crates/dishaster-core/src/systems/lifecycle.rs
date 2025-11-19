@@ -124,7 +124,10 @@ fn on_advance_day(
     perma_effects.apply_daily_decay();
 
     // Log feedback statistics before applying updates
-    log::info!("{}", format_feedback_stats(&reputation, &reputation_config));
+    log::info!(
+        "{}",
+        format_feedback_stats(&reputation, &reputation_config).unwrap()
+    );
 
     // Apply accumulated reputation changes for the day
     reputation.apply_daily_update(&reputation_config);
