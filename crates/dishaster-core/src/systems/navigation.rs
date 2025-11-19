@@ -58,7 +58,8 @@ pub fn update_crowd_field(query: Query<&Movement>, mut grid: ResMut<ResWrapper<N
                 // Gaussian falloff: contrib = base_weight * exp(-d2 / (2*sigma^2))
                 // Scale magnitude with movement.radius (or explicit weight)
                 let gauss = (-d2 * inv_two_sigma2).exp();
-                let mut extra = base_weight * gauss * 10.0; // scale factor for game tuning
+                // Increased scale factor from 10.0 to 15.0 for stronger crowd avoidance
+                let mut extra = base_weight * gauss * 15.0; // scale factor for game tuning
 
                 // Bound contribution to avoid catastrophic values near d2->0
                 if extra.is_nan() || extra.is_infinite() || extra > MAX_TILE_CONTRIB {
@@ -105,8 +106,9 @@ pub fn update_movement_speeds(
     const U_GAIN: f32 = 0.35;
 
     // Crowd sensitivity: controls how much crowd slows agents down
-    // At density=0.4, crowd_factor = 1/(1+2.5×0.4) = 0.5 (50% speed)
-    const CROWD_SENSITIVITY: f32 = 2.5;
+    // Increased from 2.5 to 3.0 for stronger crowd avoidance
+    // At density=0.4, crowd_factor = 1/(1+3.0×0.4) = 0.45 (55% speed reduction)
+    const CROWD_SENSITIVITY: f32 = 3.0;
 
     // Carry sensitivity: weight penalty coefficient
     // At 2kg, carry_factor = 1/(1+0.25×2) = 0.67 (33% slower)
@@ -138,6 +140,13 @@ pub fn update_movement_speeds(
             continue;
         }
         movement.last_speed_update = current_time;
+
+        // Staff (no DinerState) use simple speed calculation without crowd/carry factors
+        if diner_state.is_none() {
+            let target_speed = movement.walking_speed.clamp(MIN_SPEED, MAX_SPEED);
+            movement.current_speed += (target_speed - movement.current_speed) * alpha;
+            continue;
+        }
 
         // ===== Factor 1: Base Speed × Mobility =====
         // base_speed: agent's natural walking speed (e.g., 1.3 m/s for average adult)
@@ -344,11 +353,19 @@ pub fn update_agent_movement(
             continue;
         }
 
+        // Dynamic radius adjustment based on crowd density
+        // In crowded areas, agents need more personal space to avoid overlap
+        let tile = nav_grid.world_to_grid(m.pos);
+        let crowd_density = nav_grid.crowd.sample_normalized(tile);
+        // Expand radius by up to 30% in high-density areas
+        let radius_multiplier = 1.0 + (crowd_density * 0.3);
+        let effective_radius = m.radius * radius_multiplier;
+
         nav_agents.push(dishaster_navigation::Agent {
             position: m.pos,
             velocity: get_next_velocity(m),
             goal: m.path.next().unwrap_or(m.pos),
-            radius: m.radius,
+            radius: effective_radius,
             max_velocity: m.current_speed, // Use dynamically calculated speed
             avoidance_responsibility: m.avoidance_responsibility,
         });
