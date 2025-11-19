@@ -86,4 +86,7 @@ pub struct GameModelRegistry {
 
     /// Trial system configuration
     pub trial_config: TrialConfig,
+
+    /// Refill staff configuration
+    pub refill_config: RefillConfig,
 }

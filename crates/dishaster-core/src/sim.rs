@@ -148,6 +148,8 @@ impl Simulation {
             .insert_resource(db.decision_config.clone().into_res());
         self.world
             .insert_resource(db.reputation_config.clone().into_res());
+        self.world
+            .insert_resource(db.refill_config.clone().into_res());
 
         self.world
             .insert_resource(ReputationState::default().into_res());

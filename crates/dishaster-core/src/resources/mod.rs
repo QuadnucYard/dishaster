@@ -250,3 +250,6 @@ pub type OrderingConfigRes = ResWrapper<OrderingConfig>;
 
 /// Decision system configuration
 pub type DecisionConfigRes = ResWrapper<DecisionConfig>;
+
+/// Refill staff configuration
+pub type RefillConfigRes = ResWrapper<RefillConfig>;

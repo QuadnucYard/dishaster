@@ -161,3 +161,21 @@ impl<'de> Deserialize<'de> for MinMax {
         deserializer.deserialize_any(MinMaxVisitor)
     }
 }
+
+/// Configuration for refill staff operations
+///
+/// Controls limits and behavior for staff that restock dispensers.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RefillConfig {
+    /// Maximum number of refill staff that can be active simultaneously
+    pub max_concurrent_staff: usize,
+}
+
+impl Default for RefillConfig {
+    fn default() -> Self {
+        Self {
+            max_concurrent_staff: 1,
+        }
+    }
+}

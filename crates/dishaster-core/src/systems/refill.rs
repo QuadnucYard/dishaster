@@ -31,7 +31,10 @@ pub fn handle_refill_request(
     mut commands: Commands,
     mut messages: MessageReader<RefillDispenser>,
     dispenser_query: Query<&Stock, Without<RefillPending>>,
+    active_staff_query: Query<&RefillStaff>,
     canteen: Res<Canteen>,
+    refill_config: Res<RefillConfigRes>,
+    mut events: ResMut<EventQueue>,
 ) {
     for message in messages.read() {
         let dispenser_entity = message.0;
@@ -43,6 +46,19 @@ pub fn handle_refill_request(
             continue;
         };
 
+        // Check if refill staff limit reached
+        let active_count = active_staff_query.iter().count();
+        if active_count >= refill_config.max_concurrent_staff {
+            log::warn!(
+                target: "refill",
+                "Refill staff limit reached ({}/{}), cannot spawn more",
+                active_count,
+                refill_config.max_concurrent_staff
+            );
+            events.emit_hint(hints::REFILL_STAFF_BUSY, HintCondition::Always);
+            continue;
+        }
+
         // Mark as pending
         commands.entity(dispenser_entity).insert(RefillPending);
         log::info!(
@@ -51,7 +67,7 @@ pub fn handle_refill_request(
         );
 
         // Spawn refill staff at corner of canteen (entrance area)
-        let spawn_pos = vec2(1., canteen.model.entrances_y + 1.);
+        let spawn_pos = vec2(canteen.model.width - 1.0, canteen.model.windows_y - 1.0);
 
         let display_res = PrefabRef::new("staffs/sample_staff");
         let wrapper = commands.spawn((
