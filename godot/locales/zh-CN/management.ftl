@@ -52,7 +52,7 @@ mgmt--play_music_relaxing =
     .desc = 在食堂播放轻柔的背景音乐，营造优雅氛围。
     .flavor = 舒缓的旋律回荡在食堂里，食客们放慢了节奏，细嚼慢咽……翻台率也随之下降。
     .effects =
-        • 进食速度 -{ $speed_change }%（音乐太舒缓，吃得更慢了）
+        • 进食速度 { PCT($speed_change, maxfd: 0, sign: "always") }（音乐太舒缓，吃得更慢了）
         • 满意度 { $satisfaction_change }（至少气氛上档次了）
 
 mgmt--play_music_upbeat =
@@ -60,7 +60,7 @@ mgmt--play_music_upbeat =
     .desc = 在食堂播放动感的背景音乐，加快就餐节奏。
     .flavor = 欢快的节拍在空中跳动，食客们的咀嚼频率不自觉地跟上了鼓点。食堂变成了效率至上的战场。
     .effects =
-        • 进食速度 +{ $speed_change }%（赶时间的福音）
+        • 进食速度 { PCT($speed_change, maxfd: 0, sign: "always") }（赶时间的福音）
         • 满意度 { $satisfaction_change }（有人觉得吵，有人觉得燃）
 
 mgmt--play_music_anthem =
@@ -68,7 +68,7 @@ mgmt--play_music_anthem =
     .desc = 在食堂播放学校的校歌，激发师生的归属感与荣誉感。
     .flavor = 熟悉的旋律响起，有人肃然起敬，有人默默翻白眼。校歌能激励校友的心，也能劝退新生的胃。
     .effects =
-        • 进食速度 { $speed_change }%（影响因人而异）
+        • 进食速度 { PCT($speed_change, maxfd: 0, sign: "always") }（影响因人而异）
         • 满意度 { $satisfaction_change }（爱恨两极分化）
 
 ## Campaign Decisions
@@ -78,16 +78,16 @@ mgmt--advertise_canteen =
     .desc = 在校园各处投放食堂广告，全面提升知名度。
     .flavor = 宣传海报贴满了教学楼：“本食堂荣获ISO9001质量认证”——虽然没人知道这个证书是从哪买的。初期人流暴增，但热度来得快去得也快。
     .effects =
-        • 客流量 +{ $boost }%（持续 { $days } 天）
-        • 每日衰减 { $decay }%（热度总会过去）
+        • 客流量 { PCT($boost, maxfd: 0, sign: "always") }（持续 { $days } 天）
+        • 每日衰减 { PCT($decay, maxfd: 0) }（热度总会过去）
 
 mgmt--advertise_window =
     .title = 窗口定向推广
     .desc = 针对某个特定窗口进行重点推广，吸引相关顾客。
     .flavor = 精准营销，在吃货论坛疯狂安利某个窗口。虽然效果不如全食堂轰炸，但胜在持久，毕竟“酒香不怕巷子深”……才怪，还是得靠宣传。
     .effects =
-        • 目标窗口客流量 +{ $boost }%（持续 { $days } 天）
-        • 每日衰减 { $decay }%（细水长流型）
+        • 目标窗口客流量 { PCT($boost, maxfd: 0, sign: "always") }（持续 { $days } 天）
+        • 每日衰减 { PCT($decay, maxfd: 0) }（细水长流型）
 
 ## Slogan Decisions
 
@@ -96,8 +96,8 @@ mgmt--slogan_hardship =
     .desc = 在食堂墙上张贴传统励志标语：“嚼得菜根，做得大事”。
     .flavor = 巨大的红色横幅高高悬挂，古朴的八个大字映入眼帘。有人看到后斗志昂扬，有人却觉得这是在讽刺食堂的菜品质量……效果可叠加，墙上标语越来越多。
     .effects =
-        • 信任度 > { $threshold }%: 满意度 { $boost }（被激励了）
-        • 信任度 ≤ { $threshold }%: 满意度 { $penalty }（精神污染）
+        • 信任度 > { PCT($threshold, maxfd: 0) }: 满意度 { PCT($boost, maxfd: 0, sign: "always") }（被激励了）
+        • 信任度 ≤ { PCT($threshold, maxfd: 0) }: 满意度 { PCT($penalty, maxfd: 0, sign: "always") }（精神污染）
         • 可与已有标语叠加效果
 
 mgmt--supply_crab =
@@ -111,7 +111,7 @@ mgmt--improve_dish_quality =
     .desc = 改进烹饪工艺，升级食材供应商，全面提升菜品质量。
     .flavor = 从食材采购到烹饪技法，全链条优化。学生们惊喜地发现，食堂的菜突然变好吃了——虽然价格没变，但良心确实回来了。
     .effects =
-        • 所有菜品质量 +{ PCT($improvement, maxfd: 0) }
+        • 所有菜品质量 { PCT($improvement, maxfd: 0, sign: "always") }
         • 可与已有质量提升叠加（越来越好吃）
 
 mgmt--reduce_serving_time =
@@ -119,7 +119,7 @@ mgmt--reduce_serving_time =
     .desc = 通过改进后厨流程和设备，显著缩短出餐时间。
     .flavor = 引入了先进的厨房管理系统，优化了后厨动线，还给大厨们培训了快速烹饪技法。顾客们惊喜地发现，排队速度快了不少。
     .effects =
-        • 出餐时间 -{ PCT($reduction, maxfd: 0) }
+        • 出餐时间 { PCT($reduction, maxfd: 0, sign: "always") }
         • 排队时间减少，翻台率提升
         • 可与已有优化叠加（效率越来越高）
 

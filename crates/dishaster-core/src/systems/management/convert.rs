@@ -188,11 +188,10 @@ impl TemplateRealize for PlayMusicTemplate {
 impl ViewParams for PlayMusicModel {
     fn params(&self) -> ParamsMap {
         // Calculate percentage change for display
-        let speed_change = ((1.0 / self.eating_time_multiplier - 1.0) * 100.0).round() as i32;
         let satisfaction_change = (self.satisfaction_change * 100.0).round() as i32;
 
         params! {
-            speed_change => speed_change.abs(),
+            speed_change => (1.0 / self.eating_time_multiplier - 1.0).abs(),
             satisfaction_change => if satisfaction_change >= 0 {
                 eco_format!("+{}", satisfaction_change)
             } else {
@@ -220,18 +219,14 @@ impl TemplateRealize for AdvertiseCampaignTemplate {
 
 impl ViewParams for AdvertiseCampaignModel {
     fn params(&self) -> ParamsMap {
-        // Calculate percentage values for display
-        let boost_percent = ((self.attraction_boost - 1.0) * 100.0).round() as i32;
-        let decay_percent = (self.decay_rate * 100.0).round() as i32;
-
         params! {
             target => match &self.target {
                 DecisionCampaignTarget::Canteen => "canteen",
                 DecisionCampaignTarget::Window => "window",
             },
-            boost => boost_percent,
+            boost => self.attraction_boost - 1.0,
             days => self.days_remaining,
-            decay => decay_percent,
+            decay => self.decay_rate,
         }
     }
 }
@@ -255,15 +250,10 @@ impl TemplateRealize for AddMotivationalSloganTemplate {
 
 impl ViewParams for AddMotivationalSloganModel {
     fn params(&self) -> ParamsMap {
-        // Convert to percentage and format
-        let threshold_percent = (self.trust_threshold * 100.0).round() as i32;
-        let boost_percent = (self.satisfaction_boost * 100.0).round() as i32;
-        let penalty_percent = (self.satisfaction_penalty * 100.0).round() as i32;
-
         params! {
-            threshold => threshold_percent,
-            boost => eco_format!("+{}", boost_percent),
-            penalty => eco_format!("{}", penalty_percent),
+            threshold => self.trust_threshold,
+            boost => self.satisfaction_boost,
+            penalty => self.satisfaction_penalty,
         }
     }
 }
