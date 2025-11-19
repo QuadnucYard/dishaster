@@ -50,6 +50,9 @@ impl Scene for GameScene {
     fn enter(&mut self, ctx: &mut SceneContext) {
         let SceneContext { gui, .. } = ctx;
 
+        gui.get_mut::<GamingLayout>().set_dev_enabled(false);
+        gui.get_mut::<TimeStatsGui>().set_dev_enabled(false);
+
         gui.show::<GamingLayout>();
         gui.show::<TimeStatsGui>();
         gui.show::<TrialImpactGui>();
@@ -242,10 +245,12 @@ impl GameScene {
         match cmd {
             UiCommand::ToggleDev(enabled) => {
                 gui.get_mut::<GamingLayout>().set_dev_enabled(enabled);
+                gui.get_mut::<TimeStatsGui>().set_dev_enabled(enabled);
             }
 
             UiCommand::FinishRun => {
                 gui.hide::<GamingLayout>();
+                gui.hide::<ReputationGui>();
                 gui.show::<SettlementGui>();
             }
             UiCommand::FinishDay => {

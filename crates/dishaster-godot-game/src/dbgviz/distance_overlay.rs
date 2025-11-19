@@ -84,8 +84,6 @@ impl DistanceDebugOverlay {
 
         let scale = ctx.view_scale.xy() * snapshot.cell_size;
         self.sprite.set_scale(scale.into_godot());
-
-        self.sprite.set_visible(true);
     }
 }
 

@@ -40,8 +40,10 @@ exit-level =
 
 phase-preparation =
     .label = 准备阶段
+    .desc = 检查当前状态，调整价格，开始新的一天的经营！
 phase-running =
     .label = 运营阶段
+    .desc = 观察食堂运营情况，满足学生需求，努力提升声誉与收益！
 day-display =
     .label = 第 { $day } 天
 

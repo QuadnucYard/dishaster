@@ -41,6 +41,11 @@ impl DbgViz {
         }
     }
 
+    pub fn set_visible(&mut self, visible: bool) {
+        self.distance_overlay.set_visible(visible);
+        self.movement_overlay.set_visible(visible);
+    }
+
     pub fn update(&mut self, snapshot: &DebugSnapshots, display_ctx: &DisplayContext2D) {
         self.collision_overlay
             .present(snapshot.collision.as_ref(), display_ctx);

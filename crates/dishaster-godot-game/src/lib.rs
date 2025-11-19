@@ -149,11 +149,12 @@ impl Game {
         stage.set_root(root_entity, GdNode2D::new(display_root_node));
 
         // Set up debug visualization
-        let dbgviz = {
+        let mut dbgviz = {
             let mut debug_root = stage_root.get_or_add_node_as::<Node2D>("Debug");
             debug_root.set_position(origin);
             DbgViz::new(debug_root)
         };
+        dbgviz.set_visible(false);
 
         Self {
             root: gd,
@@ -237,7 +238,7 @@ impl Game {
             DayHudState {
                 day_label: tr!("day-display.label", "day" = self.telemetry.day),
                 phase_label: tr!("phase-preparation.label"),
-                details: "Review canteen status then press Start Day to begin.".into(),
+                details: tr!("phase-preparation.desc"),
                 show_start: true,
                 enable_start: true,
             }
@@ -274,7 +275,7 @@ impl Game {
                 DayHudState {
                     day_label: tr!("day-display.label", "day" = self.telemetry.day),
                     phase_label: tr!("phase-running.label"),
-                    details: "Service running.".to_string(),
+                    details: tr!("phase-running.desc"),
                     show_start: false,
                     enable_start: false,
                 }

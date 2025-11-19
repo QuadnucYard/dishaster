@@ -67,6 +67,12 @@ impl TimeStatsGui {
             self.tps_slider.set_value(clamped);
         }
     }
+
+    pub fn set_dev_enabled(&mut self, enabled: bool) {
+        self.perf_label.set_visible(enabled);
+        self.time_label.set_visible(enabled);
+        self.debug_switch.set_visible(enabled);
+    }
 }
 
 #[ui_tree_api]

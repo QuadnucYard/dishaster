@@ -19,8 +19,7 @@ impl Game {
             DebugFlags::none()
         }));
 
-        self.dbgviz.distance_overlay.set_visible(debug_mode);
-        self.dbgviz.movement_overlay.set_visible(debug_mode);
+        self.dbgviz.set_visible(debug_mode);
 
         for agent in self.pres.agents.values_mut() {
             agent.set_debug_enabled(debug_mode);

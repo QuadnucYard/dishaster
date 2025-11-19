@@ -1,16 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://w7ov8gwqu5bn"]
+[gd_scene load_steps=2 format=3 uid="uid://w7ov8gwqu5bn"]
 
-[sub_resource type="Gradient" id="Gradient_cakfy"]
-offsets = PackedFloat32Array(0)
-colors = PackedColorArray(0.3654661, 0.8483022, 0.69997704, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_aexwg"]
-gradient = SubResource("Gradient_cakfy")
-width = 120
-height = 100
+[ext_resource type="Texture2D" uid="uid://dh2j6u7fdhln6" path="res://assets/sprites/canteen/window_tile.png" id="1_6wpft"]
 
 [node name="SampleWindow" type="Node2D"]
 
-[node name="Sprite" type="Sprite2D" parent="."]
-position = Vector2(0, 47)
-texture = SubResource("GradientTexture2D_aexwg")
+[node name="WindowTile" type="Sprite2D" parent="."]
+texture_repeat = 2
+position = Vector2(0, 45)
+texture = ExtResource("1_6wpft")
+region_enabled = true
+region_rect = Rect2(0, 0, 96, 96)
