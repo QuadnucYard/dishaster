@@ -6,7 +6,7 @@ mod builtins;
 pub mod private {
     use std::{
         collections::HashMap,
-        sync::{Arc, LazyLock, Mutex},
+        sync::{Arc, LazyLock, OnceLock, RwLock},
     };
 
     use fluent::{FluentResource, FluentValue, concurrent::FluentBundle};
@@ -15,23 +15,41 @@ pub mod private {
 
     use crate::builtins;
 
-    static LOCALES: LazyLock<ArcLoader> = LazyLock::new(|| {
-        ArcLoader::builder("locales/", unic_langid::langid!("zh-CN"))
-            // .shared_resources(Some(&["locales/core.ftl".into()]))
+    static LANG: LazyLock<RwLock<LanguageIdentifier>> =
+        LazyLock::new(|| unic_langid::langid!("zh-CN").into());
+
+    static LOCALES: OnceLock<ArcLoader> = OnceLock::new();
+
+    fn get_locales() -> &'static ArcLoader {
+        LOCALES.get_or_init(|| build_loader("locales/"))
+    }
+
+    /// Triggers the initialization of LOCALES with default path.
+    pub fn init() {
+        get_locales();
+    }
+
+    /// Initialize localization with a custom source path.
+    /// This is useful for tests that need to load locales from a different directory.
+    /// Must be called before any localization operations.
+    pub fn init_with_path(path: &str) {
+        let loader = build_loader(path);
+
+        if LOCALES.set(loader).is_err() {
+            panic!(
+                "LOCALES already initialized - init_with_path must be called before any localization operations"
+            );
+        }
+    }
+
+    fn build_loader(path: &str) -> ArcLoader {
+        ArcLoader::builder(path, LANG.read().unwrap().clone())
             .customize(|bundle| {
                 bundle.set_use_isolating(false);
                 add_builtin(bundle);
             })
             .build()
-            .expect("build ArcLoader")
-    });
-
-    static LANG: LazyLock<Mutex<LanguageIdentifier>> =
-        LazyLock::new(|| unic_langid::langid!("zh-CN").into());
-
-    /// Triggers the initialization of LOCALES.
-    pub fn init() {
-        LOCALES.fallback();
+            .expect("build ArcLoader with custom path")
     }
 
     fn add_builtin(bundle: &mut FluentBundle<Arc<FluentResource>>) {
@@ -45,8 +63,8 @@ pub mod private {
     }
 
     pub fn tr_impl(id: &str, args: Option<&HashMap<&'static str, FluentValue>>) -> String {
-        LOCALES
-            .lookup_single_language(&LANG.lock().unwrap(), id, args)
+        get_locales()
+            .lookup_single_language(&LANG.read().unwrap(), id, args)
             .unwrap_or_else(|err| {
                 eprintln!("Failed to get message `{id}`: {err}.");
                 id.to_string()
@@ -57,8 +75,8 @@ pub mod private {
     where
         T: AsRef<str>,
     {
-        LOCALES
-            .lookup_single_language(&LANG.lock().unwrap(), id, args)
+        get_locales()
+            .lookup_single_language(&LANG.read().unwrap(), id, args)
             .unwrap_or_else(|err| {
                 eprintln!("Failed to get message `{id}`: {err}.");
                 id.to_string()
@@ -67,15 +85,15 @@ pub mod private {
 
     /// Translate a message id into message string.
     pub fn try_tr_plain(id: &str) -> Option<String> {
-        LOCALES
-            .lookup_single_language::<&'static str>(&LANG.lock().unwrap(), id, None)
+        get_locales()
+            .lookup_single_language::<&'static str>(&LANG.read().unwrap(), id, None)
             .ok()
     }
 }
 
 // Re-export for convenience
 pub use fluent;
-pub use private::{init, try_tr_plain};
+pub use private::{init, init_with_path, try_tr_plain};
 
 /// Translate a message id into message string. Returns [`String`].
 ///
