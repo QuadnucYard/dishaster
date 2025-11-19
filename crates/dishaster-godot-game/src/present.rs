@@ -225,8 +225,6 @@ impl Game {
                     id: hint_id,
                     condition,
                 } => {
-                    godot_print!("Received hint: {hint_id}");
-
                     // Check if we should show this hint based on its emission mode
                     if self.hint_tracker.mark_shown(&hint_id, condition) {
                         let message = tr!(&format!("hint--{hint_id}"));
