@@ -118,5 +118,24 @@
         def: SupplyCrab(
             trial_probability: 0.001,
         ),
+    ),
+
+    (
+        id: "improve_dish_quality",
+        weight: 120,
+        icon: "management/improve_quality.png",
+        def: ImproveDishQuality(
+            // 提升菜品质量：从10%到30%的质量改进
+            quality_multiplier_range: (start: 1.1, end: 1.3),
+        ),
+    ),
+    (
+        id: "reduce_serving_time",
+        weight: 120,
+        icon: "management/reduce_serving_time.png",
+        def: ReduceServingTime(
+            // 减少出餐时间：从10%到30%的时间减少
+            serving_time_multiplier_range: (start: 0.7, end: 0.9),
+        ),
     )
 ]

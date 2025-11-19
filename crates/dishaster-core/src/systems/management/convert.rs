@@ -44,6 +44,8 @@ impl TemplateRealize for ManagementDecisionTemplateDef {
             AdvertiseCampaign,
             AddMotivationalSlogan,
             SupplyCrab,
+            ImproveDishQuality,
+            ReduceServingTime,
         )
     }
 }
@@ -69,6 +71,8 @@ impl ViewParams for ManagementDecisionModel {
             AdvertiseCampaign,
             AddMotivationalSlogan,
             SupplyCrab,
+            ImproveDishQuality,
+            ReduceServingTime,
         )
     }
 }
@@ -277,6 +281,44 @@ impl TemplateRealize for SupplyCrabTemplate {
 impl ViewParams for SupplyCrabModel {
     fn params(&self) -> ParamsMap {
         params! {}
+    }
+}
+
+impl TemplateRealize for ImproveDishQualityTemplate {
+    type Model = ImproveDishQualityModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        let quality_multiplier = ctx.rng.random_range(self.quality_multiplier_range.clone());
+        Self::Model { quality_multiplier }
+    }
+}
+
+impl ViewParams for ImproveDishQualityModel {
+    fn params(&self) -> ParamsMap {
+        params! {
+            improvement => self.quality_multiplier - 1.0,
+        }
+    }
+}
+
+impl TemplateRealize for ReduceServingTimeTemplate {
+    type Model = ReduceServingTimeModel;
+
+    fn realize(&self, ctx: RealizationContext) -> Self::Model {
+        let serving_time_multiplier = ctx
+            .rng
+            .random_range(self.serving_time_multiplier_range.clone());
+        Self::Model {
+            serving_time_multiplier,
+        }
+    }
+}
+
+impl ViewParams for ReduceServingTimeModel {
+    fn params(&self) -> ParamsMap {
+        params! {
+            reduction => 1.0 - self.serving_time_multiplier,
+        }
     }
 }
 

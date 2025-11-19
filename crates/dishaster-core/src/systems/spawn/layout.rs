@@ -15,6 +15,7 @@ pub fn spawn_static_objects(
     registry: Res<GameModelRegistryRes>,
     mut rng: ResMut<WorldRng>,
     reputation: Res<ReputationStateRes>,
+    perma_effects: Res<PermanentEffectsRes>,
     mut events: ResMut<EventQueue>,
 ) {
     spawn_entrances(&mut commands, &canteen);
@@ -25,6 +26,7 @@ pub fn spawn_static_objects(
         &registry,
         &mut rng.derive_prng(),
         reputation.food_quality,
+        &perma_effects,
         &mut events,
     );
     spawn_tables(&mut commands, &level.canteen.placement, &registry);
@@ -59,6 +61,7 @@ fn spawn_windows(
     registry: &GameModelRegistry,
     rng: &mut Prng,
     food_quality: f32,
+    perma_effects: &PermanentEffects,
     events: &mut EventQueue,
 ) {
     let mut last_window_x = 0.0;
@@ -122,6 +125,7 @@ fn spawn_windows(
             registry,
             events,
             food_quality,
+            perma_effects,
         );
 
         // Fill spaces between windows with colliders
@@ -172,6 +176,7 @@ fn spawn_dishes(
     registry: &GameModelRegistry,
     events: &mut EventQueue,
     food_quality: f32,
+    perma_effects: &PermanentEffects,
 ) {
     let layout = &service_model.layout;
 
@@ -192,6 +197,10 @@ fn spawn_dishes(
         let base_quality =
             quality_range.min + (quality_range.max - quality_range.min) * quality_multiplier;
 
+        // Apply permanent quality improvement from management decisions
+        let final_quality =
+            (base_quality * perma_effects.get_dish_quality_multiplier()).min(quality_range.max);
+
         // Wrapper entity to hold dish and label
         let wrapper_entity = commands
             .spawn((
@@ -200,7 +209,7 @@ fn spawn_dishes(
                     pricing: assignment.pricing,
                     state: DishRuntimeState {
                         current_quantity: DEFAULT_DISH_QUANTITY,
-                        current_quality: base_quality,
+                        current_quality: final_quality,
                         contamination_level: DEFAULT_DISH_CONTAMINATION,
                         // last_restocked: DEFAULT_DISH_LAST_RESTOCKED_S,
                         // service_count: 0,

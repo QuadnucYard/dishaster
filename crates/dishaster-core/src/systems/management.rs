@@ -86,6 +86,8 @@ pub fn apply_management_decision(
         AdvertiseCampaign,
         AddMotivationalSlogan,
         SupplyCrab,
+        ImproveDishQuality,
+        ReduceServingTime,
     );
 
     // Remove decisions after applying

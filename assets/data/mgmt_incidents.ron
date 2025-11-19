@@ -11,7 +11,7 @@
     (
         id: "increase_attraction",
         weight: 150,
-        icon: "management/sample_1.png",
+        icon: "management/improve_quality.png",
         def: AttractionChange(
             attraction_multiplier_range: (start: 1.1, end: 1.5),  // 50% more likely to visit
         )
@@ -19,7 +19,7 @@
     (
         id: "decrease_attraction",
         weight: 150,
-        icon: "management/sample_1.png",
+        icon: "management/improve_quality.png",
         def: AttractionChange(
             attraction_multiplier_range: (start: 0.5, end: 0.9),  // 50% less likely to visit
         )
@@ -27,7 +27,7 @@
     (
         id: "temporary_crowd",
         weight: 120,
-        icon: "management/sample_1.png",
+        icon: "management/improve_quality.png",
         def: TemporaryCrowd(
             num_diners_range: (start: 20, end: 50),
             peak_time_range: (start: 0.1, end: 0.9),
@@ -37,7 +37,7 @@
     (
         id: "inspector_visit",
         weight: 100,
-        icon: "management/sample_1.png",
+        icon: "management/improve_quality.png",
         def: InspectorVisit(
             fsri_threshold: 15.0,  // Only risky if FSRI > 15
             probability_multiplier: 0.05,  // 5% chance per point above threshold

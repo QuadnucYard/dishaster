@@ -168,3 +168,33 @@ pub struct SupplyCrabModel {
     /// Probability for diners to trigger crab topic trial
     pub trial_probability: f32,
 }
+
+/// Template for improving dish quality decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "ImproveDishQuality")]
+pub struct ImproveDishQualityTemplate {
+    /// Range of quality multiplier (e.g., 1.1..1.3 means +10% to +30% quality)
+    pub quality_multiplier_range: RangeInclusive<f32>,
+}
+
+/// Model for improving dish quality decision
+#[derive(Debug, Clone)]
+pub struct ImproveDishQualityModel {
+    /// Multiplier for dish quality (e.g., 1.2 means 20% better quality)
+    pub quality_multiplier: f32,
+}
+
+/// Template for reducing serving time decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "ReduceServingTime")]
+pub struct ReduceServingTimeTemplate {
+    /// Range of serving time multiplier (e.g., 0.7..0.9 means -30% to -10% time)
+    pub serving_time_multiplier_range: RangeInclusive<f32>,
+}
+
+/// Model for reducing serving time decision
+#[derive(Debug, Clone)]
+pub struct ReduceServingTimeModel {
+    /// Multiplier for serving time (e.g., 0.8 means 20% faster)
+    pub serving_time_multiplier: f32,
+}

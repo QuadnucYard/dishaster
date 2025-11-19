@@ -106,6 +106,23 @@ mgmt--supply_crab =
     .flavor = 食堂里突然多了帝王蟹，顿时高大上了不少。虽然大部分学生望而却步，但总有土豪愿意掏钱尝鲜。
     .effects = 谁知道呢？
 
+mgmt--improve_dish_quality =
+    .title = 提升菜品质量
+    .desc = 改进烹饪工艺，升级食材供应商，全面提升菜品质量。
+    .flavor = 从食材采购到烹饪技法，全链条优化。学生们惊喜地发现，食堂的菜突然变好吃了——虽然价格没变，但良心确实回来了。
+    .effects =
+        • 所有菜品质量 +{ PCT($improvement, maxfd: 0) }
+        • 可与已有质量提升叠加（越来越好吃）
+
+mgmt--reduce_serving_time =
+    .title = 优化出餐流程
+    .desc = 通过改进后厨流程和设备，显著缩短出餐时间。
+    .flavor = 引入了先进的厨房管理系统，优化了后厨动线，还给大厨们培训了快速烹饪技法。顾客们惊喜地发现，排队速度快了不少。
+    .effects =
+        • 出餐时间 -{ PCT($reduction, maxfd: 0) }
+        • 排队时间减少，翻台率提升
+        • 可与已有优化叠加（效率越来越高）
+
 ## Incidents
 
 mgmt--mislabel_price =

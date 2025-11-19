@@ -57,6 +57,7 @@ pub fn process_serving_messages(
     mut served_messages: MessageWriter<DishServed>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     registry: Res<GameModelRegistryRes>,
+    perma_effects: Res<PermanentEffectsRes>,
 ) {
     let now = time.current_time;
     // Deliver any elapsed step so the diner and staff state machines stay in sync.
@@ -156,7 +157,8 @@ pub fn process_serving_messages(
                     let base = request.base_service_time;
                     let variation = rng
                         .random_range(-STAFF_SERVICE_TIME_VARIATION..STAFF_SERVICE_TIME_VARIATION);
-                    base * (1.0 + variation)
+                    // Apply permanent serving time multiplier from management decisions
+                    base * (1.0 + variation) * perma_effects.get_serving_time_multiplier()
                 };
                 // Schedule the ready notification to finish the conversation.
                 queue.schedule(

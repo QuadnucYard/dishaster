@@ -24,6 +24,8 @@ pub fn register_management_decision_systems(world: &mut World) {
         apply_advertise_campaign,
         apply_add_motivational_slogan,
         apply_supply_crab,
+        apply_improve_dish_quality,
+        apply_reduce_serving_time,
     );
 }
 
@@ -259,4 +261,38 @@ fn apply_supply_crab(
 
     // Set crab trial probability for next day's diners
     permanent_effects.crab_trial_probability = Some(model.trial_probability);
+}
+
+/// Apply dish quality improvement effect
+fn apply_improve_dish_quality(
+    event: On<DispatchManagement<ImproveDishQualityModel>>,
+    mut permanent_effects: ResMut<PermanentEffectsRes>,
+) {
+    let model = &event.0;
+
+    log::info!(
+        "Applying dish quality improvement: multiplier={:.2} (previous={:.2})",
+        model.quality_multiplier,
+        permanent_effects.dish_quality_multiplier
+    );
+
+    // Apply multiplicative stacking to dish quality
+    permanent_effects.dish_quality_multiplier *= model.quality_multiplier;
+}
+
+/// Apply serving time reduction effect
+fn apply_reduce_serving_time(
+    event: On<DispatchManagement<ReduceServingTimeModel>>,
+    mut permanent_effects: ResMut<PermanentEffectsRes>,
+) {
+    let model = &event.0;
+
+    log::info!(
+        "Applying serving time reduction: multiplier={:.2} (previous={:.2})",
+        model.serving_time_multiplier,
+        permanent_effects.serving_time_multiplier
+    );
+
+    // Apply multiplicative stacking to serving time
+    permanent_effects.serving_time_multiplier *= model.serving_time_multiplier;
 }

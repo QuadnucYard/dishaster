@@ -87,4 +87,6 @@ define_sum_model!(ManagementDecision {
     AdvertiseCampaign,
     AddMotivationalSlogan,
     SupplyCrab,
+    ImproveDishQuality,
+    ReduceServingTime,
 });

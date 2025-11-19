@@ -19,9 +19,25 @@ pub struct PermanentEffects {
     /// Probability for diners to actively trigger crab topic trial (from SupplyCrab decision)
     pub crab_trial_probability: Option<f32>,
 
+    /// Quality multiplier for all dishes (from ImproveDishQuality decision)
+    #[serde(default = "default_quality_multiplier")]
+    pub dish_quality_multiplier: f32,
+
+    /// Serving time multiplier for all dishes (from ReduceServingTime decision)
+    #[serde(default = "default_serving_time_multiplier")]
+    pub serving_time_multiplier: f32,
+
     /// Daily incident: attraction multiplier (reset each day)
     #[serde(skip)]
     pub daily_attraction_multiplier: f32,
+}
+
+fn default_quality_multiplier() -> f32 {
+    1.0
+}
+
+fn default_serving_time_multiplier() -> f32 {
+    1.0
 }
 
 /// Effect from playing music decision
@@ -88,6 +104,16 @@ impl PermanentEffects {
             .as_ref()
             .map(|m| m.eating_time_multiplier)
             .unwrap_or(1.0)
+    }
+
+    /// Get the effective dish quality multiplier
+    pub fn get_dish_quality_multiplier(&self) -> f32 {
+        self.dish_quality_multiplier
+    }
+
+    /// Get the effective serving time multiplier
+    pub fn get_serving_time_multiplier(&self) -> f32 {
+        self.serving_time_multiplier
     }
 
     /// Get the satisfaction change from music
