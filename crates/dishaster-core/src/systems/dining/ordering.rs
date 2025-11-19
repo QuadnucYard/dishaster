@@ -145,7 +145,6 @@ pub fn decide_order(
         // Add to order
         orders.push(ServiceRequest {
             dish_id: dish.model_id.clone(),
-            dish_name: format!("{}", dish_model.id).into(),
             base_service_time: dish_model.characteristics.serving_time,
         });
 

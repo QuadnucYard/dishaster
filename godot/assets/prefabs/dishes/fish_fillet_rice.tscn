@@ -1,10 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://84fjbi3cdk8d"]
+[gd_scene load_steps=3 format=3 uid="uid://84fjbi3cdk8d"]
 
-[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_w4kb1"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_w4kb1"]
-atlas = ExtResource("1_w4kb1")
-region = Rect2(256, 192, 64, 64)
+[ext_resource type="Texture2D" uid="uid://c1wxrioiu2uwk" path="res://assets/sprites/dishes/fish_fillet_rice.tres" id="1_w4kb1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0llok"]
 size = Vector2(32, 24)
@@ -13,7 +9,7 @@ size = Vector2(32, 24)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
-texture = SubResource("AtlasTexture_w4kb1")
+texture = ExtResource("1_w4kb1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)

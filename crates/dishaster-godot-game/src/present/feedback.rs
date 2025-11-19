@@ -1,10 +1,12 @@
 use dishaster_ui_protocol::UiCommand;
 use dishaster_views::{Feedback, FeedbackTopic};
+use dishrupt_asset::AssetCatalog;
 use dishrupt_core::EntityId;
+use dishrupt_godot_display::load_texture_sync;
 use dishrupt_godot_input::event::MouseButtonEvent;
 use dishrupt_godot_utils::AnimationPlayerExt;
 use godot::{
-    classes::{AnimationPlayer, Label, Node2D},
+    classes::{AnimationPlayer, Label, Node2D, Sprite2D},
     prelude::*,
 };
 
@@ -17,6 +19,7 @@ pub struct FeedbackPresenter {
     root: Gd<Node2D>, // actually Area2D
     thought: Gd<Node2D>,
     thought_emoji: Gd<Label>,
+    thought_icon: Gd<Sprite2D>,
     speech: Gd<Node2D>,
     anim_player: Gd<AnimationPlayer>,
 
@@ -35,6 +38,7 @@ impl FeedbackPresenter {
 
             thought: node.get_node_as("Thought"),
             thought_emoji: node.get_node_as("Thought/Emoji"),
+            thought_icon: node.get_node_as("Thought/Icon"),
             speech: node.get_node_as("Speech"),
             anim_player: node.get_node_as("%AnimationPlayer"),
             root: node,
@@ -60,7 +64,13 @@ impl FeedbackPresenter {
         }
     }
 
-    pub fn show(&mut self, feedback: &Feedback, topic: Option<FeedbackTopic>, can_trigger: bool) {
+    pub fn show(
+        &mut self,
+        feedback: &Feedback,
+        topic: Option<FeedbackTopic>,
+        can_trigger: bool,
+        catalog: &AssetCatalog,
+    ) {
         /// How long feedback balloons last on screen (placeholder value).
         const BALLOON_LIFETIME: f64 = 3.0;
 
@@ -70,12 +80,22 @@ impl FeedbackPresenter {
         match feedback {
             Feedback::Thought(emoji) => {
                 self.thought_emoji.set_text(emoji.as_str());
+                self.thought_emoji.set_visible(true);
+                self.thought_icon.set_visible(false);
                 self.thought.set_visible(true);
                 self.speech.set_visible(false);
             }
             Feedback::Speech => {
                 self.thought.set_visible(false);
                 self.speech.set_visible(true);
+            }
+            Feedback::ThoughtSprite(sprite_ref) => {
+                self.thought_icon
+                    .set_texture(&load_texture_sync(sprite_ref, catalog));
+                self.thought_icon.set_visible(true);
+                self.thought_emoji.set_visible(false);
+                self.thought.set_visible(true);
+                self.speech.set_visible(false);
             }
         }
         self.root.set_visible(true);

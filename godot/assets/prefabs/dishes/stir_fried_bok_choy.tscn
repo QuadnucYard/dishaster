@@ -1,10 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://cpegidrenjkru"]
+[gd_scene load_steps=3 format=3 uid="uid://cpegidrenjkru"]
 
-[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_nx007"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_nx007"]
-atlas = ExtResource("1_nx007")
-region = Rect2(128, 576, 64, 64)
+[ext_resource type="Texture2D" uid="uid://ilr5sjuyk72o" path="res://assets/sprites/dishes/stir_fried_bok_choy.tres" id="1_nx007"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qmmyc"]
 size = Vector2(32, 24)
@@ -13,7 +9,7 @@ size = Vector2(32, 24)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
-texture = SubResource("AtlasTexture_nx007")
+texture = ExtResource("1_nx007")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)

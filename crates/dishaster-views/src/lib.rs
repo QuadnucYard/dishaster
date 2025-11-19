@@ -77,6 +77,8 @@ pub enum Feedback {
     Thought(EcoString),
     /// Spoken feedback with implicit content
     Speech,
+    /// Display a sprite icon only
+    ThoughtSprite(SpriteRef),
 }
 
 /// Different feedback topics that can be triggered

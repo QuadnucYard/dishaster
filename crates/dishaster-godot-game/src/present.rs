@@ -144,6 +144,7 @@ impl Game {
                             &feedback.content,
                             feedback.topic,
                             feedback.can_trigger_trial,
+                            &self.asset_catalog,
                         );
                     }
                 }

@@ -2,10 +2,37 @@
 
 [ext_resource type="Texture2D" uid="uid://ch40877dldcvk" path="res://assets/sprites/emojis/thought_balloon.svg" id="1_wxex4"]
 [ext_resource type="Texture2D" uid="uid://cxtmfmkp10d7q" path="res://assets/sprites/emojis/speech_balloon.svg" id="2_hcv4f"]
-[ext_resource type="Texture2D" uid="uid://bnvburi4tresm" path="res://assets/sprites/emojis/eye_balloon.svg" id="2_pnvpb"]
+[ext_resource type="Texture2D" uid="uid://dvmepe0bmxvsj" path="res://assets/sprites/dishes/rice.tres" id="2_pnvpb"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hcv4f"]
 radius = 20.0
+
+[sub_resource type="Animation" id="Animation_pnvpb"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Thought:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(18, -18)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Thought:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
 
 [sub_resource type="Animation" id="Animation_hcv4f"]
 resource_name = "bounce"
@@ -35,33 +62,6 @@ tracks/1/keys = {
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [Vector2(1, 1), Vector2(1.5, 1.5), Vector2(1, 1)]
-}
-
-[sub_resource type="Animation" id="Animation_pnvpb"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Thought:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(18, -18)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Thought:scale")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(1, 1)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_17nke"]

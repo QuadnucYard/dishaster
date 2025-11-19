@@ -1,10 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://bbxdvulv6f1a8"]
+[gd_scene load_steps=3 format=3 uid="uid://bbxdvulv6f1a8"]
 
-[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_m1p1m"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_m1p1m"]
-atlas = ExtResource("1_m1p1m")
-region = Rect2(320, 384, 64, 64)
+[ext_resource type="Texture2D" uid="uid://dfk1gjlyakv44" path="res://assets/sprites/dishes/roast_pork_rice.tres" id="1_m1p1m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_psfne"]
 size = Vector2(32, 24)
@@ -13,7 +9,7 @@ size = Vector2(32, 24)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
-texture = SubResource("AtlasTexture_m1p1m")
+texture = ExtResource("1_m1p1m")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)

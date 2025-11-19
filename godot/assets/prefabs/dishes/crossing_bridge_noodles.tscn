@@ -1,10 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://c5xe7iq5newke"]
+[gd_scene load_steps=3 format=3 uid="uid://c5xe7iq5newke"]
 
-[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_6jhjo"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6jhjo"]
-atlas = ExtResource("1_6jhjo")
-region = Rect2(384, 128, 64, 64)
+[ext_resource type="Texture2D" uid="uid://c6ukpilwpk4s5" path="res://assets/sprites/dishes/crossing_bridge_noodles.tres" id="1_6jhjo"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yek1b"]
 size = Vector2(32, 24)
@@ -13,7 +9,7 @@ size = Vector2(32, 24)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
-texture = SubResource("AtlasTexture_6jhjo")
+texture = ExtResource("1_6jhjo")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)

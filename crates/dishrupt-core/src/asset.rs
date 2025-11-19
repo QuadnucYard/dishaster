@@ -20,6 +20,10 @@ impl PrefabRef {
     pub fn path(&self) -> &EcoString {
         &self.0
     }
+
+    pub fn as_sprite_ref(&self) -> SpriteRef {
+        SpriteRef::new(self.0.clone())
+    }
 }
 
 impl fmt::Display for PrefabRef {

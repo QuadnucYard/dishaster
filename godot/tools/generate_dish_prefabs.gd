@@ -6,7 +6,8 @@ extends EditorScript
 
 const TEXTURES_DIR = "res://assets/prefabs/dishes/_textures"
 const PREFABS_DIR = "res://assets/prefabs/dishes"
-const ATLAS_PATH = "res://assets/sprites/dishes_atlas.png"
+const DISH_TEXTURES_DIR = "res://assets/sprites/dishes"
+const ATLAS_PNG_PATH = "res://assets/sprites/dishes_atlas.png"
 const TILE_SIZE = 64
 const ATLAS_COLS = 8
 
@@ -45,7 +46,8 @@ func _run():
 
 	print("\nResults: Created %d, Updated %d, Skipped %d" % [created, updated, skipped])
 	print("\n=== Done! ===")
-	print("Atlas: %s" % ATLAS_PATH)
+	print("Atlas PNG: %s" % ATLAS_PNG_PATH)
+	print("Dish Textures: %s" % DISH_TEXTURES_DIR)
 	print("Prefabs: %s" % PREFABS_DIR)
 
 
@@ -113,13 +115,33 @@ func create_atlas(images: Array) -> Dictionary:
 		atlas_map[dish_id] = Vector2i(col, row)
 		print("  %s: atlas position (%d, %d)" % [dish_id, col, row])
 
-	# Save atlas
-	var err = atlas_image.save_png(ATLAS_PATH)
+	# Save atlas PNG
+	var err = atlas_image.save_png(ATLAS_PNG_PATH)
 	if err != OK:
-		print("Error: Failed to save atlas: %s" % err)
+		print("Error: Failed to save atlas PNG: %s" % err)
 		return {}
 
-	print("\nAtlas saved: %s" % ATLAS_PATH)
+	print("\nAtlas PNG saved: %s" % ATLAS_PNG_PATH)
+
+	# Save individual dish texture resources
+	print("\nSaving individual dish textures...")
+	for dish_id in atlas_map:
+		var pos = atlas_map[dish_id]
+		var x = pos.x * TILE_SIZE
+		var y = pos.y * TILE_SIZE
+		
+		var dish_atlas_texture = AtlasTexture.new()
+		dish_atlas_texture.atlas = load(ATLAS_PNG_PATH)
+		dish_atlas_texture.region = Rect2(x, y, TILE_SIZE, TILE_SIZE)
+		
+		var dish_texture_path = "%s/%s.tres" % [DISH_TEXTURES_DIR, dish_id]
+		err = ResourceSaver.save(dish_atlas_texture, dish_texture_path)
+		if err != OK:
+			print("  Error saving %s: %s" % [dish_texture_path, err])
+		else:
+			print("  Saved %s.tres" % dish_id)
+
+	print("\nAll individual textures saved!")
 	return atlas_map
 
 
@@ -142,16 +164,19 @@ func create_new_prefab(prefab_path: String, dish_id: String, x: int, y: int) -> 
 	var area = Area2D.new()
 	area.name = dish_id.capitalize().replace(" ", "")
 
-	# Create atlas texture
-	var atlas_texture = AtlasTexture.new()
-	atlas_texture.atlas = load(ATLAS_PATH)
-	atlas_texture.region = Rect2(x, y, TILE_SIZE, TILE_SIZE)
+	# Load the individual texture resource
+	var dish_texture_path = "%s/%s.tres" % [DISH_TEXTURES_DIR, dish_id]
+	var dish_texture = load(dish_texture_path)
+	
+	if dish_texture == null:
+		print("  Error: Failed to load texture resource %s" % dish_texture_path)
+		return "error"
 
 	# Create sprite
 	var sprite = Sprite2D.new()
 	sprite.name = "Sprite2D"
 	sprite.scale = Vector2(0.5, 0.5)
-	sprite.texture = atlas_texture
+	sprite.texture = dish_texture
 	area.add_child(sprite, true)
 	sprite.owner = area
 
@@ -196,6 +221,8 @@ func update_existing_prefab(prefab_path: String, dish_id: String, x: int, y: int
 	var needs_update = false
 
 	# Find the Sprite2D node and check its texture
+	var dish_texture_path = "%s/%s.tres" % [DISH_TEXTURES_DIR, dish_id]
+	
 	for i in range(scene_state.get_node_count()):
 		var node_type = scene_state.get_node_type(i)
 
@@ -205,9 +232,8 @@ func update_existing_prefab(prefab_path: String, dish_id: String, x: int, y: int
 				var prop_name = scene_state.get_node_property_name(i, j)
 				if prop_name == "texture":
 					var current_texture = scene_state.get_node_property_value(i, j)
-					if current_texture is AtlasTexture:
-						var expected_region = Rect2(x, y, TILE_SIZE, TILE_SIZE)
-						if current_texture.region != expected_region or current_texture.atlas.resource_path != ATLAS_PATH:
+					if current_texture != null:
+						if current_texture.resource_path != dish_texture_path:
 							needs_update = true
 							break
 
@@ -215,15 +241,18 @@ func update_existing_prefab(prefab_path: String, dish_id: String, x: int, y: int
 		print("  Skipped %s.tscn (up to date)" % dish_id)
 		return "skipped"
 
+	# Load the individual texture resource
+	var dish_texture = load(dish_texture_path)
+	if dish_texture == null:
+		print("  Error: Failed to load texture resource %s" % dish_texture_path)
+		return "error"
+
 	# Instantiate, modify, and re-save
 	var area = packed_scene.instantiate() as Area2D
 	var sprite = area.get_node("Sprite2D") as Sprite2D
 
 	if sprite != null:
-		var atlas_texture = AtlasTexture.new()
-		atlas_texture.atlas = load(ATLAS_PATH)
-		atlas_texture.region = Rect2(x, y, TILE_SIZE, TILE_SIZE)
-		sprite.texture = atlas_texture
+		sprite.texture = dish_texture
 
 		var new_packed_scene = PackedScene.new()
 		var err = new_packed_scene.pack(area)

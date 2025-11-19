@@ -105,7 +105,11 @@ pub fn process_serving_messages(
                     "Staff entity found: {staff:?}"
                 );
                 staff_state.last_update_time = now;
-                let feedback = Feedback::Thought(eco_format!("{}?", request.dish_name));
+                let feedback = registry
+                    .dishes
+                    .get_by_id(&request.dish_id)
+                    .map(|m| Feedback::ThoughtSprite(m.display.res.as_sprite_ref()))
+                    .unwrap_or_else(|| Feedback::Thought("❔".into()));
                 feedback_messages.write(FeedbackMessage {
                     entity: staff,
                     content: feedback,
@@ -132,7 +136,11 @@ pub fn process_serving_messages(
 
                 // The staff member accepted the task, so we wait for food prep.
                 staff_state.last_update_time = now;
-                let confirm_feedback = Feedback::Thought(request.dish_name.clone());
+                let confirm_feedback = registry
+                    .dishes
+                    .get_by_id(&request.dish_id)
+                    .map(|m| Feedback::ThoughtSprite(m.display.res.as_sprite_ref()))
+                    .unwrap_or_else(|| Feedback::Thought("❓".into()));
                 feedback_messages.write(FeedbackMessage {
                     entity: staff,
                     content: confirm_feedback,
@@ -150,7 +158,7 @@ pub fn process_serving_messages(
                     "Staff {} confirmed order for diner {}: {}",
                     staff,
                     diner,
-                    request.dish_name
+                    request.dish_id
                 );
 
                 // Randomize prep time.
@@ -251,7 +259,11 @@ pub fn process_serving_messages(
                     );
                 }
 
-                let staff_feedback = Feedback::Thought(eco_format!("{} ✅", request.dish_name));
+                let staff_feedback = registry
+                    .dishes
+                    .get_by_id(&request.dish_id)
+                    .map(|m| Feedback::ThoughtSprite(m.display.res.as_sprite_ref()))
+                    .unwrap_or_else(|| Feedback::Thought("✅".into()));
                 feedback_messages.write(FeedbackMessage {
                     entity: staff,
                     content: staff_feedback,
@@ -268,7 +280,7 @@ pub fn process_serving_messages(
                     target: "serving",
                     "Staff {} completed dish {} for diner {} ({}/{})",
                     staff,
-                    request.dish_name,
+                    request.dish_id,
                     diner,
                     session.current_dish_index + 1,
                     session.planned_order.len()
@@ -310,6 +322,7 @@ pub fn drive_serving_sessions(
     windows: Query<&Window>,
     mut comms: ResMut<ServingCommsQueue>,
     time: Res<Time>,
+    registry: Res<GameModelRegistryRes>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
 ) {
     let now = time.current_time;
@@ -350,13 +363,6 @@ pub fn drive_serving_sessions(
                         Some(session.planned_order[session.current_dish_index].clone());
                 }
 
-                let dish_name = {
-                    let request = session
-                        .request
-                        .as_ref()
-                        .expect("service request must exist after initialization");
-                    request.dish_name.clone()
-                };
                 session.staff = Some(staff_entity);
                 session.stage = ServiceStage::WaitingForStaffResponse;
                 staff_state.status = ServingStaffStatus::HandlingOrder;
@@ -377,9 +383,15 @@ pub fn drive_serving_sessions(
 
                 // Give the diner immediate feedback that their order was heard so they
                 // perceive progress while we wait for the delayed response.
+                let request = session.request.as_ref().unwrap();
+                let feedback = registry
+                    .dishes
+                    .get_by_id(&request.dish_id)
+                    .map(|m| Feedback::ThoughtSprite(m.display.res.as_sprite_ref()))
+                    .unwrap_or_else(|| Feedback::Thought("❓".into()));
                 feedback_messages.write(FeedbackMessage {
                     entity: diner,
-                    content: Feedback::Thought(eco_format!("{}?", dish_name)),
+                    content: feedback,
                     trigger: None,
                 });
 

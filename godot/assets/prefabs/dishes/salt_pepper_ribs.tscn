@@ -1,10 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://bninul025ib18"]
+[gd_scene load_steps=3 format=3 uid="uid://bninul025ib18"]
 
-[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_v87pp"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_v87pp"]
-atlas = ExtResource("1_v87pp")
-region = Rect2(384, 384, 64, 64)
+[ext_resource type="Texture2D" uid="uid://cdpunlsdhvk2j" path="res://assets/sprites/dishes/salt_pepper_ribs.tres" id="1_v87pp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xko2t"]
 size = Vector2(32, 24)
@@ -13,7 +9,7 @@ size = Vector2(32, 24)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
-texture = SubResource("AtlasTexture_v87pp")
+texture = ExtResource("1_v87pp")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)

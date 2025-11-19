@@ -79,6 +79,7 @@ pub struct Game {
     suspended_sim_speed: Option<f64>,
 
     profile_svc: Arc<ProfileService>,
+    asset_catalog: Arc<AssetCatalog>,
 
     /// Queue of UI commands to be processed by the scene layer.
     ui_commands: Vec<UiCommand>,
@@ -176,6 +177,7 @@ impl Game {
             suspended_sim_speed: None,
 
             profile_svc,
+            asset_catalog,
             ui_commands: Vec::new(),
         }
     }

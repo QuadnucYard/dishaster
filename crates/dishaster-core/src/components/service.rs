@@ -45,8 +45,6 @@ impl ServiceSession {
 pub struct ServiceRequest {
     /// Identifier of the dish model.
     pub dish_id: ModelId,
-    /// Display name of the ordered dish.
-    pub dish_name: EcoString,
     /// Baseline serving time derived from the dish model.
     pub base_service_time: f32,
 }

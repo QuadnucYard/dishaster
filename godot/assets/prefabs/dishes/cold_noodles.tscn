@@ -1,10 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://b6sl1dxnr4xc3"]
+[gd_scene load_steps=3 format=3 uid="uid://b6sl1dxnr4xc3"]
 
-[ext_resource type="Texture2D" uid="uid://b73a1xmccypve" path="res://assets/sprites/dishes_atlas.png" id="1_j8pct"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_j8pct"]
-atlas = ExtResource("1_j8pct")
-region = Rect2(192, 128, 64, 64)
+[ext_resource type="Texture2D" uid="uid://diedb3l52b708" path="res://assets/sprites/dishes/cold_noodles.tres" id="1_j8pct"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_r4kb6"]
 size = Vector2(32, 24)
@@ -13,7 +9,7 @@ size = Vector2(32, 24)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
-texture = SubResource("AtlasTexture_j8pct")
+texture = ExtResource("1_j8pct")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)
