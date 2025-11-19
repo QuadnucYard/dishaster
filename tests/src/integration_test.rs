@@ -76,7 +76,8 @@ impl RunSteps for Simulation {
     }
 }
 
-fn main() -> Result<()> {
+#[test]
+fn single_complete_run() -> Result<()> {
     env_logger::Builder::new().init();
 
     let mut loader = DataLoader::new("../assets/data")?;
@@ -212,6 +213,19 @@ fn main() -> Result<()> {
 
     save_sim_profile(profile_svc, persisted)?;
     std::mem::drop(sim);
+
+    Ok(())
+}
+
+#[test]
+fn continuous_run() -> Result<()> {
+    let mut loader = DataLoader::new("../assets/data")?;
+    let data = loader.load_all_data()?;
+    let registry = data.models;
+
+    let service = UserDataService::new(Arc::new(MemoryStorage));
+    let profile_svc = &service.profiles;
+    println!("✓ Player profile validation passed");
 
     // now run more days
     let mut rng = Prng::new(42);

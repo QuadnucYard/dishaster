@@ -9,7 +9,6 @@ publish = false
 [[test]]
 name = "integration_test"
 path = "src/integration_test.rs"
-harness = false
 
 [[test]]
 name = "asset_validation"

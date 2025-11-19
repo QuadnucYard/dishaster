@@ -15,17 +15,17 @@ pub const WINDOW_STAFF_OFFSET: Meters = 0.3;
 pub const PATH_WAYPOINT_EPS: Meters = 0.1;
 
 /// Minimum simulated delay for a diner to verbalize the order
-pub const ORDER_SPEECH_DELAY_MIN: Seconds = 0.35;
+pub const ORDER_SPEECH_DELAY_MIN: Seconds = 3.0;
 /// Maximum simulated delay for a diner to verbalize the order
-pub const ORDER_SPEECH_DELAY_MAX: Seconds = 0.85;
+pub const ORDER_SPEECH_DELAY_MAX: Seconds = 5.0;
 /// Minimum delay before staff confirms the order
-pub const STAFF_CONFIRM_DELAY_MIN: Seconds = 0.6;
+pub const STAFF_CONFIRM_DELAY_MIN: Seconds = 4.0;
 /// Maximum delay before staff confirms the order
-pub const STAFF_CONFIRM_DELAY_MAX: Seconds = 1.4;
+pub const STAFF_CONFIRM_DELAY_MAX: Seconds = 8.0;
 /// Random variation multiplier applied to dish serving time
-pub const STAFF_SERVICE_TIME_VARIATION: f32 = 0.25;
+pub const STAFF_SERVICE_TIME_VARIATION: f32 = 0.25; // ±25%
 /// Default walking speed for serving staff (meters per second)
-pub const STAFF_WALK_SPEED: f32 = 1.25;
+pub const STAFF_WALK_SPEED: f32 = 0.5;
 /// Navigation radius used for serving staff collision avoidance
 pub const STAFF_COLLISION_RADIUS: Meters = 0.2;
 
