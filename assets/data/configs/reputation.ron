@@ -58,6 +58,8 @@
         base_quality_tolerance: 0.2,    // Quality mismatch tolerance
         memory_weight: 0.6,             // Weight for historical memory
         base_quality_weight: 0.4,       // Weight for dish base quality
+        max_price_ratio: 1.3,           // Maximum price/base_price ratio (triggers price complaint)
+        praise_threshold: 0.4,          // Minimum satisfaction to trigger praise feedback
     ),
 
     // How much player trial responses affect reputation impact (0.0-1.0)

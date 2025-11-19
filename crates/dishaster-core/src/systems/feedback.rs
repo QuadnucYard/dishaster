@@ -25,6 +25,7 @@ pub mod feedbacks {
     pub const CONTAMINATION: &[&str] = &["🤢", "😱", "🤮"];
     pub const BAD_TASTE: &[&str] = &["😖", "😞", "🤢"];
     pub const STILL_HUNGRY: &[&str] = &["😐", "🍚", "😕"];
+    pub const PRAISE: &[&str] = &["😋", "👍", "🤤", "😍"];
 }
 
 pub fn choose_feedback(rng: &mut impl Rng, pool: &[&str]) -> Feedback {
@@ -83,7 +84,8 @@ pub fn feedback_present_system(
                 let base_impact = reputation_config.base_impacts[t];
                 // Use 0.0 response_score for non-trial feedback (neutral player response)
                 // Trial system will handle response scoring separately
-                reputation.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+                let delta = reputation.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+                log::debug!("Applied feedback impact on reputation for topic {t:?}: {delta:.2}");
             }
         }
     }

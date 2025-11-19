@@ -31,7 +31,7 @@ pub fn handle_eat_goal(
         mut goal,
         mut state,
         mut targets,
-        _personality,
+        personality,
         dining_profile,
         mut psych_state,
         mut ltm,
@@ -199,6 +199,71 @@ pub fn handle_eat_goal(
                 &satisfaction_weights,
             );
 
+            // Check for quality mismatch feedback (dish quality below expectations)
+            // Calculate expected quality based on memory and base quality
+            let expected_quality = compute_expected_quality(&ltm, served_dish, feedback_thresholds);
+
+            // Compute mood-aware quality tolerance
+            let quality_tolerance = compute_quality_tolerance(
+                personality.adaptiveness,
+                psych_state.mood,
+                feedback_thresholds.base_quality_tolerance,
+            );
+
+            let quality_gap = expected_quality - served_dish.served_quality;
+            if quality_gap > quality_tolerance {
+                log::info!(
+                    target: "diner",
+                    "diner {:?} complaining: quality below expectation (expected={:.2}, actual={:.2}, tolerance={:.2})",
+                    entity,
+                    expected_quality,
+                    served_dish.served_quality,
+                    quality_tolerance
+                );
+
+                feedback_messages.write(FeedbackMessage {
+                    entity,
+                    content: choose_feedback(&mut rng, feedbacks::BAD_TASTE),
+                    trigger: Some(FeedbackTopic::Quality),
+                });
+            }
+
+            // Check for price complaint (overpriced relative to base)
+            let price_ratio = served_dish.price_paid / base_price.max(0.01);
+            if price_ratio > feedback_thresholds.max_price_ratio {
+                log::info!(
+                    target: "diner",
+                    "diner {:?} complaining: overpriced (ratio={:.2})",
+                    entity,
+                    price_ratio
+                );
+
+                feedback_messages.write(FeedbackMessage {
+                    entity,
+                    content: choose_feedback(&mut rng, feedbacks::BAD_TASTE),
+                    trigger: Some(FeedbackTopic::Price),
+                });
+            }
+
+            // Check for praise feedback (high satisfaction)
+            // Only praise if satisfaction is positive and no major issues
+            if satisfaction > feedback_thresholds.praise_threshold
+                && served_dish.contamination_level < 0.05
+            {
+                log::info!(
+                    target: "diner",
+                    "diner {:?} praising: good experience (satisfaction={:.2})",
+                    entity,
+                    satisfaction
+                );
+
+                feedback_messages.write(FeedbackMessage {
+                    entity,
+                    content: choose_feedback(&mut rng, feedbacks::PRAISE),
+                    trigger: Some(FeedbackTopic::Praise),
+                });
+            }
+
             // Check for bad taste feedback
             if satisfaction < feedback_thresholds.bad_taste_threshold {
                 log::info!(
@@ -260,4 +325,28 @@ pub fn handle_eat_goal(
 
         goal.update(DinerGoal::ReturnDishes);
     }
+}
+
+fn compute_expected_quality(
+    ltm: &LongTermMemory,
+    served_dish: &ServedDish,
+    feedback_thresholds: &FeedbackThresholds,
+) -> f32 {
+    if let Some(dish_mem) = ltm.dish_experience.get(&served_dish.dish_id) {
+        // If diner has memory of this dish, use weighted average of memory and base
+        let memory_quality = (dish_mem.avg_rating + 1.0) / 2.0; // Map -1..1 to 0..1
+        feedback_thresholds.memory_weight * memory_quality
+            + feedback_thresholds.base_quality_weight * served_dish.served_quality
+    } else {
+        // No memory, use base quality as expectation
+        served_dish.served_quality
+    }
+}
+
+/// Helper function to compute quality tolerance based on personality and mood
+///
+/// Adjusts the quality mismatch tolerance based on diner's mood and adaptiveness.
+/// Better mood and more adaptiveness = higher tolerance (more forgiving).
+fn compute_quality_tolerance(adaptiveness: f32, mood: f32, base_tolerance: f32) -> f32 {
+    base_tolerance + adaptiveness * 0.1 + (mood + 1.0) * 0.05
 }

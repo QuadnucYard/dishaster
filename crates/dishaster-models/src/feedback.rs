@@ -30,6 +30,7 @@ pub enum FeedbackTopic {
 
 /// Configuration thresholds for triggering feedback
 #[derive(Debug, Clone, Deserialize)]
+#[serde(default)]
 pub struct FeedbackThresholds {
     /// Minimum dish score required during observation (below triggers NoAppealingDish)
     pub min_appealing_score: f32,
@@ -51,6 +52,12 @@ pub struct FeedbackThresholds {
 
     /// Weight for dish base quality in expected quality calculation
     pub base_quality_weight: f32,
+
+    /// Maximum price ratio (price/base_price) before triggering price complaint
+    pub max_price_ratio: f32,
+
+    /// Minimum satisfaction score to trigger praise feedback
+    pub praise_threshold: f32,
 }
 
 impl Default for FeedbackThresholds {
@@ -63,12 +70,15 @@ impl Default for FeedbackThresholds {
             base_quality_tolerance: 0.2,
             memory_weight: 0.6,
             base_quality_weight: 0.4,
+            max_price_ratio: 1.3,
+            praise_threshold: 0.4,
         }
     }
 }
 
 /// Configuration for reputation system
 #[derive(Debug, Clone, Deserialize)]
+#[serde(default)]
 pub struct ReputationConfig {
     /// Base impact values for each feedback topic on reputation
     /// Positive values increase reputation, negative values decrease it
