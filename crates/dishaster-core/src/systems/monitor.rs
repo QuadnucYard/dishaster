@@ -11,6 +11,7 @@ pub fn check_day_completion(
     mut day_status: ResMut<DayStatus>,
     diner_query: Query<&Diner>,
     schedule: Res<DailyDinerSchedule>,
+    trial_session: Res<TrialSession>,
 ) {
     if day_status.completion_emitted {
         // Day completion already emitted, no further checks needed
@@ -22,7 +23,8 @@ pub fn check_day_completion(
 
     // Check if day is complete: no active diners and no more scheduled arrivals
     let spawning_finished = !schedule.has_pending_spawns();
-    day_status.completed = day_status.live_diner_count == 0 && spawning_finished;
+    day_status.completed =
+        day_status.live_diner_count == 0 && spawning_finished && !trial_session.is_active;
     if day_status.completed {
         day_status.completion_emitted = true;
         commands.trigger(RunEnded);

@@ -12,6 +12,13 @@ impl Simulation {
     /// Commands alter stateful resources directly so that the next simulation tick
     /// reflects the requested transition without delay.
     pub(crate) fn handle_command(&mut self, command: SimCommand) {
+        // Validate command against current phase
+        if let Err(error) = self.validate_phase(&command) {
+            let mut events = self.world.resource_mut::<EventQueue>();
+            events.push(error);
+            return;
+        }
+
         match command {
             SimCommand::SetDebugFlags(debug_flags) => {
                 self.debug_flags = debug_flags;
@@ -161,5 +168,89 @@ impl Simulation {
                 responses.push(SimResponse::Distances(resp.into()));
             }
         }
+    }
+
+    /// Validate command against current phase.
+    ///
+    /// Returns Ok(()) if the command is allowed in the current phase,
+    /// otherwise returns an error event to be emitted.
+    fn validate_phase(&self, command: &SimCommand) -> Result<(), SimEvent> {
+        use SimCommand::*;
+
+        let phase = *self.world.resource::<RunPhase>();
+
+        // Define which commands are allowed in which phases
+        let valid_phases: &[RunPhase] = match command {
+            // Debug commands are always allowed
+            SetDebugFlags(_) => &[
+                RunPhase::Preparation,
+                RunPhase::Running,
+                RunPhase::Settlement,
+            ],
+
+            // Preparation phase only
+            UpdateDishPricing { .. } => &[RunPhase::Preparation],
+            StartRun => &[RunPhase::Preparation],
+
+            // Running phase only
+            RefillDispenser(_) => &[RunPhase::Running],
+            TrialStart { .. }
+            | TrialLaunch
+            | TrialRespond(_)
+            | TrialTimeout
+            | TrialRequestCandidates { .. }
+            | TrialProceed => &[RunPhase::Running],
+            EndRun => &[RunPhase::Running],
+
+            // Settlement phase only
+            ApplyManagementDecision(_) => &[RunPhase::Settlement],
+
+            // Dev commands are always allowed
+            DevAdjustReputation(_) | DevInspectorVisit(_) | DevCrab => &[
+                RunPhase::Preparation,
+                RunPhase::Running,
+                RunPhase::Settlement,
+            ],
+        };
+
+        if valid_phases.contains(&phase) {
+            Ok(())
+        } else {
+            Err(SimEvent::PhaseValidationError(Box::new(
+                PhaseValidationError {
+                    command_name: command_name(command).into(),
+                    current_phase: phase_name(phase).into(),
+                    valid_phases: valid_phases.iter().map(|p| phase_name(*p).into()).collect(),
+                },
+            )))
+        }
+    }
+}
+
+fn command_name(command: &SimCommand) -> &'static str {
+    match command {
+        SimCommand::SetDebugFlags(_) => "SetDebugFlags",
+        SimCommand::StartRun => "StartRun",
+        SimCommand::EndRun => "EndRun",
+        SimCommand::UpdateDishPricing { .. } => "UpdateDishPricing",
+        SimCommand::RefillDispenser(_) => "RefillDispenser",
+        SimCommand::TrialStart { .. } => "TrialStart",
+        SimCommand::TrialLaunch => "TrialLaunch",
+        SimCommand::TrialRespond(_) => "TrialRespond",
+        SimCommand::TrialTimeout => "TrialTimeout",
+        SimCommand::TrialRequestCandidates { .. } => "TrialRequestCandidates",
+        SimCommand::TrialProceed => "TrialProceed",
+        SimCommand::ApplyManagementDecision(_) => "ApplyManagementDecision",
+        SimCommand::DevAdjustReputation(_) => "DevAdjustReputation",
+        SimCommand::DevInspectorVisit(_) => "DevInspectorVisit",
+        SimCommand::DevCrab => "DevCrab",
+    }
+}
+
+fn phase_name(phase: RunPhase) -> &'static str {
+    match phase {
+        RunPhase::Preparation => "Preparation",
+        RunPhase::Running => "Running",
+        RunPhase::Settlement => "Settlement",
     }
 }

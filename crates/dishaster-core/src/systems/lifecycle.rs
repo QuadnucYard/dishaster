@@ -64,9 +64,13 @@ fn on_run_started(
     _event: On<RunStarted>,
     mut commands: Commands,
     mut time: ResMut<Time>,
+    mut phase: ResMut<RunPhase>,
     day_status: Res<DayStatus>,
 ) {
     time.fast_forward_to(day_status.start_time as f64);
+
+    // Transition to Running phase
+    *phase = RunPhase::Running;
 
     log::info!(
         "Run started for day {} from {}",
@@ -85,6 +89,7 @@ fn on_run_ended(
     mut commands: Commands,
     diner_query: Query<Entity, With<Diner>>,
     mut schedule: ResMut<DailyDinerSchedule>,
+    mut phase: ResMut<RunPhase>,
     mut events: ResMut<EventQueue>,
 ) {
     // Stop spawning
@@ -94,6 +99,9 @@ fn on_run_ended(
     for entity in diner_query.iter() {
         commands.entity(entity).despawn();
     }
+
+    // Transition to Settlement phase
+    *phase = RunPhase::Settlement;
 
     // Emit day completed event at run end
     events.push(SimEvent::RunCompleted);

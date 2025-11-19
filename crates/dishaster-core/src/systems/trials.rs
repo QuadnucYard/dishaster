@@ -121,6 +121,7 @@ fn on_trial_proceed(
         events.push(SimEvent::TrialLeftSpeak(statement.into()));
     } else {
         // End of trial
+        session.finish();
         events.push(SimEvent::TrialEnd { timeout: false });
     }
 }

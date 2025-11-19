@@ -10,6 +10,9 @@ use dishrupt_core::{EntityId, prelude::EcoString};
 /// Presentation events emitted by the core simulation for client display.
 #[derive(Debug)]
 pub enum SimEvent {
+    /// A command was rejected due to being issued in the wrong phase.
+    PhaseValidationError(Box<PhaseValidationError>),
+
     /// Request to persist player progress.
     Persist,
 
@@ -101,6 +104,17 @@ pub enum SimEvent {
         /// Emission condition for the hint.
         condition: HintCondition,
     },
+}
+
+/// A command was rejected due to being issued in the wrong phase.
+#[derive(Debug)]
+pub struct PhaseValidationError {
+    /// The command that was rejected.
+    pub command_name: EcoString,
+    /// The current phase when the command was issued.
+    pub current_phase: EcoString,
+    /// The phases in which this command is valid.
+    pub valid_phases: Vec<EcoString>,
 }
 
 /// Types of changes to a diner's held items.

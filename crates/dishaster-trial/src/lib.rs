@@ -58,6 +58,8 @@ pub struct TrialSession {
     pub rng: Prng,
     /// Whether the trial has ever been triggered in this run
     pub ever_triggered: bool,
+    /// Whether a trial is currently active
+    pub is_active: bool,
     /// The diner entity that triggered this trial (for applying psych state impacts)
     pub target_entity: Option<EntityId>,
     /// Indices of questions already asked in this trial
@@ -87,6 +89,7 @@ impl TrialSession {
             config: TrialConfig::default(),
             rng: Prng::new(seed),
             ever_triggered: false,
+            is_active: false,
             target_entity: None,
             asked_questions: Vec::new(),
             cached_options: Default::default(),
@@ -119,8 +122,14 @@ impl TrialSession {
     pub fn start(&mut self, target: EntityId, topic: Option<FeedbackTopic>) {
         self.reset();
         self.ever_triggered = true;
+        self.is_active = true;
         self.target_entity = Some(target);
         self.trigger_topic = topic;
+    }
+
+    /// Finish the current trial session
+    pub fn finish(&mut self) {
+        self.is_active = false;
     }
 
     /// Check if a question has been asked

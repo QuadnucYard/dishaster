@@ -19,6 +19,14 @@ impl Game {
     pub(crate) fn process_events(&mut self, events: Vec<SimEvent>) {
         for event in events {
             match event {
+                SimEvent::PhaseValidationError(e) => {
+                    // Let main catch it
+                    panic!(
+                        "Received unexpected PhaseValidationError in presentation layer: command '{}' is not valid in phase '{:?}', valid phases: {:?}",
+                        e.command_name, e.current_phase, e.valid_phases
+                    );
+                }
+
                 SimEvent::Persist => {
                     godot_print!("Persisting player progress upon request");
 

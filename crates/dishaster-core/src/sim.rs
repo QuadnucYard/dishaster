@@ -22,6 +22,8 @@ use crate::{
 /// Coordinates the discrete simulation loop, manages entity-component
 /// systems, and provides the primary interface for running the
 /// canteen dining simulation.
+///
+/// NOTE: It is recreated for each day, so we do not need to reset anything after one day run.
 pub struct Simulation {
     /// ECS world containing all entities, components, and resources
     pub(crate) world: World,
@@ -154,6 +156,8 @@ impl Simulation {
             start_time: level_config.start_time,
             ..Default::default()
         });
+        // Start in Preparation phase
+        self.world.insert_resource(RunPhase::Preparation);
         self.world.insert_resource(DailyStats::default());
         self.world.insert_resource({
             let mut trial_session = dishaster_trial::TrialSession::new(world_rng.derive_seed());

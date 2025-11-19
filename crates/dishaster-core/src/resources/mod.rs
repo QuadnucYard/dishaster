@@ -41,6 +41,23 @@ pub struct Canteen {
     pub model: CanteenModel,
 }
 
+/// Run phase tracking for the current day
+///
+/// The game day progresses through three phases:
+/// - Preparation: Player configures windows, dish pricing, etc.
+/// - Running: Diners are spawned and served
+/// - Settlement: Day results are displayed, management decisions made
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Resource, Default)]
+pub enum RunPhase {
+    /// Preparation phase: player configures setup before starting service
+    #[default]
+    Preparation,
+    /// Running phase: active service with diners being spawned and served
+    Running,
+    /// Settlement phase: day completed, showing results and management decisions
+    Settlement,
+}
+
 /// Day progression and completion tracking system
 ///
 /// Monitors the state of the current simulation day, tracking active
