@@ -264,7 +264,11 @@ impl Game {
         if let Some(diner_debugs) = &snapshot.diners {
             for diner_debug in diner_debugs {
                 if let Some(agent) = self.pres.agents.get_mut(&diner_debug.entity) {
-                    agent.update_debug(&diner_debug.goal_str);
+                    agent.update_debug(
+                        &diner_debug.goal_str,
+                        diner_debug.total_food_weight,
+                        diner_debug.remaining_food_weight,
+                    );
                 }
             }
         }

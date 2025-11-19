@@ -75,9 +75,16 @@ impl AgentPresenter {
         }
     }
 
-    pub fn update_debug(&mut self, goal_str: &str) {
+    pub fn update_debug(&mut self, goal_str: &str, total_weight: f32, remaining_weight: f32) {
         if let Some(debug) = &mut self.debug {
             debug.goal_label.set_text(goal_str);
+
+            // Update eating progress bar based on weight data
+            if total_weight > 0.0 && remaining_weight > 0.0 {
+                debug.update_eating_progress(total_weight, remaining_weight);
+            } else {
+                debug.hide_eating_progress();
+            }
         }
     }
 
@@ -163,13 +170,37 @@ impl AgentPresenter {
 pub struct AgentDebugPresenter {
     // root: Gd<Node2D>,
     goal_label: Gd<Label>,
+    eating_progress: Option<Gd<godot::classes::ProgressBar>>,
 }
 
 impl AgentDebugPresenter {
     pub fn new(node: Gd<Node2D>) -> Self {
         Self {
             goal_label: node.get_node_as("GoalLabel"),
+            eating_progress: node.try_get_node_as("EatingProgress"),
             // root: node,
+        }
+    }
+
+    /// Update eating progress bar with current eating state
+    pub fn update_eating_progress(&mut self, total_weight: f32, remaining_weight: f32) {
+        if let Some(progress_bar) = &mut self.eating_progress {
+            if total_weight > 0.0 {
+                // Calculate progress as percentage eaten (1.0 - remaining/total)
+                let eaten_ratio = (total_weight - remaining_weight) / total_weight;
+                progress_bar.set_value(eaten_ratio.clamp(0.0, 1.0) as f64);
+                progress_bar.set_visible(true);
+            } else {
+                // No food or finished eating
+                progress_bar.set_visible(false);
+            }
+        }
+    }
+
+    /// Hide the eating progress bar
+    pub fn hide_eating_progress(&mut self) {
+        if let Some(progress_bar) = &mut self.eating_progress {
+            progress_bar.set_visible(false);
         }
     }
 }

@@ -176,6 +176,10 @@ pub struct DinerDebugSnapshot {
     pub entity: EntityId,
     /// Current goal state as a string.
     pub goal_str: EcoString,
+    /// Total initial weight of food when started eating (kg).
+    pub total_food_weight: f32,
+    /// Remaining weight of food to eat (kg).
+    pub remaining_food_weight: f32,
 }
 
 /// Snapshot of items currently carried by a diner for visual display

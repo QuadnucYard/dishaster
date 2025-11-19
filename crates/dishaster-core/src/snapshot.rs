@@ -169,13 +169,29 @@ impl Simulation {
             return None;
         }
 
-        let mut diner_query = self.world.query::<(Entity, &DinerGoalState)>();
+        let mut diner_query = self.world.query::<(Entity, &DinerGoalState, &DinerState)>();
         Some(
             diner_query
                 .iter(&self.world)
-                .map(|(entity, goals)| DinerDebugSnapshot {
-                    entity: entity.to_entity_id(),
-                    goal_str: eco_format!("{:?}", goals.current()),
+                .map(|(entity, goals, state)| {
+                    // Calculate eating progress from served dishes
+                    let (total_weight, remaining_weight) =
+                        state
+                            .served_dishes
+                            .iter()
+                            .fold((0.0, 0.0), |(total, remaining), dish| {
+                                (
+                                    total + dish.served_weight,
+                                    remaining + dish.remaining_weight,
+                                )
+                            });
+
+                    DinerDebugSnapshot {
+                        entity: entity.to_entity_id(),
+                        goal_str: eco_format!("{:?}", goals.current()),
+                        total_food_weight: total_weight,
+                        remaining_food_weight: remaining_weight,
+                    }
                 })
                 .collect(),
         )
