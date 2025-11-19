@@ -59,9 +59,24 @@ pub struct AdvanceLevelProcedure;
 
 impl SceneProcedure for AdvanceLevelProcedure {
     fn process(&mut self, ctx: &mut SceneProcedureContext) -> SceneProcedurePoll {
-        let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
-        ctx.scene_stack.change_pop_scene(Some(trans)); // pop GameScene
+        let services = game_services().clone();
+        let level = level_for_current_day(&services.user_service.profiles, &services.data.models)
+            .expect("failed to get current day level in progress store");
 
-        EnterLevelProcedure.process(ctx) // push new GameScene
+        // Replace current GameScene with new GameScene (no pop to main menu)
+        let trans = Box::new(FadeTransition::new(ctx.scene_root.clone()));
+        ctx.scene_stack.replace_scene_with_callback(
+            GameScene::ID,
+            Some(trans),
+            move |scene, scene_ctx| {
+                use std::any::Any;
+                let game_scene = (scene as &mut dyn Any)
+                    .downcast_mut::<GameScene>()
+                    .expect("expected GameScene");
+                game_scene.start_game(scene_ctx, level, services);
+            },
+        );
+
+        SceneProcedurePoll::Ready
     }
 }

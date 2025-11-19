@@ -134,7 +134,7 @@ impl GameScene {
             | AppRequest::ViewEnding(_)
             | AppRequest::RollSeed
             | AppRequest::DeleteProfile => {
-                panic!("should be handled in main menu")
+                godot_error!("AppRequest should be handled in main menu");
             }
             AppRequest::ExitLevel => {
                 ctx.schedule(ExitLevelProcedure);

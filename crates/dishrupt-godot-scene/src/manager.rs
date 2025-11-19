@@ -279,7 +279,7 @@ impl SceneStack {
     }
 
     /// Check if there is a pending scene change.
-    pub(crate) fn has_pending_change(&self) -> bool {
+    pub fn has_pending_change(&self) -> bool {
         self.pending_change.is_some()
     }
 
@@ -304,6 +304,14 @@ impl SceneStack {
         scene_id: SceneId,
         transition: Option<Box<dyn SceneTransition>>,
     ) {
+        // Warn if overwriting a pending change (likely a bug)
+        if self.pending_change.is_some() {
+            log::warn!(
+                target: "scene",
+                "Overwriting pending scene change with push to {:?} - this may cause issues",
+                scene_id
+            );
+        }
         // Store the pending scene change
         self.pending_change = Some(PendingSceneChange {
             change_type: ChangeType::Push(scene_id),
@@ -341,6 +349,14 @@ impl SceneStack {
         transition: Option<Box<dyn SceneTransition>>,
         on_loaded: impl FnOnce(&mut dyn Scene, &mut SceneContext) + Send + 'static,
     ) {
+        // Warn if overwriting a pending change (likely a bug)
+        if self.pending_change.is_some() {
+            log::warn!(
+                target: "scene",
+                "Overwriting pending scene change with push to {:?} - this may cause issues",
+                scene_id
+            );
+        }
         // Store the pending scene change with callback
         self.pending_change = Some(PendingSceneChange {
             change_type: ChangeType::Push(scene_id),
@@ -360,6 +376,13 @@ impl SceneStack {
     /// # Panics
     /// Panics if there is no previous scene in the history (i.e., popping the root scene).
     pub fn change_pop_scene(&mut self, transition: Option<Box<dyn SceneTransition>>) {
+        // Warn if overwriting a pending change (likely a bug)
+        if self.pending_change.is_some() {
+            log::warn!(
+                target: "scene",
+                "Overwriting pending scene change with pop - this may cause issues"
+            );
+        }
         // Store the pending scene change
         self.pending_change = Some(PendingSceneChange {
             change_type: ChangeType::Pop,
@@ -381,10 +404,49 @@ impl SceneStack {
         scene_id: SceneId,
         transition: Option<Box<dyn SceneTransition>>,
     ) {
+        // Warn if overwriting a pending change (likely a bug)
+        if self.pending_change.is_some() {
+            log::warn!(
+                target: "scene",
+                "Overwriting pending scene change with replace to {:?} - this may cause issues",
+                scene_id
+            );
+        }
         // Store the pending scene change
         self.pending_change = Some(PendingSceneChange {
             change_type: ChangeType::Replace(scene_id),
             on_loaded: None,
+            transition,
+        });
+    }
+
+    /// Replace the current scene with a new one with transition and post-load callback.
+    ///
+    /// Like `replace_scene`, but executes a callback after the scene is loaded.
+    /// This is useful for initializing the scene with specific data or state.
+    ///
+    /// # Parameters
+    /// - `scene_id`: ID of the scene to load as replacement
+    /// - `transition`: Optional transition effect to use for this scene change
+    /// - `on_loaded`: Callback receiving mutable scene and context after loading
+    pub fn replace_scene_with_callback(
+        &mut self,
+        scene_id: SceneId,
+        transition: Option<Box<dyn SceneTransition>>,
+        on_loaded: impl FnOnce(&mut dyn Scene, &mut SceneContext) + Send + 'static,
+    ) {
+        // Warn if overwriting a pending change (likely a bug)
+        if self.pending_change.is_some() {
+            log::warn!(
+                target: "scene",
+                "Overwriting pending scene change with replace to {:?} - this may cause issues",
+                scene_id
+            );
+        }
+        // Store the pending scene change with callback
+        self.pending_change = Some(PendingSceneChange {
+            change_type: ChangeType::Replace(scene_id),
+            on_loaded: Some(Box::new(on_loaded)),
             transition,
         });
     }
@@ -449,19 +511,38 @@ impl SceneStack {
 
     /// Pop the current scene and restore the previous from history.
     fn pop_and_show_scene(&mut self, ctx: &mut SceneContext) {
+        // Get the previous scene ID BEFORE popping from history
+        // history has: [..., previous_scene, current_scene]
+        // We want to restore previous_scene after popping current_scene
+        let previous_scene_id = self
+            .history
+            .get(self.history.len().saturating_sub(2))
+            .copied()
+            .expect("cannot pop the root scene - need at least 2 scenes in history");
+
+        // Pop the current scene (this will remove it from history)
         self.pop_scene(ctx, false);
 
-        // get scene
-        let mut scene = self
-            .unloaded_scenes
-            .remove(
-                self.history
-                    .last()
-                    .expect("the current scene is not the root"),
-            )
-            .expect("the wanted scene has been loaded");
+        // Try to get the cached previous scene, or reload it if not cached
+        // Note: Scene might not be cached if:
+        // - It was marked as non-cacheable (can_cache() = false)
+        // - Multiple transitions caused cache eviction
+        // - The scene was explicitly cleared from cache
+        let (mut scene, was_cached) =
+            if let Some(scene) = self.unloaded_scenes.remove(&previous_scene_id) {
+                (scene, true)
+            } else {
+                // Scene wasn't cached - need to recreate it
+                log::debug!(
+                    target: "scene",
+                    "Reloading uncached scene {:?} during pop",
+                    previous_scene_id
+                );
+                (self.scene_loader.load(previous_scene_id), false)
+            };
 
-        self.show_scene(ctx, &mut *scene, true);
+        // Show scene - pass !was_cached so ready() is called for reloaded scenes
+        self.show_scene(ctx, &mut *scene, was_cached);
 
         // set active scene
         self.active_scene.replace(scene);
