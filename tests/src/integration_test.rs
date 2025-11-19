@@ -247,7 +247,11 @@ fn continuous_run() -> Result<()> {
         sim.run_steps(1);
 
         let events = sim.poll_events();
-        assert!(events.iter().any(|e| matches!(e, SimEvent::RunCompleted)));
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, SimEvent::RunCompleted(_)))
+        );
         assert!(
             events
                 .iter()

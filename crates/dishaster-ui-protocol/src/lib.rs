@@ -102,6 +102,8 @@ pub enum UiCommand {
     FinishRun,
     /// Signal that the current day has finished and should advance to next day.
     FinishDay,
+    /// Show settlement statistics for the completed day.
+    ShowSettlement(Box<SettlementView>),
 
     /// Update the displayed TPS value in the time stats UI.
     UpdateTpsDisplay(f32),

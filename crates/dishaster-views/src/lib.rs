@@ -197,3 +197,30 @@ pub struct EndingView {
     /// Whether the player can continue playing after this ending.
     pub can_continue: bool,
 }
+
+/// View data for settlement display at end of day
+#[derive(Debug, Clone)]
+pub struct SettlementView {
+    /// Current day number
+    pub day: u32,
+    /// Total number of diner visits
+    pub total_visits: u32,
+    /// Number of diners who completed their meal
+    pub completed_diners: u32,
+    /// Total revenue collected today
+    pub revenue: f32,
+    /// Total food consumed today in kilograms
+    pub consumption_kg: f32,
+    /// Average serving time per diner (seconds)
+    pub avg_serving_time: f32,
+    /// Average dining time per diner (seconds)
+    pub avg_dining_time: f32,
+    /// Current reputation value [0, 100]
+    pub reputation: f32,
+    /// Reputation change today
+    pub reputation_delta: f32,
+    /// Food Safety Risk Index [0, 100]
+    pub fsri: f32,
+    /// Food quality level [0, 100]
+    pub food_quality: f32,
+}

@@ -41,7 +41,7 @@ impl Game {
                     });
                 }
 
-                SimEvent::RunCompleted => {
+                SimEvent::RunCompleted(settlement_view) => {
                     godot_print!("Process SimEvent: RunCompleted");
 
                     self.phase = DayPhase::Settlement;
@@ -50,6 +50,9 @@ impl Game {
                     self.ui_commands
                         .push(UiCommand::PlayPhaseMusic(PhaseMusic::Settlement));
 
+                    // Send settlement view with day statistics
+                    self.ui_commands
+                        .push(UiCommand::ShowSettlement(settlement_view));
                     self.ui_commands.push(UiCommand::FinishRun);
                 }
                 SimEvent::DayCompleted => {

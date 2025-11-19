@@ -89,3 +89,22 @@ trial-agreement = 赞同
 trial-objection = 反对
 trial-perjury = 伪证
 trial-question = 疑问
+
+## Settlement
+
+settlement-title = 第 { $day } 天结算
+
+settlement-stats =
+    {"[b]营业统计[/b]"}
+    • 到访人数：{ $total_visits } 人
+    • 完成用餐：{ $completed_diners } 人（{ NUM($completion_rate, maxfd: 1) }%）
+    • 营业收入：¥{ NUM($revenue, maxfd: 1) }
+    • 食材消耗：{ NUM($consumption_kg, maxfd: 1) } kg
+    • 平均备餐时间：{ NUM($avg_serving_time, maxfd: 1) } 秒
+    • 平均用餐时间：{ NUM($avg_dining_time, maxfd: 1) } 秒
+    {"[b]声誉与质量[/b]"}
+    • 声誉：{ NUM($reputation, maxfd: 1) }（{ $reputation_delta }）
+    • 食品安全风险指数：{ NUM($fsri, maxfd: 1) }
+    • 食品质量：{ NUM($food_quality, maxfd: 1) }
+
+settlement-guidance = 点击确认按钮继续进入管理决策阶段。

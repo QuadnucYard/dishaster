@@ -91,6 +91,9 @@ fn on_run_ended(
     diner_query: Query<Entity, With<Diner>>,
     mut schedule: ResMut<DailyDinerSchedule>,
     mut phase: ResMut<RunPhase>,
+    day_status: Res<DayStatus>,
+    daily_stats: Res<DailyStats>,
+    reputation: Res<ReputationStateRes>,
     mut events: ResMut<EventQueue>,
 ) {
     // Stop spawning
@@ -104,8 +107,37 @@ fn on_run_ended(
     // Transition to Settlement phase
     *phase = RunPhase::Settlement;
 
-    // Emit day completed event at run end
-    events.push(SimEvent::RunCompleted);
+    // Create settlement view with day statistics and reputation data
+    let settlement_view = Box::new(dishaster_views::SettlementView {
+        day: day_status.current_day.0,
+        total_visits: daily_stats.total_visits,
+        completed_diners: daily_stats.completed_diners,
+        revenue: daily_stats.total_revenue,
+        consumption_kg: daily_stats.total_consumption_kg,
+        avg_serving_time: daily_stats.avg_serving_time(),
+        avg_dining_time: daily_stats.avg_dining_time(),
+        reputation: reputation.reputation,
+        reputation_delta: reputation.daily_accumulated,
+        fsri: reputation.fsri,
+        food_quality: reputation.food_quality,
+    });
+    log::info!(
+        "Day {} ended. Visits: {}, Completed: {}, Revenue: ¥{:.2}, Consumption: {:.2} kg, Avg Serving Time: {:.1}s, Avg Dining Time: {:.1}s, Reputation: {:.1} ({:+.1}), FSRI: {:.1}, Quality: {:.1}",
+        settlement_view.day,
+        settlement_view.total_visits,
+        settlement_view.completed_diners,
+        settlement_view.revenue,
+        settlement_view.consumption_kg,
+        settlement_view.avg_serving_time,
+        settlement_view.avg_dining_time,
+        settlement_view.reputation,
+        settlement_view.reputation_delta,
+        settlement_view.fsri,
+        settlement_view.food_quality
+    );
+
+    // Emit day completed event at run end with settlement data
+    events.push(SimEvent::RunCompleted(settlement_view));
 
     // Trigger management decision roll
     commands.trigger(RollManagementDecisions);

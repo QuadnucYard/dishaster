@@ -2,8 +2,8 @@
 
 use dishaster_views::{
     Appearance, DishView, EndingView, FeedbackView, InspectorResultView, ManagementDecisionsView,
-    ManagementIncidentView, PricingMethod, ReputationView, TrialImpactView, TrialIntro,
-    TrialResponseOption, TrialStatement,
+    ManagementIncidentView, PricingMethod, ReputationView, SettlementView, TrialImpactView,
+    TrialIntro, TrialResponseOption, TrialStatement,
 };
 use dishrupt_core::{EntityId, prelude::EcoString};
 
@@ -17,7 +17,7 @@ pub enum SimEvent {
     Persist,
 
     /// The current run has completed (all diners have exited and time limit reached).
-    RunCompleted,
+    RunCompleted(Box<SettlementView>),
     /// The current day has completed (decision made).
     DayCompleted,
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://ckietib4g2q0d"]
 
-[ext_resource type="Theme" uid="uid://r4reuheu2fem" path="res://assets/themes/panel_text.tres" id="1_ea4ck"]
+[ext_resource type="Theme" uid="uid://quax61mpru57" path="res://assets/themes/panel_text_sm.tres" id="1_ea4ck"]
 [ext_resource type="StyleBox" uid="uid://cbrpkgkeg2mch" path="res://assets/themes/panel.tres" id="1_qpv0l"]
 [ext_resource type="Theme" uid="uid://c5h27pdjsc30" path="res://assets/themes/round_button.tres" id="2_ea4ck"]
 
@@ -23,6 +23,7 @@ color = Color(0, 0, 0, 0.46666667)
 
 [node name="Panel" type="PanelContainer" parent="."]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(600, 0)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -52,19 +53,21 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Day 1 Settlement"
 
-[node name="SummaryLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
+[node name="StatsLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 bbcode_enabled = true
-text = "Service finished in 03:00."
+text = "Statistics will appear here."
+fit_content = true
 scroll_active = false
 
 [node name="GuidanceLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 bbcode_enabled = true
-text = "Press Next Day to continue."
+text = "Press Confirm to continue."
+fit_content = true
 scroll_active = false
 
 [node name="ButtonRow" type="HBoxContainer" parent="Panel/MarginContainer/VBox"]

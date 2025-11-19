@@ -252,6 +252,9 @@ impl GameScene {
             UiCommand::FinishRun => {
                 gui.hide::<GamingLayout>();
                 gui.hide::<ReputationGui>();
+            }
+            UiCommand::ShowSettlement(view) => {
+                gui.get_mut::<SettlementGui>().set_view(&view);
                 gui.show::<SettlementGui>();
             }
             UiCommand::FinishDay => {
