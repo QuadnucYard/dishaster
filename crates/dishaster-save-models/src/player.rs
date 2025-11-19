@@ -106,6 +106,10 @@ pub struct DayStats {
     pub revenue: f32,
     /// Total food consumed in kilograms.
     pub consumption_kg: f32,
+    /// Individual serving times for each diner (seconds).
+    pub serving_times: Vec<f32>,
+    /// Individual dining times for each diner (seconds).
+    pub dining_times: Vec<f32>,
 }
 
 impl AggregateStats {

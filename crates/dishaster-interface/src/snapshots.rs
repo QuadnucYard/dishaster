@@ -35,6 +35,10 @@ pub struct DayStats {
     pub revenue: f32,
     /// Total food consumed today in kilograms.
     pub consumption_kg: f32,
+    /// Average serving time per diner (seconds).
+    pub avg_serving_time: f32,
+    /// Average dining time per diner (seconds).
+    pub avg_dining_time: f32,
 }
 
 /// Feature gates controlling which debug payloads are exported.

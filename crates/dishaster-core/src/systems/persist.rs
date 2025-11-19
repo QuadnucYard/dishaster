@@ -106,6 +106,8 @@ pub fn persist_system(
         completed_diners: daily_stats.completed_diners,
         revenue: daily_stats.total_revenue,
         consumption_kg: daily_stats.total_consumption_kg,
+        serving_times: daily_stats.serving_times.clone(),
+        dining_times: daily_stats.dining_times.clone(),
     };
 
     SimProfile {

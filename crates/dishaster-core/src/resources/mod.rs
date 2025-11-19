@@ -98,6 +98,30 @@ pub struct DailyStats {
     pub total_revenue: f32,
     /// Number of diners who completed their meal
     pub completed_diners: u32,
+    /// Individual serving times for each diner (seconds)
+    pub serving_times: Vec<f32>,
+    /// Individual dining times for each diner (seconds)
+    pub dining_times: Vec<f32>,
+}
+
+impl DailyStats {
+    /// Calculate average serving time (returns 0.0 if no data)
+    pub fn avg_serving_time(&self) -> f32 {
+        if self.serving_times.is_empty() {
+            0.0
+        } else {
+            self.serving_times.iter().sum::<f32>() / self.serving_times.len() as f32
+        }
+    }
+
+    /// Calculate average dining time (returns 0.0 if no data)
+    pub fn avg_dining_time(&self) -> f32 {
+        if self.dining_times.is_empty() {
+            0.0
+        } else {
+            self.dining_times.iter().sum::<f32>() / self.dining_times.len() as f32
+        }
+    }
 }
 
 /// Resource wrapper for Arc<GameModelRegistry>

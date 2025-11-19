@@ -161,6 +161,50 @@ fn main() -> Result<()> {
     );
     println!("  Reputation: {:.2}", persisted.reputation);
 
+    // Print serving and dining time statistics
+    if !day_stats.serving_times.is_empty() {
+        let avg_serving =
+            day_stats.serving_times.iter().sum::<f32>() / day_stats.serving_times.len() as f32;
+        let min_serving = day_stats
+            .serving_times
+            .iter()
+            .copied()
+            .fold(f32::INFINITY, f32::min);
+        let max_serving = day_stats
+            .serving_times
+            .iter()
+            .copied()
+            .fold(f32::NEG_INFINITY, f32::max);
+        println!(
+            "  Serving time: avg={:.1}s, min={:.1}s, max={:.1}s (n={})",
+            avg_serving,
+            min_serving,
+            max_serving,
+            day_stats.serving_times.len()
+        );
+    }
+    if !day_stats.dining_times.is_empty() {
+        let avg_dining =
+            day_stats.dining_times.iter().sum::<f32>() / day_stats.dining_times.len() as f32;
+        let min_dining = day_stats
+            .dining_times
+            .iter()
+            .copied()
+            .fold(f32::INFINITY, f32::min);
+        let max_dining = day_stats
+            .dining_times
+            .iter()
+            .copied()
+            .fold(f32::NEG_INFINITY, f32::max);
+        println!(
+            "  Dining time: avg={:.1}s, min={:.1}s, max={:.1}s (n={})",
+            avg_dining,
+            min_dining,
+            max_dining,
+            day_stats.dining_times.len()
+        );
+    }
+
     let feedback_stats = sim.execute_query(SimQuery::FeedbackStats);
     if let SimResponse::FeedbackStats(stats) = feedback_stats {
         println!("Feedback stats:\n{stats}\n");

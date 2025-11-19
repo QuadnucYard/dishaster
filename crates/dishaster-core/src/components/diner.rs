@@ -46,6 +46,14 @@ pub struct DinerState {
     /// Budget allocated for this meal
     #[allow(dead_code)] // Will be used for budget constraints in future
     pub meal_budget: f32,
+    /// Time when serving started (when entering GetServed state)
+    pub serving_start_time: Option<f32>,
+    /// Time when serving ended (when leaving GetServed state)
+    pub serving_end_time: Option<f32>,
+    /// Time when dining started (when entering Eat state)
+    pub dining_start_time: Option<f32>,
+    /// Time when dining ended (when leaving Eat state)
+    pub dining_end_time: Option<f32>,
 }
 
 impl DinerState {

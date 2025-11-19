@@ -321,6 +321,19 @@ pub fn handle_eat_goal(
             change: DinerItemsChange::FinishEating,
         });
 
+        // Mark dining end time and record to daily stats
+        state.dining_end_time = Some(time.current_time as f32);
+        if let (Some(start), Some(end)) = (state.dining_start_time, state.dining_end_time) {
+            let dining_duration = end - start;
+            daily_stats.dining_times.push(dining_duration);
+            log::debug!(
+                target: "diner",
+                "diner {:?} dining time: {:.1}s",
+                entity,
+                dining_duration
+            );
+        }
+
         // Track completed diner in daily stats
         daily_stats.completed_diners += 1;
 

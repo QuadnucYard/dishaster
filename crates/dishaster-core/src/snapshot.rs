@@ -18,6 +18,8 @@ impl Simulation {
             completed_diners: daily_stats.completed_diners,
             revenue: daily_stats.total_revenue,
             consumption_kg: daily_stats.total_consumption_kg,
+            avg_serving_time: daily_stats.avg_serving_time(),
+            avg_dining_time: daily_stats.avg_dining_time(),
         }
     }
 

@@ -165,12 +165,14 @@ fn handle_get_served_goal(
     diner_query: Query<(
         Entity,
         &mut DinerGoalState,
-        &DinerState,
+        &mut DinerState,
         &DinerTargets,
         &ServiceSession,
     )>,
+    time: Res<Time>,
+    mut daily_stats: ResMut<DailyStats>,
 ) {
-    for (entity, mut goal, state, targets, session) in diner_query {
+    for (entity, mut goal, mut state, targets, session) in diner_query {
         if !goal.is(DinerGoal::GetServed) {
             continue;
         }
@@ -184,6 +186,19 @@ fn handle_get_served_goal(
             "diner {} finished being served, moving to find seat",
             entity
         );
+
+        // Mark serving end time and record to daily stats
+        state.serving_end_time = Some(time.current_time as f32);
+        if let (Some(start), Some(end)) = (state.serving_start_time, state.serving_end_time) {
+            let serving_duration = end - start;
+            daily_stats.serving_times.push(serving_duration);
+            log::debug!(
+                target: "diner",
+                "diner {} serving time: {:.1}s",
+                entity,
+                serving_duration
+            );
+        }
 
         // Service completed, remove session and move to finding a seat
         commands
@@ -300,13 +315,15 @@ fn handle_move_to_seat_goal(
     diner_query: Query<(
         Entity,
         &mut DinerGoalState,
+        &mut DinerState,
         &mut DinerTargets,
         &mut Movement,
     )>,
     mut table_query: Query<(Entity, &mut DiningTable)>,
+    time: Res<Time>,
     mut events: ResMut<EventQueue>,
 ) {
-    for (entity, mut goal, mut targets, mut movement) in diner_query {
+    for (entity, mut goal, mut state, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::MoveToSeat) {
             continue;
         }
@@ -355,6 +372,9 @@ fn handle_move_to_seat_goal(
                 entity: entity.to_entity_id(),
                 change: DinerItemsChange::StartEating(table_entity.to_entity_id(), seat_index),
             });
+
+            // Mark dining start time
+            state.dining_start_time = Some(time.current_time as f32);
 
             goal.update(DinerGoal::Eat);
             continue;

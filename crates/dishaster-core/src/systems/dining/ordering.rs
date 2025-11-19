@@ -339,6 +339,10 @@ pub fn handle_create_session_from_tentative_order(
     session.planned_order = planned_order;
     commands.entity(entity).insert(session);
     targets.tentative_order.clear();
+
+    // Mark serving start time
+    diner_state.serving_start_time = Some(time.current_time as f32);
+
     goal.update(DinerGoal::GetServed);
 }
 
