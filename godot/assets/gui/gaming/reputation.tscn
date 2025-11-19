@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b3n4dev05ifwq"]
 
-[ext_resource type="Theme" uid="uid://quax61mpru57" path="res://assets/themes/panel_text_sm.tres" id="1_b6g7l"]
+[ext_resource type="Theme" uid="uid://v1ro730rxkn0" path="res://assets/themes/panel_text_xs.tres" id="1_b6g7l"]
 [ext_resource type="StyleBox" uid="uid://cdh3642aa61kf" path="res://assets/themes/panel_compact.tres" id="2_4yhn4"]
 
 [node name="Reputation" type="Control"]
@@ -18,8 +18,8 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -206.0
-offset_right = 265.0
+offset_top = -197.0
+offset_right = 251.0
 grow_vertical = 0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
@@ -27,6 +27,7 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="Panel" type="PanelContainer" parent="MarginContainer"]
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 theme = ExtResource("1_b6g7l")
 theme_override_styles/panel = ExtResource("2_4yhn4")
@@ -36,7 +37,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="MarginContainer/Panel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 24
 text = "Reputation"
 horizontal_alignment = 1
 
@@ -47,7 +48,6 @@ layout_mode = 2
 [node name="Label" type="Label" parent="MarginContainer/Panel/VBox/ReputationRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
 text = "Reputation:"
 
 [node name="Delta" type="Label" parent="MarginContainer/Panel/VBox/ReputationRow"]
@@ -58,7 +58,6 @@ horizontal_alignment = 2
 
 [node name="Value" type="Label" parent="MarginContainer/Panel/VBox/ReputationRow"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
 text = "00.0"
 horizontal_alignment = 2
 
@@ -76,12 +75,10 @@ layout_mode = 2
 [node name="Label" type="Label" parent="MarginContainer/Panel/VBox/FSRIRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
 text = "FSRI:"
 
 [node name="Value" type="Label" parent="MarginContainer/Panel/VBox/FSRIRow"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
 text = "00.0"
 horizontal_alignment = 2
 
@@ -92,11 +89,9 @@ layout_mode = 2
 [node name="Label" type="Label" parent="MarginContainer/Panel/VBox/FoodQualityRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
 text = "Food Quality:"
 
 [node name="Value" type="Label" parent="MarginContainer/Panel/VBox/FoodQualityRow"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
 text = "00.0"
 horizontal_alignment = 2

@@ -30,6 +30,8 @@ use rustc_hash::FxHashMap;
 use self::{perf::PerfTracker, present::*};
 use crate::{dbgviz::*, hint::HintTracker};
 
+const DEFAULT_TPS: f64 = 120.0;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum DayPhase {
     Preparation,
@@ -123,8 +125,7 @@ impl Game {
         // Initialize simulation
         let sim = sim_creator(level);
         let root_entity = sim.root_entity();
-        let default_tps = 60.0;
-        let sim_runner = SyncSimulationRunner::new(sim, default_tps);
+        let sim_runner = SyncSimulationRunner::new(sim, DEFAULT_TPS);
 
         // Set up the map scene
         let mut stage_root = gd.get_node_as::<Node2D>("%Stage");

@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://djdcse6v6o5h0"]
 
-[ext_resource type="Theme" uid="uid://quax61mpru57" path="res://assets/themes/panel_text_sm.tres" id="1_ecx8e"]
+[ext_resource type="Theme" uid="uid://v1ro730rxkn0" path="res://assets/themes/panel_text_xs.tres" id="1_0nkai"]
 [ext_resource type="StyleBox" uid="uid://cdh3642aa61kf" path="res://assets/themes/panel_compact.tres" id="2_xrvir"]
 [ext_resource type="Texture2D" uid="uid://cgbgmwp03khh2" path="res://assets/gui/textures/slider_grabber.png" id="3_ecx8e"]
 [ext_resource type="Texture2D" uid="uid://u13odlqnrhwc" path="res://assets/gui/textures/clock_bg.png" id="4_0nkai"]
@@ -56,8 +56,8 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -286.0
-offset_bottom = 233.0
+offset_left = -216.0
+offset_bottom = 209.0
 grow_horizontal = 0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
@@ -65,8 +65,9 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer"]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-theme = ExtResource("1_ecx8e")
+theme = ExtResource("1_0nkai")
 theme_override_styles/panel = ExtResource("2_xrvir")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer"]
@@ -79,6 +80,7 @@ alignment = 1
 
 [node name="TpsCaption" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/TpsRow"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 16
 text = "TPS"
 
 [node name="TpsSlider" type="HSlider" parent="MarginContainer/PanelContainer/VBoxContainer/TpsRow"]
@@ -93,13 +95,15 @@ theme_override_styles/slider = SubResource("StyleBoxFlat_03vi5")
 theme_override_styles/grabber_area = SubResource("StyleBoxFlat_xrvir")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxEmpty_ecx8e")
 max_value = 600.0
+step = 10.0
 value = 60.0
 
 [node name="TpsValueLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/TpsRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
-text = "60"
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+text = "600"
 
 [node name="DinerStatsLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
 unique_name_in_owner = true

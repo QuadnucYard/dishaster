@@ -171,6 +171,8 @@ impl Simulation {
         self.world.insert_resource(level.into_res());
         // Derived RNGs
         self.world
+            .insert_resource(SpawnerRng::new(world_rng.derive_seed()));
+        self.world
             .insert_resource(NavigationRng::new(world_rng.derive_seed()));
         self.world
             .insert_resource(QueueingRng::new(world_rng.derive_seed()));

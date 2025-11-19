@@ -11,6 +11,11 @@ pub use self::{buffers::*, time::Time};
 use crate::{components::*, models::*, prelude::*};
 
 #[allow(missing_docs)]
+pub struct SpawnerRngTag;
+/// SystemRng specialized for spawning systems
+pub type SpawnerRng = SystemRng<SpawnerRngTag>;
+
+#[allow(missing_docs)]
 pub struct NavigationRngTag;
 /// SystemRng specialized for navigation systems
 pub type NavigationRng = SystemRng<NavigationRngTag>;

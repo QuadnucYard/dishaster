@@ -9,18 +9,24 @@ pub fn update_diner_spawner(
     day_status: Res<DayStatus>,
     mut schedule: ResMut<DailyDinerSchedule>,
     canteen: Res<Canteen>,
+    mut rng: ResMut<SpawnerRng>,
 ) {
     // Use relative time for arrival time checks
     let current_time = time.world_time as f32 - day_status.start_time;
 
     // Spawn all diners whose arrival time has passed
     while let Some(scheduled) = schedule.next_diner_if_ready(current_time) {
-        spawn_scheduled_diner(scheduled, &mut commands, &canteen);
+        spawn_scheduled_diner(scheduled, &mut commands, &canteen, &mut rng);
     }
 }
 
 /// Spawn a scheduled diner entity at the canteen entrance
-fn spawn_scheduled_diner(scheduled: ScheduledDiner, commands: &mut Commands, canteen: &Canteen) {
+fn spawn_scheduled_diner(
+    scheduled: ScheduledDiner,
+    commands: &mut Commands,
+    canteen: &Canteen,
+    rng: &mut Prng,
+) {
     let diner_id = scheduled.id;
 
     // Sample spawn position from entrance
@@ -28,7 +34,7 @@ fn spawn_scheduled_diner(scheduled: ScheduledDiner, commands: &mut Commands, can
         let entrance = canteen
             .model
             .entrances
-            .first()
+            .choose(rng)
             .expect("canteen must have at least one entrance");
         let x = (entrance.x_min + entrance.x_max) / 2.0; // Center of entrance
         Vec2::new(x, canteen.model.entrances_y + 0.5)
