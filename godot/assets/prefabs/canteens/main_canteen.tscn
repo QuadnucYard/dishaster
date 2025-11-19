@@ -62,6 +62,7 @@ frame = 1
 
 [node name="Corro" parent="Origin" instance=ExtResource("5_fhumt")]
 unique_name_in_owner = true
+visible = false
 position = Vector2(1473, 781)
 
 [node name="Camera2D" type="Camera2D" parent="."]

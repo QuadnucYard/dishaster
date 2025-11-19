@@ -10,7 +10,7 @@
         praise: 0.35,       // Increased to reward good service more
         appeal: -0.05,      // No appealing dishes available
         queue: -3.0,        // Queue too long
-        tableware: -0.15,   // Missing tray/chopsticks
+        tableware: -0.01,   // Missing tray/chopsticks
         quality: -0.05,     // Dish quality below expectation
         price: -0.05,       // Pricing complaints
         hygiene: -0.25,      // Still most severe
@@ -40,7 +40,7 @@
         praise: 0.5,
         appeal: 0.35,
         queue: 0.50,
-        tableware: 0.5,
+        tableware: 0.1,
         quality: 0.2,
         price: 0.25,
         hygiene: 0.5,
