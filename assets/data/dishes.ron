@@ -18,7 +18,7 @@
         id: "mantou", // 馒头
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 3.0,
+            serving_time: 5.0,
             tags: ["staple", "steamed", "mild"],
             base_price: 1.0,
             weight_distrib: (mean: 0.1, stddev: 0.02), // 100g (1-2 pieces)
@@ -31,7 +31,7 @@
         id: "congee", // 白粥
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 4.0,
+            serving_time: 5.0,
             tags: ["staple", "soup", "mild", "light"],
             base_price: 1.5,
             weight_distrib: (mean: 0.3, stddev: 0.05), // 300ml
@@ -161,7 +161,7 @@
         id: "pork_chop_rice", // 猪扒饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 15.0,
             risk_level: 0.1,
             tags: ["combo", "meat", "pork", "rice", "fried"],
             base_price: 15.0,
@@ -175,7 +175,7 @@
         id: "chicken_cutlet_rice", // 鸡排饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 15.0,
             risk_level: 0.1,
             tags: ["combo", "meat", "chicken", "rice", "fried"],
             base_price: 14.0,
@@ -217,7 +217,7 @@
         id: "fish_fillet_rice", // 鱼片饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 15.0,
             risk_level: 0.15,
             tags: ["combo", "fish", "rice", "light"],
             base_price: 14.0,
@@ -231,7 +231,7 @@
         id: "kung_pao_chicken_rice", // 宫保鸡丁盖饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 11.0,
+            serving_time: 12.0,
             risk_level: 0.1,
             tags: ["combo", "meat", "chicken", "rice", "spicy"],
             base_price: 13.0,
@@ -245,7 +245,7 @@
         id: "mapo_tofu_rice", // 麻婆豆腐盖饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 10.0,
+            serving_time: 12.0,
             tags: ["combo", "tofu", "rice", "spicy"],
             base_price: 11.0,
             weight_distrib: (mean: 0.33, stddev: 0.05),
@@ -258,7 +258,7 @@
         id: "tomato_egg_rice", // 番茄鸡蛋盖饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 10.0,
+            serving_time: 8.0,
             tags: ["combo", "egg", "rice", "vegetable", "light"],
             base_price: 10.0,
             weight_distrib: (mean: 0.32, stddev: 0.05),
@@ -273,7 +273,7 @@
         id: "egg_fried_rice", // 蛋炒饭
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 10.0,
+            serving_time: 30.0,
             tags: ["combo", "rice", "egg", "fried"],
             base_price: 8.0,
             weight_distrib: (mean: 0.3, stddev: 0.04),
@@ -286,7 +286,7 @@
         id: "yangzhou_fried_rice", // 扬州炒饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 35.0,
             tags: ["combo", "rice", "egg", "meat", "fried"],
             base_price: 12.0,
             weight_distrib: (mean: 0.33, stddev: 0.05),
@@ -299,7 +299,7 @@
         id: "shrimp_fried_rice", // 虾仁炒饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 35.0,
             risk_level: 0.1,
             tags: ["combo", "rice", "seafood", "fried"],
             base_price: 14.0,
@@ -313,7 +313,7 @@
         id: "beef_fried_rice", // 牛肉炒饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 35.0,
             risk_level: 0.1,
             tags: ["combo", "rice", "beef", "fried"],
             base_price: 13.0,
@@ -327,7 +327,7 @@
         id: "ham_fried_rice", // 火腿炒饭
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 11.0,
+            serving_time: 30.0,
             tags: ["combo", "rice", "meat", "fried"],
             base_price: 10.0,
             weight_distrib: (mean: 0.3, stddev: 0.04),
@@ -340,7 +340,7 @@
         id: "pineapple_fried_rice", // 菠萝炒饭
         characteristics: (
             quality_range: (0.7, 0.9),
-            serving_time: 13.0,
+            serving_time: 40.0,
             tags: ["combo", "rice", "fried", "sweet"],
             base_price: 13.0,
             weight_distrib: (mean: 0.32, stddev: 0.05),
@@ -370,7 +370,7 @@
         id: "sweet_sour_pork", // 糖醋里脊
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 12.0,
+            serving_time: 15.0,
             risk_level: 0.15,
             tags: ["meat", "pork", "sweet", "fried"],
             base_price: 42.0,
@@ -384,7 +384,7 @@
         id: "braised_pork_belly", // 红烧肉
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 10.0,
+            serving_time: 12.0,
             risk_level: 0.1,
             tags: ["meat", "pork", "savory", "braised", "hot"],
             base_price: 48.0,
@@ -398,7 +398,7 @@
         id: "cola_chicken_wings", // 可乐鸡翅
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 13.0,
+            serving_time: 15.0,
             risk_level: 0.1,
             tags: ["meat", "chicken", "sweet", "braised"],
             base_price: 52.0,
@@ -412,7 +412,7 @@
         id: "black_pepper_beef", // 黑椒牛柳
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 13.0,
+            serving_time: 15.0,
             risk_level: 0.1,
             tags: ["meat", "beef", "savory", "fried", "hot"],
             base_price: 65.0,
@@ -426,7 +426,7 @@
         id: "beef_potato_stew", // 土豆烧牛肉
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 13.0,
+            serving_time: 15.0,
             risk_level: 0.1,
             tags: ["meat", "beef", "savory", "hot", "braised"],
             base_price: 58.0,
@@ -440,7 +440,7 @@
         id: "fried_pork_cutlet", // 炸猪排
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            serving_time: 15.0,
             risk_level: 0.15,
             tags: ["meat", "pork", "fried", "crispy"],
             base_price: 55.0,
@@ -454,7 +454,7 @@
         id: "salt_pepper_ribs", // 椒盐排骨
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            serving_time: 15.0,
             risk_level: 0.15,
             tags: ["meat", "pork", "fried", "crispy", "savory"],
             base_price: 60.0,
@@ -471,7 +471,7 @@
         id: "mapo_tofu", // 麻婆豆腐
         characteristics: (
             quality_range: (0.65, 0.95),
-            serving_time: 10.0,
+            serving_time: 12.0,
             tags: ["tofu", "meat", "spicy", "hot", "savory"],
             base_price: 3.5,
             weight_distrib: (mean: 0.15, stddev: 0.03),
@@ -484,7 +484,7 @@
         id: "fish_fragrant_eggplant", // 鱼香茄子
         characteristics: (
             quality_range: (0.6, 0.9),
-            serving_time: 11.0,
+            serving_time: 12.0,
             tags: ["vegetable", "meat", "eggplant", "spicy", "savory"],
             base_price: 3.5,
             weight_distrib: (mean: 0.15, stddev: 0.03),
@@ -497,7 +497,7 @@
         id: "green_pepper_pork", // 青椒肉丝
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 10.0,
+            serving_time: 12.0,
             tags: ["meat", "pork", "vegetable", "fried", "savory"],
             base_price: 4.0,
             weight_distrib: (mean: 0.15, stddev: 0.03),
@@ -524,7 +524,7 @@
         id: "scrambled_eggs_tomato", // 西红柿炒鸡蛋
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 9.0,
+            serving_time: 8.0,
             tags: ["egg", "vegetable", "mild", "savory"],
             base_price: 3.0,
             weight_distrib: (mean: 0.14, stddev: 0.03),
@@ -537,7 +537,7 @@
         id: "scrambled_eggs_cucumber", // 黄瓜炒鸡蛋
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 9.0,
+            serving_time: 8.0,
             tags: ["egg", "vegetable", "mild", "light"],
             base_price: 3.0,
             weight_distrib: (mean: 0.13, stddev: 0.03),
@@ -553,7 +553,7 @@
         id: "stir_fried_cabbage", // 清炒白菜
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 8.0,
+            serving_time: 6.0,
             tags: ["vegetable", "light", "healthy", "fried"],
             base_price: 1.5,
             weight_distrib: (mean: 0.12, stddev: 0.03),
@@ -566,7 +566,7 @@
         id: "stir_fried_bok_choy", // 清炒小白菜
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 8.0,
+            serving_time: 6.0,
             tags: ["vegetable", "light", "healthy", "fried"],
             base_price: 1.5,
             weight_distrib: (mean: 0.12, stddev: 0.03),
@@ -579,7 +579,7 @@
         id: "potato_shreds", // 炒土豆丝
         characteristics: (
             quality_range: (0.6, 0.9),
-            serving_time: 9.0,
+            serving_time: 7.0,
             tags: ["vegetable", "fried", "crispy"],
             base_price: 2.0,
             weight_distrib: (mean: 0.13, stddev: 0.03),
@@ -592,7 +592,7 @@
         id: "spinach_garlic", // 蒜蓉菠菜
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 7.0,
+            serving_time: 6.0,
             tags: ["vegetable", "light", "healthy", "garlic"],
             base_price: 2.5,
             weight_distrib: (mean: 0.11, stddev: 0.02),
@@ -605,7 +605,7 @@
         id: "chinese_broccoli_garlic", // 蒜蓉芥兰
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 7.0,
+            serving_time: 6.0,
             tags: ["vegetable", "light", "healthy", "garlic"],
             base_price: 2.5,
             weight_distrib: (mean: 0.11, stddev: 0.02),
@@ -618,7 +618,7 @@
         id: "stir_fried_bean_sprouts", // 炒豆芽
         characteristics: (
             quality_range: (0.6, 0.85),
-            serving_time: 7.0,
+            serving_time: 5.0,
             tags: ["vegetable", "light", "fried", "crispy"],
             base_price: 1.5,
             weight_distrib: (mean: 0.10, stddev: 0.02),
@@ -631,7 +631,7 @@
         id: "stir_fried_water_spinach", // 炒空心菜
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 8.0,
+            serving_time: 6.0,
             tags: ["vegetable", "light", "fried", "garlic"],
             base_price: 2.0,
             weight_distrib: (mean: 0.12, stddev: 0.03),
@@ -644,7 +644,7 @@
         id: "braised_eggplant", // 红烧茄子
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 11.0,
+            serving_time: 12.0,
             tags: ["vegetable", "eggplant", "savory", "braised"],
             base_price: 2.5,
             weight_distrib: (mean: 0.14, stddev: 0.03),
@@ -659,7 +659,7 @@
         id: "egg_drop_soup", // 蛋花汤
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 6.0,
+            serving_time: 5.0,
             tags: ["soup", "egg", "light", "hot"],
             base_price: 2.0,
             weight_distrib: (mean: 0.25, stddev: 0.04), // 250ml
@@ -672,7 +672,7 @@
         id: "seaweed_egg_soup", // 紫菜蛋花汤
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 6.0,
+            serving_time: 5.0,
             tags: ["soup", "egg", "light", "hot"],
             base_price: 2.0,
             weight_distrib: (mean: 0.25, stddev: 0.04),
@@ -685,7 +685,7 @@
         id: "tomato_egg_soup", // 西红柿蛋汤
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 7.0,
+            serving_time: 6.0,
             tags: ["soup", "egg", "vegetable", "hot"],
             base_price: 2.5,
             weight_distrib: (mean: 0.26, stddev: 0.04),
@@ -698,7 +698,7 @@
         id: "winter_melon_soup", // 冬瓜汤
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 7.0,
+            serving_time: 5.0,
             tags: ["soup", "vegetable", "light", "hot"],
             base_price: 2.0,
             weight_distrib: (mean: 0.25, stddev: 0.04),
@@ -713,7 +713,7 @@
         id: "dan_dan_noodles", // 担担面
         characteristics: (
             quality_range: (0.65, 0.95),
-            serving_time: 12.0,
+            serving_time: 45.0,
             tags: ["noodle", "spicy", "savory", "hot", "sichuan"],
             base_price: 10.0,
             weight_distrib: (mean: 0.32, stddev: 0.05),
@@ -726,7 +726,7 @@
         id: "beef_noodle_soup", // 牛肉面
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 15.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["noodle", "soup", "meat", "beef", "hot"],
             base_price: 16.0,
@@ -740,7 +740,7 @@
         id: "zhajiang_noodles", // 炸酱面
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 13.0,
+            serving_time: 45.0,
             tags: ["noodle", "pork", "savory"],
             base_price: 11.0,
             weight_distrib: (mean: 0.33, stddev: 0.05),
@@ -753,7 +753,7 @@
         id: "tomato_egg_noodles", // 西红柿鸡蛋面
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 45.0,
             tags: ["noodle", "soup", "egg", "vegetable", "hot"],
             base_price: 10.0,
             weight_distrib: (mean: 0.35, stddev: 0.05),
@@ -766,7 +766,7 @@
         id: "fried_noodles", // 炒面
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 12.0,
+            serving_time: 40.0,
             tags: ["noodle", "fried", "savory"],
             base_price: 9.0,
             weight_distrib: (mean: 0.30, stddev: 0.05),
@@ -792,7 +792,7 @@
         id: "hot_dry_noodles", // 热干面
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 10.0,
+            serving_time: 40.0,
             tags: ["noodle", "savory", "sesame"],
             base_price: 8.0,
             weight_distrib: (mean: 0.28, stddev: 0.04),
@@ -805,7 +805,7 @@
         id: "lanzhou_beef_noodles", // 兰州拉面
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["noodle", "beef", "soup", "halal"],
             base_price: 13.0,
@@ -819,7 +819,7 @@
         id: "chongqing_noodles", // 重庆小面
         characteristics: (
             quality_range: (0.7, 0.9),
-            serving_time: 11.0,
+            serving_time: 45.0,
             tags: ["noodle", "spicy", "sichuan"],
             base_price: 10.0,
             weight_distrib: (mean: 0.30, stddev: 0.04),
@@ -832,7 +832,7 @@
         id: "crossing_bridge_noodles", // 过桥米线
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 16.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["noodle", "soup", "yunnan", "hot"],
             base_price: 15.0,
@@ -846,7 +846,7 @@
         id: "cold_noodles", // 凉面
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 8.0,
+            serving_time: 20.0,
             tags: ["noodle", "cold", "refreshing"],
             base_price: 8.0,
             weight_distrib: (mean: 0.28, stddev: 0.04),
@@ -859,7 +859,7 @@
         id: "shrimp_wonton_noodles", // 虾仁云吞面
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 14.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["noodle", "wonton", "seafood", "soup"],
             base_price: 15.0,
@@ -873,7 +873,7 @@
         id: "pork_chop_noodles", // 排骨面
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 15.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["noodle", "pork", "soup", "hot"],
             base_price: 14.0,
@@ -889,7 +889,7 @@
         id: "pork_dumplings", // 猪肉水饺
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            serving_time: 50.0,
             tags: ["dumpling", "meat", "pork", "steamed"],
             base_price: 8.0, // 一份(10个)
             weight_distrib: (mean: 0.18, stddev: 0.03), // ~180g for 10 dumplings
@@ -902,7 +902,7 @@
         id: "vegetable_dumplings", // 素水饺
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            serving_time: 45.0,
             tags: ["dumpling", "vegetable", "steamed"],
             base_price: 7.0,
             weight_distrib: (mean: 0.17, stddev: 0.03),
@@ -915,7 +915,7 @@
         id: "pork_cabbage_dumplings", // 猪肉白菜饺子
         characteristics: (
             quality_range: (0.7, 0.9),
-            serving_time: 14.0,
+            serving_time: 50.0,
             tags: ["dumpling", "pork", "vegetable"],
             base_price: 8.0,
             weight_distrib: (mean: 0.18, stddev: 0.03),
@@ -928,7 +928,7 @@
         id: "pork_chive_dumplings", // 猪肉韭菜饺子
         characteristics: (
             quality_range: (0.7, 0.9),
-            serving_time: 14.0,
+            serving_time: 50.0,
             tags: ["dumpling", "pork", "vegetable"],
             base_price: 8.5,
             weight_distrib: (mean: 0.18, stddev: 0.03),
@@ -941,7 +941,7 @@
         id: "three_delicacy_dumplings", // 三鲜饺子
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["dumpling", "seafood", "pork"],
             base_price: 10.0,
@@ -955,7 +955,7 @@
         id: "shrimp_dumplings", // 虾仁饺子
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 14.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["dumpling", "seafood"],
             base_price: 12.0,
@@ -969,7 +969,7 @@
         id: "beef_dumplings", // 牛肉饺子
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 14.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["dumpling", "beef"],
             base_price: 10.0,
@@ -983,7 +983,7 @@
         id: "pan_fried_buns", // 生煎包
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 12.0,
+            serving_time: 40.0,
             tags: ["dumpling", "meat", "fried", "crispy"],
             base_price: 6.0, // 一份(4个)
             weight_distrib: (mean: 0.14, stddev: 0.02), // ~140g for 4 buns
@@ -1022,7 +1022,7 @@
         id: "spring_rolls", // 春卷
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 10.0,
+            serving_time: 8.0,
             tags: ["snack", "fried", "crispy", "vegetable"],
             base_price: 4.0, // 一份(3个)
             weight_distrib: (mean: 0.10, stddev: 0.02),
@@ -1048,7 +1048,7 @@
         id: "sesame_pancake", // 烧饼
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 6.0,
+            serving_time: 5.0,
             tags: ["snack", "baked", "sesame"],
             base_price: 2.5,
             weight_distrib: (mean: 0.08, stddev: 0.01),
@@ -1061,7 +1061,7 @@
         id: "scallion_pancake", // 葱油饼
         characteristics: (
             quality_range: (0.65, 0.9),
-            serving_time: 7.0,
+            serving_time: 20.0,
             tags: ["snack", "fried", "savory", "scallion"],
             base_price: 3.0,
             weight_distrib: (mean: 0.10, stddev: 0.02),
@@ -1077,7 +1077,7 @@
         id: "clay_pot_rice", // 煲仔饭
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 20.0,
+            serving_time: 50.0,
             tags: ["combo", "rice", "cantonese", "special"],
             base_price: 15.0,
             weight_distrib: (mean: 0.36, stddev: 0.05),
@@ -1090,7 +1090,7 @@
         id: "sausage_clay_pot_rice", // 腊味煲仔饭
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 20.0,
+            serving_time: 50.0,
             tags: ["combo", "rice", "meat", "cantonese", "special"],
             base_price: 16.0,
             weight_distrib: (mean: 0.37, stddev: 0.05),
@@ -1103,7 +1103,7 @@
         id: "chicken_clay_pot_rice", // 滑鸡煲仔饭
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 20.0,
+            serving_time: 50.0,
             risk_level: 0.1,
             tags: ["combo", "rice", "chicken", "cantonese", "special"],
             base_price: 17.0,
@@ -1117,7 +1117,7 @@
         id: "sichuan_spicy_hot_pot", // 麻辣烫
         characteristics: (
             quality_range: (0.7, 0.9),
-            serving_time: 15.0,
+            serving_time: 50.0,
             tags: ["combo", "hot_pot", "spicy", "sichuan"],
             base_price: 12.0,
             weight_distrib: (mean: 0.32, stddev: 0.06), // Variable selection
@@ -1130,7 +1130,7 @@
         id: "spicy_grilled_fish", // 烤鱼
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 25.0,
+            serving_time: 55.0,
             risk_level: 0.15,
             tags: ["combo", "fish", "spicy", "grilled", "special"],
             base_price: 35.0,
@@ -1144,7 +1144,7 @@
         id: "stone_pot_bibimbap", // 石锅拌饭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 15.0,
+            serving_time: 40.0,
             tags: ["combo", "rice", "korean", "mixed"],
             base_price: 14.0,
             weight_distrib: (mean: 0.34, stddev: 0.05),
@@ -1159,7 +1159,7 @@
         id: "boiled_fish_chili", // 水煮鱼
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 18.0,
+            serving_time: 55.0,
             risk_level: 0.15,
             tags: ["specialty", "fish", "spicy", "hot", "sichuan"],
             base_price: 18.0,
@@ -1173,7 +1173,7 @@
         id: "spicy_hotpot", // 麻辣香锅
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 20.0,
+            serving_time: 50.0,
             risk_level: 0.15,
             tags: ["specialty", "meat", "spicy", "hot", "sichuan"],
             base_price: 20.0,
@@ -1187,7 +1187,7 @@
         id: "steamed_fish", // 清蒸鱼
         characteristics: (
             quality_range: (0.75, 0.95),
-            serving_time: 16.0,
+            serving_time: 50.0,
             risk_level: 0.2,
             tags: ["specialty", "fish", "light", "steamed", "healthy"],
             base_price: 16.0,
@@ -1201,7 +1201,7 @@
         id: "braised_fish", // 红烧鱼
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 17.0,
+            serving_time: 12.0,
             risk_level: 0.15,
             tags: ["specialty", "fish", "savory", "braised"],
             base_price: 16.0,
@@ -1215,7 +1215,7 @@
         id: "sweet_sour_fish", // 糖醋鱼
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 17.0,
+            serving_time: 50.0,
             risk_level: 0.15,
             tags: ["specialty", "fish", "sweet", "fried"],
             base_price: 17.0,
@@ -1229,7 +1229,7 @@
         id: "crispy_duck", // 香酥鸭
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 17.0,
+            serving_time: 15.0,
             risk_level: 0.15,
             tags: ["specialty", "duck", "fried", "crispy", "savory"],
             base_price: 18.0,

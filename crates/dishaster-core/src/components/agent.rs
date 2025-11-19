@@ -110,6 +110,84 @@ pub struct QueueLaneMembers {
     pub rear_pos: Vec2,
 }
 
+/// Bounded history of recent service completion times for a queue lane.
+/// Used to estimate actual wait times based on recent performance.
+#[derive(Component)]
+pub struct QueueServiceHistory {
+    /// Ring buffer of recent service durations (in seconds).
+    /// Each entry represents the time between consecutive service completions.
+    history: Vec<f32>,
+    /// Index where next service time will be written.
+    write_index: usize,
+    /// Timestamp of the last service completion (simulation time in seconds).
+    last_service_time: Option<f64>,
+}
+
+impl QueueServiceHistory {
+    /// Maximum number of service time samples to keep.
+    const HISTORY_SIZE: usize = 10;
+
+    /// Create a new empty service history.
+    pub fn new() -> Self {
+        Self {
+            history: Vec::new(),
+            write_index: 0,
+            last_service_time: None,
+        }
+    }
+
+    /// Record a service completion at the given simulation time.
+    pub fn record_service(&mut self, current_time: f64) {
+        if let Some(last_time) = self.last_service_time {
+            let service_duration = (current_time - last_time) as f32;
+
+            // Only record reasonable service times (1-120 seconds)
+            if service_duration > 1.0 && service_duration < 120.0 {
+                if self.history.len() < Self::HISTORY_SIZE {
+                    self.history.push(service_duration);
+                } else {
+                    self.history[self.write_index] = service_duration;
+                    self.write_index = (self.write_index + 1) % Self::HISTORY_SIZE;
+                }
+            }
+        }
+
+        self.last_service_time = Some(current_time);
+    }
+
+    /// Get the average service time per person based on recent history.
+    /// Returns None if insufficient data is available.
+    pub fn average_service_time(&self) -> Option<f32> {
+        if self.history.is_empty() {
+            return None;
+        }
+
+        let sum: f32 = self.history.iter().sum();
+        Some(sum / self.history.len() as f32)
+    }
+
+    /// Get the estimated wait time for a given queue position.
+    /// Falls back to default estimate if insufficient history.
+    /// Blends historical average with default based on sample size for stability.
+    /// Uses pessimistic (max of historical and default) to better catch queue issues.
+    pub fn estimate_wait_time(&self, queue_position: usize, default_per_person: f32) -> f32 {
+        let time_per_person = if self.history.is_empty() {
+            // No history yet, use default
+            default_per_person
+        } else if self.history.len() < Self::HISTORY_SIZE / 2 {
+            // Limited history, use pessimistic estimate (take the higher value)
+            // This ensures we catch queue problems early
+            let avg = self.average_service_time().unwrap();
+            avg.max(default_per_person)
+        } else {
+            // Sufficient history, add 20% buffer for variability and peak times
+            self.average_service_time().unwrap() * 1.2
+        };
+
+        queue_position as f32 * time_per_person
+    }
+}
+
 /// Intent marker for diners heading toward a service queue.
 #[derive(Component)]
 pub struct QueueIntent {

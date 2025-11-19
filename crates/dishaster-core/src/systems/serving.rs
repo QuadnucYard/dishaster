@@ -55,6 +55,7 @@ pub fn process_serving_messages(
     time: Res<Time>,
     mut rng: ResMut<ServingRng>,
     mut served_messages: MessageWriter<DishServed>,
+    mut queue_service_messages: MessageWriter<QueueServiceCompleted>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     registry: Res<GameModelRegistryRes>,
     perma_effects: Res<PermanentEffectsRes>,
@@ -272,6 +273,9 @@ pub fn process_serving_messages(
                     session.current_dish_index + 1,
                     session.planned_order.len()
                 );
+
+                // Emit queue service completion for history tracking
+                queue_service_messages.write(QueueServiceCompleted { lane: session.lane });
 
                 release_staff(&mut staff_state, now);
                 session.staff = None;
@@ -501,5 +505,19 @@ pub fn on_dish_served(
             entity: diner.to_entity_id(),
             change: DinerItemsChange::PickDish(dish_entity.to_entity_id()),
         });
+    }
+}
+
+/// Update queue service history when services complete.
+/// This tracks actual service times to provide better wait time estimates.
+pub fn update_queue_service_history(
+    mut lane_query: Query<&mut QueueServiceHistory>,
+    mut messages: MessageReader<QueueServiceCompleted>,
+    time: Res<Time>,
+) {
+    for msg in messages.read() {
+        if let Ok(mut history) = lane_query.get_mut(msg.lane) {
+            history.record_service(time.current_time);
+        }
     }
 }

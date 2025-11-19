@@ -13,7 +13,7 @@ pub fn check_queue_patience(
         &QueueMember,
         &mut EntityRng,
     )>,
-    lane_query: Query<&QueueLaneMembers>,
+    lane_query: Query<(&QueueLaneMembers, &QueueServiceHistory)>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     decision_config: Res<DecisionConfigRes>,
 ) {
@@ -24,13 +24,22 @@ pub fn check_queue_patience(
             continue;
         }
 
-        // Estimate wait time based on queue position
-        let queue_length = lane_query
-            .get(queue_member.lane)
-            .map(|members| members.members.len())
-            .unwrap_or(1);
+        // Estimate wait time based on queue position and recent service history
+        let Ok((lane_members, service_history)) = lane_query.get(queue_member.lane) else {
+            continue;
+        };
 
-        let estimated_wait = queue_length as f32 * 10.0; // Rough estimate: 10s per person
+        let queue_length = lane_members.members.len();
+
+        // Use historical data if available, otherwise fall back to conservative estimate
+        // Using 80s per person to account for variability and peak congestion
+        // This is tuned so queue feedback appears when queues genuinely get problematic
+        // (based on patience ranges of 60-300s and typical queue lengths)
+        const DEFAULT_TIME_PER_PERSON: f32 = 80.0;
+        let estimated_wait = service_history.estimate_wait_time(
+            queue_length.saturating_sub(queue_member.ranking),
+            DEFAULT_TIME_PER_PERSON,
+        );
         let patience_now = psych_state.patience;
 
         // Check if patience exceeded

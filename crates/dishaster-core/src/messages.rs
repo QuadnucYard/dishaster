@@ -37,3 +37,11 @@ pub struct DishServed {
     /// Any contamination level of the served dish.
     pub contamination: f32,
 }
+
+/// Notification that a queue service completion occurred.
+/// Used to update queue service history for wait time estimation.
+#[derive(Message)]
+pub struct QueueServiceCompleted {
+    /// Lane where the service was completed.
+    pub lane: Entity,
+}

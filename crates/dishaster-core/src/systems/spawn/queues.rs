@@ -27,6 +27,7 @@ pub fn spawn_window_queues(
                         members: vec![],
                         rear_pos: lane_anchor,
                     },
+                    QueueServiceHistory::new(),
                 ))
                 .id();
             lane_entities.push(lane_entity);

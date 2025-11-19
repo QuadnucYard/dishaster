@@ -58,7 +58,7 @@ impl Simulation {
                 // Spawn logic may add diners
                 update_diner_spawner,
                 // Deliver delayed serving communications before state updates
-                process_serving_messages,
+                (process_serving_messages, update_queue_service_history).chain(),
                 // Handle dish served events
                 on_dish_served,
                 // Update dish contamination levels based on FSRI and risk
@@ -189,6 +189,7 @@ impl Simulation {
         self.world
             .add_message::<DishServed>()
             .add_message::<FeedbackMessage>()
+            .add_message::<QueueServiceCompleted>()
             .add_message::<RefillDispenser>();
 
         // Add observers for agent spawn/despawn events to log presentation events
