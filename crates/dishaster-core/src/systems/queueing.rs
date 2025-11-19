@@ -85,6 +85,9 @@ pub fn update_queue_members(
         members.members.clear();
     }
 
+    // Track which lanes have members
+    let lanes_with_members: FxHashSet<Entity> = lane_to_members.keys().copied().collect();
+
     // Sort and assign rankings within each lane
     for (lane_entity, mut members) in lane_to_members {
         let Ok((_, lane, mut lane_members)) = lane_query.get_mut(lane_entity) else {
@@ -135,6 +138,14 @@ pub fn update_queue_members(
                     target_pos
                 );
             }
+        }
+    }
+
+    // Reset rear_pos for empty lanes (lanes with no members)
+    for (lane_entity, lane, mut lane_members) in lane_query.iter_mut() {
+        if !lanes_with_members.contains(&lane_entity) {
+            // This lane is empty, reset rear_pos to anchor
+            lane_members.rear_pos = lane.anchor;
         }
     }
 }

@@ -17,16 +17,20 @@ const PATH_WIDTH: f32 = 4.0;
 const CONNECTOR_WIDTH: f32 = 2.8;
 const MARKER_WIDTH: f32 = 5.0;
 const INTENT_MARKER_WIDTH: f32 = 4.0;
+const REAR_MARKER_SIZE: f32 = 8.0;
+const REAR_MARKER_WIDTH: f32 = 3.0;
 const Z_PATH: i32 = 1100;
 const Z_CONNECTOR: i32 = 1101;
 const Z_MEMBER_MARKER: i32 = 1102;
 const Z_INTENT_MARKER: i32 = 1103;
+const Z_REAR_MARKER: i32 = 1104;
 use std::f32::consts::TAU;
 
 const COLOR_PATH: Color = Color::from_rgba(0.15, 0.9, 0.45, 0.9);
 const COLOR_MEMBER_MARKER: Color = Color::from_rgba(1.0, 0.92, 0.4, 0.95);
 const COLOR_CONNECTOR: Color = Color::from_rgba(0.8, 0.35, 1.0, 0.8);
 const COLOR_INTENT_MARKER: Color = Color::from_rgba(1.0, 0.6, 0.2, 0.85);
+const COLOR_REAR_MARKER: Color = Color::from_rgba(1.0, 0.1, 0.1, 0.95);
 
 /// Visualizes queue lane membership and intents on the debug canvas.
 pub struct QueueDebugOverlay {
@@ -37,6 +41,7 @@ pub struct QueueDebugOverlay {
 struct QueueLaneDebugNodes {
     container: Gd<Node2D>,
     path: Gd<Line2D>,
+    rear_marker: Gd<Line2D>,
     member_markers: Vec<Gd<Line2D>>,
     intent_connectors: Vec<Gd<Line2D>>,
     intent_markers: Vec<Gd<Line2D>>,
@@ -91,9 +96,17 @@ impl QueueDebugOverlay {
         path.set_z_index(Z_PATH);
         container.add_child(&path);
 
+        let mut rear_marker = Line2D::new_alloc();
+        rear_marker.set_name(&format!("QueueRear_{}", lane_id));
+        rear_marker.set_default_color(COLOR_REAR_MARKER);
+        rear_marker.set_width(REAR_MARKER_WIDTH);
+        rear_marker.set_z_index(Z_REAR_MARKER);
+        container.add_child(&rear_marker);
+
         QueueLaneDebugNodes {
             container,
             path,
+            rear_marker,
             member_markers: Vec::new(),
             intent_connectors: Vec::new(),
             intent_markers: Vec::new(),
@@ -107,23 +120,37 @@ impl QueueDebugOverlay {
     ) {
         nodes.container.set_visible(true);
         let rear = ctx.to_display_space(snapshot.rear_pos.extend(0.0));
-        Self::update_path(&mut nodes.path, snapshot, rear, ctx);
+        Self::update_rear_marker(&mut nodes.rear_marker, rear);
+        Self::update_path(&mut nodes.path, snapshot, ctx);
         Self::update_members(nodes, snapshot.lane_id, &snapshot.members, ctx);
         Self::update_intents(nodes, snapshot.lane_id, rear, &snapshot.intents, ctx);
+    }
+
+    fn update_rear_marker(marker: &mut Gd<Line2D>, rear: Vector2) {
+        // Draw a cross/X marker at the rear position
+        let mut points = PackedVector2Array::new();
+        let half_size = REAR_MARKER_SIZE;
+        points.push(rear + Vector2::new(-half_size, -half_size));
+        points.push(rear + Vector2::new(half_size, half_size));
+        points.push(rear);
+        points.push(rear + Vector2::new(-half_size, half_size));
+        points.push(rear + Vector2::new(half_size, -half_size));
+        marker.set_points(&points);
+        marker.set_visible(true);
     }
 
     fn update_path(
         path: &mut Gd<Line2D>,
         snapshot: &QueueLaneDebugSnapshot,
-        rear: Vector2,
         ctx: &DisplayContext2D,
     ) {
         let mut points = PackedVector2Array::new();
+        points.push(ctx.to_display_space(snapshot.anchor.extend(0.0)));
         for member in &snapshot.members {
             let display = ctx.to_display_space(member.position.extend(0.0));
             points.push(display);
         }
-        points.push(rear);
+        points.push(ctx.to_display_space(snapshot.rear_pos.extend(0.0)));
 
         path.set_points(&points);
         path.set_visible(points.len() > 1);
@@ -249,6 +276,7 @@ impl QueueDebugOverlay {
             }
 
             nodes.path.queue_free();
+            nodes.rear_marker.queue_free();
             for mut marker in nodes.member_markers.drain(..) {
                 marker.queue_free();
             }
@@ -267,6 +295,7 @@ impl QueueDebugOverlay {
         for nodes in self.lanes.values_mut() {
             nodes.container.set_visible(false);
             nodes.path.set_visible(false);
+            nodes.rear_marker.set_visible(false);
             for marker in nodes.member_markers.iter_mut() {
                 marker.set_visible(false);
             }
