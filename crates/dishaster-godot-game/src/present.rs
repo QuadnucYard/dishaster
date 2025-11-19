@@ -280,6 +280,7 @@ impl Game {
                         .distance_overlay
                         .present(&resp, self.stage.display_context());
                 }
+                SimResponse::FeedbackStats(_) => {}
             }
         }
     }

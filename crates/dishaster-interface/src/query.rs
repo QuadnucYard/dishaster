@@ -8,4 +8,7 @@ pub enum SimQuery {
     Distance(Vec2),
     /// Request distance field data from the navigation grid.
     Distances,
+
+    /// Query feedback statistics for debugging purposes.
+    FeedbackStats,
 }

@@ -3,7 +3,8 @@ use dishaster_models::InspectorVisitModel;
 use dishaster_navigation::*;
 
 use crate::{
-    components::*, events::*, messages::*, prelude::*, resources::*, sim::Simulation, views::*,
+    components::*, debug::format_feedback_stats, events::*, messages::*, prelude::*, resources::*,
+    sim::Simulation, views::*,
 };
 
 impl Simulation {
@@ -142,30 +143,36 @@ impl Simulation {
     }
 
     pub(crate) fn handle_query(&mut self, query: SimQuery) {
+        let resp = self.execute_query(query);
+        let mut responses = self.world.resource_mut::<ResponseQueue>();
+        responses.push(resp);
+    }
+
+    /// Execute a simulation query immediately and return the response.
+    pub fn execute_query(&mut self, query: SimQuery) -> SimResponse {
         match query {
             SimQuery::Distance(pos) => {
-                let resp = {
-                    let nav_grid = self.world.resource_mut::<ResWrapper<NavigationGrid>>();
-                    nav_grid
-                        .try_world_to_grid(pos)
-                        .map(|cell| nav_grid.get_distance(cell))
-                };
-                let mut responses = self.world.resource_mut::<ResponseQueue>();
-                responses.push(SimResponse::Distance(resp));
+                let nav_grid = self.world.resource::<ResWrapper<NavigationGrid>>();
+                let distance = nav_grid
+                    .try_world_to_grid(pos)
+                    .map(|cell| nav_grid.get_distance(cell));
+                SimResponse::Distance(distance)
             }
             SimQuery::Distances => {
-                let resp = {
-                    let nav_grid = self.world.resource_mut::<ResWrapper<NavigationGrid>>();
-                    let distances = nav_grid.distance_field();
-                    DistancesResponse {
-                        width: distances.rows(),
-                        height: distances.cols(),
-                        cell_size: nav_grid.cell_size(),
-                        data: distances.flatten().clone(),
-                    }
-                };
-                let mut responses = self.world.resource_mut::<ResponseQueue>();
-                responses.push(SimResponse::Distances(resp.into()));
+                let nav_grid = self.world.resource_mut::<ResWrapper<NavigationGrid>>();
+                let distances = nav_grid.distance_field();
+                SimResponse::Distances(Box::new(DistancesResponse {
+                    width: distances.rows(),
+                    height: distances.cols(),
+                    cell_size: nav_grid.cell_size(),
+                    data: distances.flatten().clone(),
+                }))
+            }
+            SimQuery::FeedbackStats => {
+                let reputation = self.world.resource::<ReputationStateRes>();
+                let config = self.world.resource::<ReputationConfigRes>();
+                let stats = format_feedback_stats(reputation, config);
+                SimResponse::FeedbackStats(stats)
             }
         }
     }
@@ -182,7 +189,7 @@ impl Simulation {
         // Define which commands are allowed in which phases
         let valid_phases: &[RunPhase] = match command {
             // Debug commands are always allowed
-            SetDebugFlags(_) => &[
+            SetDebugFlags(_) | DevAdjustReputation(_) | DevInspectorVisit(_) | DevCrab => &[
                 RunPhase::Preparation,
                 RunPhase::Running,
                 RunPhase::Settlement,
@@ -204,13 +211,6 @@ impl Simulation {
 
             // Settlement phase only
             ApplyManagementDecision(_) => &[RunPhase::Settlement],
-
-            // Dev commands are always allowed
-            DevAdjustReputation(_) | DevInspectorVisit(_) | DevCrab => &[
-                RunPhase::Preparation,
-                RunPhase::Running,
-                RunPhase::Settlement,
-            ],
         };
 
         if valid_phases.contains(&phase) {

@@ -81,10 +81,14 @@ pub fn feedback_present_system(
 
             // Probability gate for reputation impact
             if rng.random_bool(impact_prob as f64) {
-                let base_impact = reputation_config.base_impacts[t];
                 // Use 0.0 response_score for non-trial feedback (neutral player response)
                 // Trial system will handle response scoring separately
-                let delta = reputation.apply_feedback_impact(base_impact, 0.0, &reputation_config);
+                let delta = apply_feedback_impact_to_reputation(
+                    &mut reputation,
+                    t,
+                    0.0,
+                    &reputation_config,
+                );
                 log::debug!("Applied feedback impact on reputation for topic {t:?}: {delta:.2}");
             }
         }
@@ -102,8 +106,8 @@ pub fn apply_trial_impact(
         return;
     };
 
-    let psych_impact_view = apply_psych_impact(&mut psych_state, &event.psych_impact);
-    let reputation_impact = apply_reputation_impact(
+    let psych_impact_view = apply_trial_psych_impact(&mut psych_state, &event.psych_impact);
+    let reputation_impact = apply_trial_reputation_impact(
         &mut reputation,
         &reputation_config,
         &event.reputation_impact,
@@ -117,16 +121,20 @@ pub fn apply_trial_impact(
     events.push(SimEvent::TrialImpact(impact_view.into()));
 }
 
-fn apply_reputation_impact(
+fn apply_trial_reputation_impact(
     reputation: &mut ReputationState,
     reputation_config: &ReputationConfigRes,
     reputation_impact: &ReputationImpact,
 ) -> ReputationView {
-    let base_impact = reputation_config.base_impacts[FeedbackTopic::Quality];
     let old_reputation = reputation.reputation;
     let response_score = reputation_impact.response_score;
 
-    reputation.apply_feedback_impact(base_impact, response_score, reputation_config);
+    apply_feedback_impact_to_reputation(
+        reputation,
+        FeedbackTopic::Quality,
+        response_score,
+        reputation_config,
+    );
 
     let reputation_delta = reputation.reputation - old_reputation;
 
@@ -144,7 +152,10 @@ fn apply_reputation_impact(
     }
 }
 
-fn apply_psych_impact(psych_state: &mut PsychState, psych_impact: &PsychImpact) -> PsychImpactView {
+fn apply_trial_psych_impact(
+    psych_state: &mut PsychState,
+    psych_impact: &PsychImpact,
+) -> PsychImpactView {
     let old_mood = psych_state.mood;
     let old_trust = psych_state.trust;
     let old_patience = psych_state.patience;
@@ -176,4 +187,36 @@ fn apply_psych_impact(psych_state: &mut PsychState, psych_impact: &PsychImpact) 
         trust_delta,
         patience_delta,
     }
+}
+
+/// Apply a single feedback impact with player response
+/// Returns the actual reputation delta applied
+pub fn apply_feedback_impact_to_reputation(
+    reputation: &mut ReputationState,
+    topic: FeedbackTopic,
+    response_score: f32,
+    config: &ReputationConfig,
+) -> f32 {
+    let base_impact = config.base_impacts[topic];
+    // Use different formulas for positive and negative base impacts
+    let delta = if base_impact >= 0.0 {
+        // Positive feedback: response_score amplifies the benefit
+        base_impact * (1.0 + config.response_factor * response_score)
+    } else {
+        // Negative feedback: positive response_score reduces the harm
+        base_impact * (1.0 - config.response_factor * response_score)
+    };
+
+    // Clamp to single event limit
+    let clamped = delta.clamp(-config.max_single_change, config.max_single_change);
+
+    // Add to daily accumulation
+    reputation.daily_accumulated += clamped;
+
+    // Update statistics
+    let stats = &mut reputation.feedback_stats[topic];
+    stats.trigger_count += 1;
+    stats.total_reputation_impact += clamped;
+
+    clamped
 }

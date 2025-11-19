@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use dishaster_core::{
-    interface::{SimCommand, SimEvent},
+    interface::{SimCommand, SimEvent, SimQuery, SimResponse},
     models::Day,
     sim::{ISimulation, Simulation},
 };
@@ -104,7 +104,7 @@ fn main() -> Result<()> {
     sim.command(SimCommand::StartRun);
 
     // Run with event monitoring to refill empty dispensers
-    sim.run_steps_with_monitor(20000, |event, sim| {
+    sim.run_steps_with_monitor(40000, |event, sim| {
         if let SimEvent::DispenserStockChanged {
             entity,
             current_stock,
@@ -151,6 +151,11 @@ fn main() -> Result<()> {
         day_stats.completed_diners,
         day_stats.total_visits
     );
+
+    let feedback_stats = sim.execute_query(SimQuery::FeedbackStats);
+    if let SimResponse::FeedbackStats(stats) = feedback_stats {
+        println!("Feedback stats:\n{stats}\n");
+    }
 
     save_sim_profile(profile_svc, persisted)?;
     std::mem::drop(sim);

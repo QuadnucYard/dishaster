@@ -1,5 +1,6 @@
 use crate::{
     components::Diner,
+    debug::format_feedback_stats,
     events::*,
     interface::{SimEvent, event::HintCondition},
     models::{EndingType, Seed},
@@ -121,6 +122,9 @@ fn on_advance_day(
 ) {
     // Apply daily decay to campaign effects
     perma_effects.apply_daily_decay();
+
+    // Log feedback statistics before applying updates
+    log::info!("{}", format_feedback_stats(&reputation, &reputation_config));
 
     // Apply accumulated reputation changes for the day
     reputation.apply_daily_update(&reputation_config);

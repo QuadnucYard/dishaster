@@ -166,6 +166,15 @@ impl Default for ReputationConfig {
     }
 }
 
+/// Statistics for a single feedback topic
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FeedbackStats {
+    /// Number of times this feedback was triggered
+    pub trigger_count: u32,
+    /// Total reputation impact accumulated (can be positive or negative)
+    pub total_reputation_impact: f32,
+}
+
 /// Current reputation and food safety state
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReputationState {
@@ -184,6 +193,10 @@ pub struct ReputationState {
     /// Reset at day end after applying
     #[serde(skip)]
     pub daily_accumulated: f32,
+
+    /// Statistics for each feedback topic (for tuning configuration)
+    #[serde(skip)]
+    pub feedback_stats: EnumMap<FeedbackTopic, FeedbackStats>,
 }
 
 impl Default for ReputationState {
@@ -193,37 +206,12 @@ impl Default for ReputationState {
             fsri: 10.0,
             food_quality: 60.0,
             daily_accumulated: 0.0,
+            feedback_stats: EnumMap::default(),
         }
     }
 }
 
 impl ReputationState {
-    /// Apply a single feedback impact with player response
-    /// Returns the actual reputation delta applied
-    pub fn apply_feedback_impact(
-        &mut self,
-        base_impact: f32,
-        response_score: f32,
-        config: &ReputationConfig,
-    ) -> f32 {
-        // Use different formulas for positive and negative base impacts
-        let delta = if base_impact >= 0.0 {
-            // Positive feedback: response_score amplifies the benefit
-            base_impact * (1.0 + config.response_factor * response_score)
-        } else {
-            // Negative feedback: positive response_score reduces the harm
-            base_impact * (1.0 - config.response_factor * response_score)
-        };
-
-        // Clamp to single event limit
-        let clamped = delta.clamp(-config.max_single_change, config.max_single_change);
-
-        // Add to daily accumulation
-        self.daily_accumulated += clamped;
-
-        clamped
-    }
-
     /// Apply daily accumulated changes and reset for next day
     pub fn apply_daily_update(&mut self, config: &ReputationConfig) {
         // Clamp daily total
