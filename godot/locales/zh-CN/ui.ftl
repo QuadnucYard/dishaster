@@ -26,6 +26,8 @@ exit =
 
 roll-seed =
     .tooltip = 为当前玩家档案重新生成随机种子
+clear-level =
+    .tooltip = 清除当前关卡的所有进度
 delete-profile =
     .tooltip = 删除当前玩家档案及其所有进度
 

@@ -27,6 +27,8 @@ pub struct StartMenuGui {
     quit_btn: ButtonA,
     #[child("%RollSeed")]
     roll_seed_btn: ButtonA,
+    #[child("%ClearLevel")]
+    clear_level_btn: ButtonA,
     #[child("%DeleteProfile")]
     delete_profile_btn: ButtonA,
 
@@ -68,6 +70,11 @@ impl Gui for StartMenuGui {
         let cmd = commands.clone();
         self.roll_seed_btn.on_click.connect(move || {
             cmd.push_req(AppRequest::RollSeed);
+        });
+
+        let cmd = commands.clone();
+        self.clear_level_btn.on_click.connect(move || {
+            cmd.push_req(AppRequest::ClearLevel);
         });
 
         let cmd = commands.clone();

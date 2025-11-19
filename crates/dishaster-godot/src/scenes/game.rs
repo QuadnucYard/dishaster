@@ -133,6 +133,7 @@ impl GameScene {
             | AppRequest::BackToMenu
             | AppRequest::ViewEnding(_)
             | AppRequest::RollSeed
+            | AppRequest::ClearLevel
             | AppRequest::DeleteProfile => {
                 godot_error!("AppRequest should be handled in main menu");
             }

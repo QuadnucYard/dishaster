@@ -27,6 +27,8 @@ pub enum AppRequest {
 
     /// Roll a new random seed for the player profile.
     RollSeed,
+    /// Clear current level progress.
+    ClearLevel,
     /// Delete player profile (reset progress).
     DeleteProfile,
 

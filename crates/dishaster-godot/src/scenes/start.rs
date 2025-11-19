@@ -200,6 +200,15 @@ impl StartScene {
                     godot_print!("New seed rolled successfully: {new_seed}");
                 }
             }
+            AppRequest::ClearLevel => {
+                godot_print!("Deleting player profile");
+                let svc = &game_services().user_service.profiles;
+                if let Err(e) = svc.clear_level_progress() {
+                    godot_error!("Failed to delete profile: {}", e);
+                } else {
+                    godot_print!("Profile deleted successfully");
+                }
+            }
             AppRequest::DeleteProfile => {
                 godot_print!("Deleting player profile");
                 let svc = &game_services().user_service.profiles;
