@@ -4,6 +4,7 @@ pub fn crab_trial_system(
     mut commands: Commands,
     mut crab: Option<ResMut<CrabTurmoil>>,
     diner_query: Query<(Entity, &DinerGoalState)>,
+    trial_session: Res<TrialSession>,
     mut rng: ResMut<CrabRng>,
     time: Res<Time>,
 ) {
@@ -11,6 +12,9 @@ pub fn crab_trial_system(
         return;
     };
     if crab.triggered_diners.len() as u32 >= crab.trigger_limit {
+        return;
+    }
+    if trial_session.is_active {
         return;
     }
     let dt = time.tick_duration;

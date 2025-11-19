@@ -23,6 +23,11 @@ fn on_trial_start(
 ) {
     let TrialStart { diner, topic } = *event;
 
+    if session.is_active {
+        // Already in a trial; ignore
+        return;
+    }
+
     // Reset trial session for new trial
     session.start(diner.to_entity_id(), topic);
 
