@@ -11,6 +11,7 @@ use bevy_ecs::schedule::ScheduleConfigs;
 use dishaster_navigation::NavigationGrid;
 use ordered_float::NotNan;
 
+pub use self::pick_tableware::despawn_diner_items;
 use self::{decide_window::*, deciding::*, eating::*, pick_tableware::*, queue::*};
 use crate::systems::{feedback::*, prelude::*};
 

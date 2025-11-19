@@ -1,5 +1,5 @@
 use crate::{
-    components::Diner,
+    components::DinerState,
     debug::format_feedback_stats,
     events::*,
     interface::{SimEvent, event::HintCondition},
@@ -7,7 +7,7 @@ use crate::{
     prelude::*,
     resources::*,
     systems::{
-        self,
+        self, despawn_diner_items,
         hint::{HintEmitter, hints},
     },
     views::EndingView,
@@ -88,7 +88,7 @@ fn on_run_started(
 fn on_run_ended(
     _event: On<RunEnded>,
     mut commands: Commands,
-    diner_query: Query<Entity, With<Diner>>,
+    diner_query: Query<(Entity, &mut DinerState)>,
     mut schedule: ResMut<DailyDinerSchedule>,
     mut phase: ResMut<RunPhase>,
     day_status: Res<DayStatus>,
@@ -100,7 +100,8 @@ fn on_run_ended(
     schedule.finish_spawning();
 
     // Clear diners
-    for entity in diner_query.iter() {
+    for (entity, mut diner_state) in diner_query {
+        despawn_diner_items(&mut commands, &mut diner_state);
         commands.entity(entity).despawn();
     }
 
