@@ -11,6 +11,9 @@ fmt:
 build:
     cargo build
 
+test:
+    cargo test --tests --workspace
+
 export *ARGS:
     nu scripts/export.nu {{ARGS}}
 

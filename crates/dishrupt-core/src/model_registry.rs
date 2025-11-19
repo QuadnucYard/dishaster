@@ -21,8 +21,8 @@ impl ModelId {
         Self(name.into())
     }
 
-    pub fn to_string(self) -> EcoString {
-        self.0
+    pub fn as_str(&self) -> &str {
+        &self.0
     }
 }
 

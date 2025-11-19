@@ -1,21 +1,27 @@
+//! Conversion logic for management decision and incident templates to models
+
 use dishaster_views::{ParamsMap, params};
 
 use crate::systems::prelude::*;
 
 /// Context for realizing templates into models
 pub struct RealizationContext<'a> {
+    /// Random number generator
     pub rng: &'a mut Prng,
 }
 
 /// Trait for realizing a template into a model
 pub trait TemplateRealize {
+    /// The resulting model type
     type Model;
 
+    /// Realize the template into a model given the context
     fn realize(&self, ctx: RealizationContext) -> Self::Model;
 }
 
 /// Trait for obtaining view parameters from a model, used for localization
 pub trait ViewParams {
+    /// The parameters map for view
     fn params(&self) -> ParamsMap;
 }
 

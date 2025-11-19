@@ -3,28 +3,14 @@
 //! These tests ensure that all assets referenced in game data files actually exist
 //! in the Godot project, preventing runtime errors from missing resources.
 
-use std::path::{Path, PathBuf};
+mod harness;
+
+use std::path::PathBuf;
 
 use anyhow::Result;
 use dishaster_data::{DataLoader, GameDataAssets, load_toml};
 use dishrupt_asset::{AssetCatalog, AssetKind, AssetPathConfig, AssetResolver, ResourceLocator};
-
-/// Get the workspace root directory (where Cargo.toml with workspace is)
-fn workspace_root() -> PathBuf {
-    // tests/Cargo.toml is in workspace_root/tests/
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    Path::new(manifest_dir).parent().unwrap().to_path_buf()
-}
-
-/// Get the godot project directory
-fn godot_dir() -> PathBuf {
-    workspace_root().join("godot")
-}
-
-/// Get the assets data directory
-fn data_dir() -> PathBuf {
-    workspace_root().join("assets/data")
-}
+use harness::{data_dir, godot_dir};
 
 /// Create asset catalog for testing
 fn load_catalog() -> AssetCatalog {

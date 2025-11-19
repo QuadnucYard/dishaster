@@ -1,0 +1,303 @@
+---
+source: tests/src/management_l10n_snapshot.rs
+---
+- id: add_tables
+  seed: 1311768467294899695
+  localized:
+    title: 添加桌子
+    effects: • 桌子数量 +3
+- id: add_tables
+  seed: 18364757930599072545
+  localized:
+    title: 添加桌子
+    effects: • 桌子数量 +5
+- id: add_tables
+  seed: 12297829382473034410
+  localized:
+    title: 添加桌子
+    effects: • 桌子数量 +4
+- id: remove_tables
+  seed: 1311768467294899695
+  localized:
+    title: 移除桌子
+    effects: • 桌子数量 -2
+- id: remove_tables
+  seed: 18364757930599072545
+  localized:
+    title: 移除桌子
+    effects: • 桌子数量 -3
+- id: remove_tables
+  seed: 12297829382473034410
+  localized:
+    title: 移除桌子
+    effects: • 桌子数量 -2
+- id: disarrange_tables
+  seed: 1311768467294899695
+  localized:
+    title: 调整桌子布局
+    effects: "• 随机改变 3 张桌子的位置\n• 优化空间利用率（？）"
+- id: disarrange_tables
+  seed: 18364757930599072545
+  localized:
+    title: 调整桌子布局
+    effects: "• 随机改变 4 张桌子的位置\n• 优化空间利用率（？）"
+- id: disarrange_tables
+  seed: 12297829382473034410
+  localized:
+    title: 调整桌子布局
+    effects: "• 随机改变 3 张桌子的位置\n• 优化空间利用率（？）"
+- id: open_window
+  seed: 1311768467294899695
+  localized:
+    title: 开设新窗口
+    effects: • 窗口数量 +1
+- id: open_window
+  seed: 18364757930599072545
+  localized:
+    title: 开设新窗口
+    effects: • 窗口数量 +1
+- id: open_window
+  seed: 12297829382473034410
+  localized:
+    title: 开设新窗口
+    effects: • 窗口数量 +1
+- id: close_window
+  seed: 1311768467294899695
+  localized:
+    title: 关闭一个窗口
+    effects: • 窗口数量 -1
+- id: close_window
+  seed: 18364757930599072545
+  localized:
+    title: 关闭一个窗口
+    effects: • 窗口数量 -1
+- id: close_window
+  seed: 12297829382473034410
+  localized:
+    title: 关闭一个窗口
+    effects: • 窗口数量 -1
+- id: change_window_service
+  seed: 1311768467294899695
+  localized:
+    title: 更换窗口服务类型
+    effects: • 随机更换一个窗口的服务类型
+- id: change_window_service
+  seed: 18364757930599072545
+  localized:
+    title: 更换窗口服务类型
+    effects: • 随机更换一个窗口的服务类型
+- id: change_window_service
+  seed: 12297829382473034410
+  localized:
+    title: 更换窗口服务类型
+    effects: • 随机更换一个窗口的服务类型
+- id: play_music_relaxing
+  seed: 1311768467294899695
+  localized:
+    title: 播放舒缓音乐
+    effects: "• 进食速度 +9%（音乐太舒缓，吃得更慢了）\n• 满意度 +11（至少气氛上档次了）"
+- id: play_music_relaxing
+  seed: 18364757930599072545
+  localized:
+    title: 播放舒缓音乐
+    effects: "• 进食速度 +12%（音乐太舒缓，吃得更慢了）\n• 满意度 +6（至少气氛上档次了）"
+- id: play_music_relaxing
+  seed: 12297829382473034410
+  localized:
+    title: 播放舒缓音乐
+    effects: "• 进食速度 +9%（音乐太舒缓，吃得更慢了）\n• 满意度 +14（至少气氛上档次了）"
+- id: play_music_upbeat
+  seed: 1311768467294899695
+  localized:
+    title: 播放快节奏音乐
+    effects: "• 进食速度 +11%（赶时间的福音）\n• 满意度 +0（有人觉得吵，有人觉得燃）"
+- id: play_music_upbeat
+  seed: 18364757930599072545
+  localized:
+    title: 播放快节奏音乐
+    effects: "• 进食速度 +7%（赶时间的福音）\n• 满意度 -8（有人觉得吵，有人觉得燃）"
+- id: play_music_upbeat
+  seed: 12297829382473034410
+  localized:
+    title: 播放快节奏音乐
+    effects: "• 进食速度 +11%（赶时间的福音）\n• 满意度 +4（有人觉得吵，有人觉得燃）"
+- id: play_music_anthem
+  seed: 1311768467294899695
+  localized:
+    title: 播放校歌
+    effects: "• 进食速度 +0%（影响因人而异）\n• 满意度 +7（爱恨两极分化）"
+- id: play_music_anthem
+  seed: 18364757930599072545
+  localized:
+    title: 播放校歌
+    effects: "• 进食速度 +3%（影响因人而异）\n• 满意度 -11（爱恨两极分化）"
+- id: play_music_anthem
+  seed: 12297829382473034410
+  localized:
+    title: 播放校歌
+    effects: "• 进食速度 +0%（影响因人而异）\n• 满意度 +17（爱恨两极分化）"
+- id: advertise_canteen
+  seed: 1311768467294899695
+  localized:
+    title: 全食堂广告宣传
+    effects: "• 客流量 +39%（持续 5 天）\n• 每日衰减 25%（热度总会过去）"
+- id: advertise_canteen
+  seed: 18364757930599072545
+  localized:
+    title: 全食堂广告宣传
+    effects: "• 客流量 +47%（持续 5 天）\n• 每日衰减 25%（热度总会过去）"
+- id: advertise_canteen
+  seed: 12297829382473034410
+  localized:
+    title: 全食堂广告宣传
+    effects: "• 客流量 +40%（持续 5 天）\n• 每日衰减 25%（热度总会过去）"
+- id: advertise_window
+  seed: 1311768467294899695
+  localized:
+    title: 窗口定向推广
+    effects: "• 目标窗口客流量 +29%（持续 7 天）\n• 每日衰减 15%（细水长流型）"
+- id: advertise_window
+  seed: 18364757930599072545
+  localized:
+    title: 窗口定向推广
+    effects: "• 目标窗口客流量 +37%（持续 7 天）\n• 每日衰减 15%（细水长流型）"
+- id: advertise_window
+  seed: 12297829382473034410
+  localized:
+    title: 窗口定向推广
+    effects: "• 目标窗口客流量 +30%（持续 7 天）\n• 每日衰减 15%（细水长流型）"
+- id: slogan_hardship
+  seed: 1311768467294899695
+  localized:
+    title: 张贴励志标语
+    effects: "• 信任度 > 70%: 满意度 +16%（被激励了）\n• 信任度 ≤ 70%: 满意度 -19%（精神污染）\n• 可与已有标语叠加效果"
+- id: slogan_hardship
+  seed: 18364757930599072545
+  localized:
+    title: 张贴励志标语
+    effects: "• 信任度 > 73%: 满意度 +11%（被激励了）\n• 信任度 ≤ 73%: 满意度 -11%（精神污染）\n• 可与已有标语叠加效果"
+- id: slogan_hardship
+  seed: 12297829382473034410
+  localized:
+    title: 张贴励志标语
+    effects: "• 信任度 > 70%: 满意度 +19%（被激励了）\n• 信任度 ≤ 70%: 满意度 -19%（精神污染）\n• 可与已有标语叠加效果"
+- id: supply_crab
+  seed: 1311768467294899695
+  localized:
+    title: 供应帝王蟹
+    effects: 谁知道呢？
+- id: supply_crab
+  seed: 18364757930599072545
+  localized:
+    title: 供应帝王蟹
+    effects: 谁知道呢？
+- id: supply_crab
+  seed: 12297829382473034410
+  localized:
+    title: 供应帝王蟹
+    effects: 谁知道呢？
+- id: improve_dish_quality
+  seed: 1311768467294899695
+  localized:
+    title: 提升菜品质量
+    effects: "• 所有菜品质量 +19%\n• 可与已有质量提升叠加（越来越好吃）"
+- id: improve_dish_quality
+  seed: 18364757930599072545
+  localized:
+    title: 提升菜品质量
+    effects: "• 所有菜品质量 +27%\n• 可与已有质量提升叠加（越来越好吃）"
+- id: improve_dish_quality
+  seed: 12297829382473034410
+  localized:
+    title: 提升菜品质量
+    effects: "• 所有菜品质量 +20%\n• 可与已有质量提升叠加（越来越好吃）"
+- id: reduce_serving_time
+  seed: 1311768467294899695
+  localized:
+    title: 优化出餐流程
+    effects: "• 出餐时间 +21%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
+- id: reduce_serving_time
+  seed: 18364757930599072545
+  localized:
+    title: 优化出餐流程
+    effects: "• 出餐时间 +13%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
+- id: reduce_serving_time
+  seed: 12297829382473034410
+  localized:
+    title: 优化出餐流程
+    effects: "• 出餐时间 +20%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
+- id: mislabel_price
+  seed: 1311768467294899695
+  localized:
+    title: 价格标示错误
+    effects: "• 顾客满意度 -5%\n• 抱怨概率 +10%"
+- id: mislabel_price
+  seed: 18364757930599072545
+  localized:
+    title: 价格标示错误
+    effects: "• 顾客满意度 -5%\n• 抱怨概率 +10%"
+- id: mislabel_price
+  seed: 12297829382473034410
+  localized:
+    title: 价格标示错误
+    effects: "• 顾客满意度 -5%\n• 抱怨概率 +10%"
+- id: increase_attraction
+  seed: 1311768467294899695
+  localized:
+    title: 校园美食节
+    effects: "• 顾客吸引力增加\n• 客流量明显增加"
+- id: increase_attraction
+  seed: 18364757930599072545
+  localized:
+    title: 校园美食节
+    effects: "• 顾客吸引力增加\n• 客流量明显增加"
+- id: increase_attraction
+  seed: 12297829382473034410
+  localized:
+    title: 校园美食节
+    effects: "• 顾客吸引力增加\n• 客流量明显增加"
+- id: decrease_attraction
+  seed: 1311768467294899695
+  localized:
+    title: 校外餐饮竞争
+    effects: "• 顾客吸引力降低\n• 客流量有所下降"
+- id: decrease_attraction
+  seed: 18364757930599072545
+  localized:
+    title: 校外餐饮竞争
+    effects: "• 顾客吸引力降低\n• 客流量有所下降"
+- id: decrease_attraction
+  seed: 12297829382473034410
+  localized:
+    title: 校外餐饮竞争
+    effects: "• 顾客吸引力降低\n• 客流量有所下降"
+- id: temporary_crowd
+  seed: 1311768467294899695
+  localized:
+    title: 校园参访团
+    effects: "• 某个时段涌入大量顾客\n• 可能造成拥挤和排队"
+- id: temporary_crowd
+  seed: 18364757930599072545
+  localized:
+    title: 校园参访团
+    effects: "• 某个时段涌入大量顾客\n• 可能造成拥挤和排队"
+- id: temporary_crowd
+  seed: 12297829382473034410
+  localized:
+    title: 校园参访团
+    effects: "• 某个时段涌入大量顾客\n• 可能造成拥挤和排队"
+- id: inspector_visit
+  seed: 1311768467294899695
+  localized:
+    title: 卫生检查
+    effects: "• 根据食品安全风险指数判定通过或失败\n• 通过检查：声誉增加，信任度永久提升\n• 失败检查：可能触发食品安全事故结局"
+- id: inspector_visit
+  seed: 18364757930599072545
+  localized:
+    title: 卫生检查
+    effects: "• 根据食品安全风险指数判定通过或失败\n• 通过检查：声誉增加，信任度永久提升\n• 失败检查：可能触发食品安全事故结局"
+- id: inspector_visit
+  seed: 12297829382473034410
+  localized:
+    title: 卫生检查
+    effects: "• 根据食品安全风险指数判定通过或失败\n• 通过检查：声誉增加，信任度永久提升\n• 失败检查：可能触发食品安全事故结局"

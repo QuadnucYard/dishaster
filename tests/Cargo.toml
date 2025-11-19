@@ -15,9 +15,15 @@ harness = false
 name = "asset_validation"
 path = "src/asset_validation.rs"
 
+[[test]]
+name = "management_l10n_snapshot"
+path = "src/management_l10n_snapshot.rs"
+
 [dependencies]
+dishrupt-core.workspace = true
 dishrupt-asset.workspace = true
 dishrupt-rng.workspace = true
+dishrupt-l10n.workspace = true
 dishaster-core.workspace = true
 dishaster-data.workspace = true
 dishaster-persistence.workspace = true
@@ -25,6 +31,8 @@ dishaster-validation.workspace = true
 
 anyhow.workspace = true
 env_logger.workspace = true
+insta.workspace = true
+serde.workspace = true
 
 [lints]
 workspace = true

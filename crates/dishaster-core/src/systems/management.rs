@@ -1,6 +1,6 @@
 mod apply_decision;
 mod apply_incident;
-mod convert;
+pub mod convert;
 
 use dishaster_views::{ManagementDecisionView, ManagementDecisionsView, ManagementIncidentView};
 

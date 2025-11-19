@@ -710,8 +710,12 @@ dependencies = [
  "dishaster-persistence",
  "dishaster-validation",
  "dishrupt-asset",
+ "dishrupt-core",
+ "dishrupt-l10n",
  "dishrupt-rng",
  "env_logger",
+ "insta",
+ "serde",
 ]
 
 [[package]]
