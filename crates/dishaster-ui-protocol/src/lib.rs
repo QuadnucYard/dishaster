@@ -80,6 +80,8 @@ pub enum GameRequest {
 
     /// Confirm settlement phase and proceed to decision-making.
     ConfirmSettlement,
+    /// Continue from ending screen (triggers decision roll).
+    ContinueFromEnding,
     /// Select a decision from the available options.
     SelectDecision(usize),
 

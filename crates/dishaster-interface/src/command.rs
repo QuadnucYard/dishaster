@@ -49,6 +49,10 @@ pub enum SimCommand {
     /// Proceed to the next dialogue of the trial.
     TrialProceed,
 
+    /// Confirm settlement and proceed to check endings.
+    ConfirmSettlement,
+    /// Continue from ending screen (only for continuable endings like GoodReputation).
+    ContinueFromEnding,
     /// Apply a selected management decision by index.
     ApplyManagementDecision(usize),
 

@@ -216,8 +216,16 @@ impl GameScene {
             }
 
             GameRequest::ConfirmSettlement => {
+                // Send command to simulation to check endings and roll decisions
+                game.send_sim_command(SimCommand::ConfirmSettlement);
                 gui.hide::<SettlementGui>();
-                gui.show::<ManageDecisionGui>();
+            }
+            GameRequest::ContinueFromEnding => {
+                // Hide ending screen and show decision selection
+                gui.hide::<EndingGui>();
+
+                // Send command to simulation to roll management decisions
+                game.send_sim_command(SimCommand::ContinueFromEnding);
             }
             GameRequest::SelectDecision(index) => {
                 godot_print!("Decision selected: {}", index);
@@ -328,10 +336,10 @@ impl GameScene {
             }
 
             UiCommand::ShowDecisionSelection(view) => {
+                // Show decision GUI after settlement confirmation (or after good ending)
                 let catalog = &game_services().catalog;
                 gui.get_mut::<ManageDecisionGui>().set_view(&view, catalog);
-                // this command is emitted just after day ends
-                // we defer showing the decision GUI until settlement is confirmed
+                gui.show::<ManageDecisionGui>();
             }
             UiCommand::ShowIncidentNotification(view) => {
                 let catalog = &game_services().catalog;

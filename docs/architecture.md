@@ -59,23 +59,52 @@ sequenceDiagram
     UI->>UI: Close trial UI
 ```
 
-### Management Decision Flow
+### Settlement and Management Decision Flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as DecisionGui
+    participant UI as SettlementGui/DecisionGui
     participant Game as GameLogic
     participant Core as CoreSimulation
 
-    Note over Core: Day ends, reputation applied
-    Core->>Game: SimEvent::ShowManagementDecisions
-    Game->>UI: UiCommand::ShowDecisionSelection
-    UI->>UI: Display decision options
+    Note over Core: Run ends
+    Core->>Game: SimEvent::RunCompleted(settlement)
+    Game->>UI: UiCommand::ShowSettlement
+    UI->>UI: Display settlement stats
+
+    UI->>Game: GameRequest::ConfirmSettlement
+    Game->>Core: SimCommand::ConfirmSettlement
+    Core->>Core: Apply reputation changes
+    Core->>Core: Check for endings
+
+    alt Ending Triggered (reputation ≤0 or ≥100)
+        Core->>Game: SimEvent::ShowEnding
+        Game->>UI: UiCommand::ShowEnding
+        UI->>UI: Display ending screen
+
+        alt Good Ending (can continue)
+            Core->>Game: SimEvent::ShowManagementDecisions
+            Game->>UI: UiCommand::ShowDecisionSelection
+            Note over UI: Decisions ready but hidden under ending
+
+            UI->>Game: GameRequest::ContinueFromEnding
+            Game->>UI: Hide ending, show decisions
+            UI->>UI: Display decision options
+        else Bad Ending (game over)
+            UI->>Game: GameRequest::ExitLevel
+            Note over UI: Return to main menu
+        end
+    else No Ending (moderate reputation)
+        Core->>Game: SimEvent::ShowManagementDecisions
+        Game->>UI: UiCommand::ShowDecisionSelection
+        UI->>UI: Display decision options
+    end
 
     UI->>Game: GameRequest::SelectDecision(index)
     Game->>Core: SimCommand::ApplyManagementDecision(index)
 
     Core->>Core: Apply permanent effects
+    Core->>Core: Advance day
     Core->>Game: SimEvent::Persist
     Game->>Game: Save profile
 
@@ -113,16 +142,24 @@ sequenceDiagram
     participant Core as CoreSimulation
 
     Note over Core: Reputation <= 0 or >= 100
+    Core->>Core: on_confirm_settlement checks reputation
     Core->>Core: Trigger AchieveEnding event
     Core->>Scene: SimEvent::ShowEnding
     Scene->>Profile: Save ending to profile
     Scene->>UI: UiCommand::ShowEnding
     UI->>UI: Display ending screen
 
-    alt Continue (good ending only)
-        UI->>Scene: GameRequest::NextDay
-        Scene->>Scene: Advance to next day
-    else Exit
+    alt Good Ending (can_continue=true)
+        Note over Core: Also trigger RollManagementDecisions
+        Core->>Scene: SimEvent::ShowManagementDecisions
+        Scene->>UI: UiCommand::ShowDecisionSelection
+        Note over UI: Decisions loaded but hidden
+
+        UI->>Scene: GameRequest::ContinueFromEnding
+        Scene->>UI: Hide ending, show decisions
+        UI->>UI: Display decision options
+        Note over UI: Player continues playing
+    else Bad Ending (can_continue=false)
         UI->>Scene: AppRequest::ExitLevel
         Scene->>Scene: Set exiting_after_ending flag
         Scene->>Proc: Schedule ExitLevelProcedure
@@ -180,15 +217,18 @@ stateDiagram-v2
     Running --> Settlement: Run completed
     Running --> [*]: Force end / Exit level
 
-    Settlement --> DecisionMaking: Confirm settlement
+    Settlement --> EndingCheck: Confirm settlement
     Settlement --> [*]: Exit level
 
-    DecisionMaking --> Preparation: Select decision (next day)
-    DecisionMaking --> Ending: Bad/Good ending triggered
-    DecisionMaking --> [*]: Exit level
+    EndingCheck --> Ending: Bad/Good ending triggered
+    EndingCheck --> DecisionMaking: No ending (moderate reputation)
+    EndingCheck --> [*]: Exit level
 
-    Ending --> [*]: Exit after ending
-    Ending --> Preparation: Continue (good ending)
+    Ending --> [*]: Exit (bad ending)
+    Ending --> DecisionMaking: Continue (good ending)
+
+    DecisionMaking --> Preparation: Select decision (next day)
+    DecisionMaking --> [*]: Exit level
 ```
 
 ## Key Principles

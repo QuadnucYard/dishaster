@@ -29,10 +29,10 @@ impl UITree for EndingGui {}
 
 impl Gui for EndingGui {
     fn start(&mut self, commands: GuiCommands) {
-        // Continue button - returns to game (only for GoodReputation ending)
+        // Continue button - triggers decision roll (only for GoodReputation ending)
         let cmd = commands.clone();
         self.continue_btn.on_click.connect(move || {
-            cmd.push_req(GameRequest::NextDay);
+            cmd.push_req(GameRequest::ContinueFromEnding);
         });
 
         // Exit button - returns to main menu

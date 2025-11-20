@@ -16,6 +16,7 @@ use crate::{
 pub fn register_lifecycle_systems(world: &mut World) {
     world.add_observer(on_run_started);
     world.add_observer(on_run_ended);
+    world.add_observer(on_confirm_settlement);
     world.add_observer(on_advance_day);
     world.add_observer(on_achieve_ending);
 
@@ -139,19 +140,15 @@ fn on_run_ended(
 
     // Emit day completed event at run end with settlement data
     events.push(SimEvent::RunCompleted(settlement_view));
-
-    // Trigger management decision roll
-    commands.trigger(RollManagementDecisions);
 }
 
-fn on_advance_day(
-    _event: On<AdvanceDay>,
+fn on_confirm_settlement(
+    _event: On<ConfirmSettlement>,
     mut commands: Commands,
-    mut day_status: ResMut<DayStatus>,
     mut perma_effects: ResMut<PermanentEffectsRes>,
     mut reputation: ResMut<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
-    mut events: ResMut<EventQueue>,
+    day_status: Res<DayStatus>,
 ) {
     // Apply daily decay to campaign effects
     perma_effects.apply_daily_decay();
@@ -166,7 +163,7 @@ fn on_advance_day(
     reputation.apply_daily_update(&reputation_config);
 
     log::info!(
-        "Day {} completed. Reputation: {:.1}, FSRI: {:.1}, Quality: {:.1}",
+        "Day {} reputation updated. Reputation: {:.1}, FSRI: {:.1}, Quality: {:.1}",
         day_status.current_day.0,
         reputation.reputation,
         reputation.fsri,
@@ -178,10 +175,20 @@ fn on_advance_day(
         log::info!("Reputation dropped to 0 - triggering bad ending");
         commands.trigger(AchieveEnding(EndingType::BadReputation));
     } else if reputation.reputation >= 100.0 {
-        log::info!("Reputation reached 100 - potential good ending");
+        log::info!("Reputation reached 100 - triggering good ending");
         commands.trigger(AchieveEnding(EndingType::GoodReputation));
+    } else {
+        // No ending - proceed to management decisions
+        log::info!("No ending triggered - rolling management decisions");
+        commands.trigger(RollManagementDecisions);
     }
+}
 
+fn on_advance_day(
+    _event: On<AdvanceDay>,
+    mut day_status: ResMut<DayStatus>,
+    mut events: ResMut<EventQueue>,
+) {
     // Update day status for next day. This will be used when persisting progress.
     day_status.current_day.0 += 1;
     day_status.seed = advance_seed(day_status.seed);
@@ -206,4 +213,7 @@ fn on_achieve_ending(event: On<AchieveEnding>, mut events: ResMut<EventQueue>) {
         id: ending.id().into(),
         can_continue: matches!(ending, EndingType::GoodReputation),
     })));
+
+    // If the ending allows continuation, roll management decisions after showing the ending
+    // This will be triggered after the player sees the ending dialog
 }

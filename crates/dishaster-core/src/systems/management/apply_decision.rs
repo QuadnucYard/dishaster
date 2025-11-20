@@ -258,15 +258,18 @@ fn apply_open_window(
         .choose(&mut rng)
         .expect("No window models in registry");
 
-    if let Some(&slot_index) = available_slots.choose(&mut rng) {
-        // Now only spawn the components needed for persistence
-        commands.spawn(Window {
-            service_template: service_handle,
-            slot_index,
-            location: XSegment::new(0., 0., 0.), // does not matter
-            disabled: false,
-        });
-    }
+    let Some(&slot_index) = available_slots.choose(&mut rng) else {
+        log::warn!("No available window slots to open a new window");
+        return;
+    };
+
+    // Now only spawn the components needed for persistence
+    commands.spawn(Window {
+        service_template: service_handle,
+        slot_index,
+        location: XSegment::new(0., 0., 0.), // does not matter
+        disabled: false,
+    });
 }
 
 /// Close a random window
@@ -277,6 +280,7 @@ fn apply_close_window(
     mut rng: ResMut<WorldRng>,
 ) {
     let Some(window) = window_query.iter_mut().choose(&mut rng) else {
+        log::warn!("No windows available to close");
         return;
     };
 

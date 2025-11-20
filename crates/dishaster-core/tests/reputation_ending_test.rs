@@ -74,37 +74,31 @@ fn test_bad_reputation_ending_triggered() {
 
     let events = sim.poll_events();
     println!("Events after ending run: {} events", events.len());
+    // Should have settlement view
+    assert!(
+        events
+            .iter()
+            .any(|e| matches!(e, SimEvent::RunCompleted(_))),
+        "Expected RunCompleted event with settlement view"
+    );
 
-    // Check for ShowManagementDecisions event
-    let has_decisions = events
-        .iter()
-        .any(|e| matches!(e, SimEvent::ShowManagementDecisions(_)));
-    println!("Management decisions rolled: {}", has_decisions);
-
-    // Now trigger management decision to advance to next day
-    // (This simulates player selecting a decision in settlement phase)
-    println!("Applying management decision to advance day...");
-    sim.command(SimCommand::ApplyManagementDecision(0));
+    // Confirm settlement to trigger ending check
+    println!("Confirming settlement...");
+    sim.command(SimCommand::ConfirmSettlement);
     sim.tick();
 
-    // Poll events to check for ending (should happen in AdvanceDay)
+    // Poll events to check for ending
     let events = sim.poll_events();
-    println!("Events after advancing day: {} events", events.len());
+    println!(
+        "Events after confirming settlement: {} events",
+        events.len()
+    );
     for event in &events {
-        match event {
-            SimEvent::ShowEnding(view) => {
-                println!(
-                    "  - ShowEnding event: id={}, can_continue={}",
-                    view.id, view.can_continue
-                );
-            }
-            SimEvent::DayCompleted => {
-                println!("  - DayCompleted event");
-            }
-            SimEvent::Persist => {
-                println!("  - Persist event");
-            }
-            _ => {}
+        if let SimEvent::ShowEnding(view) = event {
+            println!(
+                "  - ShowEnding event: id={}, can_continue={}",
+                view.id, view.can_continue
+            );
         }
     }
 
@@ -112,12 +106,20 @@ fn test_bad_reputation_ending_triggered() {
     let ending = find_ending_event(&events);
     assert!(
         ending.is_some(),
-        "Expected ending event to be emitted, but none found"
+        "Expected ending event to be emitted after ConfirmSettlement, but none found"
     );
     assert_eq!(
         ending.unwrap(),
         EndingType::BadReputation,
         "Expected BadReputation ending when reputation is 0"
+    );
+
+    // Bad reputation ending should NOT show management decisions (cannot continue)
+    assert!(
+        !events
+            .iter()
+            .any(|e| matches!(e, SimEvent::ShowManagementDecisions(_))),
+        "Management decisions should not be shown for bad ending (game over)"
     );
 
     println!("✓ Bad reputation ending triggered successfully");
@@ -170,22 +172,25 @@ fn test_good_reputation_ending_triggered() {
 
     let events = sim.poll_events();
     println!("Events after ending run: {} events", events.len());
+    // Should have settlement view
+    assert!(
+        events
+            .iter()
+            .any(|e| matches!(e, SimEvent::RunCompleted(_))),
+        "Expected RunCompleted event with settlement view"
+    );
 
-    // Check for ShowManagementDecisions event
-    let has_decisions = events
-        .iter()
-        .any(|e| matches!(e, SimEvent::ShowManagementDecisions(_)));
-    println!("Management decisions rolled: {}", has_decisions);
-
-    // Now trigger management decision to advance to next day
-    // (This simulates player selecting a decision in settlement phase)
-    println!("Applying management decision to advance day...");
-    sim.command(SimCommand::ApplyManagementDecision(0));
+    // Confirm settlement to trigger ending check
+    println!("Confirming settlement...");
+    sim.command(SimCommand::ConfirmSettlement);
     sim.tick();
 
-    // Poll events to check for ending (should happen in AdvanceDay)
+    // Poll events to check for ending and decisions
     let events = sim.poll_events();
-    println!("Events after advancing day: {} events", events.len());
+    println!(
+        "Events after confirming settlement: {} events",
+        events.len()
+    );
     for event in &events {
         match event {
             SimEvent::ShowEnding(view) => {
@@ -194,6 +199,67 @@ fn test_good_reputation_ending_triggered() {
                     view.id, view.can_continue
                 );
             }
+            SimEvent::ShowManagementDecisions(_) => {
+                println!("  - ShowManagementDecisions event");
+            }
+            _ => {}
+        }
+    }
+
+    // Check that good reputation ending was triggered
+    let ending = find_ending_event(&events);
+    assert!(
+        ending.is_some(),
+        "Expected ending event to be emitted after ConfirmSettlement, but none found"
+    );
+    assert_eq!(
+        ending.unwrap(),
+        EndingType::GoodReputation,
+        "Expected GoodReputation ending when reputation is 100"
+    );
+
+    // Good ending shows WITHOUT decisions yet - decisions only appear after player confirms continuation
+    assert!(
+        !events
+            .iter()
+            .any(|e| matches!(e, SimEvent::ShowManagementDecisions(_))),
+        "Management decisions should NOT be shown yet (waiting for player to confirm continuation)"
+    );
+
+    // Now the player confirms continuation from the ending screen
+    println!("Continuing from ending...");
+    sim.command(SimCommand::ContinueFromEnding);
+    sim.tick();
+
+    // Now decisions should be rolled
+    let events = sim.poll_events();
+    println!(
+        "Events after continuing from ending: {} events",
+        events.len()
+    );
+    for event in &events {
+        if let SimEvent::ShowManagementDecisions(_) = event {
+            println!("  - ShowManagementDecisions event (expected)");
+        }
+    }
+
+    // Verify that decisions were shown after confirming continuation
+    assert!(
+        events
+            .iter()
+            .any(|e| matches!(e, SimEvent::ShowManagementDecisions(_))),
+        "Management decisions should be shown after confirming continuation from good ending"
+    );
+
+    // Now apply a decision to advance to next day
+    println!("Applying management decision to advance day...");
+    sim.command(SimCommand::ApplyManagementDecision(0));
+    sim.tick();
+
+    let events = sim.poll_events();
+    println!("Events after applying decision: {} events", events.len());
+    for event in &events {
+        match event {
             SimEvent::DayCompleted => {
                 println!("  - DayCompleted event");
             }
@@ -204,16 +270,10 @@ fn test_good_reputation_ending_triggered() {
         }
     }
 
-    // Check that good reputation ending was triggered
-    let ending = find_ending_event(&events);
+    // Verify day advanced
     assert!(
-        ending.is_some(),
-        "Expected ending event to be emitted, but none found"
-    );
-    assert_eq!(
-        ending.unwrap(),
-        EndingType::GoodReputation,
-        "Expected GoodReputation ending when reputation is 100"
+        events.iter().any(|e| matches!(e, SimEvent::DayCompleted)),
+        "Expected DayCompleted event after applying decision"
     );
 
     println!("✓ Good reputation ending triggered successfully");
@@ -241,16 +301,34 @@ fn test_no_ending_with_moderate_reputation() {
     sim.command(SimCommand::EndRun);
     sim.tick();
 
-    // Poll events to check for ending
+    // Poll events to check for settlement
     let events = sim.poll_events();
     println!("Events after ending run: {} events", events.len());
+    assert!(
+        events
+            .iter()
+            .any(|e| matches!(e, SimEvent::RunCompleted(_))),
+        "Expected RunCompleted event with settlement view"
+    );
+
+    // Confirm settlement to trigger ending check
+    println!("Confirming settlement...");
+    sim.command(SimCommand::ConfirmSettlement);
+    sim.tick();
+
+    // Poll events after confirming settlement
+    let events = sim.poll_events();
+    println!(
+        "Events after confirming settlement: {} events",
+        events.len()
+    );
     for event in &events {
         match event {
             SimEvent::ShowEnding(view) => {
                 println!("  - Unexpected ShowEnding event: id={}", view.id);
             }
-            SimEvent::RunCompleted(_) => {
-                println!("  - RunCompleted event (expected)");
+            SimEvent::ShowManagementDecisions(_) => {
+                println!("  - ShowManagementDecisions event (expected)");
             }
             _ => {}
         }
@@ -262,6 +340,14 @@ fn test_no_ending_with_moderate_reputation() {
         ending.is_none(),
         "Expected no ending with moderate reputation, but got {:?}",
         ending
+    );
+
+    // Should show management decisions instead
+    assert!(
+        events
+            .iter()
+            .any(|e| matches!(e, SimEvent::ShowManagementDecisions(_))),
+        "Expected management decisions to be shown when no ending triggered"
     );
 
     println!("✓ No ending triggered with moderate reputation");

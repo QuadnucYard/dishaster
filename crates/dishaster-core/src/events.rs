@@ -20,6 +20,10 @@ pub struct AdvanceDay;
 #[derive(Event)]
 pub struct AchieveEnding(pub EndingType);
 
+/// Event to confirm settlement and check for endings
+#[derive(Event)]
+pub struct ConfirmSettlement;
+
 /// Event to roll management decisions
 #[derive(Event)]
 pub struct RollManagementDecisions;

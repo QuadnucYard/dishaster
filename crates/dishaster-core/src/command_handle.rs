@@ -94,6 +94,13 @@ impl Simulation {
                 self.world.trigger(TrialProceed);
             }
 
+            SimCommand::ConfirmSettlement => {
+                self.world.trigger(ConfirmSettlement);
+            }
+            SimCommand::ContinueFromEnding => {
+                // This command is sent when player clicks continue on good ending
+                self.world.trigger(RollManagementDecisions);
+            }
             SimCommand::ApplyManagementDecision(index) => {
                 self.world.trigger(ApplyManagementDecision(index));
             }
@@ -233,7 +240,9 @@ impl Simulation {
             EndRun => &[RunPhase::Running],
 
             // Settlement phase only
-            ApplyManagementDecision(_) => &[RunPhase::Settlement],
+            ConfirmSettlement | ContinueFromEnding | ApplyManagementDecision(_) => {
+                &[RunPhase::Settlement]
+            }
         };
 
         if valid_phases.contains(&phase) {
@@ -263,6 +272,8 @@ fn command_name(command: &SimCommand) -> &'static str {
         SimCommand::TrialTimeout => "TrialTimeout",
         SimCommand::TrialRequestCandidates { .. } => "TrialRequestCandidates",
         SimCommand::TrialProceed => "TrialProceed",
+        SimCommand::ConfirmSettlement => "ConfirmSettlement",
+        SimCommand::ContinueFromEnding => "ContinueFromEnding",
         SimCommand::ApplyManagementDecision(_) => "ApplyManagementDecision",
         SimCommand::DevAdjustReputation(_) => "DevAdjustReputation",
         SimCommand::DevInspectorVisit(_) => "DevInspectorVisit",
