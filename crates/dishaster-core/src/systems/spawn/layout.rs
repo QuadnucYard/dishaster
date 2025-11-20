@@ -316,15 +316,15 @@ fn spawn_dispensers(
         (&placements.chopstick_dispensers, DispenserType::Chopstick),
     ] {
         for dispenser_placement in placements {
-            spawn_dispenser(commands, registry, dispenser_placement, ty, events);
+            spawn_dispenser(dispenser_placement, commands, registry, ty, events);
         }
     }
 }
 
-fn spawn_dispenser(
+pub fn spawn_dispenser(
+    placement: &Placement,
     commands: &mut Commands,
     registry: &GameModelRegistry,
-    placement: &Placement,
     dispenser_type: DispenserType,
     events: &mut EventQueue,
 ) {

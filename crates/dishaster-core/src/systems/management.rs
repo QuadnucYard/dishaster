@@ -79,6 +79,7 @@ pub fn apply_management_decision(
         AddTables,
         RemoveTables,
         DisarrangeTables,
+        AddDispenser,
         OpenWindow,
         CloseWindow,
         ChangeWindowService,

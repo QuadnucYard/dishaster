@@ -25,6 +25,25 @@
     ),
 
     (
+        id: "add_tray_dispenser",
+        weight: 100,
+        icon: "management/add_tables.png",
+        def: AddDispenser(
+            dispenser_type: Tray,
+            dispenser_model: "tray_dispenser",
+        ),
+    ),
+    (
+        id: "add_chopstick_dispenser",
+        weight: 100,
+        icon: "management/add_tables.png",
+        def: AddDispenser(
+            dispenser_type: Chopstick,
+            dispenser_model: "chopstick_dispenser",
+        ),
+    ),
+
+    (
         id: "open_window",
         weight: 100,
         icon: "management/open_window.png",
@@ -137,5 +156,5 @@
             // 减少出餐时间：从10%到30%的时间减少
             serving_time_multiplier_range: (start: 0.7, end: 0.9),
         ),
-    )
+    ),
 ]

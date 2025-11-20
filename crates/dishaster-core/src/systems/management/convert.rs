@@ -43,6 +43,7 @@ impl TemplateRealize for ManagementDecisionTemplateDef {
             AddTables,
             RemoveTables,
             DisarrangeTables,
+            AddDispenser,
             OpenWindow,
             CloseWindow,
             ChangeWindowService,
@@ -79,6 +80,7 @@ impl ViewParams for ManagementDecisionModel {
             SupplyCrab,
             ImproveDishQuality,
             ReduceServingTime,
+            AddDispenser,
         )
     }
 }
@@ -131,6 +133,23 @@ impl ViewParams for DisarrangeTablesModel {
         params! {
             num_tables => self.num_tables,
         }
+    }
+}
+
+impl TemplateRealize for AddDispenserTemplate {
+    type Model = AddDispenserModel;
+
+    fn realize(&self, _ctx: RealizationContext) -> Self::Model {
+        Self::Model {
+            dispenser_type: self.dispenser_type,
+            dispenser_model: self.dispenser_model.clone(),
+        }
+    }
+}
+
+impl ViewParams for AddDispenserModel {
+    fn params(&self) -> ParamsMap {
+        params! {}
     }
 }
 

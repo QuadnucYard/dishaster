@@ -80,6 +80,7 @@ define_sum_model!(ManagementDecision {
     AddTables,
     RemoveTables,
     DisarrangeTables,
+    AddDispenser,
     OpenWindow,
     CloseWindow,
     ChangeWindowService,

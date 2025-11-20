@@ -24,6 +24,22 @@ mgmt--disarrange_tables =
         • 随机改变 { $num_tables } 张桌子的位置
         • 优化空间利用率（？）
 
+mgmt--add_tray_dispenser =
+    .title = 添加托盘取餐点
+    .desc = 在食堂内随机位置增设一个托盘取餐点。
+    .flavor = 多一个托盘取餐点，意味着食客们不用再为找托盘而跑来跑去了。虽然位置是随机的，但总比没有强。
+    .effects =
+        • 托盘取餐点数量 +1
+        • 减少食客寻找托盘的时间
+
+mgmt--add_chopstick_dispenser =
+    .title = 添加筷子取用点
+    .desc = 在食堂内随机位置增设一个筷子取用点。
+    .flavor = 多一个筷子取用点，让食客们更方便地拿到餐具。不过位置是随机安排的，希望不会太偏僻。
+    .effects =
+        • 筷子取用点数量 +1
+        • 提升餐具获取便利性
+
 mgmt--open_window =
     .title = 开设新窗口
     .desc = 随机增加一个新的服务窗口，分担现有窗口的压力。

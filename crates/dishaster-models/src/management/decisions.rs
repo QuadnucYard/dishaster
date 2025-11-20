@@ -1,6 +1,6 @@
 use std::ops::RangeInclusive;
 
-use crate::prelude::*;
+use crate::{DispenserType, prelude::*};
 
 /// Template for adding tables decision
 #[derive(Debug, Clone, Deserialize)]
@@ -45,6 +45,25 @@ pub struct DisarrangeTablesTemplate {
 pub struct DisarrangeTablesModel {
     /// Number of tables to add
     pub num_tables: usize,
+}
+
+/// Template for adding dispenser decision
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename = "AddDispenser")]
+pub struct AddDispenserTemplate {
+    /// Type of dispenser to add
+    pub dispenser_type: DispenserType,
+    /// Model ID of the dispenser to add
+    pub dispenser_model: ModelId,
+}
+
+/// Model for adding dispenser decision
+#[derive(Debug, Clone)]
+pub struct AddDispenserModel {
+    /// Type of dispenser to add
+    pub dispenser_type: DispenserType,
+    /// Model ID of the dispenser to add
+    pub dispenser_model: ModelId,
 }
 
 /// Template for opening a window decision

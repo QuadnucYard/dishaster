@@ -4,7 +4,7 @@ use dishaster_save_models::{CampaignEffect, CampaignTarget, MusicEffect, SloganE
 use crate::{
     events::DispatchManagement,
     resources::PermanentEffectsRes,
-    systems::{prelude::*, spawn_table},
+    systems::{prelude::*, spawn_dispenser, spawn_table},
 };
 
 // Safe margin around objects to prevent collisions (in meters)
@@ -22,6 +22,7 @@ pub fn register_management_decision_systems(world: &mut World) {
         apply_add_tables,
         apply_remove_tables,
         apply_disarrange_tables,
+        apply_add_dispenser,
         apply_open_window,
         apply_close_window,
         apply_change_window_service,
@@ -150,6 +151,59 @@ fn apply_disarrange_tables(
                 MAX_PLACEMENT_ATTEMPTS
             );
         }
+    }
+}
+
+/// Add a random dispenser (tray or chopstick)
+fn apply_add_dispenser(
+    event: On<DispatchManagement<AddDispenserModel>>,
+    mut commands: Commands,
+    registry: Res<GameModelRegistryRes>,
+    canteen: Res<Canteen>,
+    collider_query: Query<&CompWrapper<BoxCollider>>,
+    mut rng: ResMut<WorldRng>,
+    mut events: ResMut<EventQueue>,
+) {
+    let model = &event.0;
+
+    // Collect existing colliders
+    let existing_colliders: Vec<BoxCollider> = collider_query.iter().map(|c| **c).collect();
+
+    // Get dispenser model based on type
+    let dispenser_model_id = match model.dispenser_type {
+        DispenserType::Tray => ModelId::new("tray_dispenser"),
+        DispenserType::Chopstick => ModelId::new("chopstick_dispenser"),
+    };
+
+    let dispenser_model = registry
+        .dispensers
+        .get_by_id(&dispenser_model_id)
+        .expect("Dispenser model not found in registry");
+    let dispenser_size = dispenser_model.size.as_vec2();
+
+    // Try to find a non-colliding position
+    if let Some(center_pos) = find_non_colliding_position(
+        &canteen.model,
+        dispenser_size,
+        &existing_colliders,
+        &mut rng,
+    ) {
+        let placement = Placement {
+            model: dispenser_model_id,
+            center_pos,
+        };
+        spawn_dispenser(
+            &placement,
+            &mut commands,
+            &registry,
+            model.dispenser_type,
+            &mut events,
+        );
+    } else {
+        log::warn!(
+            "Could not find non-colliding position for dispenser after {} attempts",
+            MAX_PLACEMENT_ATTEMPTS
+        );
     }
 }
 
