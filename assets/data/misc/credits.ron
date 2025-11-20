@@ -18,7 +18,7 @@
         (
             title: "art-graphics",
             entries: [
-                ["svgmoji", "豆包", "ChatGPT"],
+                ["svgmoji", "豆包", "ImageFx", "ChatGPT"],
             ],
         ),
         (

@@ -209,11 +209,19 @@ fn handle_get_served_goal(
             .map(|d| d.served_weight)
             .sum::<f32>();
 
-        // Record diner order info (dish count, total price paid, and weight)
+        // Collect dish IDs
+        let dishes = state
+            .served_dishes
+            .iter()
+            .map(|d| d.dish_id.clone())
+            .collect();
+
+        // Record diner order info (dish count, total price paid, weight, and dishes)
         daily_stats.diner_orders.push(DinerOrder {
             dish_count: state.served_dishes.len() as u32,
             price_paid: state.total_spent,
             weight_kg: total_weight,
+            dishes,
         });
 
         // Service completed, remove session and move to finding a seat
@@ -463,6 +471,7 @@ fn handle_leave_goal(
                     dish_count: 0,
                     price_paid: 0.0,
                     weight_kg: 0.0,
+                    dishes: Vec::new(),
                 });
             }
 

@@ -23,10 +23,27 @@ fn estimate_dish_price(pricing: &PricingMethod, characteristics: &DishCharacteri
     }
 }
 
+/// Core food category tags that every diner must have at least one dish from
+const CORE_FOOD_TAGS: &[&str] = &[
+    "staple",
+    "dumpling",
+    "noodle",
+    "snack",
+    "combo",
+    "specialty",
+];
+
+/// Check if dish has at least one core food tag
+fn has_core_food_tag(tags: &[EcoString]) -> bool {
+    tags.iter()
+        .any(|tag| CORE_FOOD_TAGS.contains(&tag.as_str()))
+}
+
 /// Decide what dishes to order at a window
 ///
 /// Returns a list of dish IDs to order, in order of preference.
 /// Uses a greedy algorithm that balances hunger, budget, preferences, and variety.
+/// Ensures at least one dish from core categories (staple/dumpling/noodle/snack/combo/specialty).
 pub fn decide_order(
     window_dishes: &WindowDishes,
     dish_query: &Query<&Dish>,
@@ -50,6 +67,8 @@ pub fn decide_order(
     let mut budget_left = budget;
     let mut orders = Vec::new();
     let mut variety_counts = FxHashMap::default();
+    let mut has_core_food = false;
+    let mut has_only_staples = true; // Track if we only have staples
 
     // Build list of available dishes with their info
     let mut candidates: Vec<_> = window_dishes
@@ -67,20 +86,54 @@ pub fn decide_order(
         .collect();
 
     // Greedy selection loop
-    for _ in 0..config.max_dishes_per_order {
-        if sat_needed <= config.satiation_tolerance * dining_profile.max_satiation {
-            break; // Close enough to satisfied (relative to diner's capacity)
+    for _iteration in 0..config.max_dishes_per_order {
+        // Check if we can stop: satisfied AND have core food AND have variety AND ate enough
+        let is_satisfied = sat_needed <= config.satiation_tolerance * dining_profile.max_satiation;
+        let satiation_consumed = desired_sat - sat_needed;
+        // Require at least 12 satiation consumed to prevent single-snack meals
+        let ate_enough = satiation_consumed >= 12.0;
+
+        if is_satisfied && has_core_food && !has_only_staples && ate_enough {
+            break; // Satisfied with required variety and minimum consumption
         }
 
         if candidates.is_empty() {
             break; // No more options
         }
 
+        // On last iteration or when satisfied, enforce requirements
+        let is_last_iteration = _iteration == config.max_dishes_per_order - 1;
+        let must_choose_core = !has_core_food && (is_last_iteration || is_satisfied);
+        let must_choose_non_staple =
+            has_only_staples && !orders.is_empty() && (is_last_iteration || is_satisfied);
+
         // Score each candidate
         let mut best_idx: Option<usize> = None;
         let mut best_score = f32::NEG_INFINITY;
 
         for (i, (_, dish, dish_model, sat_contribution)) in candidates.iter().enumerate() {
+            let is_core_food = has_core_food_tag(&dish_model.characteristics.tags);
+            let is_staple_only = dish_model
+                .characteristics
+                .tags
+                .iter()
+                .any(|t| t == "staple")
+                && !dish_model
+                    .characteristics
+                    .tags
+                    .iter()
+                    .any(|t| t == "combo" || t == "specialty");
+
+            // If we must choose core food, skip non-core dishes
+            if must_choose_core && !is_core_food {
+                continue;
+            }
+
+            // If we must choose non-staple, skip staple-only dishes
+            if must_choose_non_staple && is_staple_only {
+                continue;
+            }
+
             // Estimate price using weight distribution mean for ByWeight dishes
             let price = estimate_dish_price(&dish.pricing, &dish_model.characteristics);
 
@@ -91,7 +144,7 @@ pub fn decide_order(
             }
 
             // Compute ordering utility score
-            let score = compute_ordering_score(
+            let mut score = compute_ordering_score(
                 &dish_model.characteristics,
                 &dish.model_id,
                 price,
@@ -103,6 +156,11 @@ pub fn decide_order(
                 &variety_counts,
                 config,
             );
+
+            // Boost score for core food if we don't have any yet
+            if !has_core_food && is_core_food {
+                score *= 1.5; // Strong preference for core food when needed
+            }
 
             // Add small deterministic noise for tie-breaking
             let dish_id_str = format!("{}", dish.model_id);
@@ -117,7 +175,7 @@ pub fn decide_order(
 
         // Select best candidate
         let Some(idx) = best_idx else {
-            break; // All remaining dishes are unaffordable
+            break; // All remaining dishes are unaffordable or filtered out
         };
 
         let (_dish_entity, dish, dish_model, sat_contribution) = candidates.remove(idx);
@@ -142,6 +200,26 @@ pub fn decide_order(
             }
         }
 
+        // Track if this dish is core food
+        if has_core_food_tag(&dish_model.characteristics.tags) {
+            has_core_food = true;
+        }
+
+        // Track if this is a non-staple dish
+        let is_staple_only = dish_model
+            .characteristics
+            .tags
+            .iter()
+            .any(|t| t == "staple")
+            && !dish_model
+                .characteristics
+                .tags
+                .iter()
+                .any(|t| t == "combo" || t == "specialty");
+        if !is_staple_only {
+            has_only_staples = false;
+        }
+
         // Add to order
         orders.push(ServiceRequest {
             dish_id: dish.model_id.clone(),
@@ -155,6 +233,19 @@ pub fn decide_order(
 
         // Record in STM
         stm.current_order.push(dish.model_id.clone());
+    }
+
+    // Final validation: if no core food was selected, return empty order
+    // This prevents invalid orders (e.g., only soup/vegetables)
+    if !has_core_food {
+        return Vec::new();
+    }
+
+    // Validation: reject orders that don't meet minimum satiation
+    // Allow rice+vegetable combinations (typically ~18-22 satiation)
+    let satiation_consumed = desired_sat - sat_needed;
+    if satiation_consumed < 18.0 {
+        return Vec::new(); // Insufficient meal, diner won't order
     }
 
     orders

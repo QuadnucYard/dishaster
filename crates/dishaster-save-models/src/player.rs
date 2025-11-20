@@ -105,6 +105,8 @@ pub struct DinerOrder {
     pub price_paid: f32,
     /// Total weight of dishes consumed in kilograms
     pub weight_kg: f32,
+    /// Concrete list of dish IDs ordered (with duplicates if ordered multiple times)
+    pub dishes: Vec<ModelId>,
 }
 
 /// Per-day statistics history for tracking performance over time.
@@ -125,6 +127,7 @@ pub struct DayStats {
     /// Individual dining times for each diner (seconds).
     pub dining_times: Vec<f32>,
     /// Per-diner order information (dish count and price paid)
+    #[serde(skip)]
     pub diner_orders: Vec<DinerOrder>,
 }
 

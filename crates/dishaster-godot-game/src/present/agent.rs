@@ -4,7 +4,7 @@ use dishrupt_core::EntityId;
 use dishrupt_godot_display::{GdNode2D, Stage};
 use dishrupt_godot_utils::AnimationPlayerExt;
 use godot::{
-    classes::{AnimationPlayer, CanvasItem, Label, Node2D, Sprite2D},
+    classes::{AnimationPlayer, CanvasItem, Label, Node2D, ProgressBar, Sprite2D},
     prelude::*,
 };
 
@@ -170,14 +170,19 @@ impl AgentPresenter {
 pub struct AgentDebugPresenter {
     // root: Gd<Node2D>,
     goal_label: Gd<Label>,
-    eating_progress: Option<Gd<godot::classes::ProgressBar>>,
+    eating_progress: Option<Gd<ProgressBar>>,
 }
 
 impl AgentDebugPresenter {
     pub fn new(node: Gd<Node2D>) -> Self {
+        let mut eating_progress = node.try_get_node_as::<ProgressBar>("EatingProgress");
+        if let Some(progress_bar) = &mut eating_progress {
+            progress_bar.set_visible(false);
+        }
+
         Self {
             goal_label: node.get_node_as("GoalLabel"),
-            eating_progress: node.try_get_node_as("EatingProgress"),
+            eating_progress,
             // root: node,
         }
     }

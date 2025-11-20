@@ -224,13 +224,17 @@ pub fn process_serving_messages(
                     };
 
                     // Sample actual portion weight from normal distribution
-                    let served_weight = Normal::new(
-                        dish_model.characteristics.weight_distrib.mean,
-                        dish_model.characteristics.weight_distrib.stddev,
-                    )
-                    .unwrap()
-                    .sample(&mut rng)
-                    .max(0.01);
+                    // Clamp to reasonable range: [mean - 2*stddev, mean + 2*stddev]
+                    // This prevents extremely small portions (< 2 stddev below mean)
+                    let mean = dish_model.characteristics.weight_distrib.mean;
+                    let stddev = dish_model.characteristics.weight_distrib.stddev;
+                    let min_weight = (mean - 2.0 * stddev).max(mean * 0.5).max(0.05);
+                    let max_weight = mean + 2.0 * stddev;
+
+                    let served_weight = Normal::new(mean, stddev)
+                        .unwrap()
+                        .sample(&mut rng)
+                        .clamp(min_weight, max_weight);
 
                     // Calculate price based on actual weight for ByWeight pricing
                     let price_paid = match dish.pricing {

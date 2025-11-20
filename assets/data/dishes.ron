@@ -8,8 +8,8 @@
             serving_time: 5.0,
             tags: ["staple", "rice", "mild"],
             base_price: 2.0, // ¥2/kg (按重量计价)
-            weight_distrib: (mean: 0.2, stddev: 0.04), // 200g ± 40g
-            satiation_per_kg: 120.0, // Lighter satiation for plain rice
+            weight_distrib: (mean: 0.15, stddev: 0.025), // 150g ± 25g
+            satiation_per_kg: 60.0, // Very low - plain rice alone is not filling
             eating_time_per_kg: 2000.0, // Quick to eat: 200g in ~6-7 min at normal speed
         ),
         display: (res: "dishes/rice"),
@@ -475,7 +475,7 @@
             tags: ["tofu", "meat", "spicy", "hot", "savory"],
             base_price: 3.5,
             weight_distrib: (mean: 0.15, stddev: 0.03),
-            satiation_per_kg: 150.0,
+            satiation_per_kg: 80.0, // Tofu-based - lighter than pure meat dishes
             eating_time_per_kg: 2500.0,
         ),
         display: (res: "dishes/mapo_tofu"),
@@ -486,7 +486,7 @@
             quality_range: (0.6, 0.9),
             serving_time: 12.0,
             tags: ["vegetable", "meat", "eggplant", "spicy", "savory"],
-            base_price: 3.5,
+            base_price: 5.0,
             weight_distrib: (mean: 0.15, stddev: 0.03),
             satiation_per_kg: 150.0,
             eating_time_per_kg: 2500.0,
@@ -502,7 +502,7 @@
             base_price: 4.0,
             weight_distrib: (mean: 0.15, stddev: 0.03),
             satiation_per_kg: 150.0,
-            eating_time_per_kg: 2500.0,
+            eating_time_per_kg: 1900.0, // Thin slices - quicker to eat
         ),
         display: (res: "dishes/green_pepper_pork"),
     ),
@@ -558,7 +558,7 @@
             base_price: 1.5,
             weight_distrib: (mean: 0.12, stddev: 0.03),
             satiation_per_kg: 140.0, // Vegetables slightly less filling
-            eating_time_per_kg: 2300.0,
+            eating_time_per_kg: 1700.0, // Light leafy vegetable - very quick
         ),
         display: (res: "dishes/stir_fried_cabbage"),
     ),
@@ -584,7 +584,7 @@
             base_price: 2.0,
             weight_distrib: (mean: 0.13, stddev: 0.03),
             satiation_per_kg: 145.0, // Potato more filling
-            eating_time_per_kg: 2300.0,
+            eating_time_per_kg: 1800.0, // Quick to eat - thin shreds
         ),
         display: (res: "dishes/potato_shreds"),
     ),
@@ -594,7 +594,7 @@
             quality_range: (0.65, 0.9),
             serving_time: 6.0,
             tags: ["vegetable", "light", "healthy", "garlic"],
-            base_price: 2.5,
+            base_price: 3.5,
             weight_distrib: (mean: 0.11, stddev: 0.02),
             satiation_per_kg: 140.0,
             eating_time_per_kg: 2300.0,
@@ -633,9 +633,9 @@
             quality_range: (0.65, 0.9),
             serving_time: 6.0,
             tags: ["vegetable", "light", "fried", "garlic"],
-            base_price: 2.0,
+            base_price: 3.0,
             weight_distrib: (mean: 0.12, stddev: 0.03),
-            satiation_per_kg: 140.0,
+            satiation_per_kg: 70.0, // Light vegetable - not very filling
             eating_time_per_kg: 2300.0,
         ),
         display: (res: "dishes/stir_fried_water_spinach"),
@@ -646,10 +646,10 @@
             quality_range: (0.65, 0.9),
             serving_time: 12.0,
             tags: ["vegetable", "eggplant", "savory", "braised"],
-            base_price: 2.5,
+            base_price: 3.5,
             weight_distrib: (mean: 0.14, stddev: 0.03),
             satiation_per_kg: 145.0,
-            eating_time_per_kg: 2300.0,
+            eating_time_per_kg: 1800.0, // Soft and easy to eat
         ),
         display: (res: "dishes/braised_eggplant"),
     ),
@@ -983,11 +983,11 @@
         id: "pan_fried_buns", // 生煎包
         characteristics: (
             quality_range: (0.7, 0.95),
-            serving_time: 40.0,
-            tags: ["dumpling", "meat", "fried", "crispy"],
+            serving_time: 10.0,
+            tags: ["snack", "dumpling", "meat", "fried", "crispy"],
             base_price: 6.0, // 一份(4个)
             weight_distrib: (mean: 0.14, stddev: 0.02), // ~140g for 4 buns
-            satiation_per_kg: 165.0,
+            satiation_per_kg: 80.0, // Very low (0.14kg * 50 = 7) - insufficient for solo meal even with low hunger
             eating_time_per_kg: 3000.0,
         ),
         display: (res: "dishes/pan_fried_buns"),

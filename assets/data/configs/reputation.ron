@@ -7,7 +7,7 @@
     // Base reputation impact values for each feedback topic
     // Positive values increase reputation, negative values decrease it
     base_impacts: {
-        praise: 0.35,       // Increased to reward good service more
+        praise: 0.2,       // Increased to reward good service more
         appeal: -0.05,      // No appealing dishes available
         queue: -3.0,        // Queue too long
         tableware: -0.01,   // Missing tray/chopsticks
@@ -37,7 +37,7 @@
     // Probability of applying reputation impact (forgiveness mechanism)
     // Lower values make the game more forgiving by ignoring some complaints
     impact_probabilities: {
-        praise: 0.5,
+        praise: 0.8,
         appeal: 0.35,
         queue: 0.50,
         tableware: 0.1,
@@ -59,7 +59,7 @@
         memory_weight: 0.6,             // Weight for historical memory
         base_quality_weight: 0.4,       // Weight for dish base quality
         max_price_ratio: 1.6,           // Maximum price/base_price ratio (60% markup needed)
-        praise_threshold: 0.25,         // Minimum satisfaction to trigger praise feedback (lowered to trigger more)
+        praise_threshold: 0.15,         // Minimum satisfaction to trigger praise feedback (lowered to trigger more)
     ),
 
     // How much player trial responses affect reputation impact (0.0-1.0)

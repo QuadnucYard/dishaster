@@ -2,12 +2,12 @@
 
 mod persist;
 
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use anyhow::Result;
 use dishaster_core::{
     interface::{SimCommand, SimEvent, SimQuery, SimResponse},
-    models::Day,
+    models::{Day, DinerOrder},
     sim::{ISimulation, Simulation},
 };
 use dishaster_data::DataLoader;
@@ -77,6 +77,179 @@ impl RunSteps for Simulation {
 }
 
 /// Display distribution of values in bins
+/// Analyze what diners with low spending or low weight are eating
+fn analyze_dining_times(dining_times: &[f32], orders: &[DinerOrder]) {
+    if dining_times.is_empty() {
+        println!("No dining time data");
+        return;
+    }
+
+    // Convert to minutes for easier reading
+    let dining_times_min: Vec<f32> = dining_times.iter().map(|t| t / 60.0).collect();
+
+    display_distribution("Dining Time (minutes)", &dining_times_min, 5.0);
+
+    // Find long dining times (>30 min) and match with orders
+    let long_dining_indices: Vec<usize> = dining_times
+        .iter()
+        .enumerate()
+        .filter(|(_, t)| **t / 60.0 > 30.0)
+        .map(|(i, _)| i)
+        .collect();
+
+    if !long_dining_indices.is_empty() {
+        println!(
+            "\nLong dining times (>30 min): {} diners",
+            long_dining_indices.len()
+        );
+        println!("  Sample orders (first 10):");
+        for (display_idx, &idx) in long_dining_indices.iter().enumerate().take(10) {
+            if idx < orders.len() {
+                let order = &orders[idx];
+                let dishes_str = order
+                    .dishes
+                    .iter()
+                    .map(|d| d.as_str())
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                println!(
+                    "    Order {}: {:.1} min, {:.3}kg, {} dishes - [{}]",
+                    display_idx + 1,
+                    dining_times[idx] / 60.0,
+                    order.weight_kg,
+                    order.dish_count,
+                    dishes_str
+                );
+            }
+        }
+
+        // Analyze dish frequencies in long dining orders
+        let mut dish_counts = HashMap::new();
+        for &idx in &long_dining_indices {
+            if idx < orders.len() {
+                for dish_id in &orders[idx].dishes {
+                    *dish_counts.entry(dish_id.clone()).or_insert(0) += 1;
+                }
+            }
+        }
+        let mut sorted: Vec<_> = dish_counts.iter().collect();
+        sorted.sort_by(|a, b| b.1.cmp(a.1));
+        println!("  Top dishes in long dining orders:");
+        for (dish_id, count) in sorted.iter().take(10) {
+            println!("    {}: {} times", dish_id, count);
+        }
+    }
+}
+
+fn analyze_low_value_orders(orders: &[DinerOrder]) {
+    // Collect low-price and low-weight orders
+    let low_price_orders: Vec<_> = orders
+        .iter()
+        .filter(|o| o.dish_count > 0 && o.price_paid < 6.0)
+        .collect();
+
+    let low_weight_orders: Vec<_> = orders
+        .iter()
+        .filter(|o| o.dish_count > 0 && o.weight_kg < 0.2)
+        .collect();
+
+    // Count dish frequencies for low-price orders
+    let mut low_price_dish_counts: HashMap<String, usize> = HashMap::new();
+    for order in &low_price_orders {
+        for dish_id in &order.dishes {
+            *low_price_dish_counts
+                .entry(dish_id.to_string())
+                .or_insert(0) += 1;
+        }
+    }
+
+    // Count dish frequencies for low-weight orders
+    let mut low_weight_dish_counts: HashMap<String, usize> = HashMap::new();
+    for order in &low_weight_orders {
+        for dish_id in &order.dishes {
+            *low_weight_dish_counts
+                .entry(dish_id.to_string())
+                .or_insert(0) += 1;
+        }
+    }
+
+    // Display results
+    println!("Low-price orders (<¥6): {} diners", low_price_orders.len());
+    if !low_price_orders.is_empty() {
+        let avg_price: f32 = low_price_orders.iter().map(|o| o.price_paid).sum::<f32>()
+            / low_price_orders.len() as f32;
+        let avg_weight: f32 = low_price_orders.iter().map(|o| o.weight_kg).sum::<f32>()
+            / low_price_orders.len() as f32;
+        println!(
+            "  Avg price: ¥{:.2}, Avg weight: {:.3}kg",
+            avg_price, avg_weight
+        );
+
+        println!("  Sample orders (first 10):");
+        for (idx, order) in low_price_orders.iter().enumerate().take(10) {
+            let dishes_str = order
+                .dishes
+                .iter()
+                .map(|d| d.as_str())
+                .collect::<Vec<_>>()
+                .join(", ");
+            println!(
+                "    Order {}: ¥{:.2}, {:.3}kg - [{}]",
+                idx + 1,
+                order.price_paid,
+                order.weight_kg,
+                dishes_str
+            );
+        }
+
+        let mut sorted: Vec<_> = low_price_dish_counts.iter().collect();
+        sorted.sort_by(|a, b| b.1.cmp(a.1));
+        println!("  Top dishes:");
+        for (dish_id, count) in sorted.iter().take(10) {
+            println!("    {}: {} times", dish_id, count);
+        }
+    }
+
+    println!(
+        "\nLow-weight orders (<0.2kg): {} diners",
+        low_weight_orders.len()
+    );
+    if !low_weight_orders.is_empty() {
+        let avg_price: f32 = low_weight_orders.iter().map(|o| o.price_paid).sum::<f32>()
+            / low_weight_orders.len() as f32;
+        let avg_weight: f32 = low_weight_orders.iter().map(|o| o.weight_kg).sum::<f32>()
+            / low_weight_orders.len() as f32;
+        println!(
+            "  Avg price: ¥{:.2}, Avg weight: {:.3}kg",
+            avg_price, avg_weight
+        );
+
+        println!("  Sample orders (first 10):");
+        for (idx, order) in low_weight_orders.iter().enumerate().take(10) {
+            let dishes_str = order
+                .dishes
+                .iter()
+                .map(|d| d.as_str())
+                .collect::<Vec<_>>()
+                .join(", ");
+            println!(
+                "    Order {}: ¥{:.2}, {:.3}kg - [{}]",
+                idx + 1,
+                order.price_paid,
+                order.weight_kg,
+                dishes_str
+            );
+        }
+
+        let mut sorted: Vec<_> = low_weight_dish_counts.iter().collect();
+        sorted.sort_by(|a, b| b.1.cmp(a.1));
+        println!("  Top dishes:");
+        for (dish_id, count) in sorted.iter().take(10) {
+            println!("    {}: {} times", dish_id, count);
+        }
+    }
+}
+
 fn display_distribution(title: &str, values: &[f32], bin_width: f32) {
     if values.is_empty() {
         println!("{}: (empty)", title);
@@ -311,6 +484,13 @@ fn single_complete_run() -> Result<()> {
     display_distribution("Price Distribution (¥)", &prices, 2.0);
     println!();
     display_distribution("Weight Distribution (kg)", &weights, 0.05);
+
+    // Analyze dining times and low-value orders
+    println!("\n=== Dining Time Analysis ===");
+    analyze_dining_times(&day_stats.dining_times, &day_stats.diner_orders);
+
+    println!("\n=== Low-Spending/Low-Weight Analysis ===");
+    analyze_low_value_orders(&day_stats.diner_orders);
 
     save_sim_profile(profile_svc, persisted)?;
     std::mem::drop(sim);

@@ -101,8 +101,22 @@ pub fn handle_eat_goal(
             let eating_time_multiplier = perma_effects.get_eating_time_multiplier();
             // eating_rate = eating_speed / (eating_time_per_kg * multiplier)
             // Lower multiplier = faster eating (less time per kg)
-            let eating_rate =
+            let base_eating_rate =
                 dining_profile.eating_speed / (eating_time_per_kg * eating_time_multiplier);
+
+            // Apply speed multiplier for long dining times (20-30 min range)
+            // Smoothly scale from 1x at 20min to 2x at 30min
+            let elapsed_eating_time = goal.timer;
+            let speed_multiplier = if elapsed_eating_time > 20.0 * 60.0 {
+                let t = ((elapsed_eating_time - 20.0 * 60.0) / (10.0 * 60.0)).min(1.0);
+                // Smooth interpolation using smoothstep
+                let smoothed = t * t * (3.0 - 2.0 * t);
+                1.0 + smoothed // 1.0 at 20min, 2.0 at 30min
+            } else {
+                1.0
+            };
+
+            let eating_rate = base_eating_rate * speed_multiplier;
 
             // Expected consumption this tick
             let expected_consumption = eating_rate * dt;
@@ -322,8 +336,11 @@ pub fn handle_eat_goal(
         });
 
         // Mark dining end time and record to daily stats
+        // Only record dining time if diner actually ate food (has served dishes)
         state.dining_end_time = Some(time.current_time as f32);
-        if let (Some(start), Some(end)) = (state.dining_start_time, state.dining_end_time) {
+        if !state.served_dishes.is_empty()
+            && let (Some(start), Some(end)) = (state.dining_start_time, state.dining_end_time)
+        {
             let dining_duration = end - start;
             daily_stats.dining_times.push(dining_duration);
             log::debug!(
