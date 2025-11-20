@@ -16,6 +16,14 @@ pub mod hints {
     /// Hint shown when refill staff limit reached and cannot spawn more.
     /// Emission: Always (operational limit warning)
     pub const REFILL_STAFF_BUSY: &str = "refill-staff-busy";
+
+    /// Hint shown when trying to start a trial during cooldown period.
+    /// Emission: Always (cooldown warning)
+    pub const TRIAL_COOLDOWN: &str = "trial-cooldown";
+
+    /// Hint shown when triggering refill.
+    /// Emission: Always (action confirmation)
+    pub const REFILL_TRIGGERED: &str = "refill-triggered";
 }
 
 pub trait HintEmitter {

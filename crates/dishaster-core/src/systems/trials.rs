@@ -1,10 +1,11 @@
-use dishaster_interface::SimEvent;
+use dishaster_interface::{SimEvent, event::HintCondition};
 use dishaster_trial as trial;
 
 use crate::{
     events::*,
     prelude::*,
-    resources::{EventQueue, GameModelRegistryRes, TrialSession},
+    resources::{EventQueue, GameModelRegistryRes, Time, TrialSession},
+    systems::hint::{HintEmitter, hints},
 };
 
 pub fn register_trial_systems(world: &mut World) {
@@ -20,11 +21,14 @@ fn on_trial_start(
     event: On<TrialStart>,
     mut session: ResMut<TrialSession>,
     mut events: ResMut<EventQueue>,
+    time: Res<Time>,
 ) {
     let TrialStart { diner, topic } = *event;
+    let current_time = time.current_time as f32;
 
-    if session.is_active {
-        // Already in a trial; ignore
+    if !session.can_start(current_time) {
+        // Trial cooldown or already active; emit hint and ignore
+        events.emit_hint(hints::TRIAL_COOLDOWN, HintCondition::Always);
         return;
     }
 
@@ -74,8 +78,9 @@ fn on_trial_respond(
 fn on_trial_timeout(
     _event: On<TrialTimeout>,
     mut commands: Commands,
-    session: Res<TrialSession>,
+    mut session: ResMut<TrialSession>,
     mut events: ResMut<EventQueue>,
+    time: Res<Time>,
 ) {
     let impact = trial::get_trial_timeout_penalty(&session.config);
 
@@ -87,6 +92,7 @@ fn on_trial_timeout(
         });
     }
 
+    session.finish(time.current_time as f32);
     events.push(SimEvent::TrialEnd { timeout: true });
 }
 
@@ -117,6 +123,7 @@ fn on_trial_proceed(
     mut session: ResMut<TrialSession>,
     registry: Res<GameModelRegistryRes>,
     mut events: ResMut<EventQueue>,
+    time: Res<Time>,
 ) {
     let should_continue = trial::trial_should_continue(&mut session, &registry.trial);
 
@@ -126,7 +133,7 @@ fn on_trial_proceed(
         events.push(SimEvent::TrialLeftSpeak(statement.into()));
     } else {
         // End of trial
-        session.finish();
+        session.finish(time.current_time as f32);
         events.push(SimEvent::TrialEnd { timeout: false });
     }
 }

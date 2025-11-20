@@ -66,6 +66,9 @@ pub fn handle_refill_request(
             "Refill request received for dispenser: {dispenser_entity:?}"
         );
 
+        // Emit hint for refill trigger
+        events.emit_hint(hints::REFILL_TRIGGERED, HintCondition::Always);
+
         // Spawn refill staff at corner of canteen (entrance area)
         let spawn_pos = vec2(canteen.model.width - 1.0, canteen.model.windows_y - 1.0);
 

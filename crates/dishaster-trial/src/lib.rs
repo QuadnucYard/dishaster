@@ -80,6 +80,8 @@ pub struct TrialSession {
     pub temperature: f32,
     /// Topic that triggered this trial (for filtering relevant speeches)
     pub trigger_topic: Option<FeedbackTopic>,
+    /// Timestamp when the last trial ended (for cooldown enforcement)
+    pub last_trial_end_time: Option<f32>,
 }
 
 impl TrialSession {
@@ -100,6 +102,7 @@ impl TrialSession {
             max_continuation_depth: 3,
             temperature: 0.8,
             trigger_topic: None,
+            last_trial_end_time: None,
         }
     }
 
@@ -128,8 +131,21 @@ impl TrialSession {
     }
 
     /// Finish the current trial session
-    pub fn finish(&mut self) {
+    pub fn finish(&mut self, current_time: f32) {
         self.is_active = false;
+        self.last_trial_end_time = Some(current_time);
+    }
+
+    /// Check if a new trial can start based on cooldown
+    pub fn can_start(&self, current_time: f32) -> bool {
+        if self.is_active {
+            return false;
+        }
+        if let Some(last_end) = self.last_trial_end_time {
+            current_time - last_end >= self.config.trial_cooldown_seconds
+        } else {
+            true
+        }
     }
 
     /// Check if a question has been asked

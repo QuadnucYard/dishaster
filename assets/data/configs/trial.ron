@@ -77,4 +77,7 @@
     /// patience_change = response_score × patience_scale
     /// Default: 2.0
     patience_scale: 2.0,
+
+    /// Minimum time interval in seconds between trials (cooldown).
+    trial_cooldown_seconds: 5.0,
 )

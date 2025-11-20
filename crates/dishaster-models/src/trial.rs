@@ -54,6 +54,9 @@ pub struct TrialConfig {
 
     /// Scaling factor for patience change based on response score.
     pub patience_scale: f32,
+
+    /// Minimum time interval in seconds between trials (cooldown).
+    pub trial_cooldown_seconds: f32,
 }
 
 impl Default for TrialConfig {
@@ -73,6 +76,7 @@ impl Default for TrialConfig {
             mood_scale: 0.1,
             trust_scale: 0.05,
             patience_scale: 2.0,
+            trial_cooldown_seconds: 5.0,
         }
     }
 }
