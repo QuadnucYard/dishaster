@@ -150,7 +150,7 @@ pub struct WindowLayout {
     /// X-axis positions for customer queueing
     pub queue_x: Vec<Meters>,
     /// Positions where dishes can be placed. Relative to the top-left corner.
-    pub dish_slots: Vec<Rect>,
+    pub dish_slots: Vec<Vec2>,
 }
 
 /// Dish offered at a service window with a specific price

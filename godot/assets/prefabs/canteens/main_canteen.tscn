@@ -17,7 +17,7 @@ gradient = SubResource("Gradient_fhumt")
 
 [node name="Origin" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(211, 130)
+position = Vector2(211, 109)
 
 [node name="Clear" type="Sprite2D" parent="Origin"]
 z_index = -100

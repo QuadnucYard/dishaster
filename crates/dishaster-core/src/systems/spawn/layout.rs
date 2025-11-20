@@ -186,7 +186,7 @@ fn spawn_dishes(
     let layout = &service_model.layout;
 
     for (slot_index, assignment) in dish_assignments.iter().enumerate() {
-        let slot_rect = &layout.dish_slots[slot_index];
+        let slot_center = &layout.dish_slots[slot_index];
 
         let dish_handle = registry
             .dishes
@@ -226,8 +226,7 @@ fn spawn_dishes(
                     ..Default::default()
                 },
                 Transform {
-                    position: (slot_rect.center() - vec2(layout.size.width / 2.0, 0.0)).extend(0.0),
-                    scale: Vec3::splat(0.8),
+                    position: (slot_center - vec2(layout.size.width / 2.0, 0.0)).extend(0.0),
                     parent: Some(window_entity),
                     ..Default::default()
                 },

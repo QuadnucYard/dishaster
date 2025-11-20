@@ -19,17 +19,17 @@ corner_radius_bottom_left = 4
 
 [node name="Floor" type="Sprite2D" parent="."]
 texture_repeat = 2
-position = Vector2(0, 45)
+position = Vector2(0, 62)
 texture = ExtResource("1_6wpft")
 region_enabled = true
-region_rect = Rect2(0, 0, 96, 96)
+region_rect = Rect2(0, 0, 96, 128)
 
 [node name="Label" type="Label" parent="."]
 custom_minimum_size = Vector2(90, 30)
 offset_left = -45.0
-offset_top = 90.0
+offset_top = 123.0
 offset_right = 45.0
-offset_bottom = 120.0
+offset_bottom = 157.0
 theme_override_colors/font_color = Color(0.7282404, 0.2563501, 0.62899846, 1)
 theme_override_fonts/font = ExtResource("2_7oske")
 theme_override_font_sizes/font_size = 20
