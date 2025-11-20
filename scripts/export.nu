@@ -37,4 +37,5 @@ def main [--platform: string = "windows", --release] {
     cp godot/assets.toml $target_dir
     cp -r godot/locales $target_dir
     cp LICENSE $target_dir
+    cp README.md $target_dir
 }
