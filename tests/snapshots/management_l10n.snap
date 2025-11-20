@@ -46,6 +46,36 @@ source: tests/src/management_l10n_snapshot.rs
   localized:
     title: 调整桌子布局
     effects: "• 随机改变 3 张桌子的位置\n• 优化空间利用率（？）"
+- id: add_tray_dispenser
+  seed: 1311768467294899695
+  localized:
+    title: 添加托盘取餐点
+    effects: "• 托盘取餐点数量 +1\n• 减少食客寻找托盘的时间"
+- id: add_tray_dispenser
+  seed: 18364757930599072545
+  localized:
+    title: 添加托盘取餐点
+    effects: "• 托盘取餐点数量 +1\n• 减少食客寻找托盘的时间"
+- id: add_tray_dispenser
+  seed: 12297829382473034410
+  localized:
+    title: 添加托盘取餐点
+    effects: "• 托盘取餐点数量 +1\n• 减少食客寻找托盘的时间"
+- id: add_chopstick_dispenser
+  seed: 1311768467294899695
+  localized:
+    title: 添加筷子取用点
+    effects: "• 筷子取用点数量 +1\n• 提升餐具获取便利性"
+- id: add_chopstick_dispenser
+  seed: 18364757930599072545
+  localized:
+    title: 添加筷子取用点
+    effects: "• 筷子取用点数量 +1\n• 提升餐具获取便利性"
+- id: add_chopstick_dispenser
+  seed: 12297829382473034410
+  localized:
+    title: 添加筷子取用点
+    effects: "• 筷子取用点数量 +1\n• 提升餐具获取便利性"
 - id: open_window
   seed: 1311768467294899695
   localized:

@@ -23,7 +23,7 @@ pub fn sync_diner_memory_system(
 }
 
 pub fn persist_system(
-    window_query: Query<(&Window, &WindowDishes)>,
+    window_query: Query<(&Window, Option<&WindowDishes>)>,
     dish_query: Query<&Dish>,
     table_query: Query<&DiningTable>,
     dispenser_query: Query<&Dispenser>,
@@ -41,25 +41,31 @@ pub fn persist_system(
         .map(|(window, dishes)| {
             let service = registry.window_services.get(window.service_template);
 
+            let price_override = dishes
+                .map(|dishes| {
+                    dishes
+                        .iter()
+                        .filter_map(|dish_entity| {
+                            let dish = dish_query.get(dish_entity).ok()?;
+                            let price = dish.pricing;
+                            if service
+                                .dish_options
+                                .iter()
+                                .any(|opt| opt.dish_id == dish.model_id && opt.pricing == price)
+                            {
+                                return None;
+                            }
+                            Some((dish.model_id.clone(), price))
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
+
             WindowConfiguration {
                 slot_index: window.slot_index,
                 service: service.id.clone(),
                 is_disabled: window.disabled,
-                price_override: dishes
-                    .iter()
-                    .filter_map(|dish_entity| {
-                        let dish = dish_query.get(dish_entity).ok()?;
-                        let price = dish.pricing;
-                        if service
-                            .dish_options
-                            .iter()
-                            .any(|opt| opt.dish_id == dish.model_id && opt.pricing == price)
-                        {
-                            return None;
-                        }
-                        Some((dish.model_id.clone(), price))
-                    })
-                    .collect(),
+                price_override,
             }
         })
         .collect();

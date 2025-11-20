@@ -276,9 +276,10 @@ fn apply_open_window(
 fn apply_close_window(
     _event: On<DispatchManagement<CloseWindowModel>>,
     mut commands: Commands,
-    mut window_query: Query<Entity>,
+    mut window_query: Query<Entity, With<Window>>,
     mut rng: ResMut<WorldRng>,
 ) {
+    log::info!("Applying close window decision");
     let Some(window) = window_query.iter_mut().choose(&mut rng) else {
         log::warn!("No windows available to close");
         return;
@@ -294,6 +295,7 @@ fn apply_change_window_service(
     registry: Res<GameModelRegistryRes>,
     mut rng: ResMut<WorldRng>,
 ) {
+    log::info!("Applying change window service decision");
     let Some(mut window) = window_query.iter_mut().choose(&mut rng) else {
         return;
     };

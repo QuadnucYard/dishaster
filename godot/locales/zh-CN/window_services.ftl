@@ -22,6 +22,8 @@ window-main_window_premium =
     .name = 品质美食
 window-main_window_classic =
     .name = 经典菜肴
+window-main_window_soup =
+    .name = 汤羹坊
 
 # ==================== 面食窗口 (Noodle Windows) ====================
 window-noodle_window_soup =
