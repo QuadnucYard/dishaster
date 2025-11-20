@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use dishaster_core::models::*;
-use dishrupt_core::display::DisplayModel;
+use dishrupt_core::{asset::SpriteRef, display::DisplayModel};
 
 /// Create a minimal game model registry for testing
 pub fn create_test_registry() -> Arc<GameModelRegistry> {
@@ -59,6 +59,21 @@ pub fn create_test_registry() -> Arc<GameModelRegistry> {
     registry
         .levels
         .intern(level_config.id.clone(), level_config);
+
+    // Add a minimal management decision for testing
+    // Using PlayMusic because it's the simplest decision that doesn't require window models
+    let decision_template = ManagementDecisionTemplate {
+        id: ModelId::new("test_decision"),
+        weight: 100,
+        icon: SpriteRef::new("test_icon"),
+        def: ManagementDecisionTemplateDef::PlayMusic(PlayMusicTemplate {
+            eating_time_multiplier_range: 0.9..=1.1,
+            satisfaction_change_range: -5.0..=5.0,
+        }),
+    };
+    registry
+        .mgmt_decisions
+        .intern(decision_template.id.clone(), decision_template);
 
     Arc::new(registry)
 }
