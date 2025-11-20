@@ -12,6 +12,8 @@ pub struct FeedbackMessage {
     pub content: Feedback,
     /// Optional trigger type for more specific feedback handling (for trial system)
     pub trigger: Option<FeedbackTopic>,
+    /// Duration in seconds to display this feedback.
+    pub display_duration: f32,
 }
 
 /// Request to refill a dispenser entity.

@@ -1,6 +1,28 @@
 use super::deciding::{SatisfactionWeights, compute_satisfaction, update_after_eating};
 use crate::systems::{feedback::*, prelude::*};
 
+// Contamination detection constants
+const CONTAMINATION_DETECTION_RATE_MULTIPLIER: f32 = 0.5;
+const CONTAMINATION_SEVERE_MOOD_PENALTY: f32 = 0.5;
+const CONTAMINATION_SEVERE_TRUST_PENALTY: f32 = 0.3;
+const CONTAMINATION_SAFETY_THRESHOLD: f32 = 0.05;
+
+// Eating timing constants
+const DEFAULT_EATING_TIME_PER_KG: f32 = 200.0;
+const LONG_DINING_TIME_THRESHOLD: f32 = 20.0 * 60.0; // 20 minutes in seconds
+const LONG_DINING_TIME_RAMP_DURATION: f32 = 10.0 * 60.0; // 10 minute ramp to 2x speed
+const SMOOTHSTEP_CURVE_FACTOR: f32 = 3.0;
+const SMOOTHSTEP_CURVE_FACTOR_2: f32 = 2.0;
+
+// Eating randomness constants
+const EATING_RANDOMNESS_MIN: f32 = 0.5;
+const EATING_RANDOMNESS_MAX: f32 = 1.5;
+
+// Price and quality constants
+const PRICE_RATIO_EPSILON: f32 = 0.01;
+const QUALITY_TOLERANCE_ADAPTIVENESS_WEIGHT: f32 = 0.1;
+const QUALITY_TOLERANCE_MOOD_WEIGHT: f32 = 0.05;
+
 pub fn handle_eat_goal(
     mut diner_query: Query<(
         Entity,
@@ -48,7 +70,8 @@ pub fn handle_eat_goal(
             if served_dish.contamination_level > feedback_thresholds.contamination_threshold {
                 // Calculate detection chance based on contamination level
                 // Higher contamination = faster detection
-                let detection_rate = served_dish.contamination_level * 0.5; // 0.05/s at threshold, 0.5/s at max
+                let detection_rate =
+                    served_dish.contamination_level * CONTAMINATION_DETECTION_RATE_MULTIPLIER;
 
                 if rng.random_bool_dt(detection_rate as f64, dt as f64) {
                     log::warn!(
@@ -59,14 +82,17 @@ pub fn handle_eat_goal(
                     );
 
                     // Apply severe penalties
-                    psych_state.mood = (psych_state.mood - 0.5).max(-1.0);
-                    psych_state.trust = (psych_state.trust - 0.3).max(0.0);
+                    psych_state.mood =
+                        (psych_state.mood - CONTAMINATION_SEVERE_MOOD_PENALTY).max(-1.0);
+                    psych_state.trust =
+                        (psych_state.trust - CONTAMINATION_SEVERE_TRUST_PENALTY).max(0.0);
 
                     // Emit strong complaint
                     feedback_messages.write(FeedbackMessage {
                         entity,
                         content: choose_feedback(&mut rng, feedbacks::CONTAMINATION),
                         trigger: Some(FeedbackTopic::Hygiene),
+                        display_duration: feedbacks::TRIAL_DURATION,
                     });
 
                     // Stop eating immediately
@@ -92,7 +118,7 @@ pub fn handle_eat_goal(
                 .dishes
                 .get_by_id(&served_dish.dish_id)
                 .map(|m| m.characteristics.eating_time_per_kg)
-                .unwrap_or(200.0); // Default fallback
+                .unwrap_or(DEFAULT_EATING_TIME_PER_KG);
 
             // Calculate eating rate: kg/second
             // eating_speed is a multiplier (0.5 = slow, 1.0 = normal, 1.5 = fast)
@@ -107,10 +133,12 @@ pub fn handle_eat_goal(
             // Apply speed multiplier for long dining times (20-30 min range)
             // Smoothly scale from 1x at 20min to 2x at 30min
             let elapsed_eating_time = goal.timer;
-            let speed_multiplier = if elapsed_eating_time > 20.0 * 60.0 {
-                let t = ((elapsed_eating_time - 20.0 * 60.0) / (10.0 * 60.0)).min(1.0);
+            let speed_multiplier = if elapsed_eating_time > LONG_DINING_TIME_THRESHOLD {
+                let t = ((elapsed_eating_time - LONG_DINING_TIME_THRESHOLD)
+                    / LONG_DINING_TIME_RAMP_DURATION)
+                    .min(1.0);
                 // Smooth interpolation using smoothstep
-                let smoothed = t * t * (3.0 - 2.0 * t);
+                let smoothed = t * t * (SMOOTHSTEP_CURVE_FACTOR - SMOOTHSTEP_CURVE_FACTOR_2 * t);
                 1.0 + smoothed // 1.0 at 20min, 2.0 at 30min
             } else {
                 1.0
@@ -123,7 +151,7 @@ pub fn handle_eat_goal(
 
             // Add randomness: actual consumption varies ±50% around expected
             // This makes finish time indeterminate
-            let randomness_factor = rng.random_range(0.5..1.5);
+            let randomness_factor = rng.random_range(EATING_RANDOMNESS_MIN..EATING_RANDOMNESS_MAX);
             let actual_consumption = expected_consumption * randomness_factor;
 
             // Consume food (don't go below 0)
@@ -240,11 +268,12 @@ pub fn handle_eat_goal(
                     entity,
                     content: choose_feedback(&mut rng, feedbacks::BAD_TASTE),
                     trigger: Some(FeedbackTopic::Quality),
+                    display_duration: feedbacks::TRIAL_DURATION,
                 });
             }
 
             // Check for price complaint (overpriced relative to base)
-            let price_ratio = served_dish.price_paid / base_price.max(0.01);
+            let price_ratio = served_dish.price_paid / base_price.max(PRICE_RATIO_EPSILON);
             if price_ratio > feedback_thresholds.max_price_ratio {
                 log::info!(
                     target: "diner",
@@ -257,13 +286,14 @@ pub fn handle_eat_goal(
                     entity,
                     content: choose_feedback(&mut rng, feedbacks::BAD_TASTE),
                     trigger: Some(FeedbackTopic::Price),
+                    display_duration: feedbacks::TRIAL_DURATION,
                 });
             }
 
             // Check for praise feedback (high satisfaction)
             // Only praise if satisfaction is positive and no major issues
             if satisfaction > feedback_thresholds.praise_threshold
-                && served_dish.contamination_level < 0.05
+                && served_dish.contamination_level < CONTAMINATION_SAFETY_THRESHOLD
             {
                 log::info!(
                     target: "diner",
@@ -276,6 +306,7 @@ pub fn handle_eat_goal(
                     entity,
                     content: choose_feedback(&mut rng, feedbacks::PRAISE),
                     trigger: Some(FeedbackTopic::Praise),
+                    display_duration: feedbacks::TRIAL_DURATION,
                 });
             }
 
@@ -293,6 +324,7 @@ pub fn handle_eat_goal(
                     entity,
                     content: choose_feedback(&mut rng, feedbacks::BAD_TASTE),
                     trigger: Some(FeedbackTopic::Taste),
+                    display_duration: feedbacks::TRIAL_DURATION,
                 });
             }
 
@@ -310,6 +342,7 @@ pub fn handle_eat_goal(
                     entity,
                     content: choose_feedback(&mut rng, feedbacks::STILL_HUNGRY),
                     trigger: Some(FeedbackTopic::Hunger),
+                    display_duration: feedbacks::TRIAL_DURATION,
                 });
             }
         }
@@ -379,5 +412,7 @@ fn compute_expected_quality(
 /// Adjusts the quality mismatch tolerance based on diner's mood and adaptiveness.
 /// Better mood and more adaptiveness = higher tolerance (more forgiving).
 fn compute_quality_tolerance(adaptiveness: f32, mood: f32, base_tolerance: f32) -> f32 {
-    base_tolerance + adaptiveness * 0.1 + (mood + 1.0) * 0.05
+    base_tolerance
+        + adaptiveness * QUALITY_TOLERANCE_ADAPTIVENESS_WEIGHT
+        + (mood + 1.0) * QUALITY_TOLERANCE_MOOD_WEIGHT
 }

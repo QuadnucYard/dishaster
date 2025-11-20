@@ -71,6 +71,7 @@ pub fn check_queue_patience(
                 entity,
                 content: choose_feedback(&mut rng, feedbacks::QUEUE_TOO_LONG),
                 trigger: Some(FeedbackTopic::Queue),
+                display_duration: feedbacks::TRIAL_DURATION,
             });
 
             // Record leave reason

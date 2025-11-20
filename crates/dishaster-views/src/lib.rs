@@ -68,6 +68,8 @@ pub struct FeedbackView {
     pub topic: Option<FeedbackTopic>,
     /// Whether this feedback can trigger a trial (based on topic and trial corpus).
     pub can_trigger_trial: bool,
+    /// Duration in seconds to display this feedback.
+    pub display_duration: f32,
 }
 
 /// Content of feedback events.

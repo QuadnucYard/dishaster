@@ -26,6 +26,10 @@ pub mod feedbacks {
     pub const BAD_TASTE: &[&str] = &["😖", "😞", "🤢"];
     pub const STILL_HUNGRY: &[&str] = &["😐", "🍚", "😕"];
     pub const PRAISE: &[&str] = &["😋", "👍", "🤤", "😍"];
+
+    pub const TRIAL_DURATION: f32 = 5.0;
+    pub const NORMAL_DURATION: f32 = 2.0;
+    pub const ORDER_DURATION: f32 = 0.5;
 }
 
 pub fn choose_feedback(rng: &mut impl Rng, pool: &[&str]) -> Feedback {
@@ -66,6 +70,7 @@ pub fn feedback_present_system(
                 content: msg.content.clone(),
                 topic: topic.as_ref().map(ToView::to_view),
                 can_trigger_trial,
+                display_duration: msg.display_duration,
             }));
 
             // Emit hint for first-time trial trigger opportunity

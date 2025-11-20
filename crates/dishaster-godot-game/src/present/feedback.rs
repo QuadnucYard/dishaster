@@ -59,7 +59,7 @@ impl FeedbackPresenter {
             self.lifetime = None;
 
             if self.can_trigger_trial {
-                self.anim_player.stop();
+                self.anim_player.reset();
             }
         }
     }
@@ -69,11 +69,9 @@ impl FeedbackPresenter {
         feedback: &Feedback,
         topic: Option<FeedbackTopic>,
         can_trigger: bool,
+        display_duration: f32,
         catalog: &AssetCatalog,
     ) {
-        /// How long feedback balloons last on screen (placeholder value).
-        const BALLOON_LIFETIME: f64 = 3.0;
-
         self.topic = topic;
         self.can_trigger_trial = can_trigger;
 
@@ -99,7 +97,7 @@ impl FeedbackPresenter {
             }
         }
         self.root.set_visible(true);
-        self.lifetime = Some(BALLOON_LIFETIME);
+        self.lifetime = Some(display_duration as f64);
 
         if can_trigger {
             self.root.set_modulate(Color::WHITE.with_alpha(1.0));

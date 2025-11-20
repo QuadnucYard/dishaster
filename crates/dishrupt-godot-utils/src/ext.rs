@@ -153,6 +153,11 @@ impl NodeExt for Node {
 pub trait AnimationPlayerExt {
     /// Play an animation by name.
     fn play_by_name(&mut self, name: &str);
+
+    /// Reset the animation player to its initial state.
+    fn reset(&mut self) {
+        self.play_by_name("RESET");
+    }
 }
 
 impl AnimationPlayerExt for godot::classes::AnimationPlayer {

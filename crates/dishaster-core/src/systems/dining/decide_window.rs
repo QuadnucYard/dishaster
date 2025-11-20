@@ -1,6 +1,18 @@
 use super::{deciding::*, ordering::*};
 use crate::systems::{feedback::*, prelude::*};
 
+// Decision timing constants
+const DECISION_TIME_BASE: f32 = 3.0;
+
+// Feedback display duration constants
+const DECIDING_FEEDBACK_CHANCE: f64 = 0.5;
+
+// Other decision constants
+const AVG_SERVICE_TIME: f32 = 10.0; // seconds per person
+const MOOD_PENALTY: f32 = 0.2;
+const TRUST_PENALTY: f32 = 0.1;
+const MIN_DECISIVENESS: f32 = 0.1;
+
 pub fn handle_decide_window_goal(
     diner_query: Query<(
         Entity,
@@ -41,7 +53,7 @@ pub fn handle_decide_window_goal(
         }
 
         // Wait for decision time
-        if goal.timer < 3.0 / personality.decisiveness.max(0.1) {
+        if goal.timer < DECISION_TIME_BASE / personality.decisiveness.max(MIN_DECISIVENESS) {
             continue;
         }
 
@@ -179,7 +191,7 @@ fn evaluate_and_select_window(
             .map(|(_, members)| members.members.len())
             .unwrap_or(0);
 
-        let avg_service_time = 10.0; // seconds per person
+        let avg_service_time = AVG_SERVICE_TIME;
 
         if let Some(candidate) = evaluate_window(
             window_entity,
@@ -215,13 +227,14 @@ fn handle_no_suitable_window(
         entity
     );
 
-    psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
-    psych_state.trust = (psych_state.trust - 0.1).max(0.0);
+    psych_state.mood = (psych_state.mood - MOOD_PENALTY).max(-1.0);
+    psych_state.trust = (psych_state.trust - TRUST_PENALTY).max(0.0);
 
     feedback_messages.write(FeedbackMessage {
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
         trigger: Some(FeedbackTopic::Appeal),
+        display_duration: feedbacks::TRIAL_DURATION,
     });
 
     // Record why this diner left
@@ -250,13 +263,14 @@ fn handle_empty_tentative_order(
         reason
     );
 
-    psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
-    psych_state.trust = (psych_state.trust - 0.1).max(0.0);
+    psych_state.mood = (psych_state.mood - MOOD_PENALTY).max(-1.0);
+    psych_state.trust = (psych_state.trust - TRUST_PENALTY).max(0.0);
 
     feedback_messages.write(FeedbackMessage {
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
         trigger: Some(FeedbackTopic::Appeal),
+        display_duration: feedbacks::TRIAL_DURATION,
     });
 
     // Record precise reason why this diner left
@@ -278,11 +292,12 @@ fn finalize_window_choice(
     targets.tentative_order = tentative_order;
     targets.chosen_window = Some(window_entity);
 
-    if rng.random_bool(0.5) {
+    if rng.random_bool(DECIDING_FEEDBACK_CHANCE) {
         feedback_messages.write(FeedbackMessage {
             entity,
             content: choose_feedback(rng, feedbacks::DECIDING),
             trigger: None,
+            display_duration: feedbacks::TRIAL_DURATION,
         });
     }
 

@@ -114,6 +114,7 @@ pub fn process_serving_messages(
                     entity: staff,
                     content: feedback,
                     trigger: None,
+                    display_duration: feedbacks::ORDER_DURATION,
                 });
                 let delay = rng.random_range(STAFF_CONFIRM_DELAY_MIN..STAFF_CONFIRM_DELAY_MAX);
                 // Queue the verbal confirmation after a short pause to simulate speech.
@@ -145,12 +146,14 @@ pub fn process_serving_messages(
                     entity: staff,
                     content: confirm_feedback,
                     trigger: None,
+                    display_duration: feedbacks::ORDER_DURATION,
                 });
                 let diner_feedback = choose_feedback(&mut rng, feedbacks::DECIDING);
                 feedback_messages.write(FeedbackMessage {
                     entity: diner,
                     content: diner_feedback,
                     trigger: None,
+                    display_duration: feedbacks::NORMAL_DURATION,
                 });
 
                 log::debug!(
@@ -272,12 +275,14 @@ pub fn process_serving_messages(
                     entity: staff,
                     content: staff_feedback,
                     trigger: None,
+                    display_duration: feedbacks::ORDER_DURATION,
                 });
                 let diner_feedback = choose_feedback(&mut rng, feedbacks::SERVING);
                 feedback_messages.write(FeedbackMessage {
                     entity: diner,
                     content: diner_feedback,
                     trigger: None,
+                    display_duration: feedbacks::NORMAL_DURATION,
                 });
 
                 log::debug!(
@@ -397,6 +402,7 @@ pub fn drive_serving_sessions(
                     entity: diner,
                     content: feedback,
                     trigger: None,
+                    display_duration: feedbacks::ORDER_DURATION,
                 });
 
                 let delay: f32 = rng.random_range(ORDER_SPEECH_DELAY_MIN..ORDER_SPEECH_DELAY_MAX);

@@ -1,5 +1,12 @@
 use crate::systems::{feedback::*, prelude::*};
 
+const DISPENSER_RETRY_COOLDOWN: f32 = 5.0; // Retry every 5 seconds instead of every frame
+const PROXIMITY_CHECK_DISTANCE: f32 = 3.0;
+const MOOD_PENALTY_FOR_MISSING_TABLEWARE: f32 = 0.05;
+const FEEDBACK_TIMER_THRESHOLD: f32 = 10.0;
+const CHOPSTICK_PICKUP_CHANCE: f64 = 0.3;
+const DISH_RETURN_DELAY: f32 = 2.0;
+
 pub fn handle_pick_tray_goal(
     mut commands: Commands,
     diner_query: Query<(
@@ -18,8 +25,6 @@ pub fn handle_pick_tray_goal(
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
-    const DISPENSER_RETRY_COOLDOWN: f32 = 5.0; // Retry every 5 seconds instead of every frame
-
     for (
         entity,
         mut state,
@@ -47,7 +52,10 @@ pub fn handle_pick_tray_goal(
                 .iter()
                 .filter(|(_, d, s)| {
                     d.dispenser_type == DispenserType::Tray
-                        && (!d.center_pos.close_to(movement.pos, 3.0) || s.current > 0)
+                        && (!d
+                            .center_pos
+                            .close_to(movement.pos, PROXIMITY_CHECK_DISTANCE)
+                            || s.current > 0)
                 })
                 .min_by_key(|(_, d, _)| {
                     let distance = movement.pos.distance_squared(d.center_pos);
@@ -65,15 +73,17 @@ pub fn handle_pick_tray_goal(
                 targets.last_dispenser_retry_time = current_time;
 
                 // Apply mood penalty (but not trust - this could be temporary)
-                psych_state.mood = (psych_state.mood - 0.05).max(-1.0);
+                psych_state.mood =
+                    (psych_state.mood - MOOD_PENALTY_FOR_MISSING_TABLEWARE).max(-1.0);
 
                 // Emit complaint feedback
-                if goal.timer > 10.0 {
+                if goal.timer > FEEDBACK_TIMER_THRESHOLD {
                     // Only emit feedback if we've been trying for a while
                     feedback_messages.write(FeedbackMessage {
                         entity,
                         content: choose_feedback(&mut rng, feedbacks::MISSING_TABLEWARE),
                         trigger: Some(FeedbackTopic::Tableware),
+                        display_duration: feedbacks::TRIAL_DURATION,
                     });
                     goal.reset_timer(); // Reset to avoid spamming feedback
                 }
@@ -142,8 +152,8 @@ pub fn handle_pick_tray_goal(
             change: DinerItemsChange::PickTray(tray_entity.to_entity_id()),
         });
 
-        goal.update(if rng.random_bool(0.3) {
-            // 30% chance to pick chopsticks next
+        goal.update(if rng.random_bool(CHOPSTICK_PICKUP_CHANCE) {
+            // Pick chopsticks next
             DinerGoal::PickChopsticks
         } else {
             DinerGoal::QueueForWindow
@@ -168,8 +178,6 @@ pub fn handle_pick_chopsticks_goal(
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     mut events: ResMut<EventQueue>,
 ) {
-    const DISPENSER_RETRY_COOLDOWN: f32 = 5.0; // Retry every 5 seconds instead of every frame
-
     for (entity, mut state, mut goal, mut targets, mut movement, mut psych_state, mut rng) in
         diner_query
     {
@@ -189,7 +197,10 @@ pub fn handle_pick_chopsticks_goal(
                 .iter()
                 .filter(|(_, d, s)| {
                     d.dispenser_type == DispenserType::Chopstick
-                        && (!d.center_pos.close_to(movement.pos, 3.0) || s.current > 0)
+                        && (!d
+                            .center_pos
+                            .close_to(movement.pos, PROXIMITY_CHECK_DISTANCE)
+                            || s.current > 0)
                 })
                 .min_by_key(|(_, d, _)| {
                     let distance = movement.pos.distance_squared(d.center_pos);
@@ -207,15 +218,17 @@ pub fn handle_pick_chopsticks_goal(
                 targets.last_dispenser_retry_time = current_time;
 
                 // Apply mood penalty (but not trust - this could be temporary)
-                psych_state.mood = (psych_state.mood - 0.05).max(-1.0);
+                psych_state.mood =
+                    (psych_state.mood - MOOD_PENALTY_FOR_MISSING_TABLEWARE).max(-1.0);
 
                 // Emit complaint feedback
-                if goal.timer > 10.0 {
+                if goal.timer > FEEDBACK_TIMER_THRESHOLD {
                     // Only emit feedback if we've been trying for a while
                     feedback_messages.write(FeedbackMessage {
                         entity,
                         content: choose_feedback(&mut rng, feedbacks::MISSING_TABLEWARE),
                         trigger: Some(FeedbackTopic::Tableware),
+                        display_duration: feedbacks::TRIAL_DURATION,
                     });
                     goal.reset_timer(); // Reset to avoid spamming feedback
                 }
@@ -340,7 +353,7 @@ pub fn handle_return_dishes_goal(
 
         if movement.target_reached {
             movement.stop_as_reached();
-            if goal.timer < 2.0 {
+            if goal.timer < DISH_RETURN_DELAY {
                 // Simulate time taken to return dishes
                 continue;
             }

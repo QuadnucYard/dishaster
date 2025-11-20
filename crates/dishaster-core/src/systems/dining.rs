@@ -157,6 +157,7 @@ fn handle_observe_goal(
                 entity,
                 content: choose_feedback(&mut rng, feedbacks::OBSERVING),
                 trigger: None,
+                display_duration: feedbacks::NORMAL_DURATION,
             });
         }
     }

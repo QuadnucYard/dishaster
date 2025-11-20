@@ -558,6 +558,7 @@ fn apply_no_order_penalties(
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
         trigger: Some(FeedbackTopic::Appeal),
+        display_duration: feedbacks::TRIAL_DURATION,
     });
 }
 
@@ -575,6 +576,7 @@ fn apply_dishes_unavailable_penalties(
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
         trigger: Some(FeedbackTopic::Appeal),
+        display_duration: feedbacks::TRIAL_DURATION,
     });
 }
 
@@ -592,5 +594,6 @@ fn apply_abandon_after_reevaluation_penalties(
         entity,
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
         trigger: Some(FeedbackTopic::Appeal),
+        display_duration: feedbacks::TRIAL_DURATION,
     });
 }
