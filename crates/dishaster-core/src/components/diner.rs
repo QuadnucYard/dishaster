@@ -265,4 +265,6 @@ pub struct ShortTermMemory {
     pub dish_intentions: FxHashMap<ModelId, f32>,
     /// Dishes currently ordered in this serving session
     pub current_order: Vec<ModelId>,
+    /// Number of failed window selection attempts (for retry logic)
+    pub window_selection_attempts: u32,
 }

@@ -12,7 +12,6 @@ use crate::{components::*, models::*, prelude::*};
 
 /// Reasons why a diner left without completing their meal
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[allow(unused)]
 pub enum LeaveReason {
     /// No core food available (staple/dumpling/noodle/snack/combo/specialty)
     NoCoreFood,

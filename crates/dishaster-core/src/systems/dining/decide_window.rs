@@ -87,7 +87,8 @@ pub fn handle_decide_window_goal(
             continue;
         };
 
-        // Make tentative order
+        // Make tentative order (allow no-core-food after 2 failed attempts)
+        let allow_no_core_food = stm.window_selection_attempts >= 2;
         let mut leave_reason = None;
         let tentative_order = decide_order(
             window_dishes,
@@ -102,9 +103,25 @@ pub fn handle_decide_window_goal(
             diner_state.meal_budget,
             &mut rng,
             &mut leave_reason,
+            allow_no_core_food,
         );
 
         if tentative_order.is_empty() {
+            // Retry window selection if it's a NoCoreFood issue and we haven't tried enough
+            if matches!(leave_reason, Some(LeaveReason::NoCoreFood))
+                && stm.window_selection_attempts < 2
+            {
+                stm.window_selection_attempts += 1;
+                log::debug!(
+                    target: "diner",
+                    "diner {:?} retrying window selection (attempt {})",
+                    entity,
+                    stm.window_selection_attempts + 1
+                );
+                goal.reset_timer(); // Retry immediately
+                continue;
+            }
+
             handle_empty_tentative_order(
                 entity,
                 &mut goal,

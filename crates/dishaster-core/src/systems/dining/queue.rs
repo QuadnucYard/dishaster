@@ -14,6 +14,7 @@ pub fn check_queue_patience(
         &mut EntityRng,
     )>,
     lane_query: Query<(&QueueLaneMembers, &QueueServiceHistory)>,
+    mut daily_stats: ResMut<DailyStats>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
     decision_config: Res<DecisionConfigRes>,
 ) {
@@ -71,6 +72,9 @@ pub fn check_queue_patience(
                 content: choose_feedback(&mut rng, feedbacks::QUEUE_TOO_LONG),
                 trigger: Some(FeedbackTopic::Queue),
             });
+
+            // Record leave reason
+            daily_stats.leave_reasons.push(LeaveReason::QueueTooLong);
 
             // Leave queue and exit canteen
             commands.entity(entity).remove::<QueueMember>();

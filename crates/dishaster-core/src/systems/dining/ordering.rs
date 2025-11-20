@@ -57,6 +57,7 @@ pub fn decide_order(
     meal_budget: f32,
     rng: &mut impl Rng,
     out_leave_reason: &mut Option<LeaveReason>,
+    allow_no_core_food: bool,
 ) -> Vec<ServiceRequest> {
     // Use pre-calculated meal budget from spawn time
     let budget = meal_budget;
@@ -173,6 +174,16 @@ pub fn decide_order(
 
         // Select best candidate
         let Some(idx) = best_idx else {
+            // Check if we failed due to budget constraints
+            if !candidates.is_empty() && budget_left > 0.0 {
+                let all_too_expensive = candidates.iter().all(|(_, dish, dish_model, _)| {
+                    let price = estimate_dish_price(&dish.pricing, &dish_model.characteristics);
+                    price > budget_left * config.max_budget_overspend
+                });
+                if all_too_expensive && orders.is_empty() {
+                    *out_leave_reason = Some(LeaveReason::InsufficientBudget);
+                }
+            }
             break; // All remaining dishes are unaffordable or filtered out
         };
 
@@ -235,15 +246,23 @@ pub fn decide_order(
 
     // Final validation: if no core food was selected, return empty order
     // This prevents invalid orders (e.g., only soup/vegetables)
-    if !has_core_food {
+    // Unless we're allowing no-core-food orders after retries
+    if !has_core_food && !allow_no_core_food {
         *out_leave_reason = Some(LeaveReason::NoCoreFood);
+        return Vec::new();
+    }
+
+    // Check for variety violations (only staples)
+    if has_only_staples && !orders.is_empty() {
+        *out_leave_reason = Some(LeaveReason::NoVariety);
         return Vec::new();
     }
 
     // Validation: reject orders that don't meet minimum satiation
     // Allow rice+vegetable combinations (typically ~18-22 satiation)
     let satiation_consumed = desired_sat - sat_needed;
-    if satiation_consumed < 18.0 {
+    if satiation_consumed < 15.0 {
+        *out_leave_reason = Some(LeaveReason::InsufficientSatiation);
         return Vec::new(); // Insufficient meal, diner won't order
     }
 
@@ -471,6 +490,7 @@ pub fn handle_queue_re_evaluation(
 
     // Re-evaluate order with current psychological state
     let mut leave_reason = None;
+    let allow_no_core_food = stm.window_selection_attempts >= 2;
     let new_order = decide_order(
         window_dishes,
         dish_query,
@@ -484,6 +504,7 @@ pub fn handle_queue_re_evaluation(
         diner_state.meal_budget,
         rng,
         &mut leave_reason,
+        allow_no_core_food,
     );
 
     if new_order.is_empty() {
