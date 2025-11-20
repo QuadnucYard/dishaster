@@ -9,6 +9,7 @@ mod queue;
 
 use bevy_ecs::schedule::ScheduleConfigs;
 use dishaster_navigation::NavigationGrid;
+use dishaster_save_models::DinerOrder;
 use ordered_float::NotNan;
 
 pub use self::pick_tableware::despawn_diner_items;
@@ -200,6 +201,20 @@ fn handle_get_served_goal(
                 serving_duration
             );
         }
+
+        // Calculate total weight of served dishes
+        let total_weight = state
+            .served_dishes
+            .iter()
+            .map(|d| d.served_weight)
+            .sum::<f32>();
+
+        // Record diner order info (dish count, total price paid, and weight)
+        daily_stats.diner_orders.push(DinerOrder {
+            dish_count: state.served_dishes.len() as u32,
+            price_paid: state.total_spent,
+            weight_kg: total_weight,
+        });
 
         // Service completed, remove session and move to finding a seat
         commands
@@ -404,6 +419,7 @@ fn handle_leave_goal(
         &mut Movement,
     )>,
     canteen: Res<Canteen>,
+    mut daily_stats: ResMut<DailyStats>,
 ) {
     for (entity, goal, mut state, mut targets, mut movement) in diner_query {
         if !goal.is(DinerGoal::Leave) {
@@ -440,7 +456,16 @@ fn handle_leave_goal(
         }
 
         if movement.target_reached {
-            // Reached exit
+            // Reached exit - record diner order (even if it's 0 dishes)
+            if state.serving_start_time.is_none() {
+                // Diner left without ordering
+                daily_stats.diner_orders.push(DinerOrder {
+                    dish_count: 0,
+                    price_paid: 0.0,
+                    weight_kg: 0.0,
+                });
+            }
+
             log::info!(
                 target: "diner",
                 "despawn: pos={:.2}",

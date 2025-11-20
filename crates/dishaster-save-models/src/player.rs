@@ -93,6 +93,20 @@ pub struct AggregateStats {
     pub lifetime_consumption_kg: f64,
 }
 
+/// Per-diner order information recorded during a day.
+///
+/// Tracks how many dishes a diner ordered, total price paid, and weight consumed.
+/// Diners with no order have dish_count=0, price_paid=0.0, and weight_kg=0.0.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DinerOrder {
+    /// Number of dishes ordered by this diner
+    pub dish_count: u32,
+    /// Total price paid for all dishes (in yuan)
+    pub price_paid: f32,
+    /// Total weight of dishes consumed in kilograms
+    pub weight_kg: f32,
+}
+
 /// Per-day statistics history for tracking performance over time.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DayStats {
@@ -110,6 +124,8 @@ pub struct DayStats {
     pub serving_times: Vec<f32>,
     /// Individual dining times for each diner (seconds).
     pub dining_times: Vec<f32>,
+    /// Per-diner order information (dish count and price paid)
+    pub diner_orders: Vec<DinerOrder>,
 }
 
 impl AggregateStats {

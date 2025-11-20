@@ -5,7 +5,7 @@ mod time;
 
 use std::{collections::VecDeque, sync::Arc};
 
-use dishaster_save_models::PermanentEffects;
+use dishaster_save_models::{DinerOrder, PermanentEffects};
 
 pub use self::{buffers::*, time::Time};
 use crate::{components::*, models::*, prelude::*};
@@ -102,6 +102,8 @@ pub struct DailyStats {
     pub serving_times: Vec<f32>,
     /// Individual dining times for each diner (seconds)
     pub dining_times: Vec<f32>,
+    /// Per-diner order information (dish count and price paid)
+    pub diner_orders: Vec<DinerOrder>,
 }
 
 impl DailyStats {

@@ -76,6 +76,45 @@ impl RunSteps for Simulation {
     }
 }
 
+/// Display distribution of values in bins
+fn display_distribution(title: &str, values: &[f32], bin_width: f32) {
+    if values.is_empty() {
+        println!("{}: (empty)", title);
+        return;
+    }
+
+    let min = values.iter().copied().fold(f32::INFINITY, f32::min);
+    let max = values.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+    let num_bins = ((max - min) / bin_width).ceil() as usize + 1;
+
+    let mut bins = vec![0usize; num_bins];
+    for &val in values {
+        let bin_idx = if bin_width > 0.0 {
+            ((val - min) / bin_width).floor() as usize
+        } else {
+            0
+        };
+        if bin_idx < bins.len() {
+            bins[bin_idx] += 1;
+        }
+    }
+
+    println!(
+        "{}: min={:.2}, max={:.2}, mean={:.2}",
+        title,
+        min,
+        max,
+        values.iter().sum::<f32>() / values.len() as f32
+    );
+    for (i, &count) in bins.iter().enumerate() {
+        if count > 0 {
+            let bin_start = min + i as f32 * bin_width;
+            let bin_end = bin_start + bin_width;
+            println!("  [{:.2}-{:.2}): {} diners", bin_start, bin_end, count);
+        }
+    }
+}
+
 #[test]
 fn single_complete_run() -> Result<()> {
     env_logger::Builder::new().init();
@@ -210,6 +249,68 @@ fn single_complete_run() -> Result<()> {
     if let SimResponse::FeedbackStats(stats) = feedback_stats {
         println!("Feedback stats:\n{stats}\n");
     }
+
+    // Validate diner orders
+    println!("=== Diner Orders Validation ===");
+    let mut valid_count = 0;
+    let mut invalid_count = 0;
+    let mut invalid_orders = Vec::new();
+    let mut dish_counts = Vec::new();
+    let mut prices = Vec::new();
+    let mut weights = Vec::new();
+
+    for (idx, order) in day_stats.diner_orders.iter().enumerate() {
+        let is_valid = (order.dish_count == 0 && order.price_paid == 0.0)
+            || (order.dish_count >= 1
+                && order.dish_count <= 4
+                && order.price_paid > 0.0
+                && order.price_paid <= 30.0);
+
+        if is_valid {
+            valid_count += 1;
+        } else {
+            invalid_count += 1;
+            invalid_orders.push((idx, order.dish_count, order.price_paid));
+        }
+
+        if order.dish_count > 0 {
+            dish_counts.push(order.dish_count as f32);
+            prices.push(order.price_paid);
+            weights.push(order.weight_kg);
+        }
+    }
+
+    println!("Total diners: {}", day_stats.diner_orders.len());
+    println!(
+        "Valid orders: {} (0 dishes with ¥0, or 1-4 dishes with ¥0-30)",
+        valid_count
+    );
+    println!("Invalid orders: {}", invalid_count);
+
+    if !invalid_orders.is_empty() {
+        println!("Invalid orders details:");
+        for (idx, dish_count, price) in invalid_orders.iter().take(10) {
+            println!("  Diner {}: {} dishes, ¥{:.2}", idx, dish_count, price);
+        }
+        if invalid_orders.len() > 10 {
+            println!("  ... and {} more", invalid_orders.len() - 10);
+        }
+    }
+
+    // Assert all orders are valid
+    assert!(
+        invalid_count == 0,
+        "Found {} invalid orders (expected all diners to have 0 dishes with ¥0, or 1-4 dishes with ¥0-30)",
+        invalid_count
+    );
+
+    // Display distributions
+    println!("\n=== Order Distributions ===");
+    display_distribution("Dish Count Distribution", &dish_counts, 1.0);
+    println!();
+    display_distribution("Price Distribution (¥)", &prices, 2.0);
+    println!();
+    display_distribution("Weight Distribution (kg)", &weights, 0.05);
 
     save_sim_profile(profile_svc, persisted)?;
     std::mem::drop(sim);
