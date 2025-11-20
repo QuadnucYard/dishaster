@@ -21,7 +21,7 @@ pub fn level_for_current_day(
             LevelProgress {
                 level_id: default_level.id.clone(),
                 current_day: default_level.start_day,
-                reputation: default_level.start_reputation,
+                reputation: default_level.start_reputation.clone(),
                 rng_seed: default_level.seed,
                 layout: CanteenLayoutState {
                     window_configurations: default_level.window_configurations.clone(),
@@ -44,6 +44,7 @@ pub fn level_for_current_day(
         canteen: progress.layout,
         day: progress.current_day,
         seed: progress.rng_seed,
+        reputation: progress.reputation,
         diner_pool: progress.diner_pool.profiles,
         permanent_effects: progress.permanent_effects,
     };

@@ -1,4 +1,6 @@
-use crate::{CanteenLayoutState, Day, DinerPool, PermanentEffects, Seed, prelude::*};
+use crate::{
+    CanteenLayoutState, Day, DinerPool, PermanentEffects, ReputationProfile, Seed, prelude::*,
+};
 
 /// Current version of the progress schema stored on disk.
 pub const USER_PROGRESS_VERSION: u32 = 1;
@@ -47,7 +49,7 @@ pub struct LevelProgress {
     pub current_day: Day,
 
     /// Reputation score used for balancing future systems.
-    pub reputation: f32,
+    pub reputation: ReputationProfile,
 
     /// Base seed for deterministic day generation.
     pub rng_seed: Seed,

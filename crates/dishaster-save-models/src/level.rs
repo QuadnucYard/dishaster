@@ -16,6 +16,9 @@ pub struct LevelSetupState {
     /// Seed for the day's RNG
     pub seed: Seed,
 
+    /// Player reputation profile
+    pub reputation: ReputationProfile,
+
     /// Player-customized canteen layout and configurations
     pub canteen: CanteenLayoutState,
 
@@ -87,4 +90,19 @@ pub enum PricingMethod {
     PerPortion(f32),
     /// Price calculated by weight (per kg)
     ByWeight(f32),
+}
+
+/// Player reputation profile data to be saved between runs
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ReputationProfile {
+    /// Current reputation value [0, 100]
+    pub reputation: f32,
+
+    /// Food Safety Risk Index [0, 100]
+    /// Higher values mean higher risk of incidents
+    pub fsri: f32,
+
+    /// Food quality level [0, 100]
+    /// Affects feedback probabilities
+    pub food_quality: f32,
 }

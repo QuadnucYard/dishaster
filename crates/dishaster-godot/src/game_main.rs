@@ -141,15 +141,28 @@ impl Inner {
         self.apply_preferences();
 
         let profile_svc = &self.services.user_service.profiles;
-        if dishaster_validation::validate_player_profile(
-            &profile_svc.load().expect("failed to load profile"),
-            &self.services.data.models,
-        )
-        .is_err()
-        {
-            log::warn!("Player profile validation failed, resetting to default profile");
-            profile_svc.create().expect("failed to recreate profiles");
-        };
+
+        match profile_svc.load() {
+            Ok(profile) => {
+                if dishaster_validation::validate_player_profile(
+                    &profile,
+                    &self.services.data.models,
+                )
+                .is_err()
+                {
+                    log::warn!("Player profile validation failed, resetting to default profile");
+                    if let Err(e) = profile_svc.create() {
+                        log::error!("Failed to recreate profiles: {e}");
+                    }
+                }
+            }
+            Err(e) => {
+                log::warn!("Failed to load profile: {e}. Recreating default profile");
+                if let Err(e) = profile_svc.create() {
+                    log::error!("Failed to recreate profiles: {e}");
+                }
+            }
+        }
 
         self.scene_manager.schedule(StartProcedure);
     }

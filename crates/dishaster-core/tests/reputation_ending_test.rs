@@ -185,7 +185,7 @@ fn test_good_reputation_ending_triggered() {
     sim.command(SimCommand::ConfirmSettlement);
     sim.tick();
 
-    // Poll events to check for ending and decisions
+    // Poll events to check for ending
     let events = sim.poll_events();
     println!(
         "Events after confirming settlement: {} events",
@@ -201,6 +201,9 @@ fn test_good_reputation_ending_triggered() {
             }
             SimEvent::ShowManagementDecisions(_) => {
                 println!("  - ShowManagementDecisions event");
+            }
+            SimEvent::Persist => {
+                println!("  - Persist event");
             }
             _ => {}
         }
@@ -258,16 +261,8 @@ fn test_good_reputation_ending_triggered() {
 
     let events = sim.poll_events();
     println!("Events after applying decision: {} events", events.len());
-    for event in &events {
-        match event {
-            SimEvent::DayCompleted => {
-                println!("  - DayCompleted event");
-            }
-            SimEvent::Persist => {
-                println!("  - Persist event");
-            }
-            _ => {}
-        }
+    if events.iter().any(|e| matches!(e, SimEvent::DayCompleted)) {
+        println!("  - DayCompleted event");
     }
 
     // Verify day advanced

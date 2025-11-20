@@ -1,8 +1,12 @@
 (
     id: "sample_level",
-    start_reputation: 50.0,
     run_length: 3600.0,
     seed: 42,
+    start_reputation: (
+        reputation: 50.0,
+        fsri: 10.0,
+        food_quality: 60.0,
+    ),
     diner_pool: (
         initial_pool_size: 500,
     ),

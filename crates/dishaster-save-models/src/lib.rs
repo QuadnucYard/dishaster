@@ -52,7 +52,7 @@ pub struct SimProfile {
     pub current_day: Day,
 
     /// Player reputation at end of day
-    pub reputation: f32,
+    pub reputation: ReputationProfile,
 
     /// Seed for current run's RNG
     pub rng_seed: Seed,

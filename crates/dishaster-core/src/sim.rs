@@ -151,8 +151,15 @@ impl Simulation {
         self.world
             .insert_resource(db.refill_config.clone().into_res());
 
-        self.world
-            .insert_resource(ReputationState::default().into_res());
+        self.world.insert_resource(
+            ReputationState {
+                reputation: level.reputation.reputation,
+                fsri: level.reputation.fsri,
+                food_quality: level.reputation.food_quality,
+                ..Default::default()
+            }
+            .into_res(),
+        );
         self.world.insert_resource(DayStatus {
             seed: level.seed,
             current_day: level.day,

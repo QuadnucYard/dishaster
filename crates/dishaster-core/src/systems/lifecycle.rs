@@ -145,10 +145,30 @@ fn on_run_ended(
 fn on_confirm_settlement(
     _event: On<ConfirmSettlement>,
     mut commands: Commands,
+    reputation: ResMut<ReputationStateRes>,
+) {
+    // Check for reputation-based endings
+    if reputation.reputation <= 0.0 {
+        log::info!("Reputation dropped to 0 - triggering bad ending");
+        commands.trigger(AchieveEnding(EndingType::BadReputation));
+    } else if reputation.reputation >= 100.0 {
+        log::info!("Reputation reached 100 - triggering good ending");
+        commands.trigger(AchieveEnding(EndingType::GoodReputation));
+        // Decisions will be rolled after player confirms continuation
+    } else {
+        // No ending - proceed to management decisions
+        log::info!("No ending triggered - rolling management decisions");
+        commands.trigger(RollManagementDecisions);
+    }
+}
+
+fn on_advance_day(
+    _event: On<AdvanceDay>,
     mut perma_effects: ResMut<PermanentEffectsRes>,
     mut reputation: ResMut<ReputationStateRes>,
     reputation_config: Res<ReputationConfigRes>,
-    day_status: Res<DayStatus>,
+    mut day_status: ResMut<DayStatus>,
+    mut events: ResMut<EventQueue>,
 ) {
     // Apply daily decay to campaign effects
     perma_effects.apply_daily_decay();
@@ -170,28 +190,11 @@ fn on_confirm_settlement(
         reputation.food_quality
     );
 
-    // Check for reputation-based endings
-    if reputation.reputation <= 0.0 {
-        log::info!("Reputation dropped to 0 - triggering bad ending");
-        commands.trigger(AchieveEnding(EndingType::BadReputation));
-    } else if reputation.reputation >= 100.0 {
-        log::info!("Reputation reached 100 - triggering good ending");
-        commands.trigger(AchieveEnding(EndingType::GoodReputation));
-    } else {
-        // No ending - proceed to management decisions
-        log::info!("No ending triggered - rolling management decisions");
-        commands.trigger(RollManagementDecisions);
-    }
-}
-
-fn on_advance_day(
-    _event: On<AdvanceDay>,
-    mut day_status: ResMut<DayStatus>,
-    mut events: ResMut<EventQueue>,
-) {
     // Update day status for next day. This will be used when persisting progress.
     day_status.current_day.0 += 1;
     day_status.seed = advance_seed(day_status.seed);
+
+    // Persist reputation state immediately after updating
     events.push(SimEvent::Persist);
 
     // Emit day completed event to advance to next day.

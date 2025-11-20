@@ -359,7 +359,7 @@ fn single_complete_run() -> Result<()> {
         day_stats.completed_diners,
         day_stats.total_visits
     );
-    println!("  Reputation: {:.2}", persisted.reputation);
+    println!("  Reputation: {:.2}", persisted.reputation.reputation);
 
     // Print serving and dining time statistics
     if !day_stats.serving_times.is_empty() {

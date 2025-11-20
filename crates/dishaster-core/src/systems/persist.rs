@@ -114,7 +114,11 @@ pub fn persist_system(
     SimProfile {
         level_id: level.level_id.clone(),
         current_day: day_status.current_day,
-        reputation: reputation.reputation,
+        reputation: ReputationProfile {
+            reputation: reputation.reputation,
+            fsri: reputation.fsri,
+            food_quality: reputation.food_quality,
+        },
         rng_seed: day_status.seed,
         window_configurations,
         placement,
