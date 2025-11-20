@@ -256,6 +256,7 @@ fn handle_find_seat_goal(
         &mut EntityRng,
     )>,
     table_query: Query<(Entity, &mut DiningTable)>,
+    canteen: Res<Canteen>,
     nav_grid: Res<ResWrapper<NavigationGrid>>,
     time: Res<Time>,
 ) {
@@ -271,7 +272,9 @@ fn handle_find_seat_goal(
             continue;
         }
 
-        if let Some((table_entity, seat_index)) = find_seat(movement.pos, &table_query, &mut rng) {
+        if let Some((table_entity, seat_index)) =
+            find_seat(movement.pos, &table_query, &canteen, &mut rng)
+        {
             let table = table_query.get(table_entity).unwrap().1;
             targets.chosen_seat = Some((table_entity, seat_index));
             let seat_pos = table.seat_positions[seat_index];
@@ -305,12 +308,22 @@ fn handle_find_seat_goal(
 fn find_seat(
     pos: Vec2,
     table_query: &Query<(Entity, &mut DiningTable)>,
+    canteen: &Canteen,
     rng: &mut EntityRng,
 ) -> Option<(Entity, usize)> {
     // scoring factors (lower is better):
     // - distance
     // - dirtiness
     // - occupancy
+    // - distance to a random "interesting spot" (to add variety)
+
+    // Pick a random interesting spot in the canteen (approximate bounds)
+    // Assuming canteen is roughly centered around 0,0 or positive coordinates.
+    // Let's pick a spot within a reasonable range.
+    let interesting_spot = vec2(
+        rng.random_range(2.0..canteen.model.width - 2.0),
+        rng.random_range(2.0..canteen.model.height - 2.0),
+    );
 
     let (table_entity, table) = table_query
         .iter()
@@ -319,7 +332,13 @@ fn find_seat(
             let distance = pos.distance_squared(table.center_pos);
             let dirtiness = table.dirtiness;
             let occupancy = table.occupants.iter().filter(|o| o.is_some()).count();
-            let score = distance * (dirtiness + 0.5) * ((occupancy as f32).squared() + 1.0);
+            let interest_distance = table.center_pos.distance_squared(interesting_spot);
+
+            // Weight the interest distance to influence the choice
+            let score = distance
+                * (dirtiness + 0.5)
+                * ((occupancy as f32).squared() + 1.0)
+                * (interest_distance * 0.5 + 1.0);
             NotNan::new(score).unwrap()
         })?;
 
