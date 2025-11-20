@@ -3,7 +3,7 @@ use rand_distr::Normal;
 
 use crate::{
     events::{AchieveEnding, DispatchManagement, InspectorVisit},
-    systems::prelude::*,
+    systems::{create_fresh_diner, prelude::*},
 };
 
 pub fn register_management_incident_systems(world: &mut World) {
@@ -78,10 +78,17 @@ fn apply_attraction_change(
 fn apply_temporary_crowd(
     event: On<DispatchManagement<TemporaryCrowdModel>>,
     mut schedule: ResMut<DailyDinerSchedule>,
+    registry: Res<GameModelRegistryRes>,
+    level: ResMut<ResWrapper<LevelSetupState>>,
     mut rng: ResMut<WorldRng>,
 ) {
     let model = &event.0;
     let mut rng = rng.derive_prng();
+
+    let level_config = registry
+        .levels
+        .get_by_id(&level.level_id)
+        .expect("LevelConfig not found in registry");
 
     // Generate temporary diners and add them to a temporary schedule resource
     // These will be merged with the daily schedule when day starts
@@ -89,53 +96,34 @@ fn apply_temporary_crowd(
 
     let distr = Normal::new(model.peak_time, model.time_stddev).unwrap();
 
+    let mut rng = rng.derive_prng();
+
     for i in 0..model.num_diners {
         // Sample arrival time distributed around peak time
         let arrival_time = distr.sample(&mut rng).max(0.0) * 3600.0; // Convert hours to seconds
 
-        // Create temporary diner using simplified random generation
-        let frugality = rng.random_range(0.3..0.7);
-        let adventurous = rng.random_range(0.3..0.7);
-        let confrontational = rng.random_range(0.2..0.5);
-        let patience_base = rng.random_range(180.0..300.0);
-        let decisiveness = rng.random_range(0.4..0.8);
-        let adaptiveness = rng.random_range(0.3..0.7);
-
-        let personality = Personality {
-            frugality,
-            adventurous,
-            confrontational,
-            patience_base,
-            decisiveness,
-            adaptiveness,
-        };
-
-        let dining_profile = DiningProfile {
-            economic_capacity: rng.random_range(10.0..18.0),
-            max_satiation: rng.random_range(85.0..115.0),
-            eating_speed: rng.random_range(0.8..1.2),
-            preferred_arrival_time: (arrival_time - 600.0, arrival_time + 600.0),
-        };
-
-        // Use default appearance for temporary diners
-        let appearance = Appearance::default();
+        let profile = create_fresh_diner(
+            u32::MAX - i as u32, // Use high IDs for temporary diners to avoid conflicts
+            &level_config.diner_randomizer,
+            &mut rng,
+        );
 
         let hunger = rng.random_range(0.3..1.0);
-        let base_budget = dining_profile.economic_capacity * (0.2 + 0.6 * hunger) * 1.15;
+        let base_budget = profile.dining_profile.economic_capacity * (0.2 + 0.6 * hunger) * 1.25;
         let meal_budget = base_budget * rng.random_range(0.85..1.15);
 
         temp_diners.push(ScheduledDiner {
             id: u32::MAX - i as u32, // Use high IDs for temporary diners to avoid conflicts
-            personality,
-            dining_profile,
             psych_state: PsychState {
                 hunger,
                 mood: 0.0,
-                patience: patience_base * 1.3,
+                patience: profile.personality.patience_base,
                 trust: 0.7,
             },
-            long_term_memory: LongTermMemory::default(),
-            appearance,
+            personality: profile.personality,
+            dining_profile: profile.dining_profile,
+            long_term_memory: profile.long_term_memory,
+            appearance: profile.appearance,
             arrival_time,
             meal_budget,
         });

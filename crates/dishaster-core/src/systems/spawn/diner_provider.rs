@@ -43,7 +43,7 @@ pub fn populate_diner_pool(
     commands.insert_resource(pool.into_res());
 }
 
-fn create_fresh_diner(
+pub fn create_fresh_diner(
     id: u32,
     randomizer: &DinerRandomizerModel,
     rng: &mut impl Rng,

@@ -29,9 +29,9 @@
         weight: 120,
         icon: "management/temporary_crowd.png",
         def: TemporaryCrowd(
-            num_diners_range: (start: 20, end: 50),
+            num_diners_range: (start: 50, end: 100),
             peak_time_range: (start: 0.1, end: 0.9),
-            time_stddev: 0.25,  // Standard deviation in hours
+            time_stddev: 0.1,  // Standard deviation in hours
         )
     ),
     (
