@@ -20,11 +20,15 @@ impl Game {
         for event in events {
             match event {
                 SimEvent::PhaseValidationError(e) => {
-                    // Let main catch it
-                    panic!(
-                        "Received unexpected PhaseValidationError in presentation layer: command '{}' is not valid in phase '{:?}', valid phases: {:?}",
-                        e.command_name, e.current_phase, e.valid_phases
+                    // Log the error and show a hint instead of panicking
+                    godot_print!(
+                        "PhaseValidationError: command '{}' is not valid in phase '{:?}', valid phases: {:?}",
+                        e.command_name,
+                        e.current_phase,
+                        e.valid_phases
                     );
+                    let message = tr!("hint--phase_validation_error");
+                    self.ui_commands.push(UiCommand::ShowHint { message });
                 }
 
                 SimEvent::Persist => {

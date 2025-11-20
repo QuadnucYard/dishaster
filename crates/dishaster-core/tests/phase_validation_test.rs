@@ -76,24 +76,6 @@ fn test_start_run_rejected_in_running_phase() {
 }
 
 #[test]
-fn test_refill_rejected_in_preparation_phase() {
-    let registry = create_test_registry();
-    let level = create_test_level();
-    let mut sim = Simulation::new(registry);
-    sim.start(level);
-
-    // Try to refill in Preparation phase - should be rejected
-    sim.command(SimCommand::RefillDispenser(
-        dishrupt_core::EntityId::new(1).unwrap(),
-    ));
-
-    assert!(
-        poll_and_find_phase_error(&mut sim, "RefillDispenser", "Preparation"),
-        "Expected PhaseValidationError for RefillDispenser in Preparation phase"
-    );
-}
-
-#[test]
 fn test_end_run_rejected_in_preparation_phase() {
     let registry = create_test_registry();
     let level = create_test_level();

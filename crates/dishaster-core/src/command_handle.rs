@@ -50,10 +50,20 @@ impl Simulation {
             }
 
             SimCommand::RefillDispenser(dispenser_entity) => {
-                // Spawn refill staff for the requested dispenser
-                self.world.commands().queue(move |world: &mut World| {
-                    world.write_message(RefillDispenser(dispenser_entity.to_entity()));
-                });
+                let phase = *self.world.resource::<RunPhase>();
+                if phase == RunPhase::Preparation {
+                    // Emit hint if trying to refill during preparation
+                    let mut events = self.world.resource_mut::<EventQueue>();
+                    events.push(SimEvent::ShowHint {
+                        id: "refill-not-available-preparation".into(),
+                        condition: HintCondition::Always,
+                    });
+                } else {
+                    // Spawn refill staff for the requested dispenser
+                    self.world.commands().queue(move |world: &mut World| {
+                        world.write_message(RefillDispenser(dispenser_entity.to_entity()));
+                    });
+                }
             }
 
             SimCommand::TrialStart { diner, topic } => {
@@ -191,8 +201,9 @@ impl Simulation {
 
     /// Validate command against current phase.
     ///
-    /// Returns Ok(()) if the command is allowed in the current phase,
-    /// otherwise returns an error event to be emitted.
+    /// Returns Ok(()) if the command is allowed in the current phase.
+    /// For RefillDispenser in Preparation phase, returns Ok(()) but the command
+    /// handler will emit a hint instead of executing the refill.
     fn validate_phase(&self, command: &SimCommand) -> Result<(), SimEvent> {
         use SimCommand::*;
 
@@ -212,7 +223,7 @@ impl Simulation {
             StartRun => &[RunPhase::Preparation],
 
             // Running phase only
-            RefillDispenser(_) => &[RunPhase::Running],
+            RefillDispenser(_) => &[RunPhase::Preparation, RunPhase::Running],
             TrialStart { .. }
             | TrialLaunch
             | TrialRespond(_)
