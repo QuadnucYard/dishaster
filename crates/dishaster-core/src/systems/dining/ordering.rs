@@ -56,6 +56,7 @@ pub fn decide_order(
     config: &OrderingConfig,
     meal_budget: f32,
     rng: &mut impl Rng,
+    out_leave_reason: &mut Option<LeaveReason>,
 ) -> Vec<ServiceRequest> {
     // Use pre-calculated meal budget from spawn time
     let budget = meal_budget;
@@ -87,13 +88,10 @@ pub fn decide_order(
 
     // Greedy selection loop
     for _iteration in 0..config.max_dishes_per_order {
-        // Check if we can stop: satisfied AND have core food AND have variety AND ate enough
+        // Check if we can stop: satisfied AND have core food AND have variety
         let is_satisfied = sat_needed <= config.satiation_tolerance * dining_profile.max_satiation;
-        let satiation_consumed = desired_sat - sat_needed;
-        // Require at least 12 satiation consumed to prevent single-snack meals
-        let ate_enough = satiation_consumed >= 12.0;
 
-        if is_satisfied && has_core_food && !has_only_staples && ate_enough {
+        if is_satisfied && has_core_food && !has_only_staples {
             break; // Satisfied with required variety and minimum consumption
         }
 
@@ -238,6 +236,7 @@ pub fn decide_order(
     // Final validation: if no core food was selected, return empty order
     // This prevents invalid orders (e.g., only soup/vegetables)
     if !has_core_food {
+        *out_leave_reason = Some(LeaveReason::NoCoreFood);
         return Vec::new();
     }
 
@@ -471,6 +470,7 @@ pub fn handle_queue_re_evaluation(
     );
 
     // Re-evaluate order with current psychological state
+    let mut leave_reason = None;
     let new_order = decide_order(
         window_dishes,
         dish_query,
@@ -483,13 +483,15 @@ pub fn handle_queue_re_evaluation(
         ordering_config,
         diner_state.meal_budget,
         rng,
+        &mut leave_reason,
     );
 
     if new_order.is_empty() {
         log::info!(
             target: "diner",
-            "diner {:?} abandoning queue after re-evaluation: no valid order",
-            entity
+            "diner {:?} abandoning queue after re-evaluation: {:?}",
+            entity,
+            leave_reason
         );
         apply_abandon_after_reevaluation_penalties(entity, psych_state, rng, feedback_messages);
         commands.entity(entity).remove::<QueueMember>();

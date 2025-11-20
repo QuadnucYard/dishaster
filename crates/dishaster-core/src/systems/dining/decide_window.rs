@@ -20,6 +20,7 @@ pub fn handle_decide_window_goal(
     registry: Res<GameModelRegistryRes>,
     ordering_config: Res<OrderingConfigRes>,
     decision_config: Res<DecisionConfigRes>,
+    mut daily_stats: ResMut<DailyStats>,
     mut feedback_messages: MessageWriter<FeedbackMessage>,
 ) {
     for (
@@ -64,6 +65,7 @@ pub fn handle_decide_window_goal(
                 &mut psych_state,
                 &mut rng,
                 &mut feedback_messages,
+                &mut daily_stats,
             );
             continue;
         };
@@ -86,6 +88,7 @@ pub fn handle_decide_window_goal(
         };
 
         // Make tentative order
+        let mut leave_reason = None;
         let tentative_order = decide_order(
             window_dishes,
             &dish_query,
@@ -98,6 +101,7 @@ pub fn handle_decide_window_goal(
             &ordering_config,
             diner_state.meal_budget,
             &mut rng,
+            &mut leave_reason,
         );
 
         if tentative_order.is_empty() {
@@ -107,6 +111,8 @@ pub fn handle_decide_window_goal(
                 &mut psych_state,
                 &mut rng,
                 &mut feedback_messages,
+                &mut daily_stats,
+                leave_reason,
             );
             continue;
         }
@@ -184,6 +190,7 @@ fn handle_no_suitable_window(
     psych_state: &mut PsychState,
     rng: &mut EntityRng,
     feedback_messages: &mut MessageWriter<FeedbackMessage>,
+    daily_stats: &mut DailyStats,
 ) {
     log::info!(
         target: "diner",
@@ -200,6 +207,11 @@ fn handle_no_suitable_window(
         trigger: Some(FeedbackTopic::Appeal),
     });
 
+    // Record why this diner left
+    daily_stats
+        .leave_reasons
+        .push(LeaveReason::NoAppealingDishes);
+
     goal.update(DinerGoal::Leave);
 }
 
@@ -210,11 +222,15 @@ fn handle_empty_tentative_order(
     psych_state: &mut PsychState,
     rng: &mut EntityRng,
     feedback_messages: &mut MessageWriter<FeedbackMessage>,
+    daily_stats: &mut DailyStats,
+    leave_reason: Option<LeaveReason>,
 ) {
+    let reason = leave_reason.unwrap_or(LeaveReason::NoAppealingDishes);
     log::info!(
         target: "diner",
-        "diner {:?} leaving: cannot form valid order at chosen window",
-        entity
+        "diner {:?} leaving: {:?}",
+        entity,
+        reason
     );
 
     psych_state.mood = (psych_state.mood - 0.2).max(-1.0);
@@ -225,6 +241,9 @@ fn handle_empty_tentative_order(
         content: choose_feedback(rng, feedbacks::NO_APPEALING_DISH),
         trigger: Some(FeedbackTopic::Appeal),
     });
+
+    // Record precise reason why this diner left
+    daily_stats.leave_reasons.push(reason);
 
     goal.update(DinerGoal::Leave);
 }

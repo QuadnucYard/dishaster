@@ -121,7 +121,7 @@ fn apply_temporary_crowd(
         let appearance = Appearance::default();
 
         let hunger = rng.random_range(0.3..1.0);
-        let base_budget = dining_profile.economic_capacity * (0.2 + 0.6 * hunger);
+        let base_budget = dining_profile.economic_capacity * (0.2 + 0.6 * hunger) * 1.15;
         let meal_budget = base_budget * rng.random_range(0.85..1.15);
 
         temp_diners.push(ScheduledDiner {

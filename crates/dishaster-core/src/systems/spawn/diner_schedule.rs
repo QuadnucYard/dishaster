@@ -70,9 +70,9 @@ fn generate_daily_schedule(
         let hunger = rng.random_range(0.3..1.0);
 
         // Calculate meal budget with random variation
-        // Base: economic_capacity adjusted by hunger
+        // Base: economic_capacity adjusted by hunger (increased by 15% to improve completion rate)
         // Random factor: 0.85~1.15 to simulate daily variation in spending willingness
-        let base_budget = profile.dining_profile.economic_capacity * (0.2 + 0.6 * hunger);
+        let base_budget = profile.dining_profile.economic_capacity * (0.2 + 0.6 * hunger) * 1.15;
         let random_factor = rng.random_range(0.85..1.15);
         let meal_budget = base_budget * random_factor;
 

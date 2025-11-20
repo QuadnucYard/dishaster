@@ -287,6 +287,7 @@ impl Game {
                         .present(&resp, self.stage.display_context());
                 }
                 SimResponse::FeedbackStats(_) => {}
+                SimResponse::DailyStats(_) => {}
             }
         }
     }

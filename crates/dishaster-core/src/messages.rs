@@ -11,7 +11,6 @@ pub struct FeedbackMessage {
     /// Content of the feedback.
     pub content: Feedback,
     /// Optional trigger type for more specific feedback handling (for trial system)
-    #[allow(dead_code)]
     pub trigger: Option<FeedbackTopic>,
 }
 

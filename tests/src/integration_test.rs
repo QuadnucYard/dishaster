@@ -423,6 +423,27 @@ fn single_complete_run() -> Result<()> {
         println!("Feedback stats:\n{stats}\n");
     }
 
+    // Print leave reasons for diners who didn't eat
+    let daily_stats = sim.execute_query(SimQuery::DailyStats);
+    if let SimResponse::DailyStats(stats) = daily_stats
+        && !stats.leave_reasons.is_empty()
+    {
+        println!("=== Leave Reasons ===");
+        let mut reason_counts = HashMap::new();
+        for reason in &stats.leave_reasons {
+            *reason_counts.entry(format!("{:?}", reason)).or_insert(0) += 1;
+        }
+        for (reason, count) in reason_counts.iter() {
+            println!("  {}: {} diners", reason, count);
+        }
+        println!(
+            "Total left without eating: {} ({:.1}% of {} total visits)\n",
+            stats.leave_reasons.len(),
+            stats.leave_reasons.len() as f32 / stats.total_visits as f32 * 100.0,
+            stats.total_visits
+        );
+    }
+
     // Validate diner orders
     println!("=== Diner Orders Validation ===");
     let mut valid_count = 0;

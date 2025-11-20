@@ -174,6 +174,18 @@ impl Simulation {
                 let stats = format_feedback_stats(reputation, config).unwrap();
                 SimResponse::FeedbackStats(stats)
             }
+            SimQuery::DailyStats => {
+                let daily_stats = self.world.resource::<DailyStats>();
+                SimResponse::DailyStats(DailyStatsResponse {
+                    total_visits: daily_stats.total_visits,
+                    completed_diners: daily_stats.completed_diners,
+                    leave_reasons: daily_stats
+                        .leave_reasons
+                        .iter()
+                        .map(|r| format!("{:?}", r))
+                        .collect(),
+                })
+            }
         }
     }
 

@@ -9,6 +9,19 @@ pub enum SimResponse {
 
     /// Response containing feedback statistics for debugging purposes.
     FeedbackStats(String),
+    /// Response containing daily statistics.
+    DailyStats(DailyStatsResponse),
+}
+
+/// Response containing daily statistics including leave reasons.
+#[derive(Debug, Clone)]
+pub struct DailyStatsResponse {
+    /// Total number of visits
+    pub total_visits: u32,
+    /// Number of completed diners
+    pub completed_diners: u32,
+    /// Reasons why diners left without eating
+    pub leave_reasons: Vec<String>,
 }
 
 /// Response to a distance field query.

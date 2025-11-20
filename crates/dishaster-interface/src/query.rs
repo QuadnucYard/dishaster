@@ -11,4 +11,6 @@ pub enum SimQuery {
 
     /// Query feedback statistics for debugging purposes.
     FeedbackStats,
+    /// Query daily statistics including leave reasons.
+    DailyStats,
 }

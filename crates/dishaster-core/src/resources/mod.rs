@@ -10,6 +10,24 @@ use dishaster_save_models::{DinerOrder, PermanentEffects};
 pub use self::{buffers::*, time::Time};
 use crate::{components::*, models::*, prelude::*};
 
+/// Reasons why a diner left without completing their meal
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[allow(unused)]
+pub enum LeaveReason {
+    /// No core food available (staple/dumpling/noodle/snack/combo/specialty)
+    NoCoreFood,
+    /// Cannot afford any valid meal combination within budget
+    InsufficientBudget,
+    /// Meal would not satisfy minimum satiation requirement
+    InsufficientSatiation,
+    /// No dishes appeal to diner's taste preferences
+    NoAppealingDishes,
+    /// All combinations violate variety constraints (e.g., only staples)
+    NoVariety,
+    /// Queue was too long or took too long
+    QueueTooLong,
+}
+
 #[allow(missing_docs)]
 pub struct SpawnerRngTag;
 /// SystemRng specialized for spawning systems
@@ -104,6 +122,8 @@ pub struct DailyStats {
     pub dining_times: Vec<f32>,
     /// Per-diner order information (dish count and price paid)
     pub diner_orders: Vec<DinerOrder>,
+    /// Reasons why diners left without eating
+    pub leave_reasons: Vec<LeaveReason>,
 }
 
 impl DailyStats {
