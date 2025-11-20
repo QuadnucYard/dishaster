@@ -2026,13 +2026,13 @@ emotion = "😅"
 [[item]]
 kind = "objection"
 summary = "物有所值"
-text = '这是新鲜空运的[帝王蟹]，\采用高级烹饪方式，\成本本身就很高。'
+text = '这是新鲜空运的帝王蟹，\采用高级烹饪方式，\成本本身就很高。'
 emotion = "😊"
 
 [[item]]
 kind = "question"
 summary = "觉得贵？"
-text = '您之前吃过类似的[帝王蟹]吗？\可以对比一下品质和分量。'
+text = '您之前吃过类似的帝王蟹吗？\可以对比一下品质和分量。'
 emotion = "🙂"
 gesture = "🤝"
 
@@ -2217,7 +2217,7 @@ gesture = "👈"
 [[item]]
 kind = "perjury"
 summary = "扶贫项目"
-text = '每售出一份[帝王蟹]，\都将捐赠一部分用于资助贫困生餐补。'
+text = '每售出一份帝王蟹，\都将捐赠一部分用于资助贫困生餐补。'
 emotion = "😊"
 
 [[item]]
@@ -2271,7 +2271,7 @@ gesture = "👈"
 [[item]]
 kind = "perjury"
 summary = "领导接待专用"
-text = '这款[帝王蟹]其实是为外宾和校际交流准备的，不对普通学生开放。'
+text = '这款帝王蟹其实是为外宾和校际交流准备的，不对普通学生开放。'
 emotion = "😉"
 
 [[item]]

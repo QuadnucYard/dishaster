@@ -425,6 +425,16 @@ fn handle_move_to_seat_goal(
         }
 
         if !movement.has_path() {
+            if goal.timer > 10.0 {
+                log::debug!(
+                    target: "diner",
+                    "move_to_seat: diner={entity:?} cannot find path to table={table_entity:?} seat={seat_index} target={:.2}, re-finding seat",
+                    seat_pos
+                );
+                targets.chosen_seat = None;
+                goal.update(DinerGoal::FindSeat);
+                continue;
+            }
             // Somehow lost path, re-request
             movement.request_path(seat_pos);
             log::debug!(
