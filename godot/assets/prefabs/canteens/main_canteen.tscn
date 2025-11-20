@@ -17,6 +17,7 @@ gradient = SubResource("Gradient_fhumt")
 
 [node name="Origin" type="Marker2D" parent="."]
 unique_name_in_owner = true
+position = Vector2(211, 130)
 
 [node name="Clear" type="Sprite2D" parent="Origin"]
 z_index = -100
@@ -64,6 +65,3 @@ frame = 1
 unique_name_in_owner = true
 visible = false
 position = Vector2(1473, 781)
-
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(757, 400)
