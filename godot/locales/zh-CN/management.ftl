@@ -25,11 +25,11 @@ mgmt--disarrange_tables =
         • 优化空间利用率（？）
 
 mgmt--add_tray_dispenser =
-    .title = 添加托盘取餐点
-    .desc = 在食堂内随机位置增设一个托盘取餐点。
-    .flavor = 多一个托盘取餐点，意味着食客们不用再为找托盘而跑来跑去了。虽然位置是随机的，但总比没有强。
+    .title = 添加托盘提供点
+    .desc = 在食堂内随机位置增设一个托盘提供点。
+    .flavor = 多一个托盘提供点，意味着食客们不用再为找托盘而跑来跑去了。虽然位置是随机的，但总比没有强。
     .effects =
-        • 托盘取餐点数量 +1
+        • 托盘提供点数量 +1
         • 减少食客寻找托盘的时间
 
 mgmt--add_chopstick_dispenser =
@@ -59,7 +59,7 @@ mgmt--change_window_service =
     .desc = 更换一个窗口的服务类型，以适应顾客需求变化。
     .flavor = 灵活的服务类型可以吸引更多的顾客。
     .effects =
-        • 随机更换一个窗口的服务类型
+        • 随机更换一个窗口的服务类型，希望你喜欢
 
 ## Music Decisions
 
@@ -146,8 +146,7 @@ mgmt--mislabel_price =
     .desc = 一些菜品的价格标签贴错了，导致顾客困惑。
     .flavor = 你问我？那我问你？
     .effects =
-        • 顾客满意度 -5%
-        • 抱怨概率 +10%
+        我都说了价格标示错误了你还要问我什么
 
 mgmt--increase_attraction =
     .title = 校园美食节

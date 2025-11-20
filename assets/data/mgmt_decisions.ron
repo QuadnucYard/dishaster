@@ -4,7 +4,7 @@
         weight: 200,
         icon: "management/add_tables.png",
         def: AddTables(
-            num_range: (start: 2, end: 5),
+            num_range: (start: 2, end: 10),
         ),
     ),
     (
@@ -12,7 +12,7 @@
         weight: 100,
         icon: "management/remove_tables.png",
         def: RemoveTables(
-            num_range: (start: 1, end: 3),
+            num_range: (start: 1, end: 5),
         ),
     ),
     (
@@ -20,7 +20,7 @@
         weight: 200,
         icon: "management/disarrange_tables.png",
         def: DisarrangeTables(
-            num_range: (start: 2, end: 4),
+            num_range: (start: 1, end: 8),
         ),
     ),
 
