@@ -47,7 +47,7 @@ fn apply_add_tables(
     let model = &event.0;
 
     // Collect existing colliders
-    let existing_colliders: Vec<BoxCollider> = collider_query.iter().map(|c| **c).collect();
+    let mut existing_colliders: Vec<BoxCollider> = collider_query.iter().map(|c| **c).collect();
 
     for _ in 0..model.num_tables {
         // Spawn at random position
@@ -73,6 +73,9 @@ fn apply_add_tables(
                 center_pos,
             };
             spawn_table(&placement, &mut commands, &registry);
+
+            // Add new collider to existing list to prevent overlap in this batch
+            existing_colliders.push(BoxCollider::from_center_size(center_pos, table_size));
         } else {
             log::warn!(
                 "Could not find non-colliding position for table after {} attempts",
