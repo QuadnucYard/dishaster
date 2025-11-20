@@ -74,8 +74,16 @@ impl Scene for GameScene {
                     }
                 }
                 Err(req) => {
-                    let req = req.downcast::<AppRequest>().expect("app request");
-                    Self::handle_app_request(ctx, *req);
+                    // If the request wasn't a GameRequest, try AppRequest without panicking.
+                    match req.downcast::<AppRequest>() {
+                        Ok(req) => Self::handle_app_request(ctx, *req),
+                        Err(_) => {
+                            // Log and ignore unknown GUI request types — don't panic.
+                            godot_error!(
+                                "GameScene received unknown GUI request — expected GameRequest or AppRequest"
+                            );
+                        }
+                    }
                 }
             }
         }

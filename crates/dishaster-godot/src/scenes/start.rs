@@ -92,9 +92,14 @@ impl Scene for StartScene {
 
         for req in ctx.gui_cmds.take_reqs() {
             let req: Box<dyn Any> = req;
-            let req = req.downcast::<AppRequest>().expect("app request");
 
-            self.handle_app_request(ctx, *req);
+            // Do not panic if request is not an `AppRequest` — log and ignore unknown types.
+            match req.downcast::<AppRequest>() {
+                Ok(req) => self.handle_app_request(ctx, *req),
+                Err(_) => {
+                    godot_error!("StartScene received unknown GUI request — expected AppRequest");
+                }
+            }
         }
     }
 
