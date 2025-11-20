@@ -129,11 +129,11 @@ func create_atlas(images: Array) -> Dictionary:
 		var pos = atlas_map[dish_id]
 		var x = pos.x * TILE_SIZE
 		var y = pos.y * TILE_SIZE
-		
+
 		var dish_atlas_texture = AtlasTexture.new()
 		dish_atlas_texture.atlas = load(ATLAS_PNG_PATH)
 		dish_atlas_texture.region = Rect2(x, y, TILE_SIZE, TILE_SIZE)
-		
+
 		var dish_texture_path = "%s/%s.tres" % [DISH_TEXTURES_DIR, dish_id]
 		err = ResourceSaver.save(dish_atlas_texture, dish_texture_path)
 		if err != OK:
@@ -167,7 +167,7 @@ func create_new_prefab(prefab_path: String, dish_id: String, x: int, y: int) -> 
 	# Load the individual texture resource
 	var dish_texture_path = "%s/%s.tres" % [DISH_TEXTURES_DIR, dish_id]
 	var dish_texture = load(dish_texture_path)
-	
+
 	if dish_texture == null:
 		print("  Error: Failed to load texture resource %s" % dish_texture_path)
 		return "error"
@@ -222,7 +222,7 @@ func update_existing_prefab(prefab_path: String, dish_id: String, x: int, y: int
 
 	# Find the Sprite2D node and check its texture
 	var dish_texture_path = "%s/%s.tres" % [DISH_TEXTURES_DIR, dish_id]
-	
+
 	for i in range(scene_state.get_node_count()):
 		var node_type = scene_state.get_node_type(i)
 

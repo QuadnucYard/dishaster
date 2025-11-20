@@ -1,28 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://cylnel6pbv6e1"]
+[gd_scene load_steps=2 format=3 uid="uid://cylnel6pbv6e1"]
 
-[sub_resource type="Gradient" id="Gradient_hb45q"]
-offsets = PackedFloat32Array(0.0044444446)
-colors = PackedColorArray(0.7883772, 0.36245802, 0.5969966, 0.49803922)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_tbxjm"]
-gradient = SubResource("Gradient_hb45q")
-width = 90
-height = 30
-
-[sub_resource type="Gradient" id="Gradient_vue0q"]
-offsets = PackedFloat32Array(0.0044444446)
-colors = PackedColorArray(0.95479697, 0.7438265, 0.8275527, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_s6t7t"]
-gradient = SubResource("Gradient_vue0q")
-width = 90
-height = 40
+[ext_resource type="Texture2D" uid="uid://3g2p8m5cenhd" path="res://assets/prefabs/furnishings/textures/main_dish_return.png" id="1_0q0v7"]
 
 [node name="MainDishReturn" type="Node2D"]
 
-[node name="Sprite2D2" type="Sprite2D" parent="."]
-texture = SubResource("GradientTexture2D_tbxjm")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -16)
-texture = SubResource("GradientTexture2D_s6t7t")
+[node name="MainDishReturn" type="Sprite2D" parent="."]
+scale = Vector2(0.8, 0.781)
+texture = ExtResource("1_0q0v7")
+offset = Vector2(0, -15)

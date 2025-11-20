@@ -1,37 +1,18 @@
-[gd_scene load_steps=6 format=3 uid="uid://g7cfftbmjl0b"]
+[gd_scene load_steps=3 format=3 uid="uid://g7cfftbmjl0b"]
 
-[sub_resource type="Gradient" id="Gradient_mdl4i"]
-offsets = PackedFloat32Array(0.0044444446)
-colors = PackedColorArray(0.20092112, 0.5539074, 0.85408956, 0.49803922)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_rdj4p"]
-gradient = SubResource("Gradient_mdl4i")
-width = 60
-height = 25
-
-[sub_resource type="Gradient" id="Gradient_4jefv"]
-offsets = PackedFloat32Array(0.0044444446)
-colors = PackedColorArray(0.75872517, 0.897218, 0.9944739, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_cdto5"]
-gradient = SubResource("Gradient_4jefv")
-width = 60
-height = 25
+[ext_resource type="Texture2D" uid="uid://bisbrk6st4335" path="res://assets/prefabs/furnishings/textures/tray_dispenser.png" id="1_y5216"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mdl4i"]
-size = Vector2(64, 40)
+size = Vector2(64, 50)
 
 [node name="TrayDispenser" type="Node2D"]
-
-[node name="Sprite2D2" type="Sprite2D" parent="."]
-texture = SubResource("GradientTexture2D_rdj4p")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -12)
-texture = SubResource("GradientTexture2D_cdto5")
 
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(0, -4)
+position = Vector2(0, -17)
 shape = SubResource("RectangleShape2D_mdl4i")
+
+[node name="TrayDispenser" type="Sprite2D" parent="."]
+texture = ExtResource("1_y5216")
+offset = Vector2(0, -8)

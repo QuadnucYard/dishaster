@@ -1,36 +1,31 @@
-[gd_scene load_steps=5 format=3 uid="uid://c1ad2itpe80n2"]
+[gd_scene load_steps=3 format=3 uid="uid://c1ad2itpe80n2"]
 
-[sub_resource type="Gradient" id="Gradient_4wl8r"]
-offsets = PackedFloat32Array(0.0044444446)
-colors = PackedColorArray(0.63842386, 0.5191339, 0.19881883, 0.49803922)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_lhhjm"]
-gradient = SubResource("Gradient_4wl8r")
-width = 60
-height = 25
-
-[sub_resource type="Gradient" id="Gradient_qsgs5"]
-offsets = PackedFloat32Array(0.0044444446)
-colors = PackedColorArray(0.94657224, 0.79299814, 0.41967276, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_dae6u"]
-gradient = SubResource("Gradient_qsgs5")
-width = 60
-height = 25
+[ext_resource type="Texture2D" uid="uid://2frfdus36sj7" path="res://assets/prefabs/furnishings/textures/normal_chair.png" id="1_h8rlb"]
+[ext_resource type="Texture2D" uid="uid://chwu11tsjk15a" path="res://assets/prefabs/furnishings/textures/normal_table.png" id="1_rwiul"]
 
 [node name="NormalTable" type="Node2D"]
 
-[node name="Sprite2D2" type="Sprite2D" parent="."]
-texture = SubResource("GradientTexture2D_lhhjm")
+[node name="NormalChair" type="Sprite2D" parent="."]
+position = Vector2(-10, -7)
+scale = Vector2(0.48986486, 0.5402645)
+texture = ExtResource("1_h8rlb")
+offset = Vector2(0, -18)
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -12)
-texture = SubResource("GradientTexture2D_dae6u")
+[node name="NormalChair2" type="Sprite2D" parent="."]
+position = Vector2(10, -7)
+scale = Vector2(0.48986486, 0.5402645)
+texture = ExtResource("1_h8rlb")
+offset = Vector2(0, -18)
+
+[node name="NormalTable" type="Sprite2D" parent="."]
+scale = Vector2(1, 0.9)
+texture = ExtResource("1_rwiul")
+offset = Vector2(0, -7)
 
 [node name="DishSlots" type="Node2D" parent="."]
 
 [node name="Slot0" type="Marker2D" parent="DishSlots"]
-position = Vector2(-15, -14)
+position = Vector2(-12, -19)
 
 [node name="Slot1" type="Marker2D" parent="DishSlots"]
-position = Vector2(15, -14)
+position = Vector2(13, -19)
