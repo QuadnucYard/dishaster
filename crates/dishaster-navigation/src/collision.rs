@@ -32,6 +32,18 @@ impl BoxCollider {
     pub fn extent(&self) -> Rect {
         Rect::from_center_size(self.center, self.size)
     }
+
+    /// Check if two axis-aligned bounding boxes overlap
+    pub fn aabb_overlap(&self, b: &BoxCollider) -> bool {
+        let a = self;
+        let a_half = a.size / 2.0;
+        let b_half = b.size / 2.0;
+
+        (a.center.x - a_half.x < b.center.x + b_half.x)
+            && (a.center.x + a_half.x > b.center.x - b_half.x)
+            && (a.center.y - a_half.y < b.center.y + b_half.y)
+            && (a.center.y + a_half.y > b.center.y - b_half.y)
+    }
 }
 
 impl From<Rect> for BoxCollider {
