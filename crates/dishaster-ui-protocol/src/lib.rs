@@ -179,6 +179,8 @@ pub enum PhaseMusic {
     Running,
     /// Settlement phase music.
     Settlement,
+    /// Ending phase music.
+    Ending,
 }
 
 #[allow(missing_docs)]

@@ -390,6 +390,7 @@ impl GameScene {
                     PhaseMusic::Preparation => "canteen_preparation_theme",
                     PhaseMusic::Running => "canteen_running_theme",
                     PhaseMusic::Settlement => "canteen_settlement_theme",
+                    PhaseMusic::Ending => "ending_theme",
                 };
 
                 audio.play_music_crossfade(&AudioRef::new(track), FADE_DURATION);

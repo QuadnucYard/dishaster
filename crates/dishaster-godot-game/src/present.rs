@@ -285,6 +285,12 @@ impl Game {
                     // Save the ending to profile
                     let _ = self.profile_svc.update_achieved_ending(ending.id.clone());
 
+                    if ending.can_continue {
+                        // Emit command to transition to ending phase music
+                        self.ui_commands
+                            .push(UiCommand::PlayPhaseMusic(PhaseMusic::Ending));
+                    }
+
                     self.ui_commands.push(UiCommand::ShowEnding(ending));
                 }
             }
