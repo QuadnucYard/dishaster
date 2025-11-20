@@ -37,10 +37,10 @@
     // Probability of applying reputation impact (forgiveness mechanism)
     // Lower values make the game more forgiving by ignoring some complaints
     impact_probabilities: {
-        praise: 0.8,
+        praise: 1.0,
         appeal: 0.35,
         queue: 0.50,
-        tableware: 0.1,
+        tableware: 0.05,
         quality: 0.2,
         price: 0.25,
         hygiene: 0.5,

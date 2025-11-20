@@ -167,10 +167,12 @@ pub fn process_serving_messages(
                 // Randomize prep time.
                 let prep_time = {
                     let base = request.base_service_time;
-                    let variation = rng
-                        .random_range(-STAFF_SERVICE_TIME_VARIATION..STAFF_SERVICE_TIME_VARIATION);
+                    let variation =
+                        rng.random_range(-SERVING_TIME_VARIATION..SERVING_TIME_VARIATION);
                     // Apply permanent serving time multiplier from management decisions
-                    base * (1.0 + variation) * perma_effects.get_serving_time_multiplier()
+                    base * SERVING_TINE_MULTIPLIER
+                        * (1.0 + variation)
+                        * perma_effects.get_serving_time_multiplier()
                 };
                 // Schedule the ready notification to finish the conversation.
                 queue.schedule(
@@ -499,6 +501,7 @@ pub fn on_dish_served(
                     ..Default::default()
                 },
                 Transform {
+                    scale: Vec3::splat(0.8),
                     ..Default::default()
                 },
             ))

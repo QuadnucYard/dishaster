@@ -86,7 +86,7 @@ pub fn handle_refill_request(
                 },
                 movement: Movement {
                     pos: spawn_pos,
-                    walking_speed: 0.3,
+                    walking_speed: 0.5,
                     radius: STAFF_COLLISION_RADIUS,
                     ..Default::default()
                 },

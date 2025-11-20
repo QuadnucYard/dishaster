@@ -227,6 +227,7 @@ fn spawn_dishes(
                 },
                 Transform {
                     position: (slot_rect.center() - vec2(layout.size.width / 2.0, 0.0)).extend(0.0),
+                    scale: Vec3::splat(0.8),
                     parent: Some(window_entity),
                     ..Default::default()
                 },

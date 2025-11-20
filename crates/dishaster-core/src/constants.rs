@@ -22,8 +22,10 @@ pub const ORDER_SPEECH_DELAY_MAX: Seconds = 5.0;
 pub const STAFF_CONFIRM_DELAY_MIN: Seconds = 4.0;
 /// Maximum delay before staff confirms the order
 pub const STAFF_CONFIRM_DELAY_MAX: Seconds = 8.0;
+/// Configurable serving time multiplier
+pub const SERVING_TINE_MULTIPLIER: f32 = 1.25;
 /// Random variation multiplier applied to dish serving time
-pub const STAFF_SERVICE_TIME_VARIATION: f32 = 0.25; // ±25%
+pub const SERVING_TIME_VARIATION: f32 = 0.25; // ±25%
 /// Default walking speed for serving staff (meters per second)
 pub const STAFF_WALK_SPEED: f32 = 0.5;
 /// Navigation radius used for serving staff collision avoidance

@@ -9,7 +9,7 @@
     ),
     (
         id: "remove_tables",
-        weight: 150,
+        weight: 100,
         icon: "management/remove_tables.png",
         def: RemoveTables(
             num_range: (start: 1, end: 3),
@@ -26,7 +26,7 @@
 
     (
         id: "add_tray_dispenser",
-        weight: 100,
+        weight: 50,
         icon: "management/add_tables.png",
         def: AddDispenser(
             dispenser_type: Tray,
@@ -35,7 +35,7 @@
     ),
     (
         id: "add_chopstick_dispenser",
-        weight: 100,
+        weight: 50,
         icon: "management/add_tables.png",
         def: AddDispenser(
             dispenser_type: Chopstick,
@@ -51,20 +51,20 @@
     ),
     (
         id: "close_window",
-        weight: 100,
+        weight: 50,
         icon: "management/close_window.png",
         def: CloseWindow(),
     ),
     (
         id: "change_window_service",
-        weight: 100,
+        weight: 50,
         icon: "management/change_window_service.png",
         def: ChangeWindowService(),
     ),
 
     (
         id: "play_music_relaxing",
-        weight: 120,
+        weight: 30,
         icon: "management/play_music.png",
         def: PlayMusic(
             // 舒缓音乐让人放慢节奏，吃得更慢但更满足
@@ -74,7 +74,7 @@
     ),
     (
         id: "play_music_upbeat",
-        weight: 120,
+        weight: 30,
         icon: "management/play_music.png",
         def: PlayMusic(
             // 快节奏音乐催促食客加快速度，效率提升但可能影响体验
@@ -84,7 +84,7 @@
     ),
     (
         id: "play_music_anthem",
-        weight: 100,
+        weight: 40,
         icon: "management/play_music.png",
         def: PlayMusic(
             // 校歌：激励人心但可能引起反感
@@ -95,7 +95,7 @@
 
     (
         id: "advertise_canteen",
-        weight: 80,
+        weight: 50,
         icon: "management/advertise_canteen.png",
         def: AdvertiseCampaign(
             target: Canteen,
@@ -107,7 +107,7 @@
     ),
     (
         id: "advertise_window",
-        weight: 100,
+        weight: 50,
         icon: "management/advertise_canteen.png",
         def: AdvertiseCampaign(
             target: Window,
@@ -120,7 +120,7 @@
 
     (
         id: "slogan_hardship",
-        weight: 100,
+        weight: 50,
         icon: "management/slogan_hardship.png",
         def: AddMotivationalSlogan(
             // "嚼得菜根，做得大事" - 传统励志标语
@@ -132,7 +132,7 @@
 
     (
         id: "supply_crab",
-        weight: 100,
+        weight: 50,
         icon: "management/crab.svg",
         def: SupplyCrab(
             trial_probability: 0.001,
@@ -141,20 +141,20 @@
 
     (
         id: "improve_dish_quality",
-        weight: 120,
+        weight: 50,
         icon: "management/improve_quality.png",
         def: ImproveDishQuality(
             // 提升菜品质量：从10%到30%的质量改进
-            quality_multiplier_range: (start: 1.1, end: 1.3),
+            quality_multiplier_range: (start: 1.01, end: 1.3),
         ),
     ),
     (
         id: "reduce_serving_time",
-        weight: 120,
+        weight: 50,
         icon: "management/reduce_serving_time.png",
         def: ReduceServingTime(
             // 减少出餐时间：从10%到30%的时间减少
-            serving_time_multiplier_range: (start: 0.7, end: 0.9),
+            serving_time_multiplier_range: (start: 0.8, end: 0.99),
         ),
     ),
 ]

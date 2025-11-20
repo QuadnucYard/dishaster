@@ -1,7 +1,7 @@
 [
     (
         id: "mislabel_price",
-        weight: 100,
+        weight: 200,
         icon: "management/mislabel_price.png",
         def: MislabelPrice(
             num_range: (start: 1, end: 5),
@@ -10,7 +10,7 @@
     ),
     (
         id: "increase_attraction",
-        weight: 150,
+        weight: 100,
         icon: "management/increase_attraction.png",
         def: AttractionChange(
             attraction_multiplier_range: (start: 1.1, end: 1.5),  // 50% more likely to visit
@@ -18,7 +18,7 @@
     ),
     (
         id: "decrease_attraction",
-        weight: 150,
+        weight: 100,
         icon: "management/decrease_attraction.png",
         def: AttractionChange(
             attraction_multiplier_range: (start: 0.5, end: 0.9),  // 50% less likely to visit
@@ -26,7 +26,7 @@
     ),
     (
         id: "temporary_crowd",
-        weight: 120,
+        weight: 200,
         icon: "management/temporary_crowd.png",
         def: TemporaryCrowd(
             num_diners_range: (start: 50, end: 100),
@@ -36,7 +36,7 @@
     ),
     (
         id: "inspector_visit",
-        weight: 100,
+        weight: 50,
         icon: "management/inspector_visit.png",
         def: InspectorVisit(
             fsri_threshold: 15.0,  // Only risky if FSRI > 15
