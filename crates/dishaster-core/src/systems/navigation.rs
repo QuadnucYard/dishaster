@@ -245,8 +245,26 @@ impl Movement {
             }
         }
 
+        // If the agent is currently overlapping an obstacle, try to recover by
+        // finding a nearby traversable start position. This allows the pathfinder
+        // to compute a route even when the agent's world position is colliding.
+        const START_SEARCH_TILES: i32 = 5;
+        let start_pos = if nav_grid.is_pos_traversable(self.pos, self.radius) {
+            self.pos
+        } else if let Some(near) =
+            nav_grid.find_nearest_traversable_world(self.pos, self.radius, START_SEARCH_TILES)
+        {
+            log::debug!(target: "navigation", "Start pos {:.2} not traversable, using nearby start {:.2}", self.pos, near);
+            near
+        } else {
+            // Couldn't find a nearby traversable start; give up.
+            log::debug!(target: "navigation", "Start pos {:.2} not traversable and no nearby traversable tile found", self.pos);
+            self.path.clear();
+            return;
+        };
+
         if let Some(path) = find_path(PathRequest {
-            start: self.pos,
+            start: start_pos,
             target,
             radius: self.radius,
             impatience: self.impatience,

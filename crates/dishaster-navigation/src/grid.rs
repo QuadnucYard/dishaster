@@ -120,6 +120,44 @@ impl NavigationGrid {
             .is_some_and(|cell| self.is_traversable(cell, radius))
     }
 
+    /// Find the nearest traversable world position (cell center) to the given
+    /// world `pos` for an agent of `radius`. Searches outwards in tile rings
+    /// up to `max_search_tiles` and returns the first traversable cell center
+    /// found. Useful for recovering agents that end up overlapping obstacles.
+    pub fn find_nearest_traversable_world(
+        &self,
+        pos: Vec2,
+        radius: f32,
+        max_search_tiles: i32,
+    ) -> Option<Vec2> {
+        let center = self.world_to_igrid(pos);
+
+        for ring in 0..=max_search_tiles {
+            // iterate over square ring centered on `center` with half-size = ring
+            let minx = center.x - ring;
+            let maxx = center.x + ring;
+            let miny = center.y - ring;
+            let maxy = center.y + ring;
+
+            for tx in minx..=maxx {
+                for ty in miny..=maxy {
+                    // Only consider tiles on the current ring boundary (not interior)
+                    if ring > 0 && !(tx == minx || tx == maxx || ty == miny || ty == maxy) {
+                        continue;
+                    }
+
+                    if let Some(tile) = self.bound_tile(ivec2(tx, ty))
+                        && self.is_traversable(tile, radius)
+                    {
+                        return Some(self.tile_to_world(tile));
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
     /// Get the distance field grid
     pub fn distance_field(&self) -> &Grid<f32> {
         &self.distance
