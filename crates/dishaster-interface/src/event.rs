@@ -5,7 +5,7 @@ use dishaster_views::{
     ManagementIncidentView, PricingMethod, ReputationView, SettlementView, TrialImpactView,
     TrialIntro, TrialResponseOption, TrialStatement,
 };
-use dishrupt_core::{EntityId, prelude::EcoString};
+use dishrupt_core::{EntityId, ModelId, prelude::EcoString};
 
 /// Presentation events emitted by the core simulation for client display.
 #[derive(Debug)]
@@ -43,6 +43,14 @@ pub enum SimEvent {
         entity: EntityId,
         /// New pricing method.
         new_pricing: PricingMethod,
+    },
+
+    /// A window has spawned.
+    WindowSpawned {
+        /// Window entity ID.
+        entity: EntityId,
+        /// Window service model ID.
+        model_id: ModelId,
     },
 
     /// An agent has spawned.

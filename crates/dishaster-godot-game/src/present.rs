@@ -7,7 +7,11 @@ mod feedback;
 use dishaster_interface::{snapshots::*, *};
 use dishaster_ui_protocol::{PhaseMusic, UiCommand};
 use dishrupt_l10n::tr;
-use godot::{classes::Node2D, global::godot_print};
+use godot::{
+    classes::{CanvasItem, Label, Node2D},
+    global::godot_print,
+    prelude::Color,
+};
 
 pub use self::{agent::AgentPresenter, dish::DishPresenter, dispenser::DispenserPresenter};
 use super::Game;
@@ -100,6 +104,36 @@ impl Game {
                         && let Some(presenter) = self.pres.dishes.get_mut(&entity)
                     {
                         presenter.set_price(new_pricing);
+                    }
+                }
+
+                SimEvent::WindowSpawned { entity, model_id } => {
+                    if let Some(node) = self.stage.get_godot_node(entity) {
+                        if let Some(mut label) = node.try_get_node_as::<Label>("Label") {
+                            label.set_text(&tr!("window-{}.name", model_id));
+                        }
+
+                        if let Some(mut floor) = node.try_get_node_as::<CanvasItem>("Floor") {
+                            use std::{
+                                collections::hash_map::DefaultHasher,
+                                hash::{Hash, Hasher},
+                            };
+
+                            let mut hasher = DefaultHasher::new();
+                            model_id.hash(&mut hasher);
+                            let hash = hasher.finish();
+
+                            let hue = hash as f64 / (u64::MAX as f64);
+                            let sat_byte = ((hash >> 8) & 0xFF) as u8;
+                            let light_byte = ((hash >> 16) & 0xFF) as u8;
+
+                            // Choose ranges for OKHSL saturation & lightness that tend to produce
+                            // readable and distinct colors.
+                            let sat = 0.35 + (sat_byte as f64 / 255.0) * 0.6; // 0.35 .. 0.95
+                            let light = 0.35 + (light_byte as f64 / 255.0) * 0.5; // 0.35 .. 0.85
+
+                            floor.set_modulate(Color::from_ok_hsl(hue, sat, light));
+                        }
                     }
                 }
 

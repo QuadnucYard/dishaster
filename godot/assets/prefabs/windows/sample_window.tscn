@@ -1,12 +1,40 @@
-[gd_scene load_steps=2 format=3 uid="uid://w7ov8gwqu5bn"]
+[gd_scene load_steps=4 format=3 uid="uid://w7ov8gwqu5bn"]
 
 [ext_resource type="Texture2D" uid="uid://dh2j6u7fdhln6" path="res://assets/sprites/canteen/window_tile.png" id="1_6wpft"]
+[ext_resource type="FontVariation" uid="uid://bcfbpasmpc55k" path="res://assets/fonts/sans_medium.tres" id="2_7oske"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7oske"]
+bg_color = Color(0.765084, 0.79656947, 0.98456234, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6026714, 0.6473829, 0.8843575, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="SampleWindow" type="Node2D"]
 
-[node name="WindowTile" type="Sprite2D" parent="."]
+[node name="Floor" type="Sprite2D" parent="."]
 texture_repeat = 2
 position = Vector2(0, 45)
 texture = ExtResource("1_6wpft")
 region_enabled = true
 region_rect = Rect2(0, 0, 96, 96)
+
+[node name="Label" type="Label" parent="."]
+custom_minimum_size = Vector2(90, 30)
+offset_left = -45.0
+offset_top = 90.0
+offset_right = 45.0
+offset_bottom = 120.0
+theme_override_colors/font_color = Color(0.7282404, 0.2563501, 0.62899846, 1)
+theme_override_fonts/font = ExtResource("2_7oske")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_7oske")
+theme_override_styles/focus = SubResource("StyleBoxFlat_7oske")
+text = "你说得对"
+horizontal_alignment = 1
+vertical_alignment = 1

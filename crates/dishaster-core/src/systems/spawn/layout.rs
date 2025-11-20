@@ -117,6 +117,11 @@ fn spawn_windows(
             })
             .collect::<Vec<_>>();
 
+        events.push(SimEvent::WindowSpawned {
+            entity: window_entity.to_entity_id(),
+            model_id: service_model.id.clone(),
+        });
+
         spawn_dishes(
             commands,
             window_entity,
