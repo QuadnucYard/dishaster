@@ -39,6 +39,7 @@
 
 mod manager;
 mod proc;
+mod resource;
 mod transition;
 
 use std::{
@@ -46,13 +47,10 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use dishrupt_godot_audio::AudioManager;
 use dishrupt_godot_input::event::GodotInputEvent;
-use dishrupt_godot_ui::{GuiCommands, GuiRegistry};
 use godot::{classes::Node, obj::Gd};
-pub use manager::*;
-pub use proc::*;
-pub use transition::*;
+
+pub use crate::{manager::*, proc::*, resource::SceneResources, transition::*};
 
 /// Static string identifier for scene types.
 ///
@@ -68,12 +66,8 @@ pub type SceneId = &'static str;
 /// - Scene root node for creating transitions
 /// - Ability to schedule scene procedures
 pub struct SceneContext<'a> {
-    /// UI system registry for managing GUI components
-    pub gui: &'a mut GuiRegistry,
-    /// Command queue for GUI operations
-    pub gui_cmds: GuiCommands,
-    /// Audio system for sound and music playback
-    pub audio: &'a mut AudioManager,
+    /// Resources available to the scene
+    pub res: &'a mut SceneResources,
     /// Currently scheduled scene procedure (if any)
     pub proc: Option<Box<dyn SceneProcedure>>,
 }
@@ -192,11 +186,8 @@ pub trait Scene: Any {
 
     /// Called when the scene is deactivated.
     ///
-    /// Default implementation hides all GUI elements. Override to add
-    /// custom cleanup logic (stop music, save state, etc.).
-    fn leave(&mut self, ctx: &mut SceneContext) {
-        ctx.gui.hide_all();
-    }
+    /// Override to add custom cleanup logic (stop music, save state, etc.).
+    fn leave(&mut self, ctx: &mut SceneContext) {}
 
     /// Called every frame while the scene is active.
     ///

@@ -8,8 +8,10 @@ use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, EndingGalleryGui, EndingGalleryView, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_core::asset::{AudioRef, PrefabRef};
+use dishrupt_godot_audio::AudioManager;
 use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
+use dishrupt_godot_ui::{GuiCommands, GuiRegistry};
 use dishrupt_godot_utils::BindGodot;
 use godot::{
     classes::Node,
@@ -48,16 +50,17 @@ impl Scene for StartScene {
     }
 
     fn enter(&mut self, ctx: &mut SceneContext) {
+        let gui = ctx.res.get_mut::<GuiRegistry>();
+
         let services = game_services();
 
-        ctx.gui.show::<StartMenuGui>();
+        gui.show::<StartMenuGui>();
 
         // Update toggle buttons from saved settings
         {
             let svc = &services.user_service.prefs;
             let audio_prefs = &svc.load().expect("failed to load prefs").audio;
-            ctx.gui
-                .get_mut::<StartMenuGui>()
+            gui.get_mut::<StartMenuGui>()
                 .update_from_preferences(audio_prefs.music_mute, audio_prefs.sound_mute);
         }
 
@@ -68,8 +71,7 @@ impl Scene for StartScene {
                 .profiles
                 .load()
                 .expect("failed to load profile");
-            ctx.gui
-                .get_mut::<StartMenuGui>()
+            gui.get_mut::<StartMenuGui>()
                 .update_endings_unlocked(&profile.achieved_endings.iter().cloned().collect());
         }
 
@@ -80,7 +82,13 @@ impl Scene for StartScene {
             self.opening = Some(opening);
         }
 
-        ctx.audio.play_music(&MAIN_THEME_MUSIC);
+        let audio = ctx.res.get_mut::<AudioManager>();
+        audio.play_music(&MAIN_THEME_MUSIC);
+    }
+
+    fn leave(&mut self, ctx: &mut SceneContext) {
+        let gui = ctx.res.get_mut::<GuiRegistry>();
+        gui.hide_all();
     }
 
     fn process(&mut self, ctx: &mut SceneContext, delta: f64) {
@@ -88,9 +96,11 @@ impl Scene for StartScene {
             opening.process(delta);
         };
 
-        ctx.gui_cmds.run_cmds(ctx.gui);
+        let (gui, gui_cmds) = ctx.res.get_many_mut::<(GuiRegistry, GuiCommands)>();
 
-        for req in ctx.gui_cmds.take_reqs() {
+        gui_cmds.run_cmds(gui);
+
+        for req in gui_cmds.take_reqs() {
             let req: Box<dyn Any> = req;
 
             // Do not panic if request is not an `AppRequest` — log and ignore unknown types.
@@ -114,7 +124,7 @@ impl Scene for StartScene {
 
 impl StartScene {
     fn handle_app_request(&mut self, ctx: &mut SceneContext, req: AppRequest) {
-        let SceneContext { gui, audio, .. } = ctx;
+        let (gui, audio) = ctx.res.get_many_mut::<(GuiRegistry, AudioManager)>();
 
         match req {
             AppRequest::Quit => {

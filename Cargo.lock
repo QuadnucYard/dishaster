@@ -821,11 +821,10 @@ dependencies = [
 name = "dishrupt-godot-scene"
 version = "0.1.0"
 dependencies = [
- "dishrupt-godot-audio",
  "dishrupt-godot-input",
- "dishrupt-godot-ui",
  "godot",
  "log",
+ "variadics_please",
 ]
 
 [[package]]

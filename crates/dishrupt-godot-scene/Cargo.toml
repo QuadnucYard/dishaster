@@ -11,12 +11,11 @@ readme = "README.md"
 test = false
 
 [dependencies]
-dishrupt-godot-audio.workspace = true
 dishrupt-godot-input.workspace = true
-dishrupt-godot-ui.workspace = true
 
 godot.workspace = true
 log.workspace = true
+variadics_please.workspace = true
 
 [lints]
 workspace = true

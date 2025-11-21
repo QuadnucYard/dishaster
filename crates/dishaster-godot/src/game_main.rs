@@ -11,8 +11,8 @@ use dishaster_persistence::UserDataService;
 use dishrupt_asset::{AssetCatalog, AssetPathConfig, AssetResolver};
 use dishrupt_godot_audio::AudioManager;
 use dishrupt_godot_input::listener::InputListener;
-use dishrupt_godot_scene::{SceneContext, SceneManager};
-use dishrupt_godot_ui::GuiManager;
+use dishrupt_godot_scene::{SceneContext, SceneManager, SceneResources};
+use dishrupt_godot_ui::{GuiCommands, GuiRegistry, UiRoot};
 use dishrupt_godot_utils::NodeExt;
 use dishrupt_l10n_godot::LocalizationManager;
 use dishrupt_persistence::GodotUserStorage;
@@ -36,9 +36,11 @@ pub struct GameMain {
 
 /// For godot nodes obtained after initialization.
 struct Inner {
+    gui_root: UiRoot,
+
     scene_manager: SceneManager,
-    gui: GuiManager,
-    audio: AudioManager,
+    scene_res: SceneResources,
+
     l10n: LocalizationManager,
     input_listener: Gd<InputListener>,
     effect_overlay: EffectOverlay,
@@ -99,15 +101,19 @@ impl INode for GameMain {
 impl Inner {
     fn new(mut root: Gd<Node>, services: Arc<GameServices>) -> Inner {
         let scene_root = root.get_or_add_node_as::<Node2D>("SceneRoot");
-        let gui_root = root.get_or_add_node_as::<CanvasLayer>("UIRoot");
+        let ui_root = root.get_or_add_node_as::<CanvasLayer>("UIRoot");
         let audio_root = root.get_or_add_node_as("AudioRoot");
 
         let scene_manager = SceneManager::new(
             scene_root.upcast(),
             DefaultSceneLoader::new(services.catalog.clone()),
         );
-        let gui = GuiManager::new(gui_root.upcast());
         let audio = AudioManager::new(audio_root, services.catalog.clone());
+
+        let mut scene_res = SceneResources::new();
+        scene_res.insert(GuiRegistry::new());
+        scene_res.insert(GuiCommands::new());
+        scene_res.insert(audio);
 
         let l10n = Default::default();
         let input_listener = root.get_or_add_node_of_type::<InputListener>();
@@ -119,10 +125,12 @@ impl Inner {
         let panic_overlay = PanicOverlay::new(root.get_node_as("%PanicOverlay"));
 
         Self {
+            gui_root: UiRoot::new(ui_root.upcast()),
+
             scene_manager,
-            gui,
-            audio,
+            scene_res,
             l10n,
+
             input_listener,
             effect_overlay,
             panic_overlay,
@@ -135,8 +143,10 @@ impl Inner {
     }
 
     fn ready(&mut self) {
-        register_guis(&mut self.gui.registry, &self.services.catalog);
-        self.gui.ready();
+        let (gui, gui_cmds) = self.scene_res.get_many_mut::<(GuiRegistry, GuiCommands)>();
+
+        register_guis(gui, &self.services.catalog);
+        gui.mount(&mut self.gui_root, gui_cmds);
 
         self.apply_preferences();
 
@@ -169,7 +179,7 @@ impl Inner {
 
     fn ready_late(&mut self) {
         godot_print!("collect localized elements...");
-        self.l10n.collect(self.gui.root.gd());
+        self.l10n.collect(self.gui_root.gd());
         self.l10n.update();
     }
 
@@ -196,9 +206,7 @@ impl Inner {
 
         {
             let ctx = &mut SceneContext {
-                gui: &mut self.gui.registry,
-                gui_cmds: self.gui.cmds.clone(),
-                audio: &mut self.audio,
+                res: &mut self.scene_res,
                 proc: None,
             };
 
@@ -207,14 +215,15 @@ impl Inner {
         }
 
         // process UI
-        self.gui.process(delta);
+        {
+            let (gui, gui_cmds) = self.scene_res.get_many_mut::<(GuiRegistry, GuiCommands)>();
+            gui.process(delta, gui_cmds);
+        }
 
         // process active scene
         {
             let ctx = &mut SceneContext {
-                gui: &mut self.gui.registry,
-                gui_cmds: self.gui.cmds.clone(),
-                audio: &mut self.audio,
+                res: &mut self.scene_res,
                 proc: None,
             };
             self.scene_manager.inspect_active_scene_mut(|scene| {
@@ -236,9 +245,7 @@ impl Inner {
 
         self.scene_manager.inspect_active_scene_mut(|scene| {
             let ctx = &mut SceneContext {
-                gui: &mut self.gui.registry,
-                gui_cmds: self.gui.cmds.clone(),
-                audio: &mut self.audio,
+                res: &mut self.scene_res,
                 proc: None,
             };
 
@@ -262,10 +269,11 @@ impl Inner {
             .expect("failed to load preferences");
         let audio_prefs = &prefs.audio;
 
-        self.audio.set_music_mute(audio_prefs.music_mute);
-        self.audio.set_sound_mute(audio_prefs.sound_mute);
-        self.audio.set_music_volume(audio_prefs.music_volume);
-        self.audio.set_sound_volume(audio_prefs.sound_volume);
+        let audio = self.scene_res.get_mut::<AudioManager>();
+        audio.set_music_mute(audio_prefs.music_mute);
+        audio.set_sound_mute(audio_prefs.sound_mute);
+        audio.set_music_volume(audio_prefs.music_volume);
+        audio.set_sound_volume(audio_prefs.sound_volume);
     }
 }
 

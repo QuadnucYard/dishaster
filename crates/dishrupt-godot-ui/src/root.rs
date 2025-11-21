@@ -2,11 +2,12 @@ use godot::{classes::Node, obj::Gd};
 
 use crate::Gui;
 
-pub struct UIRoot {
+#[derive(Debug, Clone)]
+pub struct UiRoot {
     gd: Gd<Node>,
 }
 
-impl UIRoot {
+impl UiRoot {
     pub fn new(gd: Gd<Node>) -> Self {
         Self { gd }
     }

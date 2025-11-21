@@ -5,7 +5,7 @@ use std::{
 
 use dishrupt_core::ui::UiRequest;
 
-use crate::UITree;
+use crate::{UITree, UiRoot};
 
 #[allow(unused)]
 pub trait Gui: UITree {
@@ -67,6 +67,28 @@ impl GuiRegistry {
         for gui in self.iter_mut() {
             gui.hide();
         }
+    }
+}
+
+// Lifecycle methods
+impl GuiRegistry {
+    pub fn mount(&mut self, root: &mut UiRoot, commands: &mut GuiCommands) {
+        for gui in self.iter_mut() {
+            gui.start(commands.clone());
+            gui.ready();
+            gui.set_active(false);
+            root.add_gui(&**gui);
+        }
+        commands.run_cmds(self);
+    }
+
+    pub fn process(&mut self, delta: f64, commands: &mut GuiCommands) {
+        for gui in self.iter_mut() {
+            if gui.is_active() {
+                gui.process(commands.clone(), delta);
+            }
+        }
+        commands.run_cmds(self);
     }
 }
 

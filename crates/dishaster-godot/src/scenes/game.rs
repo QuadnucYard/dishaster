@@ -5,9 +5,10 @@ use dishaster_godot_game::Game;
 use dishaster_godot_ui::*;
 use dishaster_ui_protocol::{AppRequest, GameRequest, PhaseMusic, UiCommand};
 use dishrupt_core::asset::AudioRef;
+use dishrupt_godot_audio::AudioManager;
 use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_scene::*;
-use dishrupt_godot_ui::UITree;
+use dishrupt_godot_ui::{GuiCommands, GuiRegistry, UITree};
 use dishrupt_godot_utils::BindGodot;
 use godot::{classes::Node, prelude::*};
 
@@ -48,7 +49,7 @@ impl Scene for GameScene {
     }
 
     fn enter(&mut self, ctx: &mut SceneContext) {
-        let SceneContext { gui, .. } = ctx;
+        let gui = ctx.res.get_mut::<GuiRegistry>();
 
         gui.get_mut::<GamingLayout>().set_dev_enabled(false);
         gui.get_mut::<TimeStatsGui>().set_dev_enabled(false);
@@ -58,14 +59,20 @@ impl Scene for GameScene {
         gui.show::<TrialImpactGui>();
     }
 
+    fn leave(&mut self, ctx: &mut SceneContext) {
+        let gui = ctx.res.get_mut::<GuiRegistry>();
+        gui.hide_all();
+    }
+
     fn process(&mut self, ctx: &mut SceneContext, delta: f64) {
         if let Some(game) = self.game.as_mut() {
             game.process(delta);
         };
 
-        ctx.gui_cmds.run_cmds(ctx.gui);
+        let (gui, gui_cmds) = ctx.res.get_many_mut::<(GuiRegistry, GuiCommands)>();
+        gui_cmds.run_cmds(gui);
 
-        for req in ctx.gui_cmds.take_reqs() {
+        for req in gui_cmds.take_reqs() {
             let req: Box<dyn Any> = req;
             match req.downcast::<GameRequest>() {
                 Ok(req) => {
@@ -130,7 +137,8 @@ impl GameScene {
         game.start_day();
         self.game = Some(game);
 
-        ctx.gui.get_mut::<DishPricePopup>().enabled = true;
+        let gui = ctx.res.get_mut::<GuiRegistry>();
+        gui.get_mut::<DishPricePopup>().enabled = true;
     }
 
     fn handle_app_request(ctx: &mut SceneContext, req: AppRequest) {
@@ -158,7 +166,7 @@ impl GameScene {
 
     /// Handle a in-game ui request
     fn handle_game_request(ctx: &mut SceneContext, req: GameRequest, game: &mut Game) {
-        let SceneContext { gui, .. } = ctx;
+        let gui = ctx.res.get_mut::<GuiRegistry>();
 
         match req {
             GameRequest::StartRun => {
@@ -257,7 +265,7 @@ impl GameScene {
 
     /// Handle UI commands emitted by game logic.
     fn handle_ui_command(ctx: &mut SceneContext, cmd: UiCommand, game: &mut Game) {
-        let SceneContext { gui, audio, .. } = ctx;
+        let (gui, audio) = ctx.res.get_many_mut::<(GuiRegistry, AudioManager)>();
 
         match cmd {
             UiCommand::ToggleDev(enabled) => {
