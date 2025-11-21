@@ -1,27 +1,20 @@
-use std::{
-    cell::OnceCell,
-    path::Path,
-    sync::{Arc, OnceLock},
-};
+use std::{cell::OnceCell, path::Path, sync::Arc};
 
 use anyhow::{Context, Result};
-use dishaster_data::{DataLoader, GameDataAssets, load_toml};
+use dishaster_data::{DataLoader, load_toml};
 use dishaster_godot_ui::register_guis;
-use dishaster_persistence::UserDataService;
-use dishrupt_asset::{AssetCatalog, AssetPathConfig, AssetResolver};
-use dishrupt_godot_audio::AudioManager;
+use dishrupt_asset::{AssetPathConfig, AssetResolver};
 use dishrupt_godot_input::listener::InputListener;
-use dishrupt_godot_scene::{SceneContext, SceneManager, SceneResources};
-use dishrupt_godot_ui::{GuiCommands, GuiRegistry, UiRoot};
-use dishrupt_godot_utils::NodeExt;
+use dishrupt_godot_ui::UiRoot;
 use dishrupt_l10n_godot::LocalizationManager;
 use dishrupt_persistence::GodotUserStorage;
 use godot::{classes::CanvasLayer, prelude::*};
 
 use crate::{
-    effect::EffectOverlay,
+    effect::{EffectOverlay, GlobalEffects},
     panic::{get_panic_message, has_panic_occurred, init_backtrace_handle},
     panic_overlay::PanicOverlay,
+    prelude::*,
     scenes::{DefaultSceneLoader, proc::*},
 };
 
@@ -39,14 +32,12 @@ struct Inner {
     gui_root: UiRoot,
 
     scene_manager: SceneManager,
-    scene_res: SceneResources,
+    resources: SceneResources,
 
     l10n: LocalizationManager,
     input_listener: Gd<InputListener>,
     effect_overlay: EffectOverlay,
     panic_overlay: PanicOverlay,
-
-    services: Arc<GameServices>,
 
     late_initialized: bool,
     panic_displayed: bool,
@@ -65,10 +56,6 @@ impl INode for GameMain {
         match std::panic::catch_unwind(init_game) {
             Ok(Ok(services)) => {
                 log::info!("Init game completed successfully");
-
-                GAME_SERVICES
-                    .set(services.clone())
-                    .unwrap_or_else(|_| panic!("failed to set global game services"));
 
                 let mut inner = Inner::new(self.base().clone().upcast(), services);
                 inner.ready();
@@ -99,7 +86,7 @@ impl INode for GameMain {
 }
 
 impl Inner {
-    fn new(mut root: Gd<Node>, services: Arc<GameServices>) -> Inner {
+    fn new(mut root: Gd<Node>, services: GameServices) -> Inner {
         let scene_root = root.get_or_add_node_as::<Node2D>("SceneRoot");
         let ui_root = root.get_or_add_node_as::<CanvasLayer>("UIRoot");
         let audio_root = root.get_or_add_node_as("AudioRoot");
@@ -110,11 +97,6 @@ impl Inner {
         );
         let audio = AudioManager::new(audio_root, services.catalog.clone());
 
-        let mut scene_res = SceneResources::new();
-        scene_res.insert(GuiRegistry::new());
-        scene_res.insert(GuiCommands::new());
-        scene_res.insert(audio);
-
         let l10n = Default::default();
         let input_listener = root.get_or_add_node_of_type::<InputListener>();
 
@@ -124,18 +106,25 @@ impl Inner {
         );
         let panic_overlay = PanicOverlay::new(root.get_node_as("%PanicOverlay"));
 
+        let mut scene_res = SceneResources::new();
+        scene_res.insert(GuiRegistry::new());
+        scene_res.insert(GuiCommands::new());
+        scene_res.insert(audio);
+        scene_res.insert(GlobalEffects::new());
+        scene_res.insert(services.catalog);
+        scene_res.insert(services.data);
+        scene_res.insert(services.user_service);
+
         Self {
             gui_root: UiRoot::new(ui_root.upcast()),
 
             scene_manager,
-            scene_res,
+            resources: scene_res,
             l10n,
 
             input_listener,
             effect_overlay,
             panic_overlay,
-
-            services,
 
             late_initialized: false,
             panic_displayed: false,
@@ -143,36 +132,17 @@ impl Inner {
     }
 
     fn ready(&mut self) {
-        let (gui, gui_cmds) = self.scene_res.get_many_mut::<(GuiRegistry, GuiCommands)>();
+        {
+            let (gui, gui_cmds, catalog) = self
+                .resources
+                .get_many_mut::<(GuiRegistry, GuiCommands, AssetCatalog)>();
 
-        register_guis(gui, &self.services.catalog);
-        gui.mount(&mut self.gui_root, gui_cmds);
+            register_guis(gui, catalog);
+            gui.mount(&mut self.gui_root, gui_cmds);
+        }
 
         self.apply_preferences();
-
-        let profile_svc = &self.services.user_service.profiles;
-
-        match profile_svc.load() {
-            Ok(profile) => {
-                if dishaster_validation::validate_player_profile(
-                    &profile,
-                    &self.services.data.models,
-                )
-                .is_err()
-                {
-                    log::warn!("Player profile validation failed, resetting to default profile");
-                    if let Err(e) = profile_svc.create() {
-                        log::error!("Failed to recreate profiles: {e}");
-                    }
-                }
-            }
-            Err(e) => {
-                log::warn!("Failed to load profile: {e}. Recreating default profile");
-                if let Err(e) = profile_svc.create() {
-                    log::error!("Failed to recreate profiles: {e}");
-                }
-            }
-        }
+        self.init_profile();
 
         self.scene_manager.schedule(StartProcedure);
     }
@@ -206,7 +176,7 @@ impl Inner {
 
         {
             let ctx = &mut SceneContext {
-                res: &mut self.scene_res,
+                res: &mut self.resources,
                 proc: None,
             };
 
@@ -216,14 +186,14 @@ impl Inner {
 
         // process UI
         {
-            let (gui, gui_cmds) = self.scene_res.get_many_mut::<(GuiRegistry, GuiCommands)>();
+            let (gui, gui_cmds) = self.resources.get_many_mut::<(GuiRegistry, GuiCommands)>();
             gui.process(delta, gui_cmds);
         }
 
         // process active scene
         {
             let ctx = &mut SceneContext {
-                res: &mut self.scene_res,
+                res: &mut self.resources,
                 proc: None,
             };
             self.scene_manager.inspect_active_scene_mut(|scene| {
@@ -234,7 +204,10 @@ impl Inner {
             }
         }
 
-        self.effect_overlay.process();
+        {
+            let effects = self.resources.get_mut::<GlobalEffects>();
+            effects.process(&mut self.effect_overlay);
+        }
     }
 
     fn physics_process(&mut self, delta: f64) {
@@ -245,7 +218,7 @@ impl Inner {
 
         self.scene_manager.inspect_active_scene_mut(|scene| {
             let ctx = &mut SceneContext {
-                res: &mut self.scene_res,
+                res: &mut self.resources,
                 proc: None,
             };
 
@@ -261,61 +234,70 @@ impl Inner {
 
 impl Inner {
     fn apply_preferences(&mut self) {
-        let prefs = self
-            .services
-            .user_service
-            .prefs
-            .load()
-            .expect("failed to load preferences");
+        let user_svc = self.resources.get::<UserDataService>();
+
+        let prefs = user_svc.prefs.load().expect("failed to load preferences");
         let audio_prefs = &prefs.audio;
 
-        let audio = self.scene_res.get_mut::<AudioManager>();
+        let audio = self.resources.get_mut::<AudioManager>();
         audio.set_music_mute(audio_prefs.music_mute);
         audio.set_sound_mute(audio_prefs.sound_mute);
         audio.set_music_volume(audio_prefs.music_volume);
         audio.set_sound_volume(audio_prefs.sound_volume);
     }
+
+    fn init_profile(&mut self) {
+        let user_svc = self.resources.get::<UserDataService>();
+
+        let profile_svc = &user_svc.profiles;
+
+        match profile_svc.load() {
+            Ok(profile) => {
+                let data = self.resources.get::<GameDataAssets>();
+                if dishaster_validation::validate_player_profile(&profile, &data.models).is_err() {
+                    log::warn!("Player profile validation failed, resetting to default profile");
+                    if let Err(e) = profile_svc.create() {
+                        log::error!("Failed to recreate profiles: {e}");
+                    }
+                }
+            }
+            Err(e) => {
+                log::warn!("Failed to load profile: {e}. Recreating default profile");
+                if let Err(e) = profile_svc.create() {
+                    log::error!("Failed to recreate profiles: {e}");
+                }
+            }
+        }
+    }
 }
 
-fn init_game() -> Result<Arc<GameServices>> {
+fn init_game() -> Result<GameServices> {
     log::info!("Init game start");
 
     let assets_path_config =
         load_toml::<AssetPathConfig>(Path::new("assets.toml")).context("loading assets.toml")?;
     println!("Loaded assets config: {assets_path_config:#?}");
-    let catalog = Arc::new(AssetCatalog::new(
-        Arc::new(assets_path_config),
-        AssetResolver,
-    ));
+    let catalog = AssetCatalog::new(Arc::new(assets_path_config), AssetResolver);
 
-    let data = Arc::new(
-        DataLoader::new_with_fallback("data", "../assets/data")
-            .context("failed to create data loader")?
-            .load_all_data()
-            .context("failed to load game data")?,
-    );
+    let data = DataLoader::new_with_fallback("data", "../assets/data")
+        .context("failed to create data loader")?
+        .load_all_data()
+        .context("failed to load game data")?;
 
-    let user_service = Arc::new(UserDataService::new(Arc::new(GodotUserStorage)));
+    let user_service = UserDataService::new(Arc::new(GodotUserStorage));
 
     dishrupt_l10n_godot::init();
     log::info!("Localization initialized");
 
-    Ok(Arc::new(GameServices {
+    Ok(GameServices {
         catalog,
         data,
         user_service,
-    }))
+    })
 }
 
-pub struct GameServices {
-    pub catalog: Arc<AssetCatalog>,
-    pub data: Arc<GameDataAssets>,
-    pub user_service: Arc<UserDataService>,
-}
-
-static GAME_SERVICES: OnceLock<Arc<GameServices>> = OnceLock::new();
-
-/// Before we can inject services into scenes, we need a way to access them globally.
-pub(crate) fn game_services() -> &'static Arc<GameServices> {
-    GAME_SERVICES.get().expect("game data not initialized")
+struct GameServices {
+    catalog: AssetCatalog,
+    data: GameDataAssets,
+    user_service: UserDataService,
 }

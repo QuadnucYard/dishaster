@@ -1,6 +1,6 @@
 //! Factory for creating and pooling display nodes.
 
-use std::{collections::VecDeque, sync::Arc};
+use std::collections::VecDeque;
 
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_core::asset::{PrefabRef, SpriteRef};
@@ -88,7 +88,7 @@ impl Drop for FactoryItem {
 
 /// Factory for creating and pooling display nodes.
 pub struct DisplayFactory {
-    catalog: Arc<AssetCatalog>,
+    catalog: AssetCatalog,
     res_registry: FxHashMap<PrefabRef, PrefabIndex>,
     items: Vec<FactoryItem>,
     active: Vec<ActiveNode>,
@@ -101,7 +101,7 @@ impl DisplayFactory {
     const DECAY_AT_AGE: u32 = 600;
 
     /// Create a new display factory.
-    pub fn new(catalog: Arc<AssetCatalog>) -> Self {
+    pub fn new(catalog: AssetCatalog) -> Self {
         Self {
             catalog,
             res_registry: Default::default(),

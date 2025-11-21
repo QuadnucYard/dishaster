@@ -79,7 +79,7 @@ pub struct Game {
     suspended_sim_speed: Option<f64>,
 
     profile_svc: Arc<ProfileService>,
-    asset_catalog: Arc<AssetCatalog>,
+    asset_catalog: AssetCatalog,
 
     /// Queue of UI commands to be processed by the scene layer.
     ui_commands: Vec<UiCommand>,
@@ -99,7 +99,7 @@ impl Game {
     pub fn new(
         gd: Gd<Node>,
         db: Arc<GameModelRegistry>,
-        asset_catalog: Arc<AssetCatalog>,
+        asset_catalog: AssetCatalog,
         profile_svc: Arc<ProfileService>,
         level: LevelSetupState,
         sim_creator: impl FnOnce(LevelSetupState) -> Box<dyn ISimulation<CoreSimulationFeat>>,

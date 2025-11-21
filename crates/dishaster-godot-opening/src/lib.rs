@@ -2,8 +2,6 @@
 
 mod present;
 
-use std::sync::Arc;
-
 use dishaster_opening::{
     OpeningSimulationFeat, Simulation as OpeningSimulation,
     models::OpeningConfig,
@@ -37,7 +35,7 @@ struct Presenters {
 
 impl Opening {
     /// Create a new opening presenter
-    pub fn new(root: Gd<Node>, config: OpeningConfig, catalog: Arc<AssetCatalog>) -> Self {
+    pub fn new(root: Gd<Node>, config: OpeningConfig, catalog: AssetCatalog) -> Self {
         // Initialize simulation
         let seed = godot::global::randi() as u64;
         let sim = Box::new(OpeningSimulation::new(config, seed));
@@ -53,7 +51,7 @@ impl Opening {
         }
     }
 
-    fn setup_stage(root: &Gd<Node>, root_entity: EntityId, catalog: Arc<AssetCatalog>) -> Stage {
+    fn setup_stage(root: &Gd<Node>, root_entity: EntityId, catalog: AssetCatalog) -> Stage {
         // Opening world is 20x12 meters. With viewport 1920x1080,
         // we want the 20m width to fill most of the screen. 1920/20 = 96 pixels per meter.
         let display_ctx = DisplayContext2D {

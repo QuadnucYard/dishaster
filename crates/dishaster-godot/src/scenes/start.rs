@@ -8,18 +8,9 @@ use dishaster_godot_opening::Opening;
 use dishaster_godot_ui::{CreditsGui, EndingGalleryGui, EndingGalleryView, StartMenuGui};
 use dishaster_ui_protocol::AppRequest;
 use dishrupt_core::asset::{AudioRef, PrefabRef};
-use dishrupt_godot_audio::AudioManager;
-use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_scene::{Scene, SceneContext, SceneId};
-use dishrupt_godot_ui::{GuiCommands, GuiRegistry};
-use dishrupt_godot_utils::BindGodot;
-use godot::{
-    classes::Node,
-    global::{godot_error, godot_print},
-    obj::Gd,
-};
 
-use crate::{effect::pend_effect, game_main::game_services, scenes::proc::EnterLevelProcedure};
+use crate::{effect::GlobalEffects, prelude::*, scenes::proc::EnterLevelProcedure};
 
 static MAIN_THEME_MUSIC: LazyLock<AudioRef> = LazyLock::new(|| AudioRef::new("main_theme.ogg"));
 
@@ -50,15 +41,13 @@ impl Scene for StartScene {
     }
 
     fn enter(&mut self, ctx: &mut SceneContext) {
-        let gui = ctx.res.get_mut::<GuiRegistry>();
-
-        let services = game_services();
+        let (gui, user_service) = ctx.res.get_many_mut::<(GuiRegistry, UserDataService)>();
 
         gui.show::<StartMenuGui>();
 
         // Update toggle buttons from saved settings
         {
-            let svc = &services.user_service.prefs;
+            let svc = &user_service.prefs;
             let audio_prefs = &svc.load().expect("failed to load prefs").audio;
             gui.get_mut::<StartMenuGui>()
                 .update_from_preferences(audio_prefs.music_mute, audio_prefs.sound_mute);
@@ -66,8 +55,7 @@ impl Scene for StartScene {
 
         // Update ending gallery buttons based on unlocked endings
         {
-            let profile = services
-                .user_service
+            let profile = user_service
                 .profiles
                 .load()
                 .expect("failed to load profile");
@@ -76,8 +64,10 @@ impl Scene for StartScene {
         }
 
         if self.opening.is_none() {
-            let catalog = services.catalog.clone();
-            let config = services.data.opening_config.clone();
+            let (data, catalog) = ctx.res.get_many::<(GameDataAssets, AssetCatalog)>();
+
+            let catalog = catalog.clone();
+            let config = data.opening_config.clone();
             let opening = Opening::new(self.gd.clone(), config, catalog);
             self.opening = Some(opening);
         }
@@ -113,18 +103,26 @@ impl Scene for StartScene {
         }
     }
 
-    fn input(&mut self, _ctx: &mut SceneContext, event: GodotInputEvent) {
+    fn input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
         if let GodotInputEvent::Button(e) = event
             && e.pressed
         {
-            pend_effect(PrefabRef::new("heart_break"), None);
+            let effects = ctx.res.get_mut::<GlobalEffects>();
+            effects.pend(PrefabRef::new("heart_break"), None);
         }
     }
 }
 
 impl StartScene {
     fn handle_app_request(&mut self, ctx: &mut SceneContext, req: AppRequest) {
-        let (gui, audio) = ctx.res.get_many_mut::<(GuiRegistry, AudioManager)>();
+        let (gui, audio, effects, catalog, data, user_service) = ctx.res.get_many_mut::<(
+            GuiRegistry,
+            AudioManager,
+            GlobalEffects,
+            AssetCatalog,
+            GameDataAssets,
+            UserDataService,
+        )>();
 
         match req {
             AppRequest::Quit => {
@@ -135,7 +133,7 @@ impl StartScene {
                 ctx.schedule(EnterLevelProcedure);
             }
             AppRequest::ShowCredits => {
-                let credits_data = &game_services().data.credits;
+                let credits_data = &data.credits;
 
                 let credits_view = CreditsView {
                     sections: credits_data
@@ -155,14 +153,14 @@ impl StartScene {
             AppRequest::ViewEnding(ending_id) => {
                 godot_print!("Viewing ending: {:?}", ending_id);
 
-                if let Some(ending_model) = game_services().data.endings.get(&ending_id) {
+                if let Some(ending_model) = data.endings.get(&ending_id) {
                     let ending_view = EndingGalleryView {
                         id: ending_id.clone(),
                         illustration: ending_model.illustration.clone(),
                     };
 
                     gui.get_mut::<EndingGalleryGui>()
-                        .show_ending(ending_view, &game_services().catalog);
+                        .show_ending(ending_view, catalog);
                 } else {
                     godot_error!("Requested unknown ending ID: {}", ending_id);
                 }
@@ -178,7 +176,7 @@ impl StartScene {
                 // Apply immediately
                 audio.set_music_mute(mute);
 
-                let svc = &game_services().user_service.prefs;
+                let svc = &user_service.prefs;
                 let res = svc.update(|prefs| {
                     prefs.audio.music_mute = mute;
                     Ok(())
@@ -191,7 +189,7 @@ impl StartScene {
                 // Apply immediately
                 audio.set_sound_mute(mute);
 
-                let svc = &game_services().user_service.prefs;
+                let svc = &user_service.prefs;
                 let res = svc.update(|prefs| {
                     prefs.audio.sound_mute = mute;
                     Ok(())
@@ -202,8 +200,10 @@ impl StartScene {
             }
             AppRequest::RollSeed => {
                 godot_print!("Rolling new seed for player profile");
+
+                let svc = &user_service.profiles;
+
                 let new_seed = godot::global::randi() as u64;
-                let svc = &game_services().user_service.profiles;
                 if let Err(e) = svc.update(|profile| {
                     if let Some(level_progress) = &mut profile.level_progress {
                         level_progress.rng_seed = Seed::new(new_seed);
@@ -217,7 +217,9 @@ impl StartScene {
             }
             AppRequest::ClearLevel => {
                 godot_print!("Deleting player profile");
-                let svc = &game_services().user_service.profiles;
+
+                let svc = &user_service.profiles;
+
                 if let Err(e) = svc.clear_level_progress() {
                     godot_error!("Failed to delete profile: {}", e);
                 } else {
@@ -226,7 +228,9 @@ impl StartScene {
             }
             AppRequest::DeleteProfile => {
                 godot_print!("Deleting player profile");
-                let svc = &game_services().user_service.profiles;
+
+                let svc = &user_service.profiles;
+
                 if let Err(e) = svc.delete() {
                     godot_error!("Failed to delete profile: {}", e);
                 } else {
@@ -239,7 +243,7 @@ impl StartScene {
             AppRequest::ExitLevel => panic!("should not happen in start menu"),
 
             AppRequest::SpawnEffectAtMouse(prefab) => {
-                pend_effect(prefab, None);
+                effects.pend(prefab, None);
             }
         }
     }

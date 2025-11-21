@@ -20,16 +20,16 @@ use serde::Serialize;
 
 /// Load the actual game corpus from data files
 fn load_corpus() -> &'static TrialCorpus {
-    use std::sync::{Arc, OnceLock};
+    use std::sync::OnceLock;
 
     use dishaster_data::GameDataAssets;
 
-    static DATA: OnceLock<Arc<GameDataAssets>> = OnceLock::new();
+    static DATA: OnceLock<GameDataAssets> = OnceLock::new();
 
     let data = DATA.get_or_init(|| {
         let mut loader = dishaster_data::DataLoader::new("../../assets/data")
             .expect("Failed to create data loader");
-        Arc::new(loader.load_all_data().expect("Failed to load game data"))
+        loader.load_all_data().expect("Failed to load game data")
     });
 
     &data.models.trial

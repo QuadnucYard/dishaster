@@ -1,22 +1,13 @@
-use std::{any::Any, sync::Arc};
+use std::any::Any;
 
 use dishaster_core::{interface::SimCommand, models::LevelSetupState, sim::Simulation};
 use dishaster_godot_game::Game;
 use dishaster_godot_ui::*;
 use dishaster_ui_protocol::{AppRequest, GameRequest, PhaseMusic, UiCommand};
 use dishrupt_core::asset::AudioRef;
-use dishrupt_godot_audio::AudioManager;
-use dishrupt_godot_input::event::GodotInputEvent;
 use dishrupt_godot_scene::*;
-use dishrupt_godot_ui::{GuiCommands, GuiRegistry, UITree};
-use dishrupt_godot_utils::BindGodot;
-use godot::{classes::Node, prelude::*};
 
-use crate::{
-    effect::pend_effect,
-    game_main::{GameServices, game_services},
-    scenes::proc::*,
-};
+use crate::{effect::GlobalEffects, prelude::*, scenes::proc::*};
 
 /// The in-game scene. Recreate the inner `Game` instance on each run.
 pub struct GameScene {
@@ -113,15 +104,14 @@ impl Scene for GameScene {
 }
 
 impl GameScene {
-    pub fn start_game(
-        &mut self,
-        ctx: &mut SceneContext,
-        level: LevelSetupState,
-        services: Arc<GameServices>,
-    ) {
-        let db = services.data.models.clone();
-        let catalog = services.catalog.clone();
-        let profile_svc = services.user_service.profiles.clone();
+    pub fn start_game(&mut self, ctx: &mut SceneContext, level: LevelSetupState) {
+        let (catalog, data, user_service) = ctx
+            .res
+            .get_many::<(AssetCatalog, GameDataAssets, UserDataService)>();
+
+        let db = data.models.clone();
+        let catalog = catalog.clone();
+        let profile_svc = user_service.profiles.clone();
         let mut game = Game::new(
             self.gd(),
             db.clone(),
@@ -159,14 +149,15 @@ impl GameScene {
             AppRequest::ToggleMusic(_mute) => {}
             AppRequest::ToggleSound(_mute) => {}
             AppRequest::SpawnEffectAtMouse(prefab) => {
-                pend_effect(prefab, None);
+                let effects = ctx.res.get_mut::<GlobalEffects>();
+                effects.pend(prefab, None);
             }
         }
     }
 
     /// Handle a in-game ui request
     fn handle_game_request(ctx: &mut SceneContext, req: GameRequest, game: &mut Game) {
-        let gui = ctx.res.get_mut::<GuiRegistry>();
+        let (gui,) = ctx.res.get_many_mut::<(GuiRegistry,)>();
 
         match req {
             GameRequest::StartRun => {
@@ -251,9 +242,11 @@ impl GameScene {
             }
 
             GameRequest::ClearLevel => {
+                let user_service = ctx.res.get::<UserDataService>();
+
                 // Clear level progress only when exiting after an ending
                 godot_print!("Clearing current level progress");
-                let svc = &game_services().user_service.profiles;
+                let svc = &user_service.profiles;
                 if let Err(e) = svc.clear_level_progress() {
                     godot_error!("Failed to clear level progress: {e}");
                 } else {
@@ -265,7 +258,9 @@ impl GameScene {
 
     /// Handle UI commands emitted by game logic.
     fn handle_ui_command(ctx: &mut SceneContext, cmd: UiCommand, game: &mut Game) {
-        let (gui, audio) = ctx.res.get_many_mut::<(GuiRegistry, AudioManager)>();
+        let (gui, audio, catalog, data) =
+            ctx.res
+                .get_many_mut::<(GuiRegistry, AudioManager, AssetCatalog, GameDataAssets)>();
 
         match cmd {
             UiCommand::ToggleDev(enabled) => {
@@ -353,12 +348,10 @@ impl GameScene {
 
             UiCommand::ShowDecisionSelection(view) => {
                 // Show decision GUI after settlement confirmation (or after good ending)
-                let catalog = &game_services().catalog;
                 gui.get_mut::<ManageDecisionGui>().set_view(&view, catalog);
                 gui.show::<ManageDecisionGui>();
             }
             UiCommand::ShowIncidentNotification(view) => {
-                let catalog = &game_services().catalog;
                 gui.get_mut::<ManageIncidentGui>().set_view(&view, catalog);
                 gui.get_mut::<ManageIncidentGui>().show();
             }
@@ -372,9 +365,9 @@ impl GameScene {
             }
 
             UiCommand::ShowEnding(ending) => {
-                if let Some(ending_model) = game_services().data.endings.get(&ending.id) {
+                if let Some(ending_model) = data.endings.get(&ending.id) {
                     gui.get_mut::<EndingGui>()
-                        .set_ending_picture(&ending_model.illustration, &game_services().catalog);
+                        .set_ending_picture(&ending_model.illustration, catalog);
                 } else {
                     godot_error!("Requested unknown ending ID: {}", ending.id);
                 }

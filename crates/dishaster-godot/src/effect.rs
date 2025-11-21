@@ -1,43 +1,43 @@
-use std::sync::{Arc, LazyLock, Mutex};
-
 use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
 use dishrupt_core::asset::PrefabRef;
 use godot::{classes::CanvasLayer, prelude::*};
 
-type EffectQueue = Vec<(PrefabRef, Option<Vector2>)>;
+pub struct GlobalEffects {
+    pending: Vec<(PrefabRef, Option<Vector2>)>,
+}
 
-// We have to use a global queue because we cannot access EffectOverlay from arbitrary scenes.
-static PENDING_EFFECTS: LazyLock<Mutex<EffectQueue>> = LazyLock::new(Default::default);
+impl GlobalEffects {
+    pub fn new() -> Self {
+        Self {
+            pending: Vec::new(),
+        }
+    }
 
-pub fn pend_effect(prefab: PrefabRef, position: Option<Vector2>) {
-    if let Ok(mut guard) = PENDING_EFFECTS.lock() {
-        guard.push((prefab, position));
+    pub fn pend(&mut self, prefab: PrefabRef, position: Option<Vector2>) {
+        self.pending.push((prefab, position));
+    }
+
+    pub fn process(&mut self, overlay: &mut EffectOverlay) {
+        for (prefab, position) in self.pending.drain(..) {
+            if let Some(pos) = position {
+                overlay.spawn(&prefab, pos);
+            } else {
+                overlay.spawn_at_mouse(&prefab);
+            }
+        }
     }
 }
 
 pub struct EffectOverlay {
     root: Gd<CanvasLayer>,
 
-    catalog: Arc<AssetCatalog>,
+    catalog: AssetCatalog,
 }
 
 impl EffectOverlay {
-    pub fn new(mut root: Gd<CanvasLayer>, catalog: Arc<AssetCatalog>) -> Self {
+    pub fn new(mut root: Gd<CanvasLayer>, catalog: AssetCatalog) -> Self {
         root.set_layer(10);
         Self { root, catalog }
-    }
-
-    pub fn process(&mut self) {
-        let Ok(mut guard) = PENDING_EFFECTS.lock() else {
-            return;
-        };
-        for (prefab, position) in guard.drain(..) {
-            if let Some(pos) = position {
-                self.spawn(&prefab, pos);
-            } else {
-                self.spawn_at_mouse(&prefab);
-            }
-        }
     }
 
     pub fn spawn(&mut self, prefab: &PrefabRef, position: Vector2) {

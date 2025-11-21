@@ -3,25 +3,19 @@ pub mod proc;
 mod game;
 mod start;
 
-use std::sync::Arc;
-
-use dishrupt_asset::{AssetCatalog, AssetKind, ResourceLocator};
+use dishrupt_asset::{AssetKind, ResourceLocator};
 use dishrupt_godot_scene::*;
-use dishrupt_godot_utils::BindGodot;
-pub use game::GameScene;
-use godot::{
-    classes::{Node, PackedScene},
-    global::godot_error,
-    tools::load,
-};
-pub use start::StartScene;
+use godot::{classes::PackedScene, global::godot_error, tools::load};
+
+pub use self::{game::GameScene, start::StartScene};
+use crate::prelude::*;
 
 pub struct DefaultSceneLoader {
-    catalog: Arc<AssetCatalog>,
+    catalog: AssetCatalog,
 }
 
 impl DefaultSceneLoader {
-    pub fn new(catalog: Arc<AssetCatalog>) -> Self {
+    pub fn new(catalog: AssetCatalog) -> Self {
         Self { catalog }
     }
 }
