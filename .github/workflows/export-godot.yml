@@ -1,0 +1,100 @@
+name: Godot Export
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  PROJECT_PATH: godot
+  EXPORT_PATH: ./export
+  EXPORT_NAME: dishaster
+  GODOT_VERSION: "4.5.1"
+
+permissions:
+  contents: read
+
+jobs:
+  build-binaries:
+    uses: ./.github/workflows/build-binaries.yml
+
+  export:
+    needs: build-binaries
+    name: Export Game
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ${{ env.EXPORT_NAME }}-gdext-*
+          path: ./target/release/
+      - name: Display structure of downloaded files
+        run: ls -R ./target/release/
+      - name: Flatten artifacts into target/release
+        run: |
+          # Move every file from artifact subfolders up into target/release root.
+          # This avoids leaving an artifact-name folder inside target/release.
+          shopt -s dotglob nullglob
+          for d in ./target/release/*; do
+            if [ -d "$d" ]; then
+              mv "$d"/* ./target/release/ 2>/dev/null || true
+              rm -rf "$d" 2>/dev/null || true
+            fi
+          done
+          # Show what we ended up with for easy debugging.
+          ls -R ./target/release/
+
+      - name: Install Wine
+        id: wine_install
+        run: |
+          sudo apt install wine64
+          echo "WINE_PATH=$(which wine64)" >> $GITHUB_OUTPUT
+
+      - name: Export Game
+        uses: firebelley/godot-export@v6.0.0
+        with:
+          # Defining all the required inputs
+          godot_executable_download_url: https://github.com/godotengine/godot-builds/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot-builds/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_export_templates.tpz
+          relative_project_path: ${{ env.PROJECT_PATH }}
+          relative_export_path: ${{ env.EXPORT_PATH }}
+          archive_output: false
+          wine_path: ${{ steps.wine_install.outputs.WINE_PATH }}
+
+      # Now the export directory is like:
+      # - export/
+      #   - Windows Desktop/
+      #   - Linux/
+
+      - name: Copy game data and create archives
+        run: |
+          set -euo pipefail
+          # For each platform folder produced by the exporter, copy the game data
+          # and create an archive named ${EXPORT_NAME}-<platform-slug>.7z in the export root.
+          for d in "$EXPORT_PATH"/*; do
+            if [ -d "$d" ]; then
+              name="$(basename "$d")"
+              # Normalize folder name to a slug for archive file names:
+              # lower-case and replace spaces with hyphens (e.g. "Windows Desktop" -> "windows-desktop").
+              slug="$(echo "$name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g')"
+              cp -r assets/data "$d" || true
+              cp godot/assets.toml "$d" || true
+              cp -r godot/locales "$d" || true
+              cp LICENSE "$d" || true
+              cp README.md "$d" || true
+              # Create per-platform archive in the export root.
+              (cd "$d" && 7z a "../${{ env.EXPORT_NAME }}-${slug}.7z" * -r)
+            fi
+          done
+          ls -la "$EXPORT_PATH"
+
+      # Upload all per-platform archives as a single artifact containing multiple files.
+      - name: Upload Exported Artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.EXPORT_NAME }}
+          path: ${{ env.EXPORT_PATH }}/*.7z
+          retention-days: 3

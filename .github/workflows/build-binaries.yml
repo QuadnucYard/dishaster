@@ -1,0 +1,55 @@
+name: Build binaries
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  EXPORT_NAME: dishaster
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build binaries for ${{ matrix.build }}
+    strategy:
+      matrix:
+        include:
+          - build: windows
+            os: windows-latest
+          - build: linux
+            os: ubuntu-latest
+          # - build: macos
+          #   os: macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: rui314/setup-mold@v1
+      - name: Use Rust Toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2025-11-15
+      - name: Run rust-cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run Cargo Build
+        run: cargo build --release
+
+      - name: Upload Artifact for Windows
+        if: matrix.build == 'windows'
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.EXPORT_NAME }}-gdext-windows
+          path: target/release/dishaster.dll
+          retention-days: 3
+      - name: Upload Artifact for Linux
+        if: matrix.build == 'linux'
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.EXPORT_NAME }}-gdext-linux
+          path: target/release/libdishaster.so
+          retention-days: 3
