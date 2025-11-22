@@ -13,3 +13,8 @@ export.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# Copy of assets/data
+data
+
+locales/**/*.uid

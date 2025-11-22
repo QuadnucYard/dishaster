@@ -13,7 +13,8 @@ use anyhow::Context;
 use dishaster_models::{GameModelRegistry, TrialCorpus};
 use dishaster_opening_models::{CreditsData, EndingModel, OpeningConfig};
 use dishrupt_asset::{
-    AssetCatalog, AssetKind, ResolveError, ResourceLocator, backend::DataBackend,
+    AssetCatalog, AssetKind, ResolveError, ResourceLocator,
+    backend::{DataBackend, LoadError},
 };
 use dishrupt_core::{model_registry::*, prelude::EcoString};
 use rustc_hash::FxHashMap;
@@ -42,6 +43,9 @@ pub enum DataError {
     /// Resource path could not be resolved
     #[error("Failed to resolve resource: {0}")]
     Resolve(#[from] ResolveError),
+    /// Resource could not be loaded from backend
+    #[error("Failed to load resource: {0}")]
+    Load(#[from] LoadError),
     /// File system I/O operation failed
     #[error("Failed to read file: {0}")]
     Io(#[from] std::io::Error),
@@ -246,7 +250,7 @@ impl DataLoader {
     {
         use ron::extensions::Extensions;
 
-        let content = self.backend.read_bytes(loc).unwrap();
+        let content = self.backend.read_bytes(loc)?;
         let options = ron::Options::default().with_default_extension(
             Extensions::UNWRAP_NEWTYPES
                 | Extensions::IMPLICIT_SOME
@@ -319,5 +323,18 @@ where
         .with_context(|| format!("Reading TOML file {}", path.display()))?;
     let data = toml::from_str::<T>(&content)
         .with_context(|| format!("Parsing TOML file {}", path.display()))?;
+    Ok(data)
+}
+
+/// Load and parse a TOML file from a data backend into the specified data structure
+pub fn load_toml_with<T>(loc: &ResourceLocator, backend: &dyn DataBackend) -> anyhow::Result<T>
+where
+    T: serde::de::DeserializeOwned,
+{
+    let content = backend
+        .read_string(loc)
+        .with_context(|| format!("Reading TOML file {}", loc))?;
+    let data =
+        toml::from_str::<T>(&content).with_context(|| format!("Parsing TOML file {}", loc))?;
     Ok(data)
 }

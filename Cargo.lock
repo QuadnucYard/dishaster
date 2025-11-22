@@ -571,6 +571,7 @@ version = "0.1.0"
 dependencies = [
  "dishaster-godot",
  "godot",
+ "godot-binary-resource",
 ]
 
 [[package]]
@@ -767,6 +768,8 @@ name = "dishrupt-asset"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "godot",
+ "godot-binary-resource",
  "rustc-hash",
  "serde",
  "thiserror",
@@ -1273,6 +1276,13 @@ checksum = "1a9b5fac6f08345fe81f840353b433c3e8cd07a105cb23ea080251173c149625"
 dependencies = [
  "godot-core",
  "godot-macros",
+]
+
+[[package]]
+name = "godot-binary-resource"
+version = "0.1.0"
+dependencies = [
+ "godot",
 ]
 
 [[package]]

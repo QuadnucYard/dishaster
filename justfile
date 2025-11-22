@@ -8,8 +8,8 @@ dev:
 fmt:
     cargo fmt
 
-build:
-    cargo build
+build *ARGS:
+    cargo build {{ARGS}}
 
 test:
     cargo test --tests --workspace

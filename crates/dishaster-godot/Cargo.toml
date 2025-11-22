@@ -37,6 +37,7 @@ log.workspace = true
 [features]
 default = ["debug"]
 debug = []
+production = ["dishrupt-asset/godot"]
 trace = ["dishaster-core/trace"]
 
 [lints]

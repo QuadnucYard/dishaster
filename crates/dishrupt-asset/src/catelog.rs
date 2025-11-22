@@ -19,7 +19,7 @@ pub enum AssetKind {
 }
 
 /// Per-kind configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct AssetKindConfig {
     /// Relative prefix under `res_base` or a URI base (e.g. "assets/sounds" or "pkg://bundle/audio")
     pub prefix: String,
@@ -107,7 +107,7 @@ impl AssetResolver {
         id: &str,
     ) -> Result<ResourceLocator, ResolveError> {
         // 1) Already a URI or absolute -> return Uri or Fs
-        if id.starts_with('/') || id.starts_with("./") {
+        if id.starts_with('/') {
             return Ok(ResourceLocator::Fs(PathBuf::from(id)));
         } else if id.contains("://") {
             return Ok(ResourceLocator::Uri(id.to_string()));
@@ -127,7 +127,7 @@ impl AssetResolver {
         if !prefix.is_empty() && !prefix.ends_with('/') {
             uri.push('/');
         }
-        uri.push_str(id.strip_prefix('/').unwrap_or(id));
+        uri.push_str(id);
 
         // Add default extension only if the path doesn't already have any extension
         if let Some(suffix) = config.default_ext_for(kind) {
@@ -185,8 +185,6 @@ impl Default for AssetCatalog {
         Self::new(Default::default(), AssetResolver)
     }
 }
-
-// TODO: test relative paths (no / prefix)
 
 #[cfg(test)]
 mod tests {
@@ -402,6 +400,34 @@ mod tests {
         assert_eq!(
             result,
             ResourceLocator::Uri("res://audio/music_theme.ogg".to_string())
+        );
+    }
+
+    #[test]
+    fn test_data_directory() {
+        let config = AssetPathConfig {
+            kinds: hash_map! {
+                AssetKind::Data => AssetKindConfig {
+                    prefix: "res://data".to_string(),
+                    ..Default::default()
+                },
+            },
+            global_aliases: hash_map! {},
+        };
+        let catalog = create_catalog(config);
+
+        // Slash at end should be preserved
+        let result = catalog.resolve(AssetKind::Data, "levels/").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://data/levels/".to_string())
+        );
+
+        // Without slash
+        let result = catalog.resolve(AssetKind::Data, "levels").unwrap();
+        assert_eq!(
+            result,
+            ResourceLocator::Uri("res://data/levels".to_string())
         );
     }
 }

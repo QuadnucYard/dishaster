@@ -1,10 +1,12 @@
 def main [--platform: string = "windows", --release] {
     # Build rust
     if $release {
-        cargo build --release
+        cargo build --release --features production
     } else {
-        cargo build
+        cargo build --features production
     }
+
+    cp -u -r assets/data godot
 
     # Build godot
     let target_dir = if $release {
@@ -32,10 +34,8 @@ def main [--platform: string = "windows", --release] {
     godot --headless $export_flag $preset_name $"../($target_dir)/dishaster.exe"
     cd ..
 
-    # Copy resources
-    cp -r assets/data $target_dir
-    cp godot/assets.toml $target_dir
+    # Copy external files
     cp -r godot/locales $target_dir
-    cp LICENSE $target_dir
-    cp README.md $target_dir
+    cp -u LICENSE $target_dir
+    cp -u README.md $target_dir
 }

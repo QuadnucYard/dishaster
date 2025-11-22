@@ -36,33 +36,25 @@ impl FsBackend {
 
 impl DataBackend for FsBackend {
     fn exists(&self, locator: &ResourceLocator) -> Result<bool, LoadError> {
-        let ResourceLocator::Fs(path) = locator else {
-            return Err(LoadError::UnsupportedLocation(locator.clone()));
-        };
+        let path = fs_loc(locator)?;
         let path = self.root.join(path);
         Ok(path.exists())
     }
 
     fn is_file(&self, locator: &ResourceLocator) -> Result<bool, LoadError> {
-        let ResourceLocator::Fs(path) = locator else {
-            return Err(LoadError::UnsupportedLocation(locator.clone()));
-        };
+        let path = fs_loc(locator)?;
         let path = self.root.join(path);
         Ok(path.is_file())
     }
 
     fn is_dir(&self, locator: &ResourceLocator) -> Result<bool, LoadError> {
-        let ResourceLocator::Fs(path) = locator else {
-            return Err(LoadError::UnsupportedLocation(locator.clone()));
-        };
+        let path = fs_loc(locator)?;
         let path = self.root.join(path);
         Ok(path.is_dir())
     }
 
     fn list_dir(&self, locator: &ResourceLocator) -> Result<Vec<ResourceLocator>, LoadError> {
-        let ResourceLocator::Fs(path) = locator else {
-            return Err(LoadError::UnsupportedLocation(locator.clone()));
-        };
+        let path = fs_loc(locator)?;
         let path = self.root.join(path);
         let mut entries = Vec::new();
         for entry in std::fs::read_dir(&path)? {
@@ -73,9 +65,7 @@ impl DataBackend for FsBackend {
     }
 
     fn read_bytes(&self, locator: &ResourceLocator) -> Result<Vec<u8>, LoadError> {
-        let ResourceLocator::Fs(path) = locator else {
-            return Err(LoadError::UnsupportedLocation(locator.clone()));
-        };
+        let path = fs_loc(locator)?;
         let path = self.root.join(path);
         std::fs::read(&path).map_err(|e| {
             if e.kind() == std::io::ErrorKind::NotFound {
@@ -85,4 +75,11 @@ impl DataBackend for FsBackend {
             }
         })
     }
+}
+
+fn fs_loc(locator: &ResourceLocator) -> Result<&PathBuf, LoadError> {
+    let ResourceLocator::Fs(path) = locator else {
+        return Err(LoadError::UnsupportedLocation(locator.clone()));
+    };
+    Ok(path)
 }

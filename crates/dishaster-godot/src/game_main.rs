@@ -1,7 +1,7 @@
-use std::{cell::OnceCell, path::Path, sync::Arc};
+use std::{cell::OnceCell, sync::Arc};
 
 use anyhow::{Context, Result};
-use dishaster_data::{DataLoader, load_toml};
+use dishaster_data::DataLoader;
 use dishaster_godot_ui::register_guis;
 use dishrupt_asset::{AssetPathConfig, AssetResolver};
 use dishrupt_godot_input::listener::InputListener;
@@ -52,6 +52,14 @@ impl INode for GameMain {
             .init();
 
         log::info!("Main loop initialize");
+        godot_print!(
+            "Index: {}",
+            godot::classes::ResourceLoader::singleton().exists("res://assets.toml")
+        );
+        godot_print!(
+            "ftl: {}",
+            godot::classes::ResourceLoader::singleton().exists("res://locales/zh-CN/credits.ftl")
+        );
 
         match std::panic::catch_unwind(init_game) {
             Ok(Ok(services)) => {
@@ -289,13 +297,45 @@ fn init_game() -> Result<GameServices> {
     })
 }
 
+/// Load asset catalog and game data in non-production builds.
+#[cfg(not(feature = "production"))]
 fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
+    use std::path::Path;
+
+    use dishaster_data::load_toml;
     use dishrupt_asset::backend::FsBackend;
 
     let backend = FsBackend::new(Path::new("../assets/data"))?;
 
     let assets_path_config =
         load_toml::<AssetPathConfig>("assets.toml").context("loading assets.toml")?;
+    println!("Loaded assets config: {assets_path_config:#?}");
+    let catalog = AssetCatalog::new(Arc::new(assets_path_config), AssetResolver);
+
+    let data = DataLoader::new(catalog.clone(), backend)
+        .load_all_data()
+        .context("failed to load game data")?;
+
+    Ok((catalog, data))
+}
+
+#[cfg(feature = "production")]
+fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
+    use dishaster_data::load_toml_with;
+    use dishrupt_asset::{AssetKind, ResourceLocator, backend::GodotResourceBackend};
+
+    let backend = GodotResourceBackend;
+
+    let mut assets_path_config = load_toml_with::<AssetPathConfig>(
+        &ResourceLocator::Uri("res://assets.toml".into()),
+        &backend,
+    )
+    .context("loading assets.toml")?;
+    assets_path_config
+        .kinds
+        .entry(AssetKind::Data)
+        .or_insert_with(Default::default)
+        .prefix = "res://data/".into(); // Ensure data assets use correct prefix
     println!("Loaded assets config: {assets_path_config:#?}");
     let catalog = AssetCatalog::new(Arc::new(assets_path_config), AssetResolver);
 

@@ -1,10 +1,14 @@
 //! Backend abstraction and implementations for loading resources.
 
 mod fs;
+#[cfg(feature = "godot")]
+mod godot;
 
 use thiserror::Error;
 
 pub use self::fs::FsBackend;
+#[cfg(feature = "godot")]
+pub use self::godot::GodotResourceBackend;
 use crate::ResourceLocator;
 
 /// Load errors returned by [`DataBackend`] methods.

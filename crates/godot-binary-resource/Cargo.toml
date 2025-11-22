@@ -1,0 +1,12 @@
+[package]
+name = "godot-binary-resource"
+version.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[dependencies]
+godot = { workspace = true, features = ["experimental-threads"] }
+
+[lints]
+workspace = true

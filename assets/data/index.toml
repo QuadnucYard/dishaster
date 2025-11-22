@@ -1,4 +1,4 @@
-levels = "levels"
+levels = "levels/"
 canteens = "canteens.ron"
 dishes = "dishes.ron"
 window_services = "window_services.ron"

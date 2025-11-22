@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
 members = ["crates/*", "tests"]
-default-members = ["crates/dishaster-core", "crates/dishaster-godot-ext"]
+default-members = ["crates/dishaster-godot-ext"]
 
 [workspace.package]
 version = "0.1.0"
@@ -10,6 +10,8 @@ rust-version = "1.93"
 edition = "2024"
 
 [workspace.dependencies]
+godot-binary-resource = { path = "crates/godot-binary-resource" }
+
 dishrupt-core = { path = "crates/dishrupt-core" }
 dishrupt-ecs = { path = "crates/dishrupt-ecs" }
 dishrupt-rng = { path = "crates/dishrupt-rng" }
