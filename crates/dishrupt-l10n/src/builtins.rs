@@ -1,4 +1,4 @@
-use fluent::{FluentArgs, FluentValue, types::FluentNumber};
+use fluent_bundle::{FluentArgs, FluentValue, types::FluentNumber};
 
 pub fn number<'a>(positional: &[FluentValue<'a>], named: &FluentArgs) -> FluentValue<'a> {
     let Some(FluentValue::Number(num)) = positional.first() else {

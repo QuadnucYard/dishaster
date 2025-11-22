@@ -561,6 +561,7 @@ dependencies = [
  "dishrupt-l10n-godot",
  "dishrupt-persistence",
  "env_logger",
+ "fluent-godot-loader",
  "godot",
  "godot-binary-resource",
  "log",
@@ -871,7 +872,8 @@ dependencies = [
 name = "dishrupt-l10n"
 version = "0.1.0"
 dependencies = [
- "fluent",
+ "fluent-bundle",
+ "fluent-loader",
  "fluent-templates",
  "unic-langid",
 ]
@@ -1093,16 +1095,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d674e81391d1e1ab681a28d99df07927c6d4aa5b027d7da16ba32d1d21ecd99"
 
 [[package]]
-name = "fluent"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8137a6d5a2c50d6b0ebfcb9aaa91a28154e0a70605f112d30cb0cd4a78670477"
-dependencies = [
- "fluent-bundle",
- "unic-langid",
-]
-
-[[package]]
 name = "fluent-bundle"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1119,11 +1111,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluent-godot-loader"
+version = "0.1.0"
+dependencies = [
+ "fluent-bundle",
+ "fluent-langneg",
+ "fluent-loader",
+ "godot",
+ "unic-langid",
+]
+
+[[package]]
 name = "fluent-langneg"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7eebbe59450baee8282d71676f3bfed5689aeab00b27545e83e5f14b1195e8b0"
 dependencies = [
+ "unic-langid",
+]
+
+[[package]]
+name = "fluent-loader"
+version = "0.1.0"
+dependencies = [
+ "fluent-bundle",
+ "fluent-syntax",
+ "fluent-templates",
+ "thiserror",
  "unic-langid",
 ]
 

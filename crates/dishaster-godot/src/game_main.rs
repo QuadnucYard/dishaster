@@ -279,9 +279,6 @@ fn init_game() -> Result<GameServices> {
 
     let user_service = UserDataService::new(Arc::new(GodotUserStorage));
 
-    dishrupt_l10n_godot::init();
-    log::info!("Localization initialized");
-
     Ok(GameServices {
         catalog,
         data,
@@ -307,6 +304,9 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
     let data = DataLoader::new(catalog.clone(), backend)
         .load_all_data()
         .context("failed to load game data")?;
+
+    dishrupt_l10n_godot::get_locales();
+    log::info!("Localization initialized");
 
     Ok((catalog, data))
 }
@@ -338,6 +338,23 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
     let data = DataLoader::new(catalog.clone(), backend)
         .load_all_data()
         .context("failed to load game data")?;
+
+    ResourceLoader::singleton()
+        .add_resource_format_loader(&fluent_godot_loader::FluentFormatLoader::new_gd());
+
+    dishrupt_l10n_godot::set_locales(
+        fluent_godot_loader::GodotResLoader::builder(
+            "res://locales",
+            dishrupt_l10n_godot::get_lang(),
+        )
+        .customize(|bundle| {
+            bundle.set_use_isolating(false);
+            dishrupt_l10n_godot::add_builtins(bundle);
+        })
+        .build()
+        .expect("build Fluent loader with godot locales"),
+    );
+    log::info!("Localization initialized");
 
     Ok((catalog, data))
 }

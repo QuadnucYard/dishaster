@@ -9,6 +9,7 @@ edition.workspace = true
 test = false
 
 [dependencies]
+fluent-godot-loader = { workspace = true, optional = true }
 godot-binary-resource = { workspace = true, optional = true }
 dishrupt-core.workspace = true
 dishrupt-asset.workspace = true
@@ -38,7 +39,7 @@ log.workspace = true
 [features]
 default = ["debug"]
 debug = []
-production = ["dishrupt-asset/godot", "godot-binary-resource"]
+production = ["dishrupt-asset/godot", "fluent-godot-loader", "godot-binary-resource"]
 trace = ["dishaster-core/trace"]
 
 [lints]

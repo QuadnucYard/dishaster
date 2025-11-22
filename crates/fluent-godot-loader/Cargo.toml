@@ -1,14 +1,19 @@
 [package]
-name = "dishrupt-l10n"
+name = "fluent-godot-loader"
 version.workspace = true
-rust-version.workspace = true
 authors.workspace = true
+rust-version.workspace = true
 edition.workspace = true
+
+[lib]
+test = false
 
 [dependencies]
 fluent-loader.workspace = true
+
 fluent-bundle.workspace = true
-fluent-templates.workspace = true
+fluent-langneg.workspace = true
+godot.workspace = true
 unic-langid.workspace = true
 
 [lints]

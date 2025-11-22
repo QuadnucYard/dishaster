@@ -11,6 +11,8 @@ edition = "2024"
 
 [workspace.dependencies]
 godot-binary-resource = { path = "crates/godot-binary-resource" }
+fluent-loader = { path = "crates/fluent-loader" }
+fluent-godot-loader = { path = "crates/fluent-godot-loader" }
 
 dishrupt-core = { path = "crates/dishrupt-core" }
 dishrupt-ecs = { path = "crates/dishrupt-ecs" }
@@ -67,7 +69,9 @@ edt = "0.2"
 enum-map = { version = "2.7", features = ["serde"] }
 env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }
 fibre = "0.5"
-fluent = "0.17"
+fluent-bundle = "0.16"
+fluent-langneg = "0.13"
+fluent-syntax = "0.12"
 fluent-templates = { version = "0.13.2", default-features = false, features = ["walkdir"] }
 grid = "1.0"
 insta = { version = "1", features = ["yaml"] }
