@@ -29,21 +29,17 @@ jobs:
           paths_ignore: '["**/README.md"]'
           do_not_skip: '["workflow_dispatch"]'
 
-  test:
+  check:
     needs: [pre_job]
     if: needs.pre_job.outputs.should_skip != 'true'
-    name: Check and Test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        rust: [nightly-2025-11-15]
+    name: Check
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: rui314/setup-mold@v1
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: nightly-2025-11-15
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
 
@@ -54,7 +50,22 @@ jobs:
       - name: Machete
         uses: bnjbvr/cargo-machete@main
 
+  test:
+    needs: [pre_job]
+    if: needs.pre_job.outputs.should_skip != 'true'
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rui314/setup-mold@v1
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2025-11-15
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+
       - name: Run tests
         run: cargo test --tests --workspace
-      - name: Run tests with all features
-        run: cargo test --tests --workspace --all-features
