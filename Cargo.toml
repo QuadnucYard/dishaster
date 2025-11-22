@@ -102,7 +102,7 @@ too_many_arguments = "allow"
 type_complexity = "allow"
 
 [patch.crates-io]
-# godot = { git = "https://github.com/godot-rust/gdext", rev = "9da0f54" }
+godot = { git = "https://github.com/godot-rust/gdext", rev = "e01d2ea" } # For `max_align_t` issue
 
 [profile.dev]
 opt-level = 2

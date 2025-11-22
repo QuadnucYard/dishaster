@@ -18,6 +18,13 @@ godot.workspace = true
 [features]
 default = []
 production = ["dishaster-godot/production"]
+web = [
+  "production",
+  "godot/api-custom",
+  "godot/experimental-wasm",
+  "godot/lazy-function-tables",
+  "godot/experimental-wasm-nothreads",
+]
 trace = ["dishaster-godot/trace"]
 
 [lints]
