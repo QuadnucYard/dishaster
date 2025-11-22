@@ -562,6 +562,7 @@ dependencies = [
  "dishrupt-persistence",
  "env_logger",
  "godot",
+ "godot-binary-resource",
  "log",
 ]
 
@@ -571,7 +572,6 @@ version = "0.1.0"
 dependencies = [
  "dishaster-godot",
  "godot",
- "godot-binary-resource",
 ]
 
 [[package]]

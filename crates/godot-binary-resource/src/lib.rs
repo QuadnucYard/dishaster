@@ -100,12 +100,6 @@ impl IResourceFormatLoader for BinaryAssetLoader {
         _cache_mode: i32,
     ) -> Variant {
         use std::io::Read;
-        println!("Loading binary asset at path: {}", path);
-        let path = if path.begins_with("res://") {
-            path
-        } else {
-            format!("res://{}", path).to_godot()
-        };
         let Ok(mut file) = GFile::open(&path, ModeFlags::READ) else {
             return godot::global::Error::ERR_CANT_OPEN.to_variant();
         };

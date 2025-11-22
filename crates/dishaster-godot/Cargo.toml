@@ -9,6 +9,7 @@ edition.workspace = true
 test = false
 
 [dependencies]
+godot-binary-resource = { workspace = true, optional = true }
 dishrupt-core.workspace = true
 dishrupt-asset.workspace = true
 dishrupt-persistence = { workspace = true, features = ["godot"] }
@@ -37,7 +38,7 @@ log.workspace = true
 [features]
 default = ["debug"]
 debug = []
-production = ["dishrupt-asset/godot"]
+production = ["dishrupt-asset/godot", "godot-binary-resource"]
 trace = ["dishaster-core/trace"]
 
 [lints]

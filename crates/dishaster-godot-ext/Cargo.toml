@@ -11,14 +11,13 @@ crate-type = ["cdylib"] # Compile this crate to a dynamic C library.
 test = false
 
 [dependencies]
-godot-binary-resource = { workspace = true, optional = true }
 dishaster-godot.workspace = true
 
 godot.workspace = true
 
 [features]
 default = []
-production = ["dishaster-godot/production", "godot-binary-resource"]
+production = ["dishaster-godot/production"]
 trace = ["dishaster-godot/trace"]
 
 [lints]

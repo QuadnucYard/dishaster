@@ -52,14 +52,6 @@ impl INode for GameMain {
             .init();
 
         log::info!("Main loop initialize");
-        godot_print!(
-            "Index: {}",
-            godot::classes::ResourceLoader::singleton().exists("res://assets.toml")
-        );
-        godot_print!(
-            "ftl: {}",
-            godot::classes::ResourceLoader::singleton().exists("res://locales/zh-CN/credits.ftl")
-        );
 
         match std::panic::catch_unwind(init_game) {
             Ok(Ok(services)) => {
@@ -323,6 +315,10 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
 fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
     use dishaster_data::load_toml_with;
     use dishrupt_asset::{AssetKind, ResourceLocator, backend::GodotResourceBackend};
+    use godot::classes::ResourceLoader;
+
+    ResourceLoader::singleton()
+        .add_resource_format_loader(&godot_binary_resource::BinaryAssetLoader::new_gd());
 
     let backend = GodotResourceBackend;
 
