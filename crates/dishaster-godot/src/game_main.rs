@@ -274,15 +274,8 @@ impl Inner {
 fn init_game() -> Result<GameServices> {
     log::info!("Init game start");
 
-    let assets_path_config =
-        load_toml::<AssetPathConfig>(Path::new("assets.toml")).context("loading assets.toml")?;
-    println!("Loaded assets config: {assets_path_config:#?}");
-    let catalog = AssetCatalog::new(Arc::new(assets_path_config), AssetResolver);
-
-    let data = DataLoader::new_with_fallback("data", "../assets/data")
-        .context("failed to create data loader")?
-        .load_all_data()
-        .context("failed to load game data")?;
+    // let data_backend = GodotResourceBackend;
+    let (catalog, data) = load_data().context("loading game data")?;
 
     let user_service = UserDataService::new(Arc::new(GodotUserStorage));
 
@@ -294,6 +287,23 @@ fn init_game() -> Result<GameServices> {
         data,
         user_service,
     })
+}
+
+fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
+    use dishrupt_asset::backend::FsBackend;
+
+    let backend = FsBackend::new(Path::new("../assets/data"))?;
+
+    let assets_path_config =
+        load_toml::<AssetPathConfig>("assets.toml").context("loading assets.toml")?;
+    println!("Loaded assets config: {assets_path_config:#?}");
+    let catalog = AssetCatalog::new(Arc::new(assets_path_config), AssetResolver);
+
+    let data = DataLoader::new(catalog.clone(), backend)
+        .load_all_data()
+        .context("failed to load game data")?;
+
+    Ok((catalog, data))
 }
 
 struct GameServices {

@@ -1,5 +1,6 @@
 //! Integration tests for Dishaster.
 
+mod harness;
 mod persist;
 
 use std::{collections::HashMap, sync::Arc};
@@ -13,7 +14,10 @@ use dishaster_core::{
 use dishaster_data::DataLoader;
 use dishaster_persistence::{PersistentStorage, UserDataService};
 
-use crate::persist::{level_for_current_day, save_sim_profile};
+use crate::{
+    harness::data_dir,
+    persist::{level_for_current_day, save_sim_profile},
+};
 
 /// In-memory persistent storage for testing purposes.
 pub struct MemoryStorage;
@@ -291,7 +295,7 @@ fn display_distribution(title: &str, values: &[f32], bin_width: f32) {
 fn single_complete_run() -> Result<()> {
     env_logger::Builder::new().init();
 
-    let mut loader = DataLoader::new("../assets/data")?;
+    let mut loader = DataLoader::from_fs(data_dir())?;
     let data = loader.load_all_data()?;
     let registry = data.models;
 
@@ -508,7 +512,7 @@ fn single_complete_run() -> Result<()> {
 
 #[test]
 fn continuous_run() -> Result<()> {
-    let mut loader = DataLoader::new("../assets/data")?;
+    let mut loader = DataLoader::from_fs(data_dir())?;
     let data = loader.load_all_data()?;
     let registry = data.models;
 

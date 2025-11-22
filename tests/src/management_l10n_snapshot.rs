@@ -42,7 +42,7 @@ fn init_localization() {
 fn load_data() -> &'static GameDataAssets {
     static DATA: OnceLock<GameDataAssets> = OnceLock::new();
     DATA.get_or_init(|| {
-        let mut loader = DataLoader::new(data_dir()).expect("Failed to create loader");
+        let mut loader = DataLoader::from_fs(data_dir()).expect("Failed to create loader");
         loader.load_all_data().expect("Failed to load game data")
     })
 }

@@ -6,9 +6,13 @@ rust-version.workspace = true
 edition.workspace = true
 
 [dependencies]
+anyhow.workspace = true
 rustc-hash.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+
+[features]
+default = []
 
 [lints]
 workspace = true

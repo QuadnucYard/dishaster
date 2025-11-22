@@ -5,62 +5,62 @@ source: tests/src/management_l10n_snapshot.rs
   seed: 1311768467294899695
   localized:
     title: 添加桌子
-    effects: • 桌子数量 +3
+    effects: • 桌子数量 +6
 - id: add_tables
   seed: 18364757930599072545
   localized:
     title: 添加桌子
-    effects: • 桌子数量 +5
+    effects: • 桌子数量 +9
 - id: add_tables
   seed: 12297829382473034410
   localized:
     title: 添加桌子
-    effects: • 桌子数量 +4
+    effects: • 桌子数量 +6
 - id: remove_tables
   seed: 1311768467294899695
-  localized:
-    title: 移除桌子
-    effects: • 桌子数量 -2
-- id: remove_tables
-  seed: 18364757930599072545
   localized:
     title: 移除桌子
     effects: • 桌子数量 -3
 - id: remove_tables
+  seed: 18364757930599072545
+  localized:
+    title: 移除桌子
+    effects: • 桌子数量 -5
+- id: remove_tables
   seed: 12297829382473034410
   localized:
     title: 移除桌子
-    effects: • 桌子数量 -2
+    effects: • 桌子数量 -3
 - id: disarrange_tables
   seed: 1311768467294899695
-  localized:
-    title: 调整桌子布局
-    effects: "• 随机改变 3 张桌子的位置\n• 优化空间利用率（？）"
-- id: disarrange_tables
-  seed: 18364757930599072545
   localized:
     title: 调整桌子布局
     effects: "• 随机改变 4 张桌子的位置\n• 优化空间利用率（？）"
 - id: disarrange_tables
+  seed: 18364757930599072545
+  localized:
+    title: 调整桌子布局
+    effects: "• 随机改变 7 张桌子的位置\n• 优化空间利用率（？）"
+- id: disarrange_tables
   seed: 12297829382473034410
   localized:
     title: 调整桌子布局
-    effects: "• 随机改变 3 张桌子的位置\n• 优化空间利用率（？）"
+    effects: "• 随机改变 5 张桌子的位置\n• 优化空间利用率（？）"
 - id: add_tray_dispenser
   seed: 1311768467294899695
   localized:
-    title: 添加托盘取餐点
-    effects: "• 托盘取餐点数量 +1\n• 减少食客寻找托盘的时间"
+    title: 添加托盘提供点
+    effects: "• 托盘提供点数量 +1\n• 减少食客寻找托盘的时间"
 - id: add_tray_dispenser
   seed: 18364757930599072545
   localized:
-    title: 添加托盘取餐点
-    effects: "• 托盘取餐点数量 +1\n• 减少食客寻找托盘的时间"
+    title: 添加托盘提供点
+    effects: "• 托盘提供点数量 +1\n• 减少食客寻找托盘的时间"
 - id: add_tray_dispenser
   seed: 12297829382473034410
   localized:
-    title: 添加托盘取餐点
-    effects: "• 托盘取餐点数量 +1\n• 减少食客寻找托盘的时间"
+    title: 添加托盘提供点
+    effects: "• 托盘提供点数量 +1\n• 减少食客寻找托盘的时间"
 - id: add_chopstick_dispenser
   seed: 1311768467294899695
   localized:
@@ -110,17 +110,17 @@ source: tests/src/management_l10n_snapshot.rs
   seed: 1311768467294899695
   localized:
     title: 更换窗口服务类型
-    effects: • 随机更换一个窗口的服务类型
+    effects: • 随机更换一个窗口的服务类型，希望你喜欢
 - id: change_window_service
   seed: 18364757930599072545
   localized:
     title: 更换窗口服务类型
-    effects: • 随机更换一个窗口的服务类型
+    effects: • 随机更换一个窗口的服务类型，希望你喜欢
 - id: change_window_service
   seed: 12297829382473034410
   localized:
     title: 更换窗口服务类型
-    effects: • 随机更换一个窗口的服务类型
+    effects: • 随机更换一个窗口的服务类型，希望你喜欢
 - id: play_music_relaxing
   seed: 1311768467294899695
   localized:
@@ -230,47 +230,47 @@ source: tests/src/management_l10n_snapshot.rs
   seed: 1311768467294899695
   localized:
     title: 提升菜品质量
-    effects: "• 所有菜品质量 +19%\n• 可与已有质量提升叠加（越来越好吃）"
+    effects: "• 所有菜品质量 +15%\n• 可与已有质量提升叠加（越来越好吃）"
 - id: improve_dish_quality
   seed: 18364757930599072545
   localized:
     title: 提升菜品质量
-    effects: "• 所有菜品质量 +27%\n• 可与已有质量提升叠加（越来越好吃）"
+    effects: "• 所有菜品质量 +26%\n• 可与已有质量提升叠加（越来越好吃）"
 - id: improve_dish_quality
   seed: 12297829382473034410
   localized:
     title: 提升菜品质量
-    effects: "• 所有菜品质量 +20%\n• 可与已有质量提升叠加（越来越好吃）"
+    effects: "• 所有菜品质量 +16%\n• 可与已有质量提升叠加（越来越好吃）"
 - id: reduce_serving_time
   seed: 1311768467294899695
   localized:
     title: 优化出餐流程
-    effects: "• 出餐时间 +21%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
+    effects: "• 出餐时间 +11%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
 - id: reduce_serving_time
   seed: 18364757930599072545
   localized:
     title: 优化出餐流程
-    effects: "• 出餐时间 +13%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
+    effects: "• 出餐时间 +4%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
 - id: reduce_serving_time
   seed: 12297829382473034410
   localized:
     title: 优化出餐流程
-    effects: "• 出餐时间 +20%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
+    effects: "• 出餐时间 +10%\n• 排队时间减少，翻台率提升\n• 可与已有优化叠加（效率越来越高）"
 - id: mislabel_price
   seed: 1311768467294899695
   localized:
     title: 价格标示错误
-    effects: "• 顾客满意度 -5%\n• 抱怨概率 +10%"
+    effects: 我都说了价格标示错误了你还要问我什么
 - id: mislabel_price
   seed: 18364757930599072545
   localized:
     title: 价格标示错误
-    effects: "• 顾客满意度 -5%\n• 抱怨概率 +10%"
+    effects: 我都说了价格标示错误了你还要问我什么
 - id: mislabel_price
   seed: 12297829382473034410
   localized:
     title: 价格标示错误
-    effects: "• 顾客满意度 -5%\n• 抱怨概率 +10%"
+    effects: 我都说了价格标示错误了你还要问我什么
 - id: increase_attraction
   seed: 1311768467294899695
   localized:

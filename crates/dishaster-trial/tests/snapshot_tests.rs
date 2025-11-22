@@ -7,6 +7,9 @@
 //! - Impacts calculated
 //! - Continuation decisions
 
+use std::sync::OnceLock;
+
+use dishaster_data::{DataLoader, GameDataAssets};
 use dishaster_models::{FeedbackTopic, TrialCorpus, TrialResponseKind};
 use dishaster_trial::{
     TrialSession, create_diner_statement, create_trial_intro, generate_trial_response_candidates,
@@ -20,15 +23,11 @@ use serde::Serialize;
 
 /// Load the actual game corpus from data files
 fn load_corpus() -> &'static TrialCorpus {
-    use std::sync::OnceLock;
-
-    use dishaster_data::GameDataAssets;
-
     static DATA: OnceLock<GameDataAssets> = OnceLock::new();
 
     let data = DATA.get_or_init(|| {
-        let mut loader = dishaster_data::DataLoader::new("../../assets/data")
-            .expect("Failed to create data loader");
+        let mut loader =
+            DataLoader::from_fs("../../assets/data").expect("Failed to create data loader");
         loader.load_all_data().expect("Failed to load game data")
     });
 

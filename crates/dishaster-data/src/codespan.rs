@@ -1,4 +1,4 @@
-use std::{ops::Range, path::Path};
+use std::ops::Range;
 
 use anyhow::Context;
 use codespan_reporting::{
@@ -9,13 +9,13 @@ use codespan_reporting::{
 };
 
 pub fn emit_ron_error(
-    path: &Path,
+    path: impl core::fmt::Display + Clone,
     content: &str,
     e: &ron::error::SpannedError,
 ) -> anyhow::Result<()> {
     let mut files = SimpleFiles::new();
 
-    let file_id = files.add(path.display().to_string(), &content);
+    let file_id = files.add(path, &content);
     let diagnostic = Diagnostic::error()
         .with_message("Failed to parse RON file")
         .with_labels(vec![

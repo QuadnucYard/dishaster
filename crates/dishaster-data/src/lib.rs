@@ -9,9 +9,12 @@ use std::{
     sync::Arc,
 };
 
-use anyhow::{Context, bail};
+use anyhow::Context;
 use dishaster_models::{GameModelRegistry, TrialCorpus};
 use dishaster_opening_models::{CreditsData, EndingModel, OpeningConfig};
+use dishrupt_asset::{
+    AssetCatalog, AssetKind, ResolveError, ResourceLocator, backend::DataBackend,
+};
 use dishrupt_core::{model_registry::*, prelude::EcoString};
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
@@ -36,18 +39,21 @@ pub struct GameDataAssets {
 /// Error types for data loading operations
 #[derive(Error, Debug)]
 pub enum DataError {
+    /// Resource path could not be resolved
+    #[error("Failed to resolve resource: {0}")]
+    Resolve(#[from] ResolveError),
     /// File system I/O operation failed
     #[error("Failed to read file: {0}")]
-    IoError(#[from] std::io::Error),
+    Io(#[from] std::io::Error),
     /// RON parsing or deserialization failed
     #[error("Failed to parse RON data: {0}")]
-    RonError(#[from] ron::error::SpannedError),
+    Ron(#[from] ron::error::SpannedError),
     /// TOML parsing or deserialization failed
     #[error("Failed to parse TOML data: {0}")]
-    TomlError(#[from] toml::de::Error),
+    Toml(#[from] toml::de::Error),
     /// Data validation or consistency check failed
     #[error("Data validation failed: {0}")]
-    ValidationError(String),
+    Validation(String),
     /// Other unspecified error
     #[error(transparent)]
     Other(#[from] anyhow::Error),
@@ -55,66 +61,34 @@ pub enum DataError {
 
 /// Data loader for game assets from RON files
 pub struct DataLoader {
-    assets_path: PathBuf,
+    catalog: AssetCatalog,
+    backend: Box<dyn DataBackend>,
 
     index: FxHashMap<String, String>,
 }
 
 impl DataLoader {
     /// Create a new data loader with the specified assets directory
-    pub fn new(assets_path: impl AsRef<Path>) -> anyhow::Result<Self> {
-        let assets_path = assets_path.as_ref().to_path_buf();
-        if !std::fs::exists(&assets_path).is_ok_and(|exists| exists) {
-            bail!(DataError::IoError(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!(
-                    "Assets path does not exist: {}. The current working directory is: {:?}",
-                    assets_path.display(),
-                    std::env::current_dir()
-                ),
-            )));
-        }
-        Ok(Self {
-            assets_path,
+    pub fn new(catalog: AssetCatalog, backend: impl DataBackend + 'static) -> Self {
+        Self {
+            catalog,
+            backend: Box::new(backend),
             index: Default::default(),
-        })
+        }
     }
 
-    /// Create a new data loader, falling back to an alternative path if the primary does not exist
-    pub fn new_with_fallback(
-        assets_path: impl AsRef<Path>,
-        fallback_path: impl AsRef<Path>,
-    ) -> anyhow::Result<Self> {
-        let assets_path = assets_path.as_ref().to_path_buf();
-        if !std::fs::exists(&assets_path).is_ok_and(|exists| exists) {
-            let fallback_path = fallback_path.as_ref().to_path_buf();
-            if !std::fs::exists(&fallback_path).is_ok_and(|exists| exists) {
-                bail!(DataError::IoError(std::io::Error::new(
-                    std::io::ErrorKind::NotFound,
-                    format!(
-                        "Both assets path and fallback path do not exist: {}, {}. The current working directory is: {:?}",
-                        assets_path.display(),
-                        fallback_path.display(),
-                        std::env::current_dir()
-                    ),
-                )));
-            }
-            Ok(Self {
-                assets_path: fallback_path,
-                index: Default::default(),
-            })
-        } else {
-            Ok(Self {
-                assets_path,
-                index: Default::default(),
-            })
-        }
+    /// Create a data loader that reads from the filesystem at the given path
+    pub fn from_fs(assets_path: impl Into<PathBuf>) -> anyhow::Result<Self> {
+        let catalog = AssetCatalog::default();
+        let backend = dishrupt_asset::backend::FsBackend::new(assets_path)?;
+        Ok(Self::new(catalog, backend))
     }
 
     /// Load all game data and populate the model registry
     pub fn load_all_data(&mut self) -> anyhow::Result<GameDataAssets> {
-        self.index =
-            load_toml(&self.assets_path.join("index.toml")).context("loading data index file")?;
+        self.index = self
+            .load_toml("index.toml")
+            .context("loading data index file")?;
 
         let mut registry = GameModelRegistry::default();
 
@@ -131,22 +105,22 @@ impl DataLoader {
 
         // Load reputation configuration
         registry.reputation_config = self
-            .load_ron_file(&self.assets_path.join("configs/reputation.ron"))
+            .load_ron_file("configs/reputation.ron")
             .context("Loading reputation configuration")?;
 
         // Load ordering configuration
         registry.ordering_config = self
-            .load_ron_file(&self.assets_path.join("configs/ordering.ron"))
+            .load_ron_file("configs/ordering.ron")
             .context("Loading ordering configuration")?;
 
         // Load decision configuration
         registry.decision_config = self
-            .load_ron_file(&self.assets_path.join("configs/decision.ron"))
+            .load_ron_file("configs/decision.ron")
             .context("Loading decision configuration")?;
 
         // Load trial configuration
         registry.trial_config = self
-            .load_ron_file(&self.assets_path.join("configs/trial.ron"))
+            .load_ron_file("configs/trial.ron")
             .context("Loading trial configuration")?;
 
         registry.trial = TrialCorpus {
@@ -167,15 +141,15 @@ impl DataLoader {
         };
 
         let endings = self
-            .load_ron_file(&self.assets_path.join("endings.ron"))
+            .load_ron_file("endings.ron")
             .context("Loading endings data")?;
 
         let opening_config = self
-            .load_ron_file(&self.assets_path.join("configs/opening.ron"))
+            .load_ron_file("configs/opening.ron")
             .context("Loading opening configuration")?;
 
         let credits: CreditsData = self
-            .load_ron_file(&self.assets_path.join("misc/credits.ron"))
+            .load_ron_file("misc/credits.ron")
             .context("Loading credits data")?;
 
         Ok(GameDataAssets {
@@ -190,45 +164,35 @@ impl DataLoader {
     where
         T: serde::de::DeserializeOwned + HasId,
     {
-        let path = self.assets_path.join(self.index.get(key).ok_or_else(|| {
-            DataError::ValidationError(format!("No index entry for data file key: {}", key))
-        })?);
-
-        if path.is_file() {
-            return self.load_ron_to_registry(registry, &path);
+        let path = self.index.get(key).ok_or_else(|| {
+            DataError::Validation(format!("No index entry for data file key: {}", key))
+        })?;
+        let loc = self.catalog.resolve(AssetKind::Data, path)?;
+        if self.backend.is_file(&loc)? {
+            return self.load_ron_to_registry(registry, &loc);
         }
-        if path.is_dir() {
+        if self.backend.is_dir(&loc)? {
             // Load all RON files in the directory
             let mut has_loaded = false;
-            for entry in std::fs::read_dir(&path)? {
-                let entry = entry?;
-                let entry_path = entry.path();
-                if !entry_path.is_file() {
+            for entry in self.backend.list_dir(&loc)? {
+                if !self.backend.is_file(&entry)? {
                     continue;
                 }
-                match self.load_ron_to_registry_single(registry, &entry_path) {
+                match self.load_ron_to_registry_single(registry, &entry) {
                     Ok(_) => {
                         has_loaded = true;
                     }
                     Err(e) => {
                         // Log the error but continue loading other files
-                        log::error!("Failed to load data file {}: {}", entry_path.display(), e);
+                        log::error!("Failed to load data file {entry}: {e}");
                     }
                 }
             }
             if !has_loaded {
-                log::error!(
-                    "No valid data files found in directory for key {}: {}",
-                    key,
-                    path.display()
-                );
+                log::error!("No valid data files found in directory for key {key}: {loc}");
             }
         } else {
-            log::error!(
-                "Data path for key {} is neither a file nor a directory: {}",
-                key,
-                path.display()
-            );
+            log::error!("Data path for key {key} is neither a file nor a directory: {loc}");
         }
         Ok(())
     }
@@ -236,14 +200,14 @@ impl DataLoader {
     fn load_ron_to_registry<T>(
         &self,
         registry: &mut ModelRegistry<T>,
-        path: &Path,
+        loc: &ResourceLocator,
     ) -> anyhow::Result<()>
     where
         T: serde::de::DeserializeOwned + HasId,
     {
         let models: Vec<T> = self
-            .load_ron_file(path)
-            .with_context(|| format!("Loading {}", path.display()))?;
+            .load_ron_file_resolved(loc)
+            .with_context(|| format!("Loading {loc}"))?;
 
         for model in models {
             registry.intern(model.id().clone(), model);
@@ -255,39 +219,46 @@ impl DataLoader {
     fn load_ron_to_registry_single<T>(
         &self,
         registry: &mut ModelRegistry<T>,
-        path: &Path,
+        loc: &ResourceLocator,
     ) -> anyhow::Result<()>
     where
         T: serde::de::DeserializeOwned + HasId,
     {
         let model: T = self
-            .load_ron_file(path)
-            .with_context(|| format!("Loading {}", path.display()))?;
+            .load_ron_file_resolved(loc)
+            .with_context(|| format!("Loading {loc}"))?;
 
         registry.intern(model.id().clone(), model);
 
         Ok(())
     }
 
-    fn load_ron_file<T>(&self, path: &Path) -> Result<T, DataError>
+    fn load_ron_file<T>(&self, path: &str) -> Result<T, DataError>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        self.load_ron_file_resolved(&self.catalog.resolve(AssetKind::Data, path)?)
+    }
+
+    fn load_ron_file_resolved<T>(&self, loc: &ResourceLocator) -> Result<T, DataError>
     where
         T: serde::de::DeserializeOwned,
     {
         use ron::extensions::Extensions;
 
-        let content = std::fs::read_to_string(path)?;
+        let content = self.backend.read_bytes(loc).unwrap();
         let options = ron::Options::default().with_default_extension(
             Extensions::UNWRAP_NEWTYPES
                 | Extensions::IMPLICIT_SOME
                 | Extensions::UNWRAP_VARIANT_NEWTYPES,
         );
-        let data = match options.from_str(&content) {
+        let data = match options.from_bytes(&content) {
             Ok(data) => data,
             Err(e) => {
                 #[cfg(feature = "codespan")]
-                codespan::emit_ron_error(path, &content, &e)?;
+                codespan::emit_ron_error(loc, str::from_utf8(&content).unwrap(), &e)?;
 
-                return Err(DataError::RonError(e));
+                return Err(DataError::Ron(e));
             }
         };
         Ok(data)
@@ -302,31 +273,48 @@ impl DataLoader {
             item: Vec<T>,
         }
 
-        let path: PathBuf = self.assets_path.join(filename);
-        let data = load_toml::<Items<T>>(&path)?;
+        let data = self.load_toml::<Items<T>>(filename)?;
         Ok(data.item)
     }
 
+    /// Load and parse a TOML file into the specified data structure
+    fn load_toml<T>(&self, path: &str) -> anyhow::Result<T>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        let loc = self.catalog.resolve(AssetKind::Data, path)?;
+        let bytes = self
+            .backend
+            .read_bytes(&loc)
+            .with_context(|| format!("Reading TOML file: {loc}"))?;
+        let data =
+            toml::from_slice::<T>(&bytes).with_context(|| format!("Parsing TOML file: {loc}"))?;
+        Ok(data)
+    }
+
     fn load_bincode<T: bincode::Decode<()>>(&self, filename: &str) -> anyhow::Result<T> {
-        let path: PathBuf = self.assets_path.join(filename);
-        let file =
-            std::fs::File::open(&path).with_context(|| format!("Opening bincode file {path:?}"))?;
-        let reader = std::io::BufReader::new(file);
-        bincode::decode_from_reader(
-            reader,
+        let loc = self.catalog.resolve(AssetKind::Data, filename)?;
+        let bytes = self
+            .backend
+            .read_bytes(&loc)
+            .with_context(|| format!("Reading Bincode file {loc}"))?;
+        let (data, _) = bincode::decode_from_slice(
+            &bytes,
             bincode::config::standard()
                 .with_little_endian()
                 .with_variable_int_encoding(),
         )
-        .with_context(|| format!("Decoding bincode file {path:?}"))
+        .with_context(|| format!("Decoding bincode file {loc:?}"))?;
+        Ok(data)
     }
 }
 
 /// Load and parse a TOML file into the specified data structure
-pub fn load_toml<T>(path: &Path) -> anyhow::Result<T>
+pub fn load_toml<T>(path: impl AsRef<Path>) -> anyhow::Result<T>
 where
     T: serde::de::DeserializeOwned,
 {
+    let path = path.as_ref();
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("Reading TOML file {}", path.display()))?;
     let data = toml::from_str::<T>(&content)

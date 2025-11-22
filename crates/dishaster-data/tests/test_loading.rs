@@ -4,7 +4,7 @@ use dishaster_data::DataLoader;
 
 #[test]
 fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
-    let mut loader = DataLoader::new("../../assets/data")?;
+    let mut loader = DataLoader::from_fs("../../assets/data")?;
     let data = loader.load_all_data()?;
     let registry = data.models;
 

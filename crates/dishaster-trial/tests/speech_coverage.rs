@@ -178,7 +178,7 @@ fn run_trial_session(
 #[test]
 fn coverage() {
     println!("Loading trial corpus...");
-    let mut loader = DataLoader::new("../../assets/data").unwrap();
+    let mut loader = DataLoader::from_fs("../../assets/data").unwrap();
     let data = loader.load_all_data().unwrap();
     let corpus = &data.models.trial;
 

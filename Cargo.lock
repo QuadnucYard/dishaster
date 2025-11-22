@@ -526,6 +526,7 @@ dependencies = [
  "dishaster-models",
  "dishaster-opening-models",
  "dishaster-validation",
+ "dishrupt-asset",
  "dishrupt-core",
  "log",
  "ron",
@@ -725,6 +726,7 @@ dependencies = [
  "dishaster-data",
  "dishaster-models",
  "dishaster-views",
+ "dishrupt-asset",
  "dishrupt-core",
  "dishrupt-rng",
  "insta",
@@ -764,6 +766,7 @@ dependencies = [
 name = "dishrupt-asset"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "rustc-hash",
  "serde",
  "thiserror",

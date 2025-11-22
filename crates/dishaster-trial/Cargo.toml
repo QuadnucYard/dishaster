@@ -15,9 +15,11 @@ log.workspace = true
 rustc-hash.workspace = true
 
 [dev-dependencies]
+dishrupt-asset.workspace = true
+dishaster-data.workspace = true
+
 insta = { workspace = true, features = ["yaml"] }
 serde = { workspace = true }
-dishaster-data.workspace = true
 rand = { workspace = true }
 rand_xoshiro = { workspace = true }
 

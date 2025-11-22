@@ -25,7 +25,7 @@ fn load_catalog() -> AssetCatalog {
 }
 
 fn load_data() -> GameDataAssets {
-    let mut loader = DataLoader::new(data_dir()).expect("Failed to create data loader");
+    let mut loader = DataLoader::from_fs(data_dir()).expect("Failed to create data loader");
     loader.load_all_data().expect("Failed to load game data")
 }
 

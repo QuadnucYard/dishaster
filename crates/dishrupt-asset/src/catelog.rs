@@ -9,6 +9,7 @@ use thiserror::Error;
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AssetKind {
+    Data,
     Gui,
     Music,
     Prefab,
@@ -33,7 +34,7 @@ pub struct AssetKindConfig {
 }
 
 /// Top-level asset path configuration (single HashMap per-kind)
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct AssetPathConfig {
     // /// Base path that replaces "res://" or the root of relative asset lookups.
     // pub res_base: String,
@@ -83,6 +84,15 @@ pub enum ResourceLocator {
     Uri(String),
 }
 
+impl std::fmt::Display for ResourceLocator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ResourceLocator::Fs(path) => write!(f, "Fs({})", path.display()),
+            ResourceLocator::Uri(uri) => write!(f, "Uri({})", uri),
+        }
+    }
+}
+
 /// Asset resolver for locating assets based on kind and id
 #[derive(Debug, Clone)]
 pub struct AssetResolver;
@@ -97,7 +107,7 @@ impl AssetResolver {
         id: &str,
     ) -> Result<ResourceLocator, ResolveError> {
         // 1) Already a URI or absolute -> return Uri or Fs
-        if id.starts_with('/') {
+        if id.starts_with('/') || id.starts_with("./") {
             return Ok(ResourceLocator::Fs(PathBuf::from(id)));
         } else if id.contains("://") {
             return Ok(ResourceLocator::Uri(id.to_string()));
@@ -110,11 +120,11 @@ impl AssetResolver {
 
         // 3) prefix join: if prefix string looks like a URI base (contains "://"),
         //    treat result as a URI (concatenate with '/'), otherwise produce Fs path.
-        let prefix = config.prefix_for(kind).ok_or(ResolveError::NoPrefix)?;
+        let prefix = config.prefix_for(kind).unwrap_or_default();
 
         // ensure there's exactly one slash between prefix and id
         let mut uri = prefix.to_string();
-        if !prefix.ends_with('/') {
+        if !prefix.is_empty() && !prefix.ends_with('/') {
             uri.push('/');
         }
         uri.push_str(id.strip_prefix('/').unwrap_or(id));
@@ -132,7 +142,12 @@ impl AssetResolver {
             }
         }
 
-        self.resolve_with_config(config, kind, &uri)
+        if uri.contains("://") {
+            Ok(ResourceLocator::Uri(uri.to_string()))
+        } else {
+            // Fall back to filesystem path
+            Ok(ResourceLocator::Fs(PathBuf::from(id)))
+        }
     }
 }
 
@@ -164,6 +179,14 @@ impl AssetCatalog {
         Ok(loc)
     }
 }
+
+impl Default for AssetCatalog {
+    fn default() -> Self {
+        Self::new(Default::default(), AssetResolver)
+    }
+}
+
+// TODO: test relative paths (no / prefix)
 
 #[cfg(test)]
 mod tests {
@@ -308,19 +331,6 @@ mod tests {
         // Absolute path starting with / - should return Fs
         let result = catalog.resolve(AssetKind::Music, "/tmp/sound.ogg").unwrap();
         assert_eq!(result, ResourceLocator::Fs(PathBuf::from("/tmp/sound.ogg")));
-    }
-
-    #[test]
-    fn test_resolve_no_prefix_error() {
-        let config = AssetPathConfig {
-            kinds: hash_map! {},
-            global_aliases: hash_map! {},
-        };
-        let catalog = create_catalog(config);
-
-        // Should error when kind has no prefix configured
-        let result = catalog.resolve(AssetKind::Music, "test.ogg");
-        assert!(matches!(result, Err(ResolveError::NoPrefix)));
     }
 
     #[test]
