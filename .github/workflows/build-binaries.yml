@@ -5,6 +5,7 @@ on:
   workflow_call:
 
 env:
+  RUSTUP_TOOLCHAIN: nightly-2025-11-15
   EXPORT_NAME: dishaster
 
 permissions:
@@ -32,7 +33,7 @@ jobs:
       - name: Use Rust Toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2025-11-15
+          toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
       - name: Run rust-cache
         uses: Swatinem/rust-cache@v2
 

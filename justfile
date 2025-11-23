@@ -1,4 +1,4 @@
-set shell := ["nu", "-c"]
+set windows-shell := ["nu", "-c"]
 
 alias b := build
 
@@ -13,9 +13,15 @@ build *ARGS:
 
 build-web $RUSTFLAGS="
         -C link-args=-sSIDE_MODULE=2
-        -Zlink-native-libraries=no
-        -Cllvm-args=-enable-emscripten-cxx-exceptions=0" *ARGS:
-    cargo +nightly build -p dishaster-godot-ext --features web -Zbuild-std --target wasm32-unknown-emscripten {{ARGS}}
+        -Z link-native-libraries=no
+        -C llvm-args=-enable-emscripten-cxx-exceptions=0":
+    cargo build -p dishaster-godot-ext --features web -Zbuild-std --target wasm32-unknown-emscripten
+
+build-web-release $RUSTFLAGS="
+        -C link-args=-sSIDE_MODULE=2
+        -Z link-native-libraries=no
+        -C llvm-args=-enable-emscripten-cxx-exceptions=0":
+    cargo build --release -p dishaster-godot-ext --features web -Zbuild-std --target wasm32-unknown-emscripten
 
 test:
     cargo test --tests --workspace

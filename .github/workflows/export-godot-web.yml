@@ -1,0 +1,66 @@
+name: Godot Web Export
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  RUSTUP_TOOLCHAIN: nightly-2025-11-15
+  GODOT_VERSION: 4.5.1
+  EXPORT_NAME: dishaster
+  PROJECT_PATH: godot
+
+permissions:
+  contents: read
+
+jobs:
+  export-web:
+    name: Web Export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rui314/setup-mold@v1
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
+          targets: wasm32-unknown-emscripten
+          components: rust-src
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Setup Godot
+        run: bash ./scripts/setup-godot.sh
+
+      - name: Setup Multilib
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-multilib
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - uses: extractions/setup-just@v3
+
+      - name: Build Binary for Web
+        run: |
+          emcc --version
+          just build-web-release
+
+      - name: Upload Rust Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.EXPORT_NAME }}-gdext-web
+          path: target/wasm32-unknown-emscripten/release/dishaster.wasm
+          retention-days: 3
+
+      - name: Export Game to Web
+        run: |
+          mkdir -v -p build/web
+          EXPORT_DIR="$(readlink -f build)"
+          cd $PROJECT_PATH
+          godot --headless --verbose --export-release "Web" "$EXPORT_DIR/web/index.html"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.EXPORT_NAME }}-web
+          path: build/web
