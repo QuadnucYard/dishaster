@@ -263,9 +263,9 @@ impl GameScene {
 
     /// Handle UI commands emitted by game logic.
     fn handle_ui_command(ctx: &mut SceneContext, cmd: UiCommand, game: &mut Game) {
-        let (gui, audio, catalog, data) =
-            ctx.res
-                .get_many_mut::<(GuiRegistry, AudioManager, AssetCatalog, GameDataAssets)>();
+        let (gui, audio, data) = ctx
+            .res
+            .get_many_mut::<(GuiRegistry, AudioManager, GameDataAssets)>();
 
         match cmd {
             UiCommand::ToggleDev(enabled) => {
@@ -353,11 +353,11 @@ impl GameScene {
 
             UiCommand::ShowDecisionSelection(view) => {
                 // Show decision GUI after settlement confirmation (or after good ending)
-                gui.get_mut::<ManageDecisionGui>().set_view(&view, catalog);
+                gui.get_mut::<ManageDecisionGui>().set_view(&view);
                 gui.show::<ManageDecisionGui>();
             }
             UiCommand::ShowIncidentNotification(view) => {
-                gui.get_mut::<ManageIncidentGui>().set_view(&view, catalog);
+                gui.get_mut::<ManageIncidentGui>().set_view(&view);
                 gui.get_mut::<ManageIncidentGui>().show();
             }
             UiCommand::ShowInspectorResult(view) => {
@@ -372,7 +372,7 @@ impl GameScene {
             UiCommand::ShowEnding(ending) => {
                 if let Some(ending_model) = data.endings.get(&ending.id) {
                     gui.get_mut::<EndingGui>()
-                        .set_ending_picture(&ending_model.illustration, catalog);
+                        .set_ending_picture(&ending_model.illustration);
                 } else {
                     godot_error!("Requested unknown ending ID: {}", ending.id);
                 }

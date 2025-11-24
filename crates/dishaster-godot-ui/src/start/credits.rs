@@ -15,7 +15,7 @@ pub struct CreditsGui {
 impl UITree for CreditsGui {}
 
 impl Gui for CreditsGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.back_btn.on_click.connect(move || {
             cmd.push_req(AppRequest::BackToMenu);

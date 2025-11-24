@@ -9,6 +9,7 @@ edition.workspace = true
 test = false
 
 [dependencies]
+dishrupt-asset.workspace = true
 dishrupt-core.workspace = true
 
 godot.workspace = true

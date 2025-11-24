@@ -24,7 +24,7 @@ pub struct GamingLayout {
 impl UITree for GamingLayout {}
 
 impl Gui for GamingLayout {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.start_button.on_click.connect(move || {
             cmd.push_req(GameRequest::StartRun);

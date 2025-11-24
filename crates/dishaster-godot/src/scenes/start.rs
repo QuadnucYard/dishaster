@@ -117,11 +117,10 @@ impl Scene for StartScene {
 
 impl StartScene {
     fn handle_app_request(&mut self, ctx: &mut SceneContext, req: AppRequest) {
-        let (gui, audio, effects, catalog, data, user_service) = ctx.res.get_many_mut::<(
+        let (gui, audio, effects, data, user_service) = ctx.res.get_many_mut::<(
             GuiRegistry,
             AudioManager,
             GlobalEffects,
-            AssetCatalog,
             GameDataAssets,
             UserDataService,
         )>();
@@ -161,8 +160,7 @@ impl StartScene {
                         illustration: ending_model.illustration.clone(),
                     };
 
-                    gui.get_mut::<EndingGalleryGui>()
-                        .show_ending(ending_view, catalog);
+                    gui.get_mut::<EndingGalleryGui>().show_ending(ending_view);
                 } else {
                     godot_error!("Requested unknown ending ID: {}", ending_id);
                 }

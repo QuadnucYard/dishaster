@@ -17,7 +17,7 @@ pub struct InspectorResultGui {
 impl UITree for InspectorResultGui {}
 
 impl Gui for InspectorResultGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.confirm_button.on_click.connect(move || {
             cmd.hide::<Self>();

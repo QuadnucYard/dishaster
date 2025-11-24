@@ -138,7 +138,7 @@ impl Inner {
                 .get_many_mut::<(GuiRegistry, GuiCommands, AssetCatalog)>();
 
             register_guis(gui, catalog);
-            gui.mount(&mut self.gui_root, gui_cmds);
+            gui.mount(&mut self.gui_root, gui_cmds, catalog.clone());
         }
 
         self.apply_preferences();

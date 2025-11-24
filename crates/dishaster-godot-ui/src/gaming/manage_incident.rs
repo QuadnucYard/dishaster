@@ -1,7 +1,8 @@
-use dishaster_views::ManagementIncidentView;
-use dishrupt_asset::AssetCatalog;
+use std::cell::OnceCell;
 
-use crate::{load::load_texture_sync, prelude::*};
+use dishaster_views::ManagementIncidentView;
+
+use crate::prelude::*;
 
 #[derive(UITree)]
 #[ui_tree]
@@ -18,25 +19,33 @@ pub struct ManageIncidentGui {
     effects_label: RichLabelA,
     #[child("%ConfirmButton")]
     confirm_btn: ButtonA,
+
+    asset_provider: OnceCell<AssetProvider>,
 }
 
 #[ui_tree_api]
 impl UITree for ManageIncidentGui {}
 
 impl Gui for ManageIncidentGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, provider: AssetProvider) {
         let cmd = commands.clone();
         self.confirm_btn.on_click.connect(move || {
             cmd.hide::<Self>();
         });
+
+        let _ = self.asset_provider.set(provider);
     }
 }
 
 impl ManageIncidentGui {
     /// Display active event intro
-    pub fn set_view(&mut self, view: &ManagementIncidentView, catalog: &AssetCatalog) {
-        self.icon
-            .set_texture(load_texture_sync(&view.icon, catalog));
+    pub fn set_view(&mut self, view: &ManagementIncidentView) {
+        let provider = self
+            .asset_provider
+            .get()
+            .expect("ManageIncidentGui asset provider not set");
+
+        self.icon.set_texture(provider.get_texture(&view.icon));
         self.title_label
             .set_text(&tr!("mgmt--{}.title", view.model_id));
         self.desc_label

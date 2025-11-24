@@ -12,7 +12,7 @@ pub struct TutorialGui {
 impl UITree for TutorialGui {}
 
 impl Gui for TutorialGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.confirm_button.on_click.connect(move || {
             cmd.hide::<Self>();

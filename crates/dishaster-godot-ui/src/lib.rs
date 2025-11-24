@@ -1,6 +1,5 @@
 mod def;
 mod gaming;
-pub(crate) mod load;
 mod start;
 
 use std::{borrow::Cow, collections::HashMap};

@@ -22,7 +22,7 @@ pub struct SettlementGui {
 impl UITree for SettlementGui {}
 
 impl Gui for SettlementGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.confirm_btn.on_click.connect(move || {
             cmd.push_req(GameRequest::ConfirmSettlement);

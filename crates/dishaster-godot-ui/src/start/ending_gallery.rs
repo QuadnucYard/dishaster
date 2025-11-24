@@ -1,7 +1,8 @@
-use dishrupt_asset::AssetCatalog;
+use std::cell::OnceCell;
+
 use dishrupt_core::{asset::SpriteRef, prelude::EcoString};
 
-use crate::{load::load_texture_sync, prelude::*};
+use crate::prelude::*;
 
 pub struct EndingGalleryView {
     pub id: EcoString,
@@ -16,24 +17,33 @@ pub struct EndingGalleryGui {
     illustration: TextureButtonA,
     #[child("%TitleLabel")]
     title_label: LabelA,
+
+    asset_provider: OnceCell<AssetProvider>,
 }
 
 #[ui_tree_api]
 impl UITree for EndingGalleryGui {}
 
 impl Gui for EndingGalleryGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, provider: AssetProvider) {
         let cmd = commands.clone();
         self.illustration.on_click.connect(move || {
             cmd.push_req(AppRequest::BackToMenu);
         });
+
+        let _ = self.asset_provider.set(provider);
     }
 }
 
 impl EndingGalleryGui {
-    pub fn show_ending(&mut self, view: EndingGalleryView, catalog: &AssetCatalog) {
-        let texture = load_texture_sync(&view.illustration, catalog);
-        self.illustration.set_texture_normal(&texture);
+    pub fn show_ending(&mut self, view: EndingGalleryView) {
+        let provider = self
+            .asset_provider
+            .get()
+            .expect("EndingGalleryGui asset provider not set");
+
+        self.illustration
+            .set_texture_normal(&provider.get_texture(&view.illustration));
 
         self.title_label.set_text(&tr!("ending--{}.title", view.id));
 

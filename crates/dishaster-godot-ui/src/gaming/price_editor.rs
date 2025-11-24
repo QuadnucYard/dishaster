@@ -61,7 +61,7 @@ pub struct DishPricePopup {
 impl UITree for DishPricePopup {}
 
 impl Gui for DishPricePopup {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let _ = self.commands.set(commands.clone());
 
         let cmd = commands.clone();

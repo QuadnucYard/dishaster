@@ -79,7 +79,7 @@ impl TimeStatsGui {
 impl UITree for TimeStatsGui {}
 
 impl Gui for TimeStatsGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.tps_slider.on_value_change.connect(move |value| {
             cmd.push_req(GameRequest::SetTps(value));

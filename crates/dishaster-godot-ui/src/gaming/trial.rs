@@ -156,7 +156,7 @@ impl TrialGui {
 impl UITree for TrialGui {}
 
 impl Gui for TrialGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.left.content.on_meta_click.connect(move |meta| {
             godot_print!("Left content meta clicked: {:?}", meta);

@@ -882,6 +882,7 @@ dependencies = [
 name = "dishrupt-godot-ui"
 version = "0.1.0"
 dependencies = [
+ "dishrupt-asset",
  "dishrupt-core",
  "godot",
 ]

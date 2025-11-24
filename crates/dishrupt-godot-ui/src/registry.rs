@@ -3,13 +3,14 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use dishrupt_asset::AssetCatalog;
 use dishrupt_core::ui::UiRequest;
 
-use crate::{UITree, UiRoot};
+use crate::{AssetProvider, UITree, UiRoot};
 
 #[allow(unused)]
 pub trait Gui: UITree {
-    fn start(&mut self, commands: GuiCommands) {}
+    fn start(&mut self, commands: GuiCommands, provider: AssetProvider) {}
 
     fn process(&mut self, commands: GuiCommands, delta: f64) {}
 }
@@ -72,9 +73,10 @@ impl GuiRegistry {
 
 // Lifecycle methods
 impl GuiRegistry {
-    pub fn mount(&mut self, root: &mut UiRoot, commands: &mut GuiCommands) {
+    pub fn mount(&mut self, root: &mut UiRoot, commands: &mut GuiCommands, catalog: AssetCatalog) {
+        let provider = AssetProvider::new(catalog);
         for gui in self.iter_mut() {
-            gui.start(commands.clone());
+            gui.start(commands.clone(), provider.clone());
             gui.ready();
             gui.set_active(false);
             root.add_gui(&**gui);

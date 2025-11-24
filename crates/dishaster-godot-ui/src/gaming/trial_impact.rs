@@ -172,7 +172,7 @@ impl TrialImpactGui {
 impl UITree for TrialImpactGui {}
 
 impl Gui for TrialImpactGui {
-    fn start(&mut self, _commands: GuiCommands) {
+    fn start(&mut self, _commands: GuiCommands, _provider: AssetProvider) {
         self.impact_label_template.set_visible(false);
     }
 

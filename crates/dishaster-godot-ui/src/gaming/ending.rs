@@ -1,8 +1,9 @@
+use std::cell::OnceCell;
+
 use dishaster_views::EndingView;
-use dishrupt_asset::AssetCatalog;
 use dishrupt_core::asset::SpriteRef;
 
-use crate::{load::load_texture_sync, prelude::*};
+use crate::prelude::*;
 
 /// Ending screen showing game conclusion
 #[derive(UITree)]
@@ -22,13 +23,15 @@ pub struct EndingGui {
 
     #[child("%ExitButton")]
     exit_btn: ButtonA,
+
+    asset_provider: OnceCell<AssetProvider>,
 }
 
 #[ui_tree_api]
 impl UITree for EndingGui {}
 
 impl Gui for EndingGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, provider: AssetProvider) {
         // Continue button - triggers decision roll (only for GoodReputation ending)
         let cmd = commands.clone();
         self.continue_btn.on_click.connect(move || {
@@ -41,13 +44,19 @@ impl Gui for EndingGui {
             cmd.push_req(AppRequest::ExitLevel);
             cmd.push_req(GameRequest::ClearLevel);
         });
+
+        let _ = self.asset_provider.set(provider);
     }
 }
 
 impl EndingGui {
-    pub fn set_ending_picture(&mut self, picture: &SpriteRef, catalog: &AssetCatalog) {
-        let texture = load_texture_sync(picture, catalog);
-        self.picture.set_texture(texture);
+    pub fn set_ending_picture(&mut self, picture: &SpriteRef) {
+        let provider = self
+            .asset_provider
+            .get()
+            .expect("EndingGui asset provider not set");
+
+        self.picture.set_texture(provider.get_texture(picture));
     }
 
     /// Show ending screen with the given view

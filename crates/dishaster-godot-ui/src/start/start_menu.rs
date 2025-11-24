@@ -51,7 +51,7 @@ pub struct StartMenuGui {
 impl UITree for StartMenuGui {}
 
 impl Gui for StartMenuGui {
-    fn start(&mut self, commands: GuiCommands) {
+    fn start(&mut self, commands: GuiCommands, _provider: AssetProvider) {
         let cmd = commands.clone();
         self.start_btn.on_click.connect(move || {
             cmd.push_req(AppRequest::EnterLevel);

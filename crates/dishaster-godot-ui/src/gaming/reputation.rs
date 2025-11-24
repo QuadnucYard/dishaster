@@ -135,7 +135,7 @@ impl ReputationGui {
 impl UITree for ReputationGui {}
 
 impl Gui for ReputationGui {
-    fn start(&mut self, _commands: GuiCommands) {
+    fn start(&mut self, _commands: GuiCommands, _provider: AssetProvider) {
         self.delta_label.set_visible(false);
     }
 }
