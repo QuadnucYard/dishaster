@@ -204,5 +204,8 @@ pub trait Scene: Any {
     fn physics_process(&mut self, ctx: &mut SceneContext, delta: f64) {}
 
     /// Called for input events while the scene is active.
-    fn input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {}
+    /// Returns the event if it should be propagated further.
+    fn input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) -> Option<GodotInputEvent> {
+        Some(event)
+    }
 }

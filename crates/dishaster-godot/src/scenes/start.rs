@@ -103,13 +103,15 @@ impl Scene for StartScene {
         }
     }
 
-    fn input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) {
-        if let GodotInputEvent::Button(e) = event
+    fn input(&mut self, ctx: &mut SceneContext, event: GodotInputEvent) -> Option<GodotInputEvent> {
+        if let GodotInputEvent::Button(e) = &event
             && e.pressed
         {
             let effects = ctx.res.get_mut::<GlobalEffects>();
             effects.pend(PrefabRef::new("heart_break"), None);
+            return None;
         }
+        Some(event)
     }
 }
 

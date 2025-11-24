@@ -28,7 +28,7 @@ turns:
     manager_speeches:
       - id: 281
         summary: 觉得贵？
-        text: "您之前吃过类似的[帝王蟹]吗？\\可以对比一下品质和分量。"
+        text: "您之前吃过类似的帝王蟹吗？\\可以对比一下品质和分量。"
         emotion: 🙂
         gesture: 🤝
     impact:

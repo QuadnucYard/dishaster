@@ -35,7 +35,7 @@ turns:
     manager_speeches:
       - id: 318
         summary: 领导接待专用
-        text: "这款[帝王蟹]其实是为外宾和校际交流准备的，不对普通学生开放。"
+        text: 这款帝王蟹其实是为外宾和校际交流准备的，不对普通学生开放。
         emotion: 😉
     impact:
       reputation_score: -0.5

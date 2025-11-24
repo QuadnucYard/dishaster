@@ -8,7 +8,7 @@ use dishrupt_godot_input::listener::InputListener;
 use dishrupt_godot_ui::UiRoot;
 use dishrupt_l10n_godot::LocalizationManager;
 use dishrupt_persistence::GodotUserStorage;
-use godot::{classes::CanvasLayer, prelude::*};
+use godot::{classes::CanvasLayer, global::Key, prelude::*};
 
 use crate::{
     effect::{EffectOverlay, GlobalEffects},
@@ -216,19 +216,43 @@ impl Inner {
         }
         init_backtrace_handle();
 
+        let mut unhandled_inputs = vec![];
         self.scene_manager.inspect_active_scene_mut(|scene| {
             let ctx = &mut SceneContext {
                 res: &mut self.resources,
                 proc: None,
             };
 
-            self.input_listener
-                .bind_mut()
-                .drain_events()
-                .for_each(|e| scene.input(ctx, e));
+            self.input_listener.bind_mut().drain_events().for_each(|e| {
+                if let Some(unhandled) = scene.input(ctx, e) {
+                    unhandled_inputs.push(unhandled);
+                }
+            });
 
             scene.physics_process(ctx, delta);
         });
+
+        for event in unhandled_inputs {
+            self.unhandled_input(event);
+        }
+    }
+
+    fn unhandled_input(&mut self, event: GodotInputEvent) {
+        if let GodotInputEvent::Key(key) = &event
+            && key.pressed
+            && key.keycode == Key::F5
+        {
+            if let Ok(services) = init_game() {
+                godot_print!("Hot-reloading game data...");
+                self.resources.insert(services.catalog);
+                self.resources.insert(services.data);
+                self.resources.insert(services.user_service);
+                self.l10n.update();
+                godot_print!("Hot-reload complete.");
+            } else {
+                godot_error!("Hot-reload failed.");
+            }
+        }
     }
 }
 
@@ -295,6 +319,8 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
     use dishrupt_asset::backend::FsBackend;
     use dishrupt_l10n_godot::{L10N_SERVICE, build_arc_loader, langid};
 
+    godot_print!("Loading game data from filesystem...");
+
     let backend = FsBackend::new(Path::new("../assets/data"))?;
 
     let assets_path_config =
@@ -319,6 +345,8 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
     use dishrupt_l10n_godot::{L10N_SERVICE, default_customizer, langid};
     use fluent_godot_loader::{FluentFormatLoader, GodotResLoader};
     use godot::classes::ResourceLoader;
+
+    godot_print!("Loading game data from Godot resources...");
 
     ResourceLoader::singleton()
         .add_resource_format_loader(&godot_binary_resource::BinaryAssetLoader::new_gd());

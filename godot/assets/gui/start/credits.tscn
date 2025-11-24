@@ -38,7 +38,8 @@ theme_override_constants/margin_bottom = 80
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Header" type="Label" parent="MarginContainer/VBox"]
+[node name="Header" type="LocalizedLabel" parent="MarginContainer/VBox"]
+message_id = "credits-title"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.28449765, 0.16559735, 0.07361158, 1)
 theme_override_fonts/font = ExtResource("2_w423o")

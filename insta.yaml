@@ -1,2 +1,2 @@
 behavior:
-  force_update: true
+  update: "always"
