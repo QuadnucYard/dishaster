@@ -3,7 +3,7 @@ use std::{borrow::Cow, collections::HashMap, sync::Arc};
 use fluent_bundle::{FluentResource, FluentValue, concurrent::FluentBundle};
 use fluent_langneg::{NegotiationStrategy, negotiate_languages};
 use fluent_loader::{
-    SyncLoader, build_fallbacks,
+    FluentProvider, build_fallbacks,
     error::{FluentError, LoaderError, LookupError},
     lookup::{lookup_no_default_fallback, lookup_single_language},
 };
@@ -186,7 +186,7 @@ impl GodotResLoader {
     }
 }
 
-impl SyncLoader for GodotResLoader {
+impl FluentProvider for GodotResLoader {
     // Traverse the fallback chain,
     fn lookup_complete(
         &self,

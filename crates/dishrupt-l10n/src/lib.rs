@@ -1,76 +1,25 @@
 //! Localization with Fluent
 
 mod builtins;
+mod service;
 
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-    sync::{Arc, LazyLock, OnceLock, RwLock},
-};
+use std::{borrow::Cow, collections::HashMap, sync::LazyLock};
 
-use fluent_bundle::{FluentResource, FluentValue, concurrent::FluentBundle};
-use fluent_loader::SyncLoader;
-use fluent_templates::ArcLoader;
-use unic_langid::LanguageIdentifier;
+use fluent_bundle::FluentValue;
+pub use unic_langid::langid;
 
-static LANG: LazyLock<RwLock<LanguageIdentifier>> =
-    LazyLock::new(|| unic_langid::langid!("zh-CN").into());
+pub use self::service::{L10nService, build_arc_loader, default_customizer};
 
-static LOCALES: OnceLock<Box<dyn SyncLoader>> = OnceLock::new();
-
-/// Get the current language identifier.
-pub fn get_lang() -> LanguageIdentifier {
-    LANG.read().unwrap().clone()
-}
-
-/// Get the global localization loader.
-pub fn get_locales() -> &'static dyn SyncLoader {
-    LOCALES
-        .get_or_init(|| Box::new(build_arc_loader("locales/")))
-        .as_ref()
-}
-
-/// Set the global localization loader.
-pub fn set_locales(loader: impl SyncLoader + 'static) {
-    if LOCALES.set(Box::new(loader)).is_err() {
-        panic!(
-            "LOCALES already initialized - set_locales must be called before any localization operations"
-        );
-    }
-}
-
-/// Initialize localization with a custom source path.
-/// This is useful for tests that need to load locales from a different directory.
-/// Must be called before any localization operations.
-pub fn init_with_path(path: &str) {
-    set_locales(build_arc_loader(path));
-}
-
-fn build_arc_loader(path: &str) -> ArcLoader {
-    ArcLoader::builder(path, LANG.read().unwrap().clone())
-        .customize(|bundle| {
-            bundle.set_use_isolating(false);
-            add_builtins(bundle);
-        })
-        .build()
-        .expect("build ArcLoader with custom path")
-}
-
-/// Add builtin functions to a Fluent bundle.
-#[doc(hidden)]
-pub fn add_builtins(bundle: &mut FluentBundle<Arc<FluentResource>>) {
-    // The builtin function in v0.16.1 are missing, so we have to implement them by ourself.
-    bundle
-        .add_function("NUM", builtins::number)
-        .expect("Failed to add function `NUM` to the bundle.");
-    bundle
-        .add_function("PCT", builtins::percent)
-        .expect("Failed to add function `PCT` to the bundle.");
-}
+/// The global localization service instance.
+pub static L10N_SERVICE: LazyLock<L10nService> =
+    LazyLock::new(|| L10nService::new_with_lang(langid!("zh-CN")));
 
 /// Translate a message id into message string.
 pub fn try_tr_plain(id: &str) -> Option<String> {
-    get_locales().try_lookup_complete(&LANG.read().unwrap(), id, None)
+    let lang = L10N_SERVICE.get_lang();
+    L10N_SERVICE
+        .get_locales()
+        .try_lookup_complete(&lang, id, None)
 }
 
 #[doc(hidden)]
@@ -78,8 +27,9 @@ pub mod private {
     use super::*;
 
     pub fn tr_impl(id: &str, args: Option<&HashMap<Cow<'static, str>, FluentValue>>) -> String {
-        let lang = LANG.read().unwrap();
-        get_locales()
+        let lang = L10N_SERVICE.get_lang();
+        L10N_SERVICE
+            .get_locales()
             .try_lookup_complete(&lang, id, args)
             .unwrap_or_else(|| format!("Unknown localization key: {id:?}"))
     }

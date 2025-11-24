@@ -1,5 +1,7 @@
 // Copied from fluent-templates v0.13.2
 
+#![allow(missing_docs)]
+
 use thiserror::Error;
 use unic_langid::LanguageIdentifier;
 

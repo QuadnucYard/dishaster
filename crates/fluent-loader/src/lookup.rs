@@ -1,5 +1,7 @@
 // Copied from fluent-templates v0.13.2
 
+#![allow(missing_docs)]
+
 use std::{borrow::Borrow, collections::HashMap};
 
 use fluent_bundle::{FluentArgs, FluentResource, FluentValue, concurrent::FluentBundle};

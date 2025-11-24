@@ -57,6 +57,7 @@ bevy_math = { version = "0.17.0", default-features = false, features = ["std", "
 godot = "0.4.2"
 
 anyhow = "1.0"
+arc-swap = "1.7"
 as-any = "0.3"
 backtrace = "0.3"
 bincode = "2.0"

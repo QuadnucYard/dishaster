@@ -1,7 +1,5 @@
 //! Synchronous Fluent loader and re-implementation of `fluent_templates` utilities
 
-#![allow(missing_docs)]
-
 pub mod error;
 pub mod lookup;
 
@@ -13,7 +11,7 @@ pub use fluent_templates::loader::build_fallbacks;
 use unic_langid::LanguageIdentifier;
 
 /// A loader capable of looking up Fluent keys given a language.
-pub trait SyncLoader: Send + Sync {
+pub trait FluentProvider: Send + Sync {
     /// Look up `text_id` for `lang` in Fluent.
     fn lookup(&self, lang: &LanguageIdentifier, text_id: &str) -> String {
         self.lookup_complete(lang, text_id, None)
@@ -64,7 +62,7 @@ pub trait SyncLoader: Send + Sync {
     fn locales(&self) -> Box<dyn Iterator<Item = &LanguageIdentifier> + '_>;
 }
 
-impl<T> SyncLoader for T
+impl<T> FluentProvider for T
 where
     T: Loader + Send + Sync,
 {
@@ -88,5 +86,32 @@ where
 
     fn locales(&self) -> Box<dyn Iterator<Item = &LanguageIdentifier> + '_> {
         <Self as Loader>::locales(self)
+    }
+}
+
+/// A dummy Fluent provider that returns the text id as-is.
+pub struct DummyProvider;
+
+impl FluentProvider for DummyProvider {
+    fn lookup_complete(
+        &self,
+        _lang: &LanguageIdentifier,
+        text_id: &str,
+        _args: Option<&HashMap<Cow<'static, str>, FluentValue>>,
+    ) -> String {
+        text_id.to_string()
+    }
+
+    fn try_lookup_complete(
+        &self,
+        _lang: &LanguageIdentifier,
+        text_id: &str,
+        _args: Option<&HashMap<Cow<'static, str>, FluentValue>>,
+    ) -> Option<String> {
+        Some(text_id.to_string())
+    }
+
+    fn locales(&self) -> Box<dyn Iterator<Item = &LanguageIdentifier> + '_> {
+        Box::new(std::iter::empty())
     }
 }

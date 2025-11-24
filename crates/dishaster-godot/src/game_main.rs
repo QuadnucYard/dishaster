@@ -293,6 +293,7 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
 
     use dishaster_data::load_toml;
     use dishrupt_asset::backend::FsBackend;
+    use dishrupt_l10n_godot::{L10N_SERVICE, build_arc_loader, langid};
 
     let backend = FsBackend::new(Path::new("../assets/data"))?;
 
@@ -305,7 +306,7 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
         .load_all_data()
         .context("failed to load game data")?;
 
-    dishrupt_l10n_godot::get_locales();
+    L10N_SERVICE.set_locales(build_arc_loader("locales/", langid!("zh-CN")));
     log::info!("Localization initialized");
 
     Ok((catalog, data))
@@ -315,6 +316,8 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
 fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
     use dishaster_data::load_toml_with;
     use dishrupt_asset::{AssetKind, ResourceLocator, backend::GodotResourceBackend};
+    use dishrupt_l10n_godot::{L10N_SERVICE, default_customizer, langid};
+    use fluent_godot_loader::{FluentFormatLoader, GodotResLoader};
     use godot::classes::ResourceLoader;
 
     ResourceLoader::singleton()
@@ -339,20 +342,13 @@ fn load_data() -> Result<(AssetCatalog, GameDataAssets)> {
         .load_all_data()
         .context("failed to load game data")?;
 
-    ResourceLoader::singleton()
-        .add_resource_format_loader(&fluent_godot_loader::FluentFormatLoader::new_gd());
+    ResourceLoader::singleton().add_resource_format_loader(&FluentFormatLoader::new_gd());
 
-    dishrupt_l10n_godot::set_locales(
-        fluent_godot_loader::GodotResLoader::builder(
-            "res://locales",
-            dishrupt_l10n_godot::get_lang(),
-        )
-        .customize(|bundle| {
-            bundle.set_use_isolating(false);
-            dishrupt_l10n_godot::add_builtins(bundle);
-        })
-        .build()
-        .expect("build Fluent loader with godot locales"),
+    L10N_SERVICE.set_locales(
+        GodotResLoader::builder("res://locales", langid!("zh-CN"))
+            .customize(default_customizer)
+            .build()
+            .expect("build Fluent loader with godot locales"),
     );
     log::info!("Localization initialized");
 

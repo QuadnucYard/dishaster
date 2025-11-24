@@ -6,6 +6,7 @@ authors.workspace = true
 edition.workspace = true
 
 [dependencies]
+arc-swap.workspace = true
 fluent-loader.workspace = true
 fluent-bundle.workspace = true
 fluent-templates.workspace = true

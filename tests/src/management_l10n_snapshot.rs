@@ -19,8 +19,9 @@ use dishaster_core::{
 use dishaster_data::{DataLoader, GameDataAssets};
 use dishrupt_core::{ModelId, prelude::EcoString};
 use dishrupt_l10n::{
+    L10N_SERVICE, build_arc_loader,
     fluent::{FluentValue, types::FluentNumber},
-    tr,
+    langid, tr,
 };
 use dishrupt_rng::Prng;
 use harness::data_dir;
@@ -34,7 +35,7 @@ fn init_localization() {
     INIT.call_once(|| {
         // Test CWD is tests/, need to go up one level to workspace root
         let locales_path = "../godot/locales/";
-        dishrupt_l10n::init_with_path(locales_path);
+        L10N_SERVICE.set_locales(build_arc_loader(locales_path, langid!("zh-CN")));
     });
 }
 
