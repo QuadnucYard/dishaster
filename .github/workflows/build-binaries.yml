@@ -38,7 +38,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run Cargo Build
-        run: cargo build --release
+        run: cargo build --release --features production
 
       - name: Upload Artifact for Windows
         if: matrix.build == 'windows'

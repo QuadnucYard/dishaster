@@ -6,6 +6,7 @@ def main [--platform: string = "windows", --release] {
         cargo build --features production
     }
 
+    # Copy assets to godot project
     cp -u -r assets/data godot
 
     # Build godot
@@ -35,7 +36,6 @@ def main [--platform: string = "windows", --release] {
     cd ..
 
     # Copy external files
-    cp -r godot/locales $target_dir
     cp -u LICENSE $target_dir
     cp -u README.md $target_dir
 }

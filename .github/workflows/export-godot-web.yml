@@ -54,6 +54,7 @@ jobs:
 
       - name: Export Game to Web
         run: |
+          cp -u -r assets/data godot
           mkdir -v -p build/web
           EXPORT_DIR="$(readlink -f build)"
           cd $PROJECT_PATH

@@ -53,6 +53,10 @@ jobs:
           sudo apt install wine64
           echo "WINE_PATH=$(which wine64)" >> $GITHUB_OUTPUT
 
+      - name: Prepare Data
+        run: |
+          cp -u -r assets/data godot
+
       - name: Export Game
         uses: firebelley/godot-export@v6.0.0
         with:
@@ -80,9 +84,6 @@ jobs:
               # Normalize folder name to a slug for archive file names:
               # lower-case and replace spaces with hyphens (e.g. "Windows Desktop" -> "windows-desktop").
               slug="$(echo "$name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g')"
-              cp -r assets/data "$d" || true
-              cp godot/assets.toml "$d" || true
-              cp -r godot/locales "$d" || true
               cp LICENSE "$d" || true
               cp README.md "$d" || true
               # Create per-platform archive in the export root.
