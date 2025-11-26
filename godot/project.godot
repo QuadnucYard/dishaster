@@ -24,3 +24,7 @@ window/stretch/mode="canvas_items"
 mouse_cursor/custom_image="uid://c3ydo1nt8djxq"
 mouse_cursor/custom_image_hotspot=Vector2(2, 2)
 mouse_cursor/tooltip_position_offset=Vector2(10, -30)
+
+[gui]
+
+theme/custom_font="uid://bcfbpasmpc55k"

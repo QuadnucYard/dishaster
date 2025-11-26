@@ -1,6 +1,7 @@
 use std::{cell::OnceCell, sync::Arc};
 
 use anyhow::{Context, Result};
+use dishaster_core::models::GameModelRegistry;
 use dishaster_data::DataLoader;
 use dishaster_godot_ui::register_guis;
 use dishrupt_asset::{AssetPathConfig, AssetResolver};
@@ -300,6 +301,8 @@ fn init_game() -> Result<GameServices> {
 
     // let data_backend = GodotResourceBackend;
     let (catalog, data) = load_data().context("loading game data")?;
+    #[cfg(feature = "debug")]
+    summarize_models(&data.models);
 
     let user_service = UserDataService::new(Arc::new(GodotUserStorage));
 
@@ -387,4 +390,42 @@ struct GameServices {
     catalog: AssetCatalog,
     data: GameDataAssets,
     user_service: UserDataService,
+}
+
+#[cfg(feature = "debug")]
+fn summarize_models(registry: &GameModelRegistry) {
+    println!("Reputation config: {:#?}", registry.reputation_config);
+    println!("Ordering config: {:#?}", registry.ordering_config);
+    println!("Decision config: {:#?}", registry.decision_config);
+
+    println!("✓ Loaded {} levels", registry.levels.len());
+    println!("✓ Loaded {} canteens", registry.canteens.len());
+    println!("✓ Loaded {} dishes", registry.dishes.len());
+    println!(
+        "✓ Loaded {} window services",
+        registry.window_services.len()
+    );
+    println!("✓ Loaded {} tables", registry.tables.len());
+    println!("✓ Loaded {} dispensers", registry.dispensers.len());
+    println!("✓ Loaded {} collectors", registry.collectors.len());
+
+    println!(
+        "✓ Loaded {} management decisions",
+        registry.mgmt_decisions.len()
+    );
+    println!(
+        "✓ Loaded {} management incidents",
+        registry.mgmt_incidents.len()
+    );
+
+    println!(
+        "✓ Loaded {} + {} trial statements",
+        registry.trial.diner_speeches.len(),
+        registry.trial.responses.len()
+    );
+    println!(
+        "✓ Loaded {} QA ranks and {} AQ ranks",
+        registry.trial.qa_ranks.len(),
+        registry.trial.aq_ranks.len()
+    );
 }

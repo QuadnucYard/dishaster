@@ -37,14 +37,14 @@ impl FsBackend {
 impl DataBackend for FsBackend {
     fn exists(&self, locator: &ResourceLocator) -> Result<bool, LoadError> {
         let path = fs_loc(locator)?;
-        let path = self.root.join(path);
-        Ok(path.exists())
+        let full_path = self.root.join(path);
+        Ok(full_path.exists())
     }
 
     fn is_file(&self, locator: &ResourceLocator) -> Result<bool, LoadError> {
         let path = fs_loc(locator)?;
-        let path = self.root.join(path);
-        Ok(path.is_file())
+        let full_path = self.root.join(path);
+        Ok(full_path.is_file())
     }
 
     fn is_dir(&self, locator: &ResourceLocator) -> Result<bool, LoadError> {
@@ -55,21 +55,21 @@ impl DataBackend for FsBackend {
 
     fn list_dir(&self, locator: &ResourceLocator) -> Result<Vec<ResourceLocator>, LoadError> {
         let path = fs_loc(locator)?;
-        let path = self.root.join(path);
+        let full_path = self.root.join(path);
         let mut entries = Vec::new();
-        for entry in std::fs::read_dir(&path)? {
+        for entry in std::fs::read_dir(&full_path)? {
             let entry = entry?;
-            entries.push(ResourceLocator::Fs(entry.path()));
+            entries.push(ResourceLocator::Fs(path.join(entry.file_name())));
         }
         Ok(entries)
     }
 
     fn read_bytes(&self, locator: &ResourceLocator) -> Result<Vec<u8>, LoadError> {
         let path = fs_loc(locator)?;
-        let path = self.root.join(path);
-        std::fs::read(&path).map_err(|e| {
+        let full_path = self.root.join(path);
+        std::fs::read(&full_path).map_err(|e| {
             if e.kind() == std::io::ErrorKind::NotFound {
-                LoadError::NotFound(ResourceLocator::Fs(path))
+                LoadError::NotFound(ResourceLocator::Fs(full_path))
             } else {
                 anyhow::Error::new(e).into()
             }

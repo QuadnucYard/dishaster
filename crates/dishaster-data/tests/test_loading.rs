@@ -43,6 +43,8 @@ fn test_loading() -> Result<(), Box<dyn std::error::Error>> {
         registry.trial.aq_ranks.len()
     );
 
+    assert!(!registry.levels.is_empty(), "No levels loaded");
+
     // Validate all loaded data
     dishaster_validation::validate_registry(&registry)
         .map_err(|errors| anyhow::anyhow!("Validation failed with {} error(s)", errors.len()))?;
