@@ -48,10 +48,7 @@ struct Inner {
 impl INode for GameMain {
     /// The game entry.
     fn ready(&mut self) {
-        env_logger::Builder::new()
-            .filter_level(log::LevelFilter::Debug)
-            .init();
-
+        setup_logging();
         log::info!("Main loop initialize");
 
         match std::panic::catch_unwind(init_game) {
@@ -294,6 +291,15 @@ impl Inner {
             }
         }
     }
+}
+
+fn setup_logging() {
+    let filter_level = if cfg!(feature = "production") {
+        log::LevelFilter::Info
+    } else {
+        log::LevelFilter::Debug
+    };
+    env_logger::Builder::new().filter_level(filter_level).init();
 }
 
 fn init_game() -> Result<GameServices> {
