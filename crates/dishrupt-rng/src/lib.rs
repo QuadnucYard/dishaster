@@ -9,7 +9,7 @@ use std::{
 
 use bevy_ecs::prelude::*;
 use derive_more::{Deref, DerefMut};
-use rand::{Rng, SeedableRng};
+use rand::{Rng, RngExt, SeedableRng};
 use rand_xoshiro::Xoshiro256PlusPlus;
 
 /// Pseudorandom number generator for deterministic simulation

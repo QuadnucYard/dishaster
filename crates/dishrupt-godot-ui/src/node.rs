@@ -90,7 +90,7 @@ impl UINode {
     }
 
     pub fn dup(&self) -> Self {
-        Self(self.0.duplicate().expect("duplicate UINode").cast())
+        Self(Gd::duplicate_node(&self.0))
     }
 
     pub fn child<T>(&self, path: &str) -> Gd<T>

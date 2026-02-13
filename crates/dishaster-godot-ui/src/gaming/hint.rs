@@ -59,7 +59,7 @@ impl HintNotification {
 
         // Animate fade-in
         self.panel.set_modulate(Color::TRANSPARENT_WHITE);
-        let mut tween = self.panel.gd().create_tween().unwrap();
+        let mut tween = self.panel.gd().create_tween();
         tween.tween_property(&self.panel.gd(), "modulate:a", &1.0.to_variant(), 0.3);
         tween.tween_interval(Self::HINT_DURATION);
         tween.tween_property(&self.panel.gd(), "modulate:a", &0.0.to_variant(), 0.3);

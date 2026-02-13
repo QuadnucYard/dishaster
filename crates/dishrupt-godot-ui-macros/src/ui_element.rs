@@ -78,7 +78,7 @@ fn create(info: &UIElement, item: &ItemStruct) -> Result<TokenStream> {
             }
 
             fn dup(&self) -> Self {
-                Self::new(self.gd.duplicate().unwrap().cast())
+                Self::new(Gd::duplicate_node(&self.gd))
             }
         }
 

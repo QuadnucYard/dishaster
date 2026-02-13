@@ -1,4 +1,4 @@
-use dishrupt_rng::prelude::Rng;
+use dishrupt_rng::prelude::*;
 
 /// Sigmoid function for mapping unbounded values to 0..1
 #[inline]

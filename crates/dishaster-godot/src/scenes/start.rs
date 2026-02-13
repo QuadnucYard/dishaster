@@ -128,7 +128,7 @@ impl StartScene {
         match req {
             AppRequest::Quit => {
                 godot_print!("Quit requested");
-                self.gd.get_tree().expect("failed to get scene tree").quit();
+                self.gd.get_tree().quit();
             }
             AppRequest::EnterLevel => {
                 ctx.schedule(EnterLevelProcedure);

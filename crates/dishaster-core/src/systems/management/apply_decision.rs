@@ -93,10 +93,7 @@ fn apply_remove_tables(
     mut rng: ResMut<WorldRng>,
 ) {
     let model = &event.0;
-    for entity in table_query
-        .iter()
-        .choose_multiple(&mut rng, model.num_tables)
-    {
+    for entity in table_query.iter().sample(&mut rng, model.num_tables) {
         commands.entity(entity).despawn();
     }
 }
@@ -120,7 +117,7 @@ fn apply_disarrange_tables(
     // Collect existing colliders (excluding the ones we're moving)
     let tables_to_move: Vec<Entity> = table_query
         .iter()
-        .choose_multiple(&mut rng, model.num_tables)
+        .sample(&mut rng, model.num_tables)
         .into_iter()
         .map(|(e, _, _, _)| e)
         .collect();

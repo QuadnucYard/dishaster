@@ -10,7 +10,7 @@ pub fn make_callable<F>(name: &str, mut func: F) -> Callable
 where
     F: 'static + FnMut(&[&Variant]),
 {
-    Callable::from_fn(name, move |vargs| {
+    Callable::from_fn(name.to_string(), move |vargs| {
         func(vargs);
     })
 }
@@ -37,7 +37,7 @@ macro_rules! impl_connect_fn {
                 self.connect(
                     signal,
                     #[allow(unused_variables)]
-                    &Callable::from_fn(signal, move |vargs| {
+                    &Callable::from_fn(signal.to_string(), move |vargs| {
                         func($(vargs[$indiced].to(),)*);
                     }),
                 );

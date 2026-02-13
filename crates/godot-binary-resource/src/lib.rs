@@ -60,15 +60,15 @@ impl IResourceFormatLoader for BinaryAssetLoader {
 
     // All resource types that this loader handles.
     fn handles_type(&self, ty: StringName) -> bool {
-        ty == "BinaryResource".into()
+        ty == "BinaryResource"
     }
 
     // The stringified name of your resource should be returned.
     fn get_resource_type(&self, path: GString) -> GString {
         // The extension arg always comes with a `.` in Godot, so don't forget it ;)
-        if path.get_extension().to_lower() == ".bin".into()
-            || path.get_extension().to_lower() == ".ron".into()
-            || path.get_extension().to_lower() == ".toml".into()
+        if path.get_extension().to_lower() == ".bin"
+            || path.get_extension().to_lower() == ".ron"
+            || path.get_extension().to_lower() == ".toml"
         {
             "BinaryResource".into()
         } else {

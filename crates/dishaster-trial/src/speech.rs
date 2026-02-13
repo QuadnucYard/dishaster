@@ -535,7 +535,7 @@ fn generate_response_options(
             speech_id,
             keyword_idx
         );
-        (0..corpus.responses.len() as SpeechId).choose_multiple(&mut session.rng, options_count)
+        (0..corpus.responses.len() as SpeechId).sample(&mut session.rng, options_count)
     };
 
     selected
@@ -579,7 +579,7 @@ fn sample_weighted_indices(
         .collect();
 
     choices
-        .choose_multiple_weighted(rng, count, |item| item.1)
+        .sample_weighted(rng, count, |item| item.1)
         .unwrap()
         .map(|item| item.0)
         .collect()

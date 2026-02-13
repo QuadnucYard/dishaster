@@ -263,7 +263,7 @@ impl AudioManager {
             self.bgm.state = MusicState::FadingOut;
 
             // Create tween for cross-fade
-            let mut tween = self.audio_root.create_tween().unwrap();
+            let mut tween = self.audio_root.create_tween();
             tween.set_pause_mode(TweenPauseMode::PROCESS);
             tween.set_parallel(); // Run both tweens simultaneously
 
@@ -286,7 +286,6 @@ impl AudioManager {
             // When fade completes, free the old player
             tween
                 .tween_callback(&old_player.callable("queue_free"))
-                .unwrap()
                 .set_delay(fade_duration as f64);
 
             self.bgm.tween = Some(tween);
@@ -294,7 +293,7 @@ impl AudioManager {
             // No previous music, just fade in
             self.bgm.state = MusicState::FadingIn;
 
-            let mut tween = self.audio_root.create_tween().unwrap();
+            let mut tween = self.audio_root.create_tween();
             tween.set_pause_mode(TweenPauseMode::PROCESS);
             tween.tween_property(
                 &next_player,

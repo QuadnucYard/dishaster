@@ -106,7 +106,7 @@ fn spawn_windows(
 
         let dish_assignments = service_model
             .dish_options
-            .choose_multiple(rng, service_model.layout.dish_slots.len())
+            .sample(rng, service_model.layout.dish_slots.len())
             .map(|opt| DishAssignment {
                 dish_id: opt.dish_id.clone(),
                 pricing: window_config

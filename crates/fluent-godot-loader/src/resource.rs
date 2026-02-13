@@ -39,13 +39,13 @@ impl IResourceFormatLoader for FluentFormatLoader {
 
     // All resource types that this loader handles.
     fn handles_type(&self, ty: StringName) -> bool {
-        ty == FluentResource::RES_TYPE.into()
+        ty == FluentResource::RES_TYPE
     }
 
     // The stringified name of your resource should be returned.
     fn get_resource_type(&self, path: GString) -> GString {
         // The extension arg always comes with a `.` in Godot, so don't forget it ;)
-        if path.get_extension().to_lower() == ".ftl".into() {
+        if path.get_extension().to_lower() == ".ftl" {
             FluentResource::RES_TYPE.into()
         } else {
             // In case of not handling the given resource, this function must

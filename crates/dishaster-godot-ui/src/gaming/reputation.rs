@@ -56,7 +56,7 @@ impl ReputationGui {
 
     fn tween_bar(&mut self, reputation: f32) {
         // Animate progress bar value change
-        let mut bar_tween = self.reputation_bar.gd().create_tween().unwrap();
+        let mut bar_tween = self.reputation_bar.gd().create_tween();
         bar_tween.set_ease(tween::EaseType::OUT);
         bar_tween.set_trans(tween::TransitionType::CUBIC);
         bar_tween.tween_property(
@@ -105,7 +105,7 @@ impl ReputationGui {
         self.delta_label.set_scale(Vector2::new(0.5, 0.5));
         self.delta_label.set_modulate(Color::WHITE); // Reset alpha to 1.0
 
-        let mut delta_tween = self.delta_label.gd().create_tween().unwrap();
+        let mut delta_tween = self.delta_label.gd().create_tween();
         delta_tween.set_ease(tween::EaseType::OUT); // Scale up with bounce
         delta_tween.set_trans(tween::TransitionType::BACK);
         delta_tween.tween_property(

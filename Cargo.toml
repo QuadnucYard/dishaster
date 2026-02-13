@@ -50,14 +50,14 @@ dishaster-godot-game = { path = "crates/dishaster-godot-game" }
 dishaster-godot-opening = { path = "crates/dishaster-godot-opening" }
 dishaster-godot = { path = "crates/dishaster-godot" }
 
-bevy_color = { version = "0.17.0", default-features = false, features = ["std"] }
-bevy_ecs = { version = "0.17.0", default-features = false, features = ["std", "backtrace"] }
-bevy_math = { version = "0.17.0", default-features = false, features = ["std", "serialize"] }
+bevy_color = { version = "0.18.0", default-features = false, features = ["std"] }
+bevy_ecs = { version = "0.18.0", default-features = false, features = ["std", "backtrace"] }
+bevy_math = { version = "0.18.0", default-features = false, features = ["std", "serialize"] }
 
-godot = "0.4.2"
+godot = "0.4.4"
 
 anyhow = "1.0"
-arc-swap = "1.7"
+arc-swap = "1.8"
 as-any = "0.3"
 backtrace = "0.3"
 bincode = "2.0"
@@ -80,17 +80,17 @@ log = "0.4"
 ordered-float = "5"
 paste = "1.0"
 pathfinding = "4.14.0"
-rand = { version = "0.9", default-features = false, features = ["std"] }
-rand_core = "0.9"
-rand_distr = "0.5"
-rand_xoshiro = "0.7"
+rand = { version = "0.10", default-features = false, features = ["std"] }
+rand_core = "0.10"
+rand_distr = "0.6"
+rand_xoshiro = "0.8"
 ron = "0.12"
 rustc-hash = "2"
 serde = { version = "1.0", features = ["derive"] }
 signals2 = "0.3"
 slab = "0.4"
 thiserror = "2.0"
-tempfile = "3.10"
+tempfile = "3.25"
 toml = "0.9"
 unic-langid = "0.9"
 variadics_please = "1.1"
@@ -103,7 +103,7 @@ too_many_arguments = "allow"
 type_complexity = "allow"
 
 [patch.crates-io]
-godot = { git = "https://github.com/godot-rust/gdext", rev = "e01d2ea" } # For `max_align_t` issue
+godot = { git = "https://github.com/godot-rust/gdext", rev = "5eeaa6f" } # For `max_align_t` issue
 
 [profile.dev]
 opt-level = 2

@@ -103,7 +103,7 @@ impl SceneTransition for FadeTransition {
         self.kill_current_tween();
 
         // Fade from transparent to opaque black
-        let mut tween = self.fade_rect.create_tween().unwrap();
+        let mut tween = self.fade_rect.create_tween();
         tween.set_pause_mode(TweenPauseMode::PROCESS);
         tween.tween_property(
             &self.fade_rect,
@@ -124,7 +124,7 @@ impl SceneTransition for FadeTransition {
         self.kill_current_tween();
 
         // Fade from opaque black to transparent
-        let mut tween = self.fade_rect.create_tween().unwrap();
+        let mut tween = self.fade_rect.create_tween();
         tween.set_pause_mode(TweenPauseMode::PROCESS);
         tween.tween_property(
             &self.fade_rect,
